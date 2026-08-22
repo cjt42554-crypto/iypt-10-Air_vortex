@@ -1,0 +1,9 @@
+{
+  "absolute_critical_rpm_quantitative": false,
+  "apparatus_specific_prediction": false,
+  "forward_theory_used_by_hf3d": false,
+  "legacy_h1_used": false,
+  "physical_model_experimentally_validated": false,
+  "reason": "NO_GO_UNDERRESOLVED_UNCONVERGED_UNVALIDATED",
+  "stable_channel_radius_quantitative": false
+}

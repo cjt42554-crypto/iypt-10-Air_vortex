@@ -1,0 +1,39 @@
+{
+  "schema": "airvortex-numerical-validation-protocol-v2",
+  "amended_at": "2026-08-20T17:01:00+08:00",
+  "base_protocol": "protocol_v1.json",
+  "base_protocol_sha256": "7052a9a92ef71ed4e70ce6a240f37c1f76fe87dffc594f74f6ba4979c6f8a7fb",
+  "reason_for_amendment": [
+    "H1 冻结版把瞬时喉道门禁升级为 r_throat >= max(2*epsilon, 4*max(dr,dz))；v1 的固定两格假设已失效。",
+    "跨网格自由面范数必须使用真实 R、轴对称面积权重和明确的轴/壁外推，不能按最后一个单元中心重缩放。",
+    "长矩阵需要冻结执行源码快照并在每案首尾复核哈希，防止不同代码版本混入同一收敛序列。"
+  ],
+  "amendments": {
+    "source_stability": {
+      "immutable_execution_snapshot_required": true,
+      "per_case_start_end_hash_required": true,
+      "hash_mismatch_status": "INVALID_SOURCE_CHANGED_DURING_RUN"
+    },
+    "synthetic_throat_rule": {
+      "formula": "r_throat >= max(2*interface_thickness_m, 4*max(dr,dz))",
+      "cell_count": "ceil(required_radius/dr)",
+      "cases": [
+        "zero-width path",
+        "one-cell precursor",
+        "one cell below computed threshold",
+        "exactly the computed threshold",
+        "one cell above computed threshold",
+        "otherwise-wide path with one layer below threshold",
+        "threshold-wide path disconnected from the top"
+      ],
+      "interpretation": "瞬时且分辨率门控的 topology candidate；不是持续气道、润湿或定量半径"
+    },
+    "cross_grid_surface_norm": {
+      "coordinate": "x=r/R using the physical configured vessel radius",
+      "axis_extension": "constant from first cell centre to r=0, consistent with symmetry",
+      "wall_extension": "constant from last cell centre to r=R, consistent with the preview Neumann wall convention",
+      "constant_removal": "axisymmetric area-weighted mean",
+      "norm": "sqrt(2*integral_0^1 error(x)^2*x dx)"
+    }
+  }
+}

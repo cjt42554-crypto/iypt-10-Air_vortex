@@ -1,0 +1,560 @@
+{
+  "arrays": {
+    "fields": {
+      "effective_target_mask": {
+        "dtype": "float64",
+        "npz_key": "field_0000",
+        "shape": [
+          32,
+          56
+        ]
+      },
+      "final_centrifugal_potential_m2_s2": {
+        "dtype": "float64",
+        "npz_key": "field_0001",
+        "shape": [
+          32,
+          56
+        ]
+      },
+      "final_curvature_m_inv": {
+        "dtype": "float64",
+        "npz_key": "field_0002",
+        "shape": [
+          32,
+          56
+        ]
+      },
+      "final_liquid_fraction": {
+        "dtype": "float64",
+        "npz_key": "field_0003",
+        "shape": [
+          32,
+          56
+        ]
+      },
+      "final_phase_order_parameter": {
+        "dtype": "float64",
+        "npz_key": "field_0004",
+        "shape": [
+          32,
+          56
+        ]
+      },
+      "final_tangential_velocity_m_s": {
+        "dtype": "float64",
+        "npz_key": "field_0005",
+        "shape": [
+          32,
+          56
+        ]
+      },
+      "final_top_connected_gas_mask": {
+        "dtype": "float64",
+        "npz_key": "field_0006",
+        "shape": [
+          32,
+          56
+        ]
+      },
+      "fluid_mask": {
+        "dtype": "float64",
+        "npz_key": "field_0007",
+        "shape": [
+          32,
+          56
+        ]
+      },
+      "frame_time_s": {
+        "dtype": "float64",
+        "npz_key": "field_0008",
+        "shape": [
+          1
+        ]
+      },
+      "phase_liquid_fraction": {
+        "dtype": "float64",
+        "npz_key": "field_0009",
+        "shape": [
+          32,
+          56
+        ]
+      },
+      "r_m": {
+        "dtype": "float64",
+        "npz_key": "field_0010",
+        "shape": [
+          32
+        ]
+      },
+      "u_r_m_s": {
+        "dtype": "float64",
+        "npz_key": "field_0011",
+        "shape": [
+          32,
+          56
+        ]
+      },
+      "u_theta_m_s": {
+        "dtype": "float64",
+        "npz_key": "field_0012",
+        "shape": [
+          32,
+          56
+        ]
+      },
+      "u_z_m_s": {
+        "dtype": "float64",
+        "npz_key": "field_0013",
+        "shape": [
+          32,
+          56
+        ]
+      },
+      "z_m": {
+        "dtype": "float64",
+        "npz_key": "field_0014",
+        "shape": [
+          56
+        ]
+      }
+    },
+    "observables": {
+      "actual_angular_velocity_rad_s": {
+        "dtype": "float64",
+        "npz_key": "observable_0000",
+        "shape": [
+          81
+        ]
+      },
+      "actual_bar_rpm": {
+        "dtype": "float64",
+        "npz_key": "observable_0001",
+        "shape": [
+          81
+        ]
+      },
+      "advancing_contact_faces": {
+        "dtype": "float64",
+        "npz_key": "observable_0002",
+        "shape": [
+          81
+        ]
+      },
+      "bulk_potential_energy_j": {
+        "dtype": "float64",
+        "npz_key": "observable_0003",
+        "shape": [
+          81
+        ]
+      },
+      "burgers_C_m2_s": {
+        "dtype": "float64",
+        "npz_key": "observable_0004",
+        "shape": [
+          81
+        ]
+      },
+      "channel_throat_profile_m": {
+        "dtype": "float64",
+        "npz_key": "observable_0005",
+        "shape": [
+          81,
+          56
+        ]
+      },
+      "circulation_m2_s": {
+        "dtype": "float64",
+        "npz_key": "observable_0006",
+        "shape": [
+          81
+        ]
+      },
+      "discrete_top_connected_gap_m": {
+        "dtype": "float64",
+        "npz_key": "observable_0007",
+        "shape": [
+          81
+        ]
+      },
+      "finite_channel": {
+        "dtype": "float64",
+        "npz_key": "observable_0008",
+        "shape": [
+          81
+        ]
+      },
+      "forward_effective_energy_j": {
+        "dtype": "float64",
+        "npz_key": "observable_0009",
+        "shape": [
+          81
+        ]
+      },
+      "funnel_depth_m": {
+        "dtype": "float64",
+        "npz_key": "observable_0010",
+        "shape": [
+          81
+        ]
+      },
+      "gas_pressure_closure_error": {
+        "dtype": "float64",
+        "npz_key": "observable_0011",
+        "shape": [
+          81
+        ]
+      },
+      "isolated_gas_volume_m3": {
+        "dtype": "float64",
+        "npz_key": "observable_0012",
+        "shape": [
+          81
+        ]
+      },
+      "liquid_volume_error_m3": {
+        "dtype": "float64",
+        "npz_key": "observable_0013",
+        "shape": [
+          81
+        ]
+      },
+      "liquid_volume_m3": {
+        "dtype": "float64",
+        "npz_key": "observable_0014",
+        "shape": [
+          81
+        ]
+      },
+      "min_gap_to_bar_m": {
+        "dtype": "float64",
+        "npz_key": "observable_0015",
+        "shape": [
+          81
+        ]
+      },
+      "minimum_gap_m": {
+        "dtype": "float64",
+        "npz_key": "observable_0016",
+        "shape": [
+          81
+        ]
+      },
+      "minimum_throat_radius_m": {
+        "dtype": "float64",
+        "npz_key": "observable_0017",
+        "shape": [
+          81
+        ]
+      },
+      "physical_circulation_gamma_m2_s": {
+        "dtype": "float64",
+        "npz_key": "observable_0018",
+        "shape": [
+          81
+        ]
+      },
+      "pinned_contact_faces": {
+        "dtype": "float64",
+        "npz_key": "observable_0019",
+        "shape": [
+          81
+        ]
+      },
+      "receding_contact_faces": {
+        "dtype": "float64",
+        "npz_key": "observable_0020",
+        "shape": [
+          81
+        ]
+      },
+      "required_resolved_throat_radius_m": {
+        "dtype": "float64",
+        "npz_key": "observable_0021",
+        "shape": [
+          81
+        ]
+      },
+      "resolved_channel": {
+        "dtype": "float64",
+        "npz_key": "observable_0022",
+        "shape": [
+          81
+        ]
+      },
+      "surface_depth_m": {
+        "dtype": "float64",
+        "npz_key": "observable_0023",
+        "shape": [
+          81
+        ]
+      },
+      "surface_energy_j": {
+        "dtype": "float64",
+        "npz_key": "observable_0024",
+        "shape": [
+          81
+        ]
+      },
+      "surface_profile_m": {
+        "dtype": "float64",
+        "npz_key": "observable_0025",
+        "shape": [
+          81,
+          32
+        ]
+      },
+      "surface_profile_range_m": {
+        "dtype": "float64",
+        "npz_key": "observable_0026",
+        "shape": [
+          81
+        ]
+      },
+      "sustained_channel": {
+        "dtype": "float64",
+        "npz_key": "observable_0027",
+        "shape": [
+          81
+        ]
+      },
+      "tangential_velocity_profile_m_s": {
+        "dtype": "float64",
+        "npz_key": "observable_0028",
+        "shape": [
+          81,
+          32
+        ]
+      },
+      "target_gas_area_m2": {
+        "dtype": "float64",
+        "npz_key": "observable_0029",
+        "shape": [
+          81
+        ]
+      },
+      "target_touch": {
+        "dtype": "float64",
+        "npz_key": "observable_0030",
+        "shape": [
+          81
+        ]
+      },
+      "top_connected_gas_volume_m3": {
+        "dtype": "float64",
+        "npz_key": "observable_0031",
+        "shape": [
+          81
+        ]
+      },
+      "visible_funnel_depth_m": {
+        "dtype": "float64",
+        "npz_key": "observable_0032",
+        "shape": [
+          81
+        ]
+      },
+      "volume_lagrange_pressure_pa": {
+        "dtype": "float64",
+        "npz_key": "observable_0033",
+        "shape": [
+          81
+        ]
+      },
+      "wall_energy_j": {
+        "dtype": "float64",
+        "npz_key": "observable_0034",
+        "shape": [
+          81
+        ]
+      }
+    },
+    "time_s": {
+      "dtype": "float64",
+      "npz_key": "time_s",
+      "shape": [
+        81
+      ]
+    }
+  },
+  "backend": "forward",
+  "events": [
+    {
+      "data": {
+        "threshold_m": 0.001
+      },
+      "kind": "funnel_depth_threshold",
+      "message": "surface depth crossed the configured reporting threshold",
+      "time_s": 0.5006635583010867
+    },
+    {
+      "data": {
+        "bracket_end_s": 1.75,
+        "bracket_start_s": 1.725,
+        "event_time_bracket_s": 0.02499999999999991
+      },
+      "kind": "first_target_touch",
+      "message": "top-connected gas first touches the effective target",
+      "time_s": 1.7490348515860958
+    },
+    {
+      "data": {
+        "minimum_throat_radius_m": 0.00140625,
+        "resolved": false
+      },
+      "kind": "finite_channel",
+      "message": "finite top-connected channel candidate appeared",
+      "time_s": 1.75
+    },
+    {
+      "data": {
+        "hold_time_s": 0.2,
+        "radius_threshold_m": 0.001
+      },
+      "kind": "sustained_channel",
+      "message": "resolved channel met the pre-registered radius/hold contract",
+      "time_s": 2.0
+    }
+  ],
+  "metadata": {
+    "bubble_quantification": "not_triggered",
+    "channel_resolution": {
+      "continuous_definition": "F74/F77",
+      "final_required_resolved_radius_m": 0.004285714285714286,
+      "final_resolved": true,
+      "one_cell_path_is_evidence": false
+    },
+    "contact_law": {
+      "last_advancing_faces": 5,
+      "last_pinned_faces": 6,
+      "last_receding_faces": 4,
+      "pinned_advancing_receding_discretised": true
+    },
+    "discretisation": {
+      "accepted_internal_steps": 1169,
+      "axial_cells": 56,
+      "dr_m": 0.00140625,
+      "dz_m": 0.0014285714285714286,
+      "energy_gate_passed": true,
+      "interface_thickness_cells": 1.5,
+      "interface_thickness_m": 0.002142857142857143,
+      "maximum_abs_liquid_volume_error_m3": 1.9056535104262917e-11,
+      "maximum_backtracking_rejections": 0,
+      "maximum_fixed_forcing_energy_increase_j": 0.0,
+      "maximum_phase_change": 0.03999689389346989,
+      "minimum_accepted_dt_s": 6.485379512266576e-05,
+      "minimum_resolved_throat_cells": 3,
+      "radial_cells": 32,
+      "volume_gate_passed": true
+    },
+    "domain_status": "IN_MODEL_DOMAIN",
+    "drive_input_form": "initial_target_linear_ramp_actual_rpm",
+    "drive_interpretation": "prescribed_actual_stir_bar_speed",
+    "event_time_localisation": "topology classified at output snapshots; event is right endpoint of a bracket no wider than output_interval_s",
+    "event_time_nominal_resolution_s": 0.025,
+    "field_units": {
+      "effective_target_mask": "1",
+      "final_centrifugal_potential_m2_s2": "m^2 s^-2",
+      "final_curvature_m_inv": "m^-1",
+      "final_liquid_fraction": "1",
+      "final_phase_order_parameter": "1",
+      "final_tangential_velocity_m_s": "m s^-1",
+      "final_top_connected_gas_mask": "1",
+      "fluid_mask": "1",
+      "frame_time_s": "s",
+      "phase_liquid_fraction": "1",
+      "r_m": "m",
+      "u_r_m_s": "m s^-1",
+      "u_theta_m_s": "m s^-1",
+      "u_z_m_s": "m s^-1",
+      "z_m": "m"
+    },
+    "geometry": {
+      "derived_initial_liquid_mass_kg": 0.38084710045733183,
+      "domain_height_m": 0.08,
+      "effective_target_bottom_m": 0.0015,
+      "effective_target_radius_m": 0.003,
+      "effective_target_top_m": 0.0075,
+      "exact_effective_target_volume_m3": 1.6964600329384883e-07,
+      "grid_aligned_target_cell_count": 8,
+      "rasterized_effective_target_volume_m3": 1.4200279293569937e-07,
+      "target_liquid_volume_m3": 0.00038153386140786597,
+      "target_rasterization_volume_error_m3": -2.7643210358149458e-08
+    },
+    "initial_state_kind": "flat_volume_projected",
+    "limitations": [
+      "axisymmetric averaged interface, not instantaneous 3D flow",
+      "diffuse-interface result requires epsilon/grid/time convergence",
+      "effective central target replaces the horizontal bar geometry",
+      "gas pressure is uniform only while the reported closure check passes",
+      "isolated bubble pressure/dissolution is not a quantitative state"
+    ],
+    "model_id": "forward-f1.0-axisymmetric-variational-fv-v1",
+    "model_role": "forward_theory_numerical_implementation",
+    "numerical_method_id": "PF-FV2D-v1",
+    "observable_units": {
+      "actual_angular_velocity_rad_s": "rad s^-1",
+      "actual_bar_rpm": "rpm",
+      "advancing_contact_faces": "1",
+      "bulk_potential_energy_j": "J",
+      "burgers_C_m2_s": "m^2 s^-1",
+      "channel_throat_profile_m": "m",
+      "circulation_m2_s": "m^2 s^-1",
+      "discrete_top_connected_gap_m": "m",
+      "finite_channel": "1",
+      "forward_effective_energy_j": "J",
+      "funnel_depth_m": "m",
+      "gas_pressure_closure_error": "1",
+      "isolated_gas_volume_m3": "m^3",
+      "liquid_volume_error_m3": "m^3",
+      "liquid_volume_m3": "m^3",
+      "min_gap_to_bar_m": "m",
+      "minimum_gap_m": "m",
+      "minimum_throat_radius_m": "m",
+      "physical_circulation_gamma_m2_s": "m^2 s^-1",
+      "pinned_contact_faces": "1",
+      "receding_contact_faces": "1",
+      "required_resolved_throat_radius_m": "m",
+      "resolved_channel": "1",
+      "surface_depth_m": "m",
+      "surface_energy_j": "J",
+      "surface_profile_m": "m",
+      "surface_profile_range_m": "m",
+      "sustained_channel": "1",
+      "tangential_velocity_profile_m_s": "m s^-1",
+      "target_gas_area_m2": "m^2",
+      "target_touch": "1",
+      "top_connected_gas_volume_m3": "m^3",
+      "visible_funnel_depth_m": "m",
+      "volume_lagrange_pressure_pa": "Pa",
+      "wall_energy_j": "J"
+    },
+    "parameter_roles_required": "MEASURED/CALIBRATED_FLOW/CALIBRATED_INTERFACE/CALIBRATED_WETTING/FIXED_REFERENCE",
+    "post_contact_interpretation": "same_equations_continue",
+    "solution_class": "GENERALIZED_TOPOLOGY_SOLUTION",
+    "termination_reason": "requested_duration_reached",
+    "theory_id": "F1.0-frozen-2026-08-21",
+    "topology_change_simulated": true,
+    "unassessed_validity_gates": [
+      "SWIRL_CLOSURE_REQUIRES_PIV",
+      "AXISYMMETRY_REQUIRES_3D_OBSERVATION",
+      "INTERFACE_MOBILITY_REQUIRES_MULTI_SCALE_STEP_TESTS"
+    ],
+    "uses_high_fidelity_equations": false,
+    "validity_thresholds": {
+      "axisymmetry_error_max": 0.1,
+      "gas_pressure_error_max": 0.1,
+      "swirl_profile_error_max": 0.15,
+      "wave_envelope_error_max": 0.2
+    },
+    "wave_envelope_check": {
+      "drive_change_time_s": 0.5,
+      "epsilon_wave": 2.2479740879289514,
+      "fast_wave_time_s": 1.1239870439644757,
+      "ideal_step_interpretation": "epsilon_wave is formally unbounded when speed changes at zero ramp",
+      "status": "INTERFACE_KINETICS_WARNING"
+    },
+    "wetting_and_contact_line_simulated": true
+  },
+  "status": "completed"
+}

@@ -1,0 +1,55 @@
+{
+  "amended_at": "2026-08-20T18:34:00+08:00",
+  "amendments": {
+    "explicit_outer_required_regime": "CAPILLARY_SINGULAR_LIMIT_OUTER",
+    "normal_finite_sigma_path_must_never_report_outer_regime": true,
+    "resolved_finite_sigma_centre_error_must_decrease": true,
+    "resolved_finite_sigma_sequence": [
+      {
+        "surface_radial_points": 128,
+        "surface_tension_n_m": 0.02
+      },
+      {
+        "surface_radial_points": 256,
+        "surface_tension_n_m": 0.005
+      },
+      {
+        "surface_radial_points": 512,
+        "surface_tension_n_m": 0.001
+      }
+    ],
+    "resolved_finite_sigma_wall_q_absolute_max": 2e-08,
+    "resolved_sequence_fixed_actual_rpm": 100.0,
+    "resolved_sequence_required_result": "EXACT_NONLINEAR_CURVATURE approaches the explicit outer reference while retaining the finite-sigma wall Neumann condition",
+    "sigma_zero_G_comparison_route": "explicit solve_capillary_singular_limit only; do not call the configured finite-sigma Forward main path",
+    "underresolved_finite_sigma_cases": [
+      {
+        "surface_radial_points": 64,
+        "surface_tension_n_m": 1e-10
+      },
+      {
+        "surface_radial_points": 256,
+        "surface_tension_n_m": 1e-10
+      }
+    ],
+    "underresolved_forward_backend_must_fail": true,
+    "underresolved_required_exception": "UnderresolvedSurfaceError"
+  },
+  "base_protocol": "forward_protocol_v1.json",
+  "base_protocol_sha256": "00a645102e0c49be3793366298f55cda1060e50d0bba1290b5b084a7d65c1ef4",
+  "negative_result_policy": {
+    "an_unlabelled_or_automatic_outer_solution_is_a_hard_failure": true,
+    "do_not_infer_physical_instability_from_underresolution": true,
+    "underresolution_is_expected_fail_closed_not_nonconvergence": true
+  },
+  "reason_for_amendment": [
+    "Forward finite-sigma semantics were frozen after v1: an underresolved capillary wall layer now fails closed rather than automatically substituting a sigma-to-zero outer solution.",
+    "The mathematical sigma-to-zero outer solution remains available only through the explicit solve_capillary_singular_limit API and must be labelled as an asymptotic reference.",
+    "Resolved finite-sigma convergence therefore requires a coupled sigma/radial-grid sequence, while deliberately underresolved cases are expected failures."
+  ],
+  "schema": "airvortex-forward-numerical-validation-protocol-v2",
+  "supersedes": {
+    "automatic_capillary_singular_limit": false,
+    "matrix.surface_tension_n_m": "Use amendments.resolved_finite_sigma_sequence and amendments.underresolved_finite_sigma_cases instead."
+  }
+}

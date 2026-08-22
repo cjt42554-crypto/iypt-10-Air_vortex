@@ -1,0 +1,350 @@
+{
+  "files": [
+    {
+      "bytes": 3400,
+      "path": "configs/forward_default.json",
+      "sha256": "9191fe7da9d2001cb2810f0c2fb93a2e10244337eb184e8eec32640e77b1ded6"
+    },
+    {
+      "bytes": 3400,
+      "path": "configs/forward_threshold_scan.json",
+      "sha256": "873a2e41ac3a5ccc15a27cb8ae1ee62e783570101e29a8a650c7f99158d6d9e9"
+    },
+    {
+      "bytes": 3411,
+      "path": "configs/hf_preview_quick.json",
+      "sha256": "55582c600e7efc75e1b70bb12d6b0684a40073a8ee60a49960674963b506a317"
+    },
+    {
+      "bytes": 58276,
+      "path": "deliverables/01_前向预测理论.md",
+      "sha256": "02541b680c0ee19c172fbbe87a8a6b6b2c646d6ad72e3da0298ccb25ba231a03"
+    },
+    {
+      "bytes": 42140,
+      "path": "deliverables/02_前向预测理论的数值计算理论.md",
+      "sha256": "caf6e8643c8cceae2ee96342c97ec1da38ee596acd9313105f8e628578befdb7"
+    },
+    {
+      "bytes": 712,
+      "path": "pyproject.toml",
+      "sha256": "cb4eb1c89dbc598e210e5f2c628c56d6f3f35a71f7d2db3b6befddb570bb5794"
+    },
+    {
+      "bytes": 1216,
+      "path": "src/airvortex/__init__.py",
+      "sha256": "44b4541bfaa1ad7286cf2fd0d7cc5c9118e72ed2b33ecd273c5b4e315f7595fd"
+    },
+    {
+      "bytes": 741,
+      "path": "src/airvortex/__main__.py",
+      "sha256": "32c1c5deb5787300e2d54017e235771e2f4481345995ee3219ed314295602f27"
+    },
+    {
+      "bytes": 3992,
+      "path": "src/airvortex/_hardware.py",
+      "sha256": "7131d4d8ba0ffa186159aaa3a4b5c8d106ae2516647489fb464004cc5efcdccb"
+    },
+    {
+      "bytes": 2941,
+      "path": "src/airvortex/analysis/__init__.py",
+      "sha256": "76217020cae8882ad95279a88a9a0d25701fe0d662d4ae0d86ebd540c98e3fca"
+    },
+    {
+      "bytes": 1369,
+      "path": "src/airvortex/analysis/_common.py",
+      "sha256": "59e637f9aaac2d5cc88505f64391e7e0dc74f90637cdb34661b7b1231bfb096c"
+    },
+    {
+      "bytes": 7598,
+      "path": "src/airvortex/analysis/calibration.py",
+      "sha256": "ad7c49deb4b4788fb1357fe0fc47caad5becf034309f8cdca6c8d355707b6a3a"
+    },
+    {
+      "bytes": 17774,
+      "path": "src/airvortex/analysis/comparison.py",
+      "sha256": "a7b4440ff3962d4dd42392dab3d4b9849a1420de674a0b49feb4e1b7bf35dc9e"
+    },
+    {
+      "bytes": 20963,
+      "path": "src/airvortex/analysis/dimensionless.py",
+      "sha256": "9ef2398ce77348705c5e1de1e793cfe0e44354c141bbfa071ae80fa701d9fdad"
+    },
+    {
+      "bytes": 14874,
+      "path": "src/airvortex/analysis/experiment.py",
+      "sha256": "713b6a559ae4ff0bc952d1c1dea95c476489ff763bfbf0bcf223c7b577a470fb"
+    },
+    {
+      "bytes": 22346,
+      "path": "src/airvortex/analysis/spectral.py",
+      "sha256": "39eaf4b62ad0d97d6e03d86ce8895054b854a0cc49d1ae7918941e8a4e2d348b"
+    },
+    {
+      "bytes": 7358,
+      "path": "src/airvortex/analysis/states.py",
+      "sha256": "093a61bc586ec96b078c5da0f2fa3d92c0651e96cbc896cc7ba9aa318f3a9366"
+    },
+    {
+      "bytes": 15472,
+      "path": "src/airvortex/analysis/sweep.py",
+      "sha256": "2b72f573d0baf00364c2ebd1ce1c70de2ccfd18f0638b6a1aa781c63884d878f"
+    },
+    {
+      "bytes": 2123,
+      "path": "src/airvortex/backends/__init__.py",
+      "sha256": "5377d76dab2b5191245abaaff55f17960b1d125eb9f007f2d08428b9866f5bf3"
+    },
+    {
+      "bytes": 54035,
+      "path": "src/airvortex/backends/forward.py",
+      "sha256": "3644b40f96b10de1b55bd098372e460a7eebf2e5e8a08cc2bcb1e0bbc668dcf9"
+    },
+    {
+      "bytes": 56902,
+      "path": "src/airvortex/backends/forward_topology.py",
+      "sha256": "eb42b9472fcd0e8457e520b4794402b098e3288d3496395fd7d3001043fe880f"
+    },
+    {
+      "bytes": 50043,
+      "path": "src/airvortex/backends/high_fidelity.py",
+      "sha256": "790afee102eae905c5752c541b32e394a9deb0cdf52e04256d001dbc864e2cfa"
+    },
+    {
+      "bytes": 65012,
+      "path": "src/airvortex/backends/high_fidelity_3d.py",
+      "sha256": "620aa2f0ef3e308fe6f9906b31e9918022fa64841107aa902a9067abf84b498f"
+    },
+    {
+      "bytes": 38118,
+      "path": "src/airvortex/backends/nonlinear_surface.py",
+      "sha256": "3098dc09d99a44ae9b2d6487be0206d69543f904e112b1e9bb98ee9c1b0115f2"
+    },
+    {
+      "bytes": 21199,
+      "path": "src/airvortex/cli.py",
+      "sha256": "7df44d8372c2bd40262dd86f163a5720ced14c55a7fab8a68610aa67f7327def"
+    },
+    {
+      "bytes": 1052,
+      "path": "src/airvortex/core/__init__.py",
+      "sha256": "ddf57e2c1fd937c80bdf471c84a8feb618e4d6aa07356eec2bc6f2d541407668"
+    },
+    {
+      "bytes": 31755,
+      "path": "src/airvortex/core/config.py",
+      "sha256": "bb772ea713f75685d52a508f647cddbb0c7395842cb66988c0ab8959ca2e7756"
+    },
+    {
+      "bytes": 501,
+      "path": "src/airvortex/core/hashing.py",
+      "sha256": "18a3545bb86ec0980f4a09ff67e247d5283faf4a03417c3b8001846b970293aa"
+    },
+    {
+      "bytes": 12241,
+      "path": "src/airvortex/core/protocols.py",
+      "sha256": "29f022e34b1144853207128f9f56c0aef7ae2d33cec996270ac08ec3cb9b181f"
+    },
+    {
+      "bytes": 553,
+      "path": "src/airvortex/gui/__init__.py",
+      "sha256": "0972c266a416f20bd551df526df31defe7056ceb87edcd2b03c114f8843c8ce5"
+    },
+    {
+      "bytes": 109,
+      "path": "src/airvortex/gui/__main__.py",
+      "sha256": "09a78e518b8896e206e324684821b15d9a21a77fe676318070117e340e79a638"
+    },
+    {
+      "bytes": 66226,
+      "path": "src/airvortex/gui/app.py",
+      "sha256": "8839dd26b0372fb8eb191b1f276780d5aca41a9c4f39f2b02bc036ec8e397804"
+    },
+    {
+      "bytes": 106714,
+      "path": "src/airvortex/gui/model.py",
+      "sha256": "8f06550f576af78a2832a7089af190f3ebf68e179e305c6e61ce96b953d0079e"
+    },
+    {
+      "bytes": 26879,
+      "path": "src/airvortex/gui/plots.py",
+      "sha256": "8af7772f736a6c3b3a7e8f256cac14f694c188889f7b0d2f64228e3569e39d2c"
+    },
+    {
+      "bytes": 1060,
+      "path": "src/airvortex/io/__init__.py",
+      "sha256": "9fb83c42d9cbbaf6067aee003fc162b6a399c2466e4daf01cc54f9231f4c6cd9"
+    },
+    {
+      "bytes": 55550,
+      "path": "src/airvortex/io/archive.py",
+      "sha256": "5323d0a831b3c75f3f057a5d1a093eb3316bdbb1ddf53b563fda49e7accfe4b1"
+    },
+    {
+      "bytes": 3675,
+      "path": "src/airvortex/io/config_io.py",
+      "sha256": "259b35baa4a6980c8ffdc7025b6cd1fdffbe74a66dc6b52c4fc80bc82172a9ac"
+    },
+    {
+      "bytes": 3837,
+      "path": "src/airvortex/numerics/__init__.py",
+      "sha256": "b7c87655b59b10e939e3ff38ff79fd653fc0c36e3495506417bdb103ecf2b04b"
+    },
+    {
+      "bytes": 7726,
+      "path": "src/airvortex/numerics/axisymmetric.py",
+      "sha256": "9145f7f1b8b9838bd50d5b40fa40de571fef8e46b3ba9c043df25b9dea437cf7"
+    },
+    {
+      "bytes": 20518,
+      "path": "src/airvortex/numerics/cartesian3d.py",
+      "sha256": "6a7292660577abefa527b609cec88e55e3c9701185597f89a7e428167de26a6b"
+    },
+    {
+      "bytes": 12479,
+      "path": "src/airvortex/numerics/interface.py",
+      "sha256": "484b845b685dd1c276e0e1d3e95e5d48cb9cb3b7f5025844bc44ebe77a01de4a"
+    },
+    {
+      "bytes": 25602,
+      "path": "src/airvortex/numerics/interface3d.py",
+      "sha256": "b6c3a45d2407837b1bd18540afad3855cf217b2836e95fdb2c598dc1dc359489"
+    },
+    {
+      "bytes": 15259,
+      "path": "src/airvortex/numerics/momentum3d.py",
+      "sha256": "e40983e0b7a4cfb32b124faa87f04949c1a0cb75c5d3ab51217cfa03b5a23304"
+    },
+    {
+      "bytes": 5041,
+      "path": "src/airvortex/numerics/projection.py",
+      "sha256": "f6fa57b9d99ac33f60b695cb81595aeb7bb42529e10c23483f019320dfffa039"
+    },
+    {
+      "bytes": 22780,
+      "path": "src/airvortex/numerics/projection3d.py",
+      "sha256": "61304dd5a1035f83d1840640d9f3e6420e71dfbb41c4ae9b3289e90e859e7dd6"
+    },
+    {
+      "bytes": 25610,
+      "path": "src/airvortex/numerics/projection3d_gpu.py",
+      "sha256": "b4d596ee211fcae99bc22159c49b96225deedb741416d2d54cf9939614224019"
+    },
+    {
+      "bytes": 12087,
+      "path": "src/airvortex/numerics/transport.py",
+      "sha256": "0194ee566a879441eefe1934501c699cf8b06151d9d3691aecc7b280ebaebace"
+    },
+    {
+      "bytes": 29946,
+      "path": "src/airvortex/numerics/variational_interface.py",
+      "sha256": "acbc082d661d576c081e87b36bf4b8a836e0fd0f889aa0c5eb53d5e356fe3ade"
+    },
+    {
+      "bytes": 1153,
+      "path": "src/airvortex/runtime/__init__.py",
+      "sha256": "1a8d836404c9d37e8e2e01384d0a0df2fba9c696e85065e9fe7915d956cc5432"
+    },
+    {
+      "bytes": 16736,
+      "path": "src/airvortex/runtime/controller.py",
+      "sha256": "1c03b49d1df117c4b67824d616413aaeee9aa862a02aff635530d764cf4a401b"
+    },
+    {
+      "bytes": 48099,
+      "path": "src/airvortex/runtime/operations.py",
+      "sha256": "d50f9bc9ed82596505546baa4866725e0dda69ad9967822c1385898d3ae3b39a"
+    },
+    {
+      "bytes": 7213,
+      "path": "src/airvortex/runtime/registry.py",
+      "sha256": "5d58c3d7830d2b0796546001f552271079e5226254cbaff53c2d8468931514c4"
+    },
+    {
+      "bytes": 88,
+      "path": "src/airvortex/version.py",
+      "sha256": "dd163ee7ab64bd304cfa6331403dec868cd45a865e342e6c20eda1455cd8c1e1"
+    },
+    {
+      "bytes": 30199,
+      "path": "tests/test_analysis.py",
+      "sha256": "ed0adb0a6112f98c47ab2f29ff81c578422142d1f7eddf37b1fa962e3eea8e31"
+    },
+    {
+      "bytes": 25628,
+      "path": "tests/test_config_io.py",
+      "sha256": "4f2319c4d4e3636c48ea279e0a2e8a518478c75ade5e93b24ad484f1cd981d41"
+    },
+    {
+      "bytes": 18783,
+      "path": "tests/test_forward.py",
+      "sha256": "c048d74ec4182b8828d008ad25a3ca36b5b02e9a7950cffb276e6cbe9daec744"
+    },
+    {
+      "bytes": 17395,
+      "path": "tests/test_forward_topology.py",
+      "sha256": "bcaa72b7a45967631628c234d6602475f9f4b48b5701818656a0c356cc9ddd0e"
+    },
+    {
+      "bytes": 5895,
+      "path": "tests/test_gpu_projection.py",
+      "sha256": "dc4a6271c3e6d4fbfd16dd9020ab1c3b409bf8131340c784d34f874051f1ea69"
+    },
+    {
+      "bytes": 2935,
+      "path": "tests/test_gui_live_preview.py",
+      "sha256": "fd308ea0a2f1970e21f13d77add10185d95ca2bb23f9fdbefbec066342fc7922"
+    },
+    {
+      "bytes": 36726,
+      "path": "tests/test_gui_model.py",
+      "sha256": "f7151ef45c8ee46f8f8e2dee974c57f86c9bde822527864e4d892886e1d7fc24"
+    },
+    {
+      "bytes": 2615,
+      "path": "tests/test_hardware_runtime.py",
+      "sha256": "fdef363ba88bb922ec7178289c7af6ded7698ae872f62c17f688b0c7ae15f77d"
+    },
+    {
+      "bytes": 19989,
+      "path": "tests/test_high_fidelity.py",
+      "sha256": "6342ba2888a7eff75e740c9b52122a55e88e9e1b3d9daf6f5831eb1525bd11f1"
+    },
+    {
+      "bytes": 25833,
+      "path": "tests/test_high_fidelity_3d.py",
+      "sha256": "f172f6e1fce734e15da8ef2da5e1bb8fc4f47dae3d739bfb4e5637f20294a37d"
+    },
+    {
+      "bytes": 14564,
+      "path": "tests/test_nonlinear_surface.py",
+      "sha256": "0d170f2a2a246547dc1deb427662d2bab67cbf119e10458e1f98873df0ffe2aa"
+    },
+    {
+      "bytes": 43109,
+      "path": "tests/test_runtime_cli.py",
+      "sha256": "12a37c010e69b3a943e0e51a4a0fb3e92d29ef20403a4d5b1610f13ec04cdd8c"
+    },
+    {
+      "bytes": 8616,
+      "path": "tests/test_spectral.py",
+      "sha256": "3b0cdf4254aec8cddf178a64610d64126651461f1786d30a4925cfcbe8cc9105"
+    },
+    {
+      "bytes": 4443,
+      "path": "validation/hf3d_protocol_v2.json",
+      "sha256": "e409d613063f6b20cc4e197026f63269f9aec6b15b5461b91f2d953cc587acbf"
+    },
+    {
+      "bytes": 33048,
+      "path": "validation/run_hf3d_validation.py",
+      "sha256": "1d31472c85c69bb3f6ce72d14a8c3e6ae0a1ef198ed5c247fdcdc68a17e58ad5"
+    },
+    {
+      "bytes": 14904,
+      "path": "/home/cjt/竞赛物理研究四层通用框架与统一计算平台需求说明.md",
+      "sha256": "e4c622f6a236642ce6c8eb94f8ad45097f268b016919bb0d1965108cfa23918e"
+    }
+  ],
+  "tree_sha256": "d1ab62751899a100ca40befde555891cbe026dd4af749d29a2fcb1ed5f93bb97"
+}

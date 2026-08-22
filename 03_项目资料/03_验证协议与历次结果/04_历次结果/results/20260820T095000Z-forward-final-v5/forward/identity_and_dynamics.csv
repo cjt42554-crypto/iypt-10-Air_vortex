@@ -1,0 +1,7 @@
+status,test,unit,value
+PASS,zero_speed_flat_surface,m,0.0
+RECORDED,zero_speed_volume_error,m3,5.421010862427522e-20
+PASS,nonlinear_discrete_radial_volume_mean,m,-4.0657581468206416e-19
+PASS,rotation_reversal_surface_relative_l2,1,0.0
+PASS,rotation_reversal_C_antisymmetry_relative_l2,1,0.0
+PASS,circulation_step_response_relative_l2,1,4.382615463157832e-14

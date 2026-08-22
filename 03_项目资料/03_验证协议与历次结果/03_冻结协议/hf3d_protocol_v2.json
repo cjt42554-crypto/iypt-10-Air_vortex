@@ -1,0 +1,100 @@
+{
+  "schema": "airvortex-hf3d-validation-protocol-v2",
+  "frozen_at": "2026-08-21T00:00:00+08:00",
+  "problem_id": "iypt-2027-10-air-vortex",
+  "requirements": {
+    "path": "/home/cjt/竞赛物理研究四层通用框架与统一计算平台需求说明.md",
+    "sha256": "e4c622f6a236642ce6c8eb94f8ad45097f268b016919bb0d1965108cfa23918e"
+  },
+  "separation_boundary": {
+    "forward_theory_path": "deliverables/01_前向预测理论.md",
+    "forward_theory_sha256": "02541b680c0ee19c172fbbe87a8a6b6b2c646d6ad72e3da0298ccb25ba231a03",
+    "forward_numerical_theory_path": "deliverables/02_前向预测理论的数值计算理论.md",
+    "forward_numerical_theory_sha256": "caf6e8643c8cceae2ee96342c97ec1da38ee596acd9313105f8e628578befdb7",
+    "rule": "HF3D must not import or evaluate any F1 Burgers field, circulation closure, interface mobility, contact hysteresis mobility, or effective target.",
+    "markdown_format_revision": "MD-MATH-1"
+  },
+  "implementation": {
+    "model_id": "hf3d-local-law-one-fluid-v1",
+    "backend": "src/airvortex/backends/high_fidelity_3d.py",
+    "grid": "src/airvortex/numerics/cartesian3d.py",
+    "projection": "src/airvortex/numerics/projection3d.py",
+    "interface": "src/airvortex/numerics/interface3d.py",
+    "momentum": "src/airvortex/numerics/momentum3d.py",
+    "coordinate_frame": "bar-co-rotating Cartesian frame",
+    "governing_class": "variable-density incompressible two-phase one-fluid Navier-Stokes with local Newtonian stress, conservative colour transport, CSF and variable-coefficient projection",
+    "geometry": "voxelised cylindrical vessel and actual horizontal capsule bar",
+    "top_boundary": "open atmospheric p_gauge=0 with pure-gas inflow",
+    "legacy_h1_is_normative": false
+  },
+  "common_driven_case": {
+    "actual_bar_rpm": 200,
+    "ramp_duration_s": 0.002,
+    "duration_s": 0.004,
+    "output_interval_s": 0.001,
+    "pressure_relative_tolerance": 1e-8,
+    "pressure_max_iterations": 1800,
+    "interface_thickness_cells": 2.5,
+    "interface_compression_interval": 1,
+    "interface_compression_pseudo_cfl": 0.02,
+    "parameter_status": "REFERENCE_WATER_AIR_AND_GEOMETRY_NOT_EXPERIMENTALLY_VALIDATED"
+  },
+  "implementation_gates": {
+    "complete_unit_suite_must_pass": true,
+    "source_must_remain_unchanged_during_campaign": true,
+    "random_variable_density_projection_divergence_ratio_max": 2e-8,
+    "random_projection_relative_residual_max": 1.1e-9,
+    "zero_drive_hydrostatic_max_speed_m_s": 0.000002,
+    "zero_drive_shared_funnel_depth_max_m": 1e-8,
+    "maximum_open_boundary_volume_balance_error_relative": 1e-10,
+    "maximum_configured_phase_clip_and_repair_limits_must_pass": true,
+    "time_refinement_medium_to_coarse_error_ratio_max": 0.75,
+    "reversal_phase_mirror_relative_l2_max": 0.06,
+    "reversal_velocity_mirror_relative_l2_max": 0.02,
+    "reversal_kinetic_energy_relative_difference_max": 0.0001,
+    "reversal_angular_momentum_antisymmetry_relative_difference_max": 0.0001
+  },
+  "time_refinement": {
+    "grid_xyz": [
+      12,
+      12,
+      15
+    ],
+    "maximum_dt_s": [
+      0.00015,
+      0.000075,
+      0.0000375
+    ],
+    "comparison": "final full 3D laboratory velocity relative L2 against the finest run"
+  },
+  "dynamic_grid_audit": {
+    "transverse_cells": [
+      8,
+      12,
+      16,
+      20
+    ],
+    "axial_cells_rule": "max(10, round(1.25*Nxy))",
+    "maximum_dt_s": 0.000075,
+    "physical_convergence_gate_finest_pair_relative_difference_max": 0.05,
+    "minimum_bar_diameter_cells_for_physical_go": 6,
+    "expected_protocol_status": "NO_GO_ALLOWED_AND_REPORTED"
+  },
+  "claim_boundary": {
+    "numerical_implementation_verified_if_implementation_gates_pass": true,
+    "physical_model_validated_by_this_protocol": false,
+    "experimental_threshold_established": false,
+    "single_grid_channel_or_critical_rpm_quantitative": false,
+    "physical_go_requires": [
+      "resolved capsule and boundary layer on a frozen dynamic grid refinement",
+      "time and interface refinement",
+      "apparatus-specific measured actual bar trajectory",
+      "sealed calibration and independent validation experiments"
+    ]
+  },
+  "predecessor": {
+    "protocol_path": "validation/hf3d_protocol_v1.json",
+    "protocol_sha256": "31a551b8fd3b8ec73fe02adced6fd33dd821005701ef0aac43818a222a23cbf7",
+    "change_scope": "MD-MATH-1 markdown formula-rendering revision only; numerical gates unchanged"
+  }
+}

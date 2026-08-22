@@ -1,0 +1,104 @@
+{
+  "schema": "airvortex-forward-numerical-validation-protocol-v1",
+  "frozen_at": "2026-08-20T18:25:00+08:00",
+  "purpose": "Forward exact-curvature implementation/numerical verification; explicitly not experimental or physical validation",
+  "immutability": {
+    "existing_result_directories_must_not_be_overwritten": true,
+    "execute_from_frozen_snapshot": true,
+    "invalidate_if_frozen_source_tree_changes_during_run": true,
+    "archive_workspace_and_snapshot_hashes": true
+  },
+  "declared_default_input": {
+    "config_path": "configs/forward_default.json",
+    "config_file_sha256": "ff02d43e343868642e9b677fdeb7076aa23fbdaec2202f01f4a4a0f6eda7659f",
+    "density_kg_m3": 998.2,
+    "gravity_m_s2": 9.80665,
+    "surface_tension_n_m": 0.072,
+    "core_radius_m": 0.01,
+    "vessel_radius_m": 0.045,
+    "liquid_depth_m": 0.06,
+    "stir_bar_bottom_clearance_m": 0.0015,
+    "stir_bar_radius_m": 0.003,
+    "stir_bar_half_length_m": 0.015,
+    "circulation_coupling_m2": 0.00009,
+    "surface_radial_points": 256,
+    "relative_tolerance": 0.000001,
+    "absolute_tolerance_m": 1e-09
+  },
+  "definitions": {
+    "Bo": "rho*g*c^2/sigma",
+    "L": "R/c",
+    "W": "rho*C^2/(sigma*c)",
+    "static_gap_ratio": "[H-(bottom_clearance+2*bar_radius)]/c",
+    "main_depth": "mean(surface samples at r>=0.8R)-min(surface samples at r<=bar_half_length)",
+    "profile_range": "max(surface)-min(surface)",
+    "axisymmetric_profile_norm": "sqrt[2/R^2 integral_0^R error(r)^2 r dr] after separate volume-datum removal"
+  },
+  "independent_routes": {
+    "bvp_script": "research/scripts/verify_nonlinear_surface.py",
+    "bvp_script_sha256_at_freeze": "00f55c3e441909abeb5d075cbe73a35101d6c68f3b5e6faf5a72d22bc1425731",
+    "bvp_independence_requirement": "must not import airvortex",
+    "bvp_state": "independent collocation implementation and Jacobians",
+    "energy_route": "independent constrained finite-dimensional exact surface-energy minimisation; no backend surface used as the objective or acceptance reference"
+  },
+  "matrix": {
+    "identity_and_dynamics": [
+      "zero speed and flat surface",
+      "discrete radial volume constraint",
+      "rotation reversal",
+      "exact first-order circulation step response",
+      "default 10 s / 501-frame run"
+    ],
+    "forcing_W": [0.1, 0.2, 0.4, 1.0, 10.0, 40.0, 80.0, 130.0],
+    "backend_radial_points": [64, 128, 256, 512],
+    "backend_tolerance_pairs": [
+      {"relative": 0.0001, "absolute_m": 1e-07},
+      {"relative": 0.000001, "absolute_m": 1e-09},
+      {"relative": 1e-08, "absolute_m": 1e-11}
+    ],
+    "independent_bvp_refinement": [
+      {"mesh_points": 201, "tolerance": 0.000001, "axis_fraction": 0.000001},
+      {"mesh_points": 401, "tolerance": 3e-07, "axis_fraction": 1e-07},
+      {"mesh_points": 801, "tolerance": 8e-08, "axis_fraction": 1e-08}
+    ],
+    "energy_radial_points": [129, 257, 513],
+    "surface_tension_n_m": [0.072, 0.001, 0.0001, 1e-05, 1e-06, 1e-07, 1e-09],
+    "natural_domain_forcing_W": [130.0, 160.0, 200.0, 260.0, 340.0, 460.0, 620.0]
+  },
+  "hard_implementation_gates": {
+    "all_archived_arrays_finite": true,
+    "zero_speed_flat_error_m_max": 2e-13,
+    "nonlinear_discrete_volume_mean_m_max": 2e-13,
+    "rotation_reversal_surface_relative_l2_max": 2e-11,
+    "rotation_reversal_C_antisymmetry_relative_l2_max": 2e-11,
+    "circulation_step_response_relative_l2_max": 2e-11,
+    "independent_potential_quadrature_relative_error_max": 2e-10,
+    "sigma_zero_G_axis_depression_relative_error_finest_max": 2e-06,
+    "independent_bvp_profile_relative_axisymmetric_l2_max": 5e-05,
+    "independent_bvp_critical_W_relative_difference_max": 2e-05,
+    "independent_energy_profile_relative_axisymmetric_l2_finest_max": 0.0001,
+    "weak_nonlinear_W3_relative_spread_max": 0.01,
+    "default_run_status": "completed",
+    "default_run_frame_count": 501,
+    "default_run_wall_time_s_regression_max": 60.0,
+    "q_domain_poison_must_raise": "NonlinearSurfaceDomainError",
+    "collocation_failure_must_raise_without_linear_fallback": true,
+    "deep_vessel_low_load_must_complete_with_critical_unavailable": true,
+    "external_independent_audit_exit_code": 0
+  },
+  "diagnostic_only_no_posthoc_physical_tolerance": {
+    "radial_grid_critical_sequence": "report every value, adjacent differences, observed order when identifiable, and a conservative numerical spread; nonmonotonic is a retained negative result",
+    "tolerance_critical_sequence": "same rule as radial grid sequence",
+    "surface_tension_limit": "report explicit finite-sigma versus CAPILLARY_SINGULAR_LIMIT_OUTER regimes and convergence to the finite-cylinder analytic limit",
+    "critical_rpm_numerical_uncertainty": "numerical discretisation/tolerance envelope only; never experimental uncertainty",
+    "natural_q_domain_sweep": "record first failure and last certified q; a solver failure is not a physical instability"
+  },
+  "negative_result_policy": {
+    "retain_nonconvergence": true,
+    "retain_nonmonotonic_sequences": true,
+    "retain_route_disagreement": true,
+    "retain_unavailable_critical_threshold": true,
+    "never_call_numerical_stability_physical_validation": true,
+    "never_replace_failed_nonlinear_solution_with_linear_baseline": true
+  }
+}

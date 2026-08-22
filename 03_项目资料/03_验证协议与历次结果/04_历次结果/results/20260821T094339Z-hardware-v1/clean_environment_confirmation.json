@@ -1,0 +1,214 @@
+{
+  "schema": "airvortex-hf3d-hardware-benchmark-v1",
+  "created_utc": "2026-08-21T09:54:11.770051+00:00",
+  "equation_change": false,
+  "timing_scope": "steady pressure projection; warm-up and CUDA JIT excluded; host wrapper includes current hybrid transfers",
+  "host": {
+    "platform": "Linux-7.0.0-28-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "numpy": "2.5.2",
+    "scipy": "1.17.1",
+    "affinity_logical_cpus": 32,
+    "load_average_1_5_15": [
+      5.65625,
+      5.482421875,
+      5.78759765625
+    ],
+    "numerical_thread_policy": {
+      "requested": "2",
+      "selected_threads": 2,
+      "affinity_logical_cpus": 32,
+      "explicitly_overrode_library_environment": true,
+      "applied": [
+        [
+          "OPENBLAS_NUM_THREADS",
+          "2"
+        ],
+        [
+          "OMP_NUM_THREADS",
+          "2"
+        ],
+        [
+          "MKL_NUM_THREADS",
+          "2"
+        ],
+        [
+          "BLIS_NUM_THREADS",
+          "2"
+        ],
+        [
+          "VECLIB_MAXIMUM_THREADS",
+          "2"
+        ],
+        [
+          "NUMEXPR_NUM_THREADS",
+          "2"
+        ]
+      ],
+      "preserved": []
+    }
+  },
+  "gpu_probe": {
+    "available": true,
+    "detail": "CuPy FP64 device operation passed",
+    "device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "compute_capability": "12.0",
+    "total_memory_bytes": 8053915648
+  },
+  "case": {
+    "grid_x_y_z": [
+      48,
+      48,
+      72
+    ],
+    "active_cells": 129685,
+    "relative_tolerance": 1e-07,
+    "maximum_iterations": 400,
+    "random_seed": 20260821,
+    "velocity_scale_m_s": 0.0001,
+    "dt_s": 0.0002
+  },
+  "engines": {
+    "cpu": {
+      "samples_s": [
+        0.21905798099760432,
+        0.21917163400212303,
+        0.21888902399223298,
+        0.21624737899401225,
+        0.21676820499124005,
+        0.22084683600405697,
+        0.21886300499318168
+      ],
+      "median_s": 0.21888902399223298,
+      "minimum_s": 0.21624737899401225,
+      "maximum_s": 0.22084683600405697,
+      "preconditioner": "vertical-line block-Jacobi",
+      "diagnostics": {
+        "iterations": 206,
+        "relative_residual": 9.788803785808927e-08,
+        "divergence_before_s_inv": 0.7349312169922377,
+        "divergence_after_s_inv": 1.1691473763772442e-07,
+        "active_unknowns": 129685,
+        "matrix_nonzeros": 890063
+      }
+    },
+    "cuda_device_resident": {
+      "samples_s": [
+        0.057138231000863016,
+        0.056171126998378895,
+        0.05585441199946217,
+        0.055955542004085146,
+        0.05593410199799109,
+        0.05584123700100463,
+        0.055937748998985626
+      ],
+      "median_s": 0.055937748998985626,
+      "minimum_s": 0.05584123700100463,
+      "maximum_s": 0.057138231000863016,
+      "preconditioner": "CUDA batched vertical-line block-Jacobi",
+      "diagnostics": {
+        "iterations": 206,
+        "relative_residual": 9.78880378581738e-08,
+        "divergence_before_s_inv": 0.7349312169922377,
+        "divergence_after_s_inv": 1.1691473746772152e-07,
+        "active_unknowns": 129685,
+        "matrix_nonzeros": 890063
+      }
+    },
+    "cuda_hybrid_host_wrapper": {
+      "samples_s": [
+        0.05766948699601926,
+        0.05735504699987359,
+        0.05757737399835605,
+        0.05747119498846587,
+        0.057778661997872405,
+        0.057871955999871716,
+        0.05896517699875403
+      ],
+      "median_s": 0.05766948699601926,
+      "minimum_s": 0.05735504699987359,
+      "maximum_s": 0.05896517699875403,
+      "preconditioner": "CUDA batched vertical-line block-Jacobi",
+      "diagnostics": {
+        "iterations": 206,
+        "relative_residual": 9.78880378581738e-08,
+        "divergence_before_s_inv": 0.7349312169922377,
+        "divergence_after_s_inv": 1.1691473746772152e-07,
+        "active_unknowns": 129685,
+        "matrix_nonzeros": 890063
+      }
+    }
+  },
+  "comparison": {
+    "hybrid_pressure_speedup": 3.795577789817034,
+    "maximum_absolute_difference_u_x_u_y_u_z_pressure": [
+      2.439454888092385e-19,
+      3.5236570605778894e-19,
+      5.149960319306146e-19,
+      2.4424906541753444e-15
+    ],
+    "same_iteration_count": true,
+    "absolute_relative_residual_difference": 8.4531241158019e-20
+  },
+  "full_hf3d": {
+    "requested_duration_max_dt_intervals": 5,
+    "requested_duration_s": 0.001,
+    "actual_adaptive_steps_are_reported_per_engine": true,
+    "includes": "complete backend setup, all local laws, pressure projection, diagnostics and final result assembly",
+    "engines": {
+      "cpu": {
+        "samples_s": [
+          10.422249170995201
+        ],
+        "median_s": 10.422249170995201,
+        "minimum_s": 10.422249170995201,
+        "maximum_s": 10.422249170995201,
+        "status": "completed",
+        "completed_steps": 59,
+        "pressure_accelerator": {
+          "requested": "cpu",
+          "selected": "cpu",
+          "fallback": false,
+          "detail": "CPU reference projection selected explicitly",
+          "device_name": null,
+          "compute_capability": null,
+          "host_device_transfer_each_solve": false
+        },
+        "maximum_pressure_relative_residual": 9.99479298455966e-08,
+        "maximum_projected_divergence_s_inv": 1.1432307327474689e-06
+      },
+      "cuda": {
+        "samples_s": [
+          5.355750421003904
+        ],
+        "median_s": 5.355750421003904,
+        "minimum_s": 5.355750421003904,
+        "maximum_s": 5.355750421003904,
+        "status": "completed",
+        "completed_steps": 59,
+        "pressure_accelerator": {
+          "requested": "cuda",
+          "selected": "cuda",
+          "fallback": false,
+          "detail": "CuPy FP64 device operation passed",
+          "device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+          "compute_capability": "12.0",
+          "total_memory_bytes": 8053915648,
+          "host_device_transfer_each_solve": true
+        },
+        "maximum_pressure_relative_residual": 9.994793018307606e-08,
+        "maximum_projected_divergence_s_inv": 1.1432307049918933e-06
+      }
+    },
+    "comparison": {
+      "end_to_end_speedup": 1.945992316991054,
+      "maximum_absolute_field_difference": {
+        "final_phase_liquid_fraction_3d": 1.3322676295501878e-14,
+        "final_pressure_gauge_pa_3d": 8.313350008393172e-11,
+        "final_u_x_rotating_m_s_3d": 1.429412144204889e-13,
+        "final_u_y_rotating_m_s_3d": 1.4288570326925765e-13,
+        "final_u_z_rotating_m_s_3d": 9.192646643896296e-14
+      }
+    }
+  }
+}

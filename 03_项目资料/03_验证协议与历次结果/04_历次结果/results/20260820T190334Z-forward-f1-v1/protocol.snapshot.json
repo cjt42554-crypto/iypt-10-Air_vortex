@@ -1,0 +1,106 @@
+{
+  "claim_boundary": {
+    "experimental_threshold_established": false,
+    "numerical_implementation_verified_if_pass": true,
+    "physical_model_validated_by_this_protocol": false,
+    "required_for_quantitative_event_time": "frozen multi-level extrapolation plus independent calibration and experiment",
+    "single_grid_event_time_quantitative": false
+  },
+  "common_case": {
+    "actual_speed_source": "synthetic prescribed actual bar rpm, not motor command rpm",
+    "initial_state": "flat volume-projected interface, C0=0",
+    "interface_thickness_cells": 1.5,
+    "minimum_resolved_throat_cells": 3,
+    "output_interval_s": 0.025,
+    "physical_parameter_status": "FIXED_REFERENCE_NOT_EXPERIMENTALLY_CALIBRATED",
+    "ramp_duration_s": 0.5,
+    "stable_channel_radius_m": 0.001
+  },
+  "frozen_at": "2026-08-21T00:00:00+08:00",
+  "implementation": {
+    "backend": "src/airvortex/backends/forward_topology.py",
+    "interface_numerics": "src/airvortex/numerics/variational_interface.py",
+    "legacy_graph_backend_is_normative": false,
+    "method_id": "PF-FV2D-v1",
+    "model_id": "forward-f1.0-axisymmetric-variational-fv-v1"
+  },
+  "manufactured_and_identity_checks": [
+    "Burgers potential F(x) against independent adaptive quadrature",
+    "F21 exact update against independent convolution quadrature",
+    "signed piecewise-linear drive with rotation reversal",
+    "discrete liquid-volume projection",
+    "fixed-forcing energy non-increase",
+    "rotation-reversal interface symmetry",
+    "one-cell gas path rejected by resolution gate",
+    "contact angle inside hysteresis interval is pinned",
+    "high-drive formation and restart-driven break use the same state equation"
+  ],
+  "problem_id": "iypt-2027-10-air-vortex",
+  "schema": "airvortex-forward-f1-numerical-validation-protocol-v1",
+  "space_interface_refinement": {
+    "hard_gates": {
+      "all_volume_and_energy_gates_pass": true,
+      "last_three_vs_all_four_event_extrapolate_relative_difference_max": 0.03,
+      "linear_h_extrapolation_normalized_rms_max": 0.01,
+      "subcritical_all_remain_disconnected": true,
+      "subcritical_finest_pair_depth_relative_difference_max": 0.05,
+      "topology_all_form_resolved_channel": true,
+      "topology_event_time_monotone_with_refinement": true,
+      "topology_finest_pair_throat_relative_difference_max": 0.1
+    },
+    "levels": [
+      {
+        "axial_cells": 42,
+        "nominal_dt_s": 0.002,
+        "radial_cells": 24
+      },
+      {
+        "axial_cells": 56,
+        "nominal_dt_s": 0.002,
+        "radial_cells": 32
+      },
+      {
+        "axial_cells": 84,
+        "nominal_dt_s": 0.0015,
+        "radial_cells": 48
+      },
+      {
+        "axial_cells": 112,
+        "nominal_dt_s": 0.001,
+        "radial_cells": 64
+      }
+    ],
+    "subcritical_case": {
+      "duration_s": 1.5,
+      "rpm": 1200.0
+    },
+    "topology_case": {
+      "duration_s": 2.0,
+      "rpm": 2000.0
+    }
+  },
+  "theory": {
+    "id": "F1.0-frozen-2026-08-21",
+    "path": "deliverables/01_前向预测理论.md",
+    "sha256": "bc153b362aad5801d964b12c1293b54e3ae2194e9526ca5e9350100da6958537"
+  },
+  "time_refinement": {
+    "duration_s": 2.0,
+    "grid": [
+      32,
+      56
+    ],
+    "hard_gates": {
+      "all_form_resolved_channel": true,
+      "all_volume_and_energy_gates_pass": true,
+      "finest_pair_event_time_difference_max_s": 0.025,
+      "finest_pair_throat_relative_difference_max": 0.02
+    },
+    "nominal_dt_s": [
+      0.004,
+      0.002,
+      0.001
+    ],
+    "rpm": 2000.0
+  }
+}

@@ -1,0 +1,7 @@
+group,metric,value,status,note
+grid_moderate,surface_rms_hf_grid_moderate_n24_vs_hf_grid_moderate_n36_m,0.0009186726292029683,RECORDED,
+grid_moderate,surface_rms_hf_grid_moderate_n36_vs_hf_grid_moderate_n54_m,0.0006730630588882651,RECORDED,
+grid_moderate,observed_order_from_last_three,0.7672443428367481,CONVERGENCE_TREND,离散差下降只是数值趋势，不是物理验证
+grid_moderate,final_funnel_depth_m:hf_grid_moderate_n24,0.00840461691662972,RECORDED,
+grid_moderate,final_funnel_depth_m:hf_grid_moderate_n36,0.012366838398434263,RECORDED,
+grid_moderate,final_funnel_depth_m:hf_grid_moderate_n54,0.010095613390325511,RECORDED,

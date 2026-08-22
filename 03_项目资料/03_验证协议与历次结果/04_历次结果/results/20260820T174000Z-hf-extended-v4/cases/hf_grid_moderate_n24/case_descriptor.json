@@ -1,0 +1,21 @@
+{
+  "backend_options": {
+    "cls_compression_interval": 1,
+    "cls_compression_speed_m_s": 0.04,
+    "enable_surface_tension": true
+  },
+  "direction": 1,
+  "dt_s": 0.0002,
+  "duration_s": 3.0,
+  "id": "hf_grid_moderate_n24",
+  "interface_thickness_cells": 2.5,
+  "nr": 24,
+  "nz": 36,
+  "output_interval_s": 0.1,
+  "ramp_s": 0.5,
+  "rpm": 900.0,
+  "tags": [
+    "hf-extended",
+    "grid-moderate"
+  ]
+}

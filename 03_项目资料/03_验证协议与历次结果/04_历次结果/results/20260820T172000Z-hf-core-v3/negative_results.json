@@ -1,0 +1,18 @@
+[
+  {
+    "group": "time_step",
+    "metric": "observed_order_from_last_three",
+    "note": "离散差下降只是数值趋势，不是物理验证",
+    "source": "convergence",
+    "status": "NOT_DEMONSTRATED",
+    "value": ""
+  },
+  {
+    "group": "grid_short",
+    "metric": "observed_order_from_last_three",
+    "note": "离散差下降只是数值趋势，不是物理验证",
+    "source": "convergence",
+    "status": "NOT_DEMONSTRATED",
+    "value": ""
+  }
+]

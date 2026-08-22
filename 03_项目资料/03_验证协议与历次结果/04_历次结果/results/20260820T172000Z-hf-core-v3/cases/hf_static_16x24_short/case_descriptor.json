@@ -1,0 +1,23 @@
+{
+  "backend_options": {
+    "cls_compression_interval": 1,
+    "cls_compression_speed_m_s": 0.04,
+    "enable_surface_tension": true
+  },
+  "direction": 1,
+  "dt_s": 0.0005,
+  "duration_s": 0.1,
+  "id": "hf_static_16x24_short",
+  "interface_thickness_cells": 2.5,
+  "nr": 16,
+  "nz": 24,
+  "output_interval_s": 0.02,
+  "ramp_s": 0.0,
+  "rpm": 0.0,
+  "tags": [
+    "hf-smoke",
+    "hf-core",
+    "static",
+    "performance-short"
+  ]
+}

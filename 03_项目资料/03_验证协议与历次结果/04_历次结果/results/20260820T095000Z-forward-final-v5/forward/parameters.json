@@ -1,0 +1,23 @@
+{
+  "config_file_sha256": "ff02d43e343868642e9b677fdeb7076aa23fbdaec2202f01f4a4a0f6eda7659f",
+  "config_path": "/home/cjt/Desktop/iypt/10 空气涡流/validation/results/20260820T095000Z-forward-final-v5/frozen_execution_input/configs/forward_default.json",
+  "parameter_vector": {
+    "Bo": 13.595830597222225,
+    "L_R_over_c": 4.5,
+    "absolute_tolerance_m": 1e-09,
+    "bar_half_length_m": 0.015,
+    "bar_top_m": 0.0075,
+    "circulation_coupling_m2": 9e-05,
+    "core_radius_m": 0.01,
+    "gravity_m_s2": 9.80665,
+    "liquid_density_kg_m3": 998.2,
+    "liquid_depth_m": 0.06,
+    "relative_tolerance": 1e-06,
+    "static_gap_m": 0.0525,
+    "static_gap_ratio_S_over_c": 5.25,
+    "surface_radial_points": 256,
+    "surface_tension_n_m": 0.072,
+    "vessel_radius_m": 0.045
+  },
+  "parameter_vector_sha256": "238c2124decfaa37164f1d60c8e42e4fb9390895237299376c19620987c0a863"
+}

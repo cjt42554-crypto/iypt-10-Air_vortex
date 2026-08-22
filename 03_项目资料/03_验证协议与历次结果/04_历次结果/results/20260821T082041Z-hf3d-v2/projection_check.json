@@ -1,0 +1,11 @@
+{
+  "active_unknowns": 1789,
+  "divergence_after_s_inv": 4.042298407114231e-08,
+  "divergence_before_s_inv": 26.729343298375525,
+  "divergence_ratio": 1.5123074151095591e-09,
+  "iterations": 99,
+  "matrix_nonzeros": 11523,
+  "pressure_relative_residual": 9.375886698404798e-10,
+  "pressure_sha256": "23cb654429de0e3a9beb98e3c4ff254fd9e627f395cf5a78cf9cddb09f8a8a4b",
+  "seed": 20270821
+}

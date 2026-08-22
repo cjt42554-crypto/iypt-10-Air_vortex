@@ -1,0 +1,94 @@
+{
+  "at_900_rpm": {
+    "drive": 99.74987102081992,
+    "linear_axis_depth_mm": 36.46480082429787,
+    "linear_curvature_operator_l2_error_on_nonlinear_shape": 2.052962885310204,
+    "linear_depth_underestimate_fraction": 0.07059243268274686,
+    "nonlinear_axis_depth_mm": 39.234456557690805,
+    "nonlinear_max_abs_q": 0.9508573309667802,
+    "nonlinear_max_abs_slope": 3.070953455195616
+  },
+  "capillary_singular_outer": {
+    "first_contact_rpm": 985.2945765415741,
+    "mean_potential": 0.5970429020932615,
+    "mean_potential_over_ln2": 0.8613508340479032,
+    "status": "sigma->0 finite-vessel outer solution, not finite-sigma exact curvature"
+  },
+  "constants_si": {
+    "C_per_omega_m2": 9e-05,
+    "core_radius_m": 0.01,
+    "density_kg_m3": 998.2,
+    "gravity_m_s2": 9.80665,
+    "liquid_depth_m": 0.06,
+    "magnet_bottom_gap_m": 0.0015,
+    "magnet_radius_m": 0.003,
+    "surface_tension_N_m": 0.072,
+    "vessel_radius_m": 0.045
+  },
+  "contact_threshold_90deg": {
+    "linear_curvature_operator_l2_error_on_nonlinear_shape": 2.854738955491225,
+    "linear_drive": 143.6143379417269,
+    "linear_rpm": 1079.9042199588953,
+    "nonlinear_drive": 131.63931557860485,
+    "nonlinear_max_abs_q": 0.971627401737162,
+    "nonlinear_max_abs_slope": 4.108069450964094,
+    "nonlinear_rpm": 1033.9014534524702,
+    "nonlinear_to_linear_rpm_ratio": 0.9574010679315835
+  },
+  "contact_threshold_cross_formulation": {
+    "collocation_nodes": 1110,
+    "drive": 131.63931557797866,
+    "drive_difference_from_angle_continuation": -6.261871021706611e-10,
+    "maximum_collocation_rms_residual": 9.958905758699181e-09,
+    "maximum_height_difference_dimensionless": 8.290967912216729e-11,
+    "state": "w=x*q with W and Lambda solved simultaneously"
+  },
+  "dimensionless": {
+    "bond": 13.595830597222225,
+    "magnet_clearance_ratio": 5.25,
+    "radius_ratio": 4.5
+  },
+  "local_contact_threshold_sensitivities": {
+    "angle_step_deg": 1.0,
+    "drive_per_contact_angle_deg": 0.013644674715862948,
+    "drive_per_gap_ratio": 23.91641919209917,
+    "gap_ratio_step": 0.01,
+    "rpm_per_contact_angle_deg": 0.05358296257816164,
+    "rpm_per_gap_mm": 9.392038919827428,
+    "rpm_per_gap_ratio": 93.92038919827428
+  },
+  "numerics": {
+    "angle_state_axis_fraction": 1e-07,
+    "angle_state_initial_mesh_points": 401,
+    "angle_state_tolerance": 1e-08,
+    "direct_w_state_tolerance": 1e-08,
+    "pinned_continuation_tolerance": 3e-07,
+    "pinned_last_prescribed_q_wall": -0.9998,
+    "touch_bisections": 36
+  },
+  "pinned_y_wall_zero_graph_endpoint": {
+    "axis_depth_ratio": 2.7212210532202903,
+    "drive": 71.24833088319525,
+    "method": "three-point quadratic extrapolation in sqrt(1+q_wall)",
+    "rpm": 760.6304115215075,
+    "status": "single-valued graph endpoint; not a proved flow instability",
+    "tail_fit_estimates": [
+      {
+        "axis_depth_ratio": 2.7212210532202823,
+        "drive": 71.24833088319507,
+        "points": 3
+      },
+      {
+        "axis_depth_ratio": 2.7212213000230654,
+        "drive": 71.24832689776977,
+        "points": 4
+      },
+      {
+        "axis_depth_ratio": 2.7212219633029573,
+        "drive": 71.24831247496691,
+        "points": 5
+      }
+    ]
+  },
+  "schema": "iypt-air-vortex/nonlinear-surface-audit/v1"
+}
