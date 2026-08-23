@@ -24,6 +24,9 @@ REQUIRED_FILES = (
     "00_项目控制/LAYOUT.md",
     "00_项目控制/WORKFLOW.md",
     "00_项目控制/LAYOUT_VERSION.txt",
+    "01_最终理论/README.md",
+    "02_模拟程序/README.md",
+    "03_项目资料/README.md",
     "90_候选工作区/README.md",
     "90_候选工作区/current/README.md",
     "90_候选工作区/archive/README.md",
@@ -42,6 +45,9 @@ ACTIVE_DOCS = (
     "00_项目控制/README.md",
     "00_项目控制/STATUS.md",
     "00_项目控制/WORKFLOW.md",
+    "01_最终理论/README.md",
+    "02_模拟程序/README.md",
+    "03_项目资料/README.md",
     "90_候选工作区/README.md",
     "90_候选工作区/current/README.md",
 )
@@ -55,6 +61,7 @@ LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 
 def main() -> int:
     errors: list[str] = []
+
     for relative in REQUIRED_DIRS:
         if not (ROOT / relative).is_dir():
             errors.append(f"missing directory: {relative}")
@@ -100,6 +107,7 @@ def main() -> int:
         for error in errors:
             print(f"- {error}")
         return 1
+
     print("repository layout validation: PASS")
     return 0
 
