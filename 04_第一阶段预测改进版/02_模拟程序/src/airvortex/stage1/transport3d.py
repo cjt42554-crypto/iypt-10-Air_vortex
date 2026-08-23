@@ -20,6 +20,9 @@ class TransportDiagnostics:
     density_conservation_residual_kg: float
     phase_clip_absolute_volume_m3: float
     phase_repair_absolute_volume_m3: float
+    momentum_remap_x_kg_m_s: float
+    momentum_remap_y_kg_m_s: float
+    momentum_remap_z_kg_m_s: float
     momentum_remap_absolute_kg_m_s: float
 
 def _masked_faces(u_x,u_y,u_z,grid):
@@ -106,10 +109,13 @@ def advect_phase_density_momentum_consistently(phase,u_x_cell,u_y_cell,u_z_cell,
         fz[:,:,1:-1]=rho_flux.z[:,:,1:-1]*np.where(uz[:,:,1:-1]>=0,component[:,:,:-1],component[:,:,1:])
         top=np.broadcast_to(np.asarray(top_component,dtype=float),(grid.nx,grid.ny)); fz[:,:,-1]=rho_flux.z[:,:,-1]*np.where(uz[:,:,-1]>=0,component[:,:,-1],top)
         raw_momentum.append(np.where(grid.active_mask,old_rho*component-dt_s*_div(FaceFluxes(fx,fy,fz,0.0),grid),0.0))
-    transported_velocity=[np.divide(p,raw_rho,out=np.zeros_like(p),where=grid.active_mask) for p in raw_momentum]
+    active_density=grid.active_mask&(raw_rho>0.0)
+    transported_velocity=[np.divide(p,raw_rho,out=np.zeros_like(p),where=active_density) for p in raw_momentum]
     new_rho=np.where(grid.active_mask,rho_g+drho*new_alpha,0.0); delta_rho=new_rho-raw_rho
     corrections=[delta_rho*v for v in transported_velocity]
-    final_velocity=[np.divide(p+c,new_rho,out=np.zeros_like(p),where=grid.active_mask) for p,c in zip(raw_momentum,corrections)]
+    active_new_density=grid.active_mask&(new_rho>0.0)
+    final_velocity=[np.divide(p+c,new_rho,out=np.zeros_like(p),where=active_new_density) for p,c in zip(raw_momentum,corrections)]
+    momentum_components=tuple(float(np.sum(c[grid.active_mask])*grid.cell_volume_m3) for c in corrections)
     momentum_remap=float(sum(np.sum(np.abs(c)[grid.active_mask])*grid.cell_volume_m3 for c in corrections))
     diag=TransportDiagnostics(
         advective_cfl=advective_cfl_face_flux(ux,uy,uz,grid,dt_s),
@@ -118,6 +124,9 @@ def advect_phase_density_momentum_consistently(phase,u_x_cell,u_y_cell,u_z_cell,
         density_conservation_residual_kg=_integral(raw_rho,grid)-expected_mass,
         phase_clip_absolute_volume_m3=clip_abs,
         phase_repair_absolute_volume_m3=repair_abs,
+        momentum_remap_x_kg_m_s=momentum_components[0],
+        momentum_remap_y_kg_m_s=momentum_components[1],
+        momentum_remap_z_kg_m_s=momentum_components[2],
         momentum_remap_absolute_kg_m_s=momentum_remap,
     )
     return new_alpha,new_rho,final_velocity[0],final_velocity[1],final_velocity[2],diag

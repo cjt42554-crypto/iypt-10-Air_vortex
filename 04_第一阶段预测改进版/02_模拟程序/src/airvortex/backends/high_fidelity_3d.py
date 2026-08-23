@@ -171,6 +171,18 @@ class HF3DStepDiagnostics:
     maximum_boundary_acceleration_m_s2: float
     boundary_rotating_energy_change_j: float
     topology: Topology3DDiagnostics
+    phase_conservation_residual_m3: float = 0.0
+    density_conservation_residual_kg: float = 0.0
+    momentum_remap_x_kg_m_s: float = 0.0
+    momentum_remap_y_kg_m_s: float = 0.0
+    momentum_remap_z_kg_m_s: float = 0.0
+    momentum_remap_absolute_kg_m_s: float = 0.0
+    cls_phase_conservation_residual_m3: float = 0.0
+    cls_density_conservation_residual_kg: float = 0.0
+    cls_momentum_remap_x_kg_m_s: float = 0.0
+    cls_momentum_remap_y_kg_m_s: float = 0.0
+    cls_momentum_remap_z_kg_m_s: float = 0.0
+    cls_momentum_remap_absolute_kg_m_s: float = 0.0
 
 
 def _rpm_to_omega(rpm: float) -> float:
@@ -873,6 +885,18 @@ class HighFidelityBackend:
         step_divergence: list[float] = []
         step_pressure_residual: list[float] = []
         step_pressure_iterations: list[float] = []
+        step_phase_conservation: list[float] = []
+        step_density_conservation: list[float] = []
+        step_momentum_remap_x: list[float] = []
+        step_momentum_remap_y: list[float] = []
+        step_momentum_remap_z: list[float] = []
+        step_momentum_remap_absolute: list[float] = []
+        step_cls_phase_conservation: list[float] = []
+        step_cls_density_conservation: list[float] = []
+        step_cls_momentum_remap_x: list[float] = []
+        step_cls_momentum_remap_y: list[float] = []
+        step_cls_momentum_remap_z: list[float] = []
+        step_cls_momentum_remap_absolute: list[float] = []
         cumulative_clip = 0.0
         cumulative_repair = 0.0
         maximum_single_clip = 0.0
@@ -979,6 +1003,51 @@ class HighFidelityBackend:
             append_observable("cfl_viscous", diagnostics.viscous_cfl)
             append_observable("cfl_capillary", diagnostics.capillary_cfl)
             append_observable("rotation_increment_rad", diagnostics.rotation_increment_rad)
+            append_observable(
+                "phase_conservation_residual_m3",
+                diagnostics.phase_conservation_residual_m3,
+            )
+            append_observable(
+                "density_conservation_residual_kg",
+                diagnostics.density_conservation_residual_kg,
+            )
+            append_observable(
+                "momentum_remap_x_kg_m_s", diagnostics.momentum_remap_x_kg_m_s
+            )
+            append_observable(
+                "momentum_remap_y_kg_m_s", diagnostics.momentum_remap_y_kg_m_s
+            )
+            append_observable(
+                "momentum_remap_z_kg_m_s", diagnostics.momentum_remap_z_kg_m_s
+            )
+            append_observable(
+                "momentum_remap_absolute_kg_m_s",
+                diagnostics.momentum_remap_absolute_kg_m_s,
+            )
+            append_observable(
+                "cls_phase_conservation_residual_m3",
+                diagnostics.cls_phase_conservation_residual_m3,
+            )
+            append_observable(
+                "cls_density_conservation_residual_kg",
+                diagnostics.cls_density_conservation_residual_kg,
+            )
+            append_observable(
+                "cls_momentum_remap_x_kg_m_s",
+                diagnostics.cls_momentum_remap_x_kg_m_s,
+            )
+            append_observable(
+                "cls_momentum_remap_y_kg_m_s",
+                diagnostics.cls_momentum_remap_y_kg_m_s,
+            )
+            append_observable(
+                "cls_momentum_remap_z_kg_m_s",
+                diagnostics.cls_momentum_remap_z_kg_m_s,
+            )
+            append_observable(
+                "cls_momentum_remap_absolute_kg_m_s",
+                diagnostics.cls_momentum_remap_absolute_kg_m_s,
+            )
             append_observable("kinetic_energy_j", diagnostics.kinetic_energy_lab_j)
             append_observable("kinetic_energy_lab_j", diagnostics.kinetic_energy_lab_j)
             append_observable(
@@ -1174,6 +1243,36 @@ class HighFidelityBackend:
             step_divergence.append(last_diag.divergence_after_s_inv)
             step_pressure_residual.append(last_diag.pressure_relative_residual)
             step_pressure_iterations.append(float(last_diag.pressure_iterations))
+            step_phase_conservation.append(
+                last_diag.phase_conservation_residual_m3
+            )
+            step_density_conservation.append(
+                last_diag.density_conservation_residual_kg
+            )
+            step_momentum_remap_x.append(last_diag.momentum_remap_x_kg_m_s)
+            step_momentum_remap_y.append(last_diag.momentum_remap_y_kg_m_s)
+            step_momentum_remap_z.append(last_diag.momentum_remap_z_kg_m_s)
+            step_momentum_remap_absolute.append(
+                last_diag.momentum_remap_absolute_kg_m_s
+            )
+            step_cls_phase_conservation.append(
+                last_diag.cls_phase_conservation_residual_m3
+            )
+            step_cls_density_conservation.append(
+                last_diag.cls_density_conservation_residual_kg
+            )
+            step_cls_momentum_remap_x.append(
+                last_diag.cls_momentum_remap_x_kg_m_s
+            )
+            step_cls_momentum_remap_y.append(
+                last_diag.cls_momentum_remap_y_kg_m_s
+            )
+            step_cls_momentum_remap_z.append(
+                last_diag.cls_momentum_remap_z_kg_m_s
+            )
+            step_cls_momentum_remap_absolute.append(
+                last_diag.cls_momentum_remap_absolute_kg_m_s
+            )
             cumulative_clip += last_diag.phase_clip_absolute_volume_m3
             cumulative_repair += last_diag.phase_repair_absolute_volume_m3
             single_clip = last_diag.phase_clip_absolute_volume_m3 / initial_volume
@@ -1393,6 +1492,42 @@ class HighFidelityBackend:
             "diagnostic_pressure_iterations": np.asarray(
                 step_pressure_iterations, dtype=np.float64
             ),
+            "diagnostic_phase_conservation_residual_m3": np.asarray(
+                step_phase_conservation, dtype=np.float64
+            ),
+            "diagnostic_density_conservation_residual_kg": np.asarray(
+                step_density_conservation, dtype=np.float64
+            ),
+            "diagnostic_momentum_remap_x_kg_m_s": np.asarray(
+                step_momentum_remap_x, dtype=np.float64
+            ),
+            "diagnostic_momentum_remap_y_kg_m_s": np.asarray(
+                step_momentum_remap_y, dtype=np.float64
+            ),
+            "diagnostic_momentum_remap_z_kg_m_s": np.asarray(
+                step_momentum_remap_z, dtype=np.float64
+            ),
+            "diagnostic_momentum_remap_absolute_kg_m_s": np.asarray(
+                step_momentum_remap_absolute, dtype=np.float64
+            ),
+            "diagnostic_cls_phase_conservation_residual_m3": np.asarray(
+                step_cls_phase_conservation, dtype=np.float64
+            ),
+            "diagnostic_cls_density_conservation_residual_kg": np.asarray(
+                step_cls_density_conservation, dtype=np.float64
+            ),
+            "diagnostic_cls_momentum_remap_x_kg_m_s": np.asarray(
+                step_cls_momentum_remap_x, dtype=np.float64
+            ),
+            "diagnostic_cls_momentum_remap_y_kg_m_s": np.asarray(
+                step_cls_momentum_remap_y, dtype=np.float64
+            ),
+            "diagnostic_cls_momentum_remap_z_kg_m_s": np.asarray(
+                step_cls_momentum_remap_z, dtype=np.float64
+            ),
+            "diagnostic_cls_momentum_remap_absolute_kg_m_s": np.asarray(
+                step_cls_momentum_remap_absolute, dtype=np.float64
+            ),
         }
         observable_units = {
             "surface_profile_m": "m",
@@ -1423,6 +1558,18 @@ class HighFidelityBackend:
             "cfl_viscous": "1",
             "cfl_capillary": "1",
             "rotation_increment_rad": "rad",
+            "phase_conservation_residual_m3": "m^3",
+            "density_conservation_residual_kg": "kg",
+            "momentum_remap_x_kg_m_s": "kg*m/s",
+            "momentum_remap_y_kg_m_s": "kg*m/s",
+            "momentum_remap_z_kg_m_s": "kg*m/s",
+            "momentum_remap_absolute_kg_m_s": "kg*m/s",
+            "cls_phase_conservation_residual_m3": "m^3",
+            "cls_density_conservation_residual_kg": "kg",
+            "cls_momentum_remap_x_kg_m_s": "kg*m/s",
+            "cls_momentum_remap_y_kg_m_s": "kg*m/s",
+            "cls_momentum_remap_z_kg_m_s": "kg*m/s",
+            "cls_momentum_remap_absolute_kg_m_s": "kg*m/s",
             "kinetic_energy_j": "J",
             "kinetic_energy_lab_j": "J",
             "kinetic_energy_rotating_j": "J",
@@ -1457,6 +1604,22 @@ class HighFidelityBackend:
             )
             for name in fields
         }
+        field_units.update(
+            {
+                "diagnostic_phase_conservation_residual_m3": "m^3",
+                "diagnostic_density_conservation_residual_kg": "kg",
+                "diagnostic_momentum_remap_x_kg_m_s": "kg*m/s",
+                "diagnostic_momentum_remap_y_kg_m_s": "kg*m/s",
+                "diagnostic_momentum_remap_z_kg_m_s": "kg*m/s",
+                "diagnostic_momentum_remap_absolute_kg_m_s": "kg*m/s",
+                "diagnostic_cls_phase_conservation_residual_m3": "m^3",
+                "diagnostic_cls_density_conservation_residual_kg": "kg",
+                "diagnostic_cls_momentum_remap_x_kg_m_s": "kg*m/s",
+                "diagnostic_cls_momentum_remap_y_kg_m_s": "kg*m/s",
+                "diagnostic_cls_momentum_remap_z_kg_m_s": "kg*m/s",
+                "diagnostic_cls_momentum_remap_absolute_kg_m_s": "kg*m/s",
+            }
+        )
         interface_width = (
             config.high_fidelity.interface_thickness_cells
             * grid.minimum_spacing_m
@@ -1484,6 +1647,57 @@ class HighFidelityBackend:
         resolved_event_times = [
             event.time_s for event in events if event.kind == "resolved_channel"
         ]
+
+        def diagnostic_summary(values: list[float]) -> dict[str, float]:
+            array = np.asarray(values, dtype=np.float64)
+            return {
+                "maximum_absolute": (
+                    0.0 if array.size == 0 else float(np.max(np.abs(array)))
+                ),
+                "cumulative_absolute": float(np.sum(np.abs(array))),
+            }
+
+        conservation_summary = {
+            "internal_step_count": len(step_time),
+            "phase_conservation_residual_m3": diagnostic_summary(
+                step_phase_conservation
+            ),
+            "density_conservation_residual_kg": diagnostic_summary(
+                step_density_conservation
+            ),
+            "momentum_remap_x_kg_m_s": diagnostic_summary(
+                step_momentum_remap_x
+            ),
+            "momentum_remap_y_kg_m_s": diagnostic_summary(
+                step_momentum_remap_y
+            ),
+            "momentum_remap_z_kg_m_s": diagnostic_summary(
+                step_momentum_remap_z
+            ),
+            "momentum_remap_absolute_kg_m_s": diagnostic_summary(
+                step_momentum_remap_absolute
+            ),
+            "cls_phase_conservation_residual_m3": diagnostic_summary(
+                step_cls_phase_conservation
+            ),
+            "cls_density_conservation_residual_kg": diagnostic_summary(
+                step_cls_density_conservation
+            ),
+            "cls_momentum_remap_x_kg_m_s": diagnostic_summary(
+                step_cls_momentum_remap_x
+            ),
+            "cls_momentum_remap_y_kg_m_s": diagnostic_summary(
+                step_cls_momentum_remap_y
+            ),
+            "cls_momentum_remap_z_kg_m_s": diagnostic_summary(
+                step_cls_momentum_remap_z
+            ),
+            "cls_momentum_remap_absolute_kg_m_s": diagnostic_summary(
+                step_cls_momentum_remap_absolute
+            ),
+            "phase_clip_absolute_volume_m3": diagnostic_summary(step_clip),
+            "phase_repair_absolute_volume_m3": diagnostic_summary(step_repair),
+        }
         metadata = {
             "backend_id": self.backend_id,
             "fidelity_label": "HF3D-local-law",
@@ -1553,6 +1767,7 @@ class HighFidelityBackend:
                 "cumulative_phase_clip_relative": cumulative_clip / initial_volume,
                 "maximum_single_step_phase_repair_relative": maximum_single_repair,
                 "cumulative_phase_repair_relative": cumulative_repair / initial_volume,
+                "conservation_and_momentum_remap": conservation_summary,
                 "liquid_open_boundary_balance_error_relative": (
                     (grid.integrate(state.phase) - expected_volume) / initial_volume
                 ),

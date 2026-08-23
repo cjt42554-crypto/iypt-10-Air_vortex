@@ -310,11 +310,29 @@ def newtonian_stress_acceleration_3d(
     dtau_xz_dx = masked_gradient_axis_3d(tau_xz, grid, 0)
     dtau_yz_dy = masked_gradient_axis_3d(tau_yz, grid, 1)
     dtau_zz_dz = masked_gradient_axis_3d(tau_zz, grid, 2)
-    ax = (dtau_xx_dx + dtau_xy_dy + dtau_xz_dz) / rho
-    ay = (dtau_xy_dx + dtau_yy_dy + dtau_yz_dz) / rho
-    az = (dtau_xz_dx + dtau_yz_dy + dtau_zz_dz) / rho
-    for value in (ax, ay, az):
-        value[~grid.active_mask] = 0.0
+    # Inactive voxels deliberately carry zero density.  Dividing the complete
+    # array and masking afterwards emits invalid-value warnings and fails the
+    # strict warning gate even though those cells are outside the PDE domain.
+    # Restrict the division itself to the positive-density active set.
+    active_density = grid.active_mask & (rho > 0.0)
+    ax = np.divide(
+        dtau_xx_dx + dtau_xy_dy + dtau_xz_dz,
+        rho,
+        out=np.zeros_like(rho),
+        where=active_density,
+    )
+    ay = np.divide(
+        dtau_xy_dx + dtau_yy_dy + dtau_yz_dz,
+        rho,
+        out=np.zeros_like(rho),
+        where=active_density,
+    )
+    az = np.divide(
+        dtau_xz_dx + dtau_yz_dy + dtau_zz_dz,
+        rho,
+        out=np.zeros_like(rho),
+        where=active_density,
+    )
     dissipation_density = 2.0 * mu * (
         dxx * dxx
         + dyy * dyy

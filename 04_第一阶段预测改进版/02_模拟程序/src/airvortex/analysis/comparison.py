@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 import math
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Mapping
@@ -25,6 +26,7 @@ class ObservableSeries:
     values: "NDArray[np.float64]"
     unit: str
     source: str
+    scientific_identity: Mapping[str, Any] | None = None
 
     def __post_init__(self) -> None:
         time = np.asarray(self.time, dtype=float)
@@ -46,6 +48,26 @@ class ObservableSeries:
         object.__setattr__(self, "time", time)
         object.__setattr__(self, "values", values)
         object.__setattr__(self, "unit", unit)
+        identity = self.scientific_identity
+        if identity is not None:
+            if not isinstance(identity, Mapping):
+                raise DataValidationError("scientific_identity must be a mapping")
+            try:
+                copied = json.loads(
+                    json.dumps(
+                        dict(identity),
+                        ensure_ascii=False,
+                        allow_nan=False,
+                        sort_keys=True,
+                    )
+                )
+            except (TypeError, ValueError) as exc:
+                raise DataValidationError(
+                    f"scientific_identity must be finite strict JSON: {exc}"
+                ) from exc
+            object.__setattr__(
+                self, "scientific_identity", MappingProxyType(copied)
+            )
 
 
 @dataclass(frozen=True)
@@ -198,6 +220,24 @@ def _unit_from_result(result: Any, observable: str) -> str:
     )
 
 
+def _scientific_identity_from_metadata(
+    metadata: object, observable: str
+) -> Mapping[str, Any] | None:
+    if not isinstance(metadata, Mapping):
+        return None
+    try:
+        from airvortex.stage1.contracts import (
+            ContractError,
+            scientific_identity_from_metadata,
+        )
+
+        return scientific_identity_from_metadata(metadata, observable)
+    except ContractError as exc:
+        raise DataValidationError(
+            f"invalid scientific identity for {observable!r}: {exc}"
+        ) from exc
+
+
 def series_from_result(
     result: "SimulationResult",
     observable: str,
@@ -231,6 +271,9 @@ def series_from_result(
             else _validated_explicit_unit(unit, observable)
         ),
         source=source_name,
+        scientific_identity=_scientific_identity_from_metadata(
+            getattr(result, "metadata", None), observable
+        ),
     )
 
 
@@ -257,6 +300,9 @@ def series_from_experiment(
         values=dataset.observables[observable],
         unit=unit,
         source=source,
+        scientific_identity=_scientific_identity_from_metadata(
+            getattr(dataset, "metadata", None), observable
+        ),
     )
 
 
@@ -316,6 +362,31 @@ def compare_series(
     backend is silently privileged as the reference sampling rate.
     """
 
+    left_identity = left.scientific_identity
+    right_identity = right.scientific_identity
+    if left_identity is not None or right_identity is not None:
+        if left_identity is None or right_identity is None:
+            raise DataValidationError(
+                f"scientific identity missing on one side for {observable!r}"
+            )
+        left_document = json.dumps(
+            dict(left_identity),
+            ensure_ascii=False,
+            allow_nan=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        right_document = json.dumps(
+            dict(right_identity),
+            ensure_ascii=False,
+            allow_nan=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        if left_document != right_document:
+            raise DataValidationError(
+                f"scientific identity mismatch for {observable!r}"
+            )
     if left.unit != right.unit:
         raise DataValidationError(
             f"incompatible observable units: {left.unit!r} != {right.unit!r}"
@@ -421,6 +492,24 @@ def compare_results(
     normalization: str = "right_range",
 ) -> ObservableComparison:
     """Compare one common observable from two core simulation results."""
+
+    left_metadata = getattr(left, "metadata", {})
+    right_metadata = getattr(right, "metadata", {})
+    try:
+        from airvortex.stage1.contracts import (
+            ContractError,
+            assert_observables_compatible,
+        )
+
+        assert_observables_compatible(
+            left_metadata if isinstance(left_metadata, Mapping) else {},
+            right_metadata if isinstance(right_metadata, Mapping) else {},
+            observable,
+        )
+    except ContractError as exc:
+        raise DataValidationError(
+            f"scientific comparison contract rejected {observable!r}: {exc}"
+        ) from exc
 
     return compare_series(
         series_from_result(left, observable),

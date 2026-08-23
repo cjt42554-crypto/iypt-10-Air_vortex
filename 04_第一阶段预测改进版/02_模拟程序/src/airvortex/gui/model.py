@@ -1878,18 +1878,32 @@ def compare_series(
     if len(ref_pairs) < 2 or len(candidate_pairs) < 2:
         raise ValueError("每个序列至少需要两个有限样本，缺失值不会被伪填")
     from airvortex.analysis import ObservableSeries, compare_series as analysis_compare_series
+    from airvortex.stage1.contracts import (
+        ContractError,
+        scientific_identity_from_metadata,
+    )
+
+    def identity(dataset: SimulationView | ExperimentData) -> Mapping[str, Any] | None:
+        try:
+            return scientific_identity_from_metadata(dataset.metadata, signal_key)
+        except ContractError as exc:
+            raise ValueError(
+                f"预测合同拒绝比较 {signal_key!r}: {exc}"
+            ) from exc
 
     ref_core = ObservableSeries(
         time=[item[0] for item in ref_pairs],
         values=[item[1] for item in ref_pairs],
         unit=ref_unit,
         source="reference",
+        scientific_identity=identity(reference),
     )
     candidate_core = ObservableSeries(
         time=[item[0] for item in candidate_pairs],
         values=[item[1] for item in candidate_pairs],
         unit=candidate_unit,
         source="candidate",
+        scientific_identity=identity(candidate),
     )
     comparison = analysis_compare_series(
         candidate_core,
@@ -2414,6 +2428,13 @@ def _is_demonstration_metadata(metadata: Mapping[str, Any]) -> bool:
 def _signal_presentation(key: str) -> tuple[str, str]:
     table = {
         "surface_depth_m": ("自由表面漏斗深度（气芯代理）", "m"),
+        "central_surface_min_height_m": ("中央 ROI 表面最低高度", "m"),
+        "outer_reference_height_m": ("外环参考高度", "m"),
+        "central_depression_from_static_m": ("相对配置静液面的中央下降", "m"),
+        "visible_outer_to_center_depth_m": ("外环至中央可见深度", "m"),
+        "surface_height_range_m": ("自由表面高度范围", "m"),
+        "camera_visible_depth_m": ("相机链可见深度", "m"),
+        "camera_channel_width_m": ("相机链气道宽度", "m"),
         "air_core_bottom_radius_m": ("气芯底部半径", "m"),
         "surface_min_z_m": ("最低自由表面高度", "m"),
         "min_gap_to_bar_m": ("自由表面—磁子最小间隙", "m"),

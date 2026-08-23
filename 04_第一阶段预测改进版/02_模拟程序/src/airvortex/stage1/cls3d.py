@@ -22,12 +22,18 @@ def compress_phase_density_momentum_consistently(phase,density,u_x,u_y,u_z,grid,
         mfx=np.zeros_like(fx); mfy=np.zeros_like(fy); mfz=np.zeros_like(fz)
         mfx[1:-1]=rho_flux.x[1:-1]*np.where(fx[1:-1]>=0,v[:-1],v[1:]); mfy[:,1:-1]=rho_flux.y[:,1:-1]*np.where(fy[:,1:-1]>=0,v[:,:-1],v[:,1:]); mfz[:,:,1:-1]=rho_flux.z[:,:,1:-1]*np.where(fz[:,:,1:-1]>=0,v[:,:,:-1],v[:,:,1:])
         raw_momentum.append(np.where(grid.active_mask,rho*v-pseudo_dt*_div(FaceFluxes(mfx,mfy,mfz,0.0),grid),0.0))
-    transported=[np.divide(p,raw_rho,out=np.zeros_like(p),where=grid.active_mask) for p in raw_momentum]
+    transported=[np.divide(p,raw_rho,out=np.zeros_like(p),where=grid.active_mask&(raw_rho>0.0)) for p in raw_momentum]
     new_rho=np.where(grid.active_mask,float(gas_density_kg_m3)+drho*repaired,0.0); delta=new_rho-raw_rho; corrections=[delta*v for v in transported]
-    final=[np.divide(p+d,new_rho,out=np.zeros_like(p),where=grid.active_mask) for p,d in zip(raw_momentum,corrections)]
+    final=[np.divide(p+d,new_rho,out=np.zeros_like(p),where=grid.active_mask&(new_rho>0.0)) for p,d in zip(raw_momentum,corrections)]
+    momentum_components=tuple(float(np.sum(d[grid.active_mask])*grid.cell_volume_m3) for d in corrections)
     return repaired,new_rho,final[0],final[1],final[2],{
         "clip_absolute_volume_m3":clip_abs,
         "repair_absolute_volume_m3":repair_abs,
+        "phase_conservation_residual_m3":_integral(raw,grid)-target,
+        "density_conservation_residual_kg":_integral(raw_rho,grid)-_integral(rho,grid),
+        "momentum_remap_x_kg_m_s":momentum_components[0],
+        "momentum_remap_y_kg_m_s":momentum_components[1],
+        "momentum_remap_z_kg_m_s":momentum_components[2],
         "momentum_remap_absolute_kg_m_s":float(sum(np.sum(np.abs(d)[grid.active_mask])*grid.cell_volume_m3 for d in corrections)),
         "pseudo_time_s":pseudo_dt,
     }
