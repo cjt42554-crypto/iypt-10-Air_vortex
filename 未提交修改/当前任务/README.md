@@ -22,7 +22,7 @@
 
 - 来源基线提交：`e7cff65b8bda38d0fd6cec848866a2a3d5a8caa6`
 - 当前唯一允许分支：`main`
-- 整理起点历史分支：`codex/stage1-implementation-repair-20260823`（整理后删除分支引用，提交历史并入 `main`）
+- 整理起点历史分支：`codex/stage1-implementation-repair-20260823`（分支引用已删除，提交历史已并入 `main`）
 - 整理起点 HEAD：`c8639393740462a7a347b7daf4a29deb16a38cf4`
 - 默认允许修改：`未提交修改/当前任务/**`
 - 禁止普通任务修改：根 `01_最终理论/**`、`02_模拟程序/**`、`03_项目资料/**`

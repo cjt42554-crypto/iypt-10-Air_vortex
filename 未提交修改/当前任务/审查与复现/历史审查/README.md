@@ -14,4 +14,4 @@
 
 历史结论是 `PASS_STAGE1_IMPLEMENTATION__NO_GO_PHYSICAL_PREDICTION`。实现级问题关闭不等于物理预测有效；旧证据中的绝对路径和 `04_第一阶段预测改进版/` 保持生成时原样。
 
-上述分支名只记录历史来源。仓库采用 main-only 后，非 `main` 分支引用会删除；审查分支独有的 3 个文件已按原 Git blob 保存到本目录。
+上述分支名只记录历史来源。仓库采用 main-only 后，非 `main` 分支引用已删除；审查分支独有的 3 个文件已按原 Git blob 保存到本目录。
