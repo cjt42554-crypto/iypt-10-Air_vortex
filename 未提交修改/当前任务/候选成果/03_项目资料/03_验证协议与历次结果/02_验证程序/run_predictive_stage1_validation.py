@@ -37,6 +37,7 @@ RESULTS_ROOT = STAGE1 / "03_项目资料" / "03_验证协议与历次结果" / "
 
 ALLOWED_REPOSITORY_FILES = {"README.md", "AGENTS.md"}
 ALLOWED_REPOSITORY_PREFIXES = ("未提交修改/", "每次任务前阅读/")
+LEGACY_STAGE1_PREFIX = "04_第一阶段预测改进版/"
 
 REQUIRED_TESTS = (
     "test_stage1_registry_and_entrypoints.py",
@@ -411,14 +412,19 @@ def _source_boundary_check() -> tuple[dict[str, str], dict[str, Any]]:
         if item
     )
     changed = sorted(set(line for line in changed_output.splitlines() if line))
-    outside = [
-        path
-        for path in changed
-        if path not in ALLOWED_REPOSITORY_FILES
-        and not path.startswith(ALLOWED_REPOSITORY_PREFIXES)
-    ]
+    def allowed(path: str) -> bool:
+        if path in ALLOWED_REPOSITORY_FILES:
+            return True
+        if path.startswith(ALLOWED_REPOSITORY_PREFIXES):
+            return True
+        # The main-only folder migration removes the former root candidate.
+        # Git may report those old names for modified files across the rename.
+        # Accept only absence records; recreating any legacy path still fails.
+        return path.startswith(LEGACY_STAGE1_PREFIX) and not (REPO / path).exists()
+
+    outside = [path for path in changed if not allowed(path)]
     if outside:
-        raise AssertionError(f"changes outside allowed Stage1 tree: {outside}")
+        raise AssertionError(f"changes outside allowed repository scope: {outside}")
     return actual, {"changed_paths": changed, "outside_allowed_scope": outside}
 
 

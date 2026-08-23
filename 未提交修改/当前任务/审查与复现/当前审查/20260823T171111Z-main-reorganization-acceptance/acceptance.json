@@ -1,0 +1,415 @@
+{
+  "schema": "airvortex-predictive-stage1-result-v2",
+  "created_at_utc": "2026-08-23T17:11:35.469221+00:00",
+  "overall_status": "FAIL_STAGE1_IMPLEMENTATION__NO_GO_PHYSICAL_PREDICTION",
+  "implementation_pass": false,
+  "physical_prediction_go": false,
+  "six_gates": {
+    "G1_entrypoints": {
+      "passed": true
+    },
+    "G2_shared_observable_operator": {
+      "passed": true
+    },
+    "G3_comparison_contract": {
+      "passed": true
+    },
+    "G4_events_and_camera": {
+      "passed": true
+    },
+    "G5_numeric_auditability": {
+      "passed": true
+    },
+    "G6_validator": {
+      "passed": false
+    }
+  },
+  "gate_results": {
+    "compileall": {
+      "name": "compileall",
+      "required": true,
+      "command": [
+        "/home/cjt/Desktop/iypt/5 Y形摆/03_项目资料/09_本机环境与缓存/高保真模拟器_venv/bin/python",
+        "-m",
+        "compileall",
+        "-q",
+        "src/airvortex/stage1",
+        "run_stage1_gui.py",
+        "run_stage1_cli.py"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/候选成果/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "log_path": "logs/01_compileall.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stage1_required_tests": {
+      "name": "stage1_required_tests",
+      "required": true,
+      "command": [
+        "/home/cjt/Desktop/iypt/5 Y形摆/03_项目资料/09_本机环境与缓存/高保真模拟器_venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_stage1_registry_and_entrypoints.py",
+        "tests/test_stage1_shared_observable_operator.py",
+        "tests/test_stage1_core_comparison_contract.py",
+        "tests/test_stage1_units.py",
+        "tests/test_stage1_events_and_sampling.py",
+        "tests/test_stage1_camera_integration.py",
+        "tests/test_stage1_transport_conservation.py",
+        "tests/test_stage1_cls_conservation.py",
+        "tests/test_stage1_widest_path_topology.py",
+        "tests/test_stage1_hf3d_strict_warnings.py",
+        "tests/test_stage1_archive_roundtrip.py",
+        "tests/test_stage1_validator_end_to_end.py"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/候选成果/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "f98f43b0f200c4378d62112b26c179b184e54e8b1ff18fc08b736831fda92326",
+      "log_path": "logs/02_stage1_required_tests.log",
+      "log_sha256": "f98f43b0f200c4378d62112b26c179b184e54e8b1ff18fc08b736831fda92326"
+    },
+    "full_baseline_regression": {
+      "name": "full_baseline_regression",
+      "required": true,
+      "command": [
+        "/home/cjt/Desktop/iypt/5 Y形摆/03_项目资料/09_本机环境与缓存/高保真模拟器_venv/bin/python",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/候选成果/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "a6d1eec66c5ae4d7bd782f16b4181210c08daffcb8cb349e40533bb60cafe153",
+      "log_path": "logs/03_full_baseline_regression.log",
+      "log_sha256": "a6d1eec66c5ae4d7bd782f16b4181210c08daffcb8cb349e40533bb60cafe153"
+    },
+    "backend_cli_self_check": {
+      "name": "backend_cli_self_check",
+      "required": true,
+      "command": [
+        "/home/cjt/Desktop/iypt/5 Y形摆/03_项目资料/09_本机环境与缓存/高保真模拟器_venv/bin/python",
+        "run_stage1_cli.py",
+        "self-check",
+        "--pretty"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/候选成果/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "f26ef928b42c9f6f4f5072dd7aa3d1dba05d4984abf8925f93f7d371e91afd91",
+      "log_path": "logs/04_backend_cli_self_check.log",
+      "log_sha256": "f26ef928b42c9f6f4f5072dd7aa3d1dba05d4984abf8925f93f7d371e91afd91"
+    },
+    "strict_warnings_self_check": {
+      "name": "strict_warnings_self_check",
+      "required": true,
+      "command": [
+        "/home/cjt/Desktop/iypt/5 Y形摆/03_项目资料/09_本机环境与缓存/高保真模拟器_venv/bin/python",
+        "run_stage1_cli.py",
+        "self-check",
+        "--pretty"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/候选成果/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "f26ef928b42c9f6f4f5072dd7aa3d1dba05d4984abf8925f93f7d371e91afd91",
+      "log_path": "logs/05_strict_warnings_self_check.log",
+      "log_sha256": "f26ef928b42c9f6f4f5072dd7aa3d1dba05d4984abf8925f93f7d371e91afd91"
+    },
+    "gui_backend_discovery": {
+      "name": "gui_backend_discovery",
+      "required": true,
+      "command": [
+        "/home/cjt/Desktop/iypt/5 Y形摆/03_项目资料/09_本机环境与缓存/高保真模拟器_venv/bin/python",
+        "-c",
+        "from airvortex.stage1 import install_stage1_overlay; install_stage1_overlay(); from airvortex.gui.model import GuiViewModel; GuiViewModel(); from airvortex.runtime import discover_backends; r=discover_backends(probe=True); assert not r.discovery_errors; a=r.create('forward'); b=r.create('high_fidelity'); assert type(a).__module__=='airvortex.stage1.backends'; assert type(b).__module__=='airvortex.stage1.backends'; print(type(a).__name__, type(b).__name__)"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/候选成果/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "01092398230fd73e6a52924411501fdf4cf5a53956118d74e100fe29b7c0d8ce",
+      "log_path": "logs/06_gui_backend_discovery.log",
+      "log_sha256": "01092398230fd73e6a52924411501fdf4cf5a53956118d74e100fe29b7c0d8ce"
+    },
+    "forward_cli_archive": {
+      "name": "forward_cli_archive",
+      "required": true,
+      "command": [
+        "/home/cjt/Desktop/iypt/5 Y形摆/03_项目资料/09_本机环境与缓存/高保真模拟器_venv/bin/python",
+        "run_stage1_cli.py",
+        "run",
+        "--backend",
+        "forward",
+        "--config",
+        "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/审查与复现/当前审查/20260823T171111Z-main-reorganization-acceptance/inputs/forward_smoke.json",
+        "--output",
+        "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/审查与复现/当前审查/20260823T171111Z-main-reorganization-acceptance/archives/forward",
+        "--quiet"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/候选成果/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "20454c4d0873f17fa5f8c2ae012f9d7fcc35f6ace969e86c823735ef4746a9d3",
+      "log_path": "logs/07_forward_cli_archive.log",
+      "log_sha256": "20454c4d0873f17fa5f8c2ae012f9d7fcc35f6ace969e86c823735ef4746a9d3"
+    },
+    "hf3d_cli_archive": {
+      "name": "hf3d_cli_archive",
+      "required": true,
+      "command": [
+        "/home/cjt/Desktop/iypt/5 Y形摆/03_项目资料/09_本机环境与缓存/高保真模拟器_venv/bin/python",
+        "run_stage1_cli.py",
+        "run",
+        "--backend",
+        "high_fidelity",
+        "--config",
+        "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/审查与复现/当前审查/20260823T171111Z-main-reorganization-acceptance/inputs/hf3d_smoke.json",
+        "--output",
+        "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/审查与复现/当前审查/20260823T171111Z-main-reorganization-acceptance/archives/hf3d",
+        "--quiet"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/候选成果/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "473379aaacfbfec5ae804bcaf91fab02afe7136f97f765ee973e00ebf70aac00",
+      "log_path": "logs/08_hf3d_cli_archive.log",
+      "log_sha256": "473379aaacfbfec5ae804bcaf91fab02afe7136f97f765ee973e00ebf70aac00"
+    },
+    "archive_roundtrip_and_contract": {
+      "name": "archive_roundtrip_and_contract",
+      "required": true,
+      "command": null,
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "7a37fb6ef7c48dd03254bc3f3f670c25e6dd27142ebcc4b7edbd09288267c88e",
+      "log_path": "logs/09_archive_roundtrip_and_contract.log",
+      "log_sha256": "7a37fb6ef7c48dd03254bc3f3f670c25e6dd27142ebcc4b7edbd09288267c88e"
+    },
+    "identity_mismatch_counterexample": {
+      "name": "identity_mismatch_counterexample",
+      "required": true,
+      "command": null,
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "485cf0e97a43e48144a8daea6283bd9625690ede8fc68b8ec0a0dee136a85231",
+      "log_path": "logs/10_identity_mismatch_counterexample.log",
+      "log_sha256": "485cf0e97a43e48144a8daea6283bd9625690ede8fc68b8ec0a0dee136a85231"
+    },
+    "camera_end_to_end": {
+      "name": "camera_end_to_end",
+      "required": true,
+      "command": [
+        "/home/cjt/Desktop/iypt/5 Y形摆/03_项目资料/09_本机环境与缓存/高保真模拟器_venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_stage1_camera_integration.py"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/候选成果/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "958d17336f8140ca21640a44fb0f80b3c6241571b0103390933498c19b18487b",
+      "log_path": "logs/11_camera_end_to_end.log",
+      "log_sha256": "958d17336f8140ca21640a44fb0f80b3c6241571b0103390933498c19b18487b"
+    },
+    "numeric_algorithm_tests": {
+      "name": "numeric_algorithm_tests",
+      "required": true,
+      "command": [
+        "/home/cjt/Desktop/iypt/5 Y形摆/03_项目资料/09_本机环境与缓存/高保真模拟器_venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_stage1_transport_conservation.py",
+        "tests/test_stage1_cls_conservation.py",
+        "tests/test_stage1_widest_path_topology.py"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/候选成果/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "006ba2e6e18954ad086677bc060e3290380048985a443818578f6ef51ed1b21b",
+      "log_path": "logs/12_numeric_algorithm_tests.log",
+      "log_sha256": "006ba2e6e18954ad086677bc060e3290380048985a443818578f6ef51ed1b21b"
+    },
+    "numeric_archive_thresholds": {
+      "name": "numeric_archive_thresholds",
+      "required": true,
+      "command": null,
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "6b8efbcab778747c781957bf79e58a660fe57a5a621424235d2eadd7e521e0a5",
+      "log_path": "logs/13_numeric_archive_thresholds.log",
+      "log_sha256": "6b8efbcab778747c781957bf79e58a660fe57a5a621424235d2eadd7e521e0a5"
+    },
+    "comparison_report_generation": {
+      "name": "comparison_report_generation",
+      "required": true,
+      "command": [
+        "/home/cjt/Desktop/iypt/5 Y形摆/03_项目资料/09_本机环境与缓存/高保真模拟器_venv/bin/python",
+        "run_stage1_cli.py",
+        "compare",
+        "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/审查与复现/当前审查/20260823T171111Z-main-reorganization-acceptance/archives/forward",
+        "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/审查与复现/当前审查/20260823T171111Z-main-reorganization-acceptance/archives/hf3d",
+        "--output",
+        "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/审查与复现/当前审查/20260823T171111Z-main-reorganization-acceptance/comparison_report",
+        "--quiet"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/候选成果/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "fd3cbec7fc3547647d2af972a3d7693e80e68c44d76e4d719f139ed9c80ca061",
+      "log_path": "logs/14_comparison_report_generation.log",
+      "log_sha256": "fd3cbec7fc3547647d2af972a3d7693e80e68c44d76e4d719f139ed9c80ca061"
+    },
+    "source_boundary": {
+      "name": "source_boundary",
+      "required": true,
+      "command": null,
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流",
+      "returncode": 1,
+      "passed": false,
+      "output_sha256": "96c9777f3db9d79e20b737819d3f16572d12b96173822eb10d64f5c2326ee258",
+      "log_path": "logs/15_source_boundary.log",
+      "log_sha256": "96c9777f3db9d79e20b737819d3f16572d12b96173822eb10d64f5c2326ee258"
+    }
+  },
+  "environment": {
+    "python_executable": "/home/cjt/Desktop/iypt/5 Y形摆/03_项目资料/09_本机环境与缓存/高保真模拟器_venv/bin/python",
+    "python_version": "3.12.3",
+    "implementation": "CPython",
+    "platform": "Linux-7.0.0-28-generic-x86_64-with-glibc2.39",
+    "dependencies": {
+      "numpy": "2.5.2",
+      "scipy": "1.18.0",
+      "matplotlib": "3.11.1",
+      "pytest": "9.1.1"
+    },
+    "pythonpath_for_subprocesses": "/home/cjt/Desktop/iypt/10 空气涡流/未提交修改/当前任务/候选成果/02_模拟程序/src"
+  },
+  "source_content_identity": {
+    "algorithm": "sha256",
+    "canonicalization": "sorted relative UTF-8 path and length-prefixed bytes",
+    "excluded": [
+      "validation result history",
+      "Python/test caches"
+    ],
+    "sha256": "ab643981af8c17e726c0a043bda3684fbdd3d600dd6e7a034b2077c062a67107",
+    "file_count": 155,
+    "total_bytes": 3009723
+  },
+  "git": {
+    "branch": "main",
+    "head": "8e1c22bdf751d9747d5d5291015af5488f733cb4",
+    "origin_main": "e2a8215baa204b2a7f35c84aa0606c32e1018cc3",
+    "working_tree_status": [
+      "?? 未提交修改/当前任务/审查与复现/当前审查/20260823T171111Z-main-reorganization-acceptance/"
+    ]
+  },
+  "original_tree_sha": {
+    "01_最终理论": "238914477bfa15cf6d8dcd1a7e731b1559b6506d",
+    "02_模拟程序": "2d65edcd2717ac262d028ab51d1feecc850b838f",
+    "03_项目资料": "84f0e9e210b86b556935b9117310b5e668813bd7"
+  },
+  "physical_go_gates": {
+    "static_drop_laplace_pressure": false,
+    "spurious_current_grid_convergence": false,
+    "capillary_wave_frequency_and_damping": false,
+    "joint_grid_time_interface_refinement": false,
+    "measured_bar_trajectory": false,
+    "independent_calibration_and_blind_validation": false
+  },
+  "interpretation": "Implementation evidence only. HF3D and forward agreement is not apparatus-level validation.",
+  "evidence_files": {
+    "archives/forward/manifest.json": {
+      "bytes": 2753,
+      "sha256": "e18b87b25d9c9d013b15bb8e1990bd3b8e6422d94f9ebcd5539a458e53973d3f"
+    },
+    "archives/hf3d/manifest.json": {
+      "bytes": 3387,
+      "sha256": "ff6a1a1996c0a2f8fc5b4464c48117e43e599898e3a3c8d495cb32a164eb793b"
+    },
+    "comparison_report/comparison.json": {
+      "bytes": 5706,
+      "sha256": "2893a792d1f9cc6b04f02dc9d35387e969a8d098ee0d7ad0cd7637300c8989b5"
+    },
+    "comparison_report/manifest.json": {
+      "bytes": 743,
+      "sha256": "4ed33da912817883942272048c8a0ffaf56e2c21648b0a8a368aa7d2eeae4c1a"
+    },
+    "inputs/forward_smoke.json": {
+      "bytes": 3437,
+      "sha256": "cbc6d7f603f203f29279b55f87053f0ffcfb24241058a5a052fa153a88b74ccc"
+    },
+    "inputs/hf3d_smoke.json": {
+      "bytes": 3447,
+      "sha256": "a06a7f4f84850b1d8e2ca05851794f346b5596deef4b5e98440045298038b36d"
+    },
+    "logs/01_compileall.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/02_stage1_required_tests.log": {
+      "bytes": 115,
+      "sha256": "f98f43b0f200c4378d62112b26c179b184e54e8b1ff18fc08b736831fda92326"
+    },
+    "logs/03_full_baseline_regression.log": {
+      "bytes": 317,
+      "sha256": "a6d1eec66c5ae4d7bd782f16b4181210c08daffcb8cb349e40533bb60cafe153"
+    },
+    "logs/04_backend_cli_self_check.log": {
+      "bytes": 377,
+      "sha256": "f26ef928b42c9f6f4f5072dd7aa3d1dba05d4984abf8925f93f7d371e91afd91"
+    },
+    "logs/05_strict_warnings_self_check.log": {
+      "bytes": 377,
+      "sha256": "f26ef928b42c9f6f4f5072dd7aa3d1dba05d4984abf8925f93f7d371e91afd91"
+    },
+    "logs/06_gui_backend_discovery.log": {
+      "bytes": 47,
+      "sha256": "01092398230fd73e6a52924411501fdf4cf5a53956118d74e100fe29b7c0d8ce"
+    },
+    "logs/07_forward_cli_archive.log": {
+      "bytes": 601,
+      "sha256": "20454c4d0873f17fa5f8c2ae012f9d7fcc35f6ace969e86c823735ef4746a9d3"
+    },
+    "logs/08_hf3d_cli_archive.log": {
+      "bytes": 912,
+      "sha256": "473379aaacfbfec5ae804bcaf91fab02afe7136f97f765ee973e00ebf70aac00"
+    },
+    "logs/09_archive_roundtrip_and_contract.log": {
+      "bytes": 64,
+      "sha256": "7a37fb6ef7c48dd03254bc3f3f670c25e6dd27142ebcc4b7edbd09288267c88e"
+    },
+    "logs/10_identity_mismatch_counterexample.log": {
+      "bytes": 119,
+      "sha256": "485cf0e97a43e48144a8daea6283bd9625690ede8fc68b8ec0a0dee136a85231"
+    },
+    "logs/11_camera_end_to_end.log": {
+      "bytes": 114,
+      "sha256": "958d17336f8140ca21640a44fb0f80b3c6241571b0103390933498c19b18487b"
+    },
+    "logs/12_numeric_algorithm_tests.log": {
+      "bytes": 98,
+      "sha256": "006ba2e6e18954ad086677bc060e3290380048985a443818578f6ef51ed1b21b"
+    },
+    "logs/13_numeric_archive_thresholds.log": {
+      "bytes": 1151,
+      "sha256": "6b8efbcab778747c781957bf79e58a660fe57a5a621424235d2eadd7e521e0a5"
+    },
+    "logs/14_comparison_report_generation.log": {
+      "bytes": 585,
+      "sha256": "fd3cbec7fc3547647d2af972a3d7693e80e68c44d76e4d719f139ed9c80ca061"
+    },
+    "logs/15_source_boundary.log": {
+      "bytes": 1739,
+      "sha256": "96c9777f3db9d79e20b737819d3f16572d12b96173822eb10d64f5c2326ee258"
+    }
+  }
+}
