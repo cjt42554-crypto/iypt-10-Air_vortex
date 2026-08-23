@@ -19,10 +19,14 @@ PASS_STAGE1_IMPLEMENTATION__NO_GO_PHYSICAL_PREDICTION
 - 独立审查证据：`codex/local-review-results-20260823`，提交 `a5ce324c82172f663dd553a9804bab2c43f00b8a`
 - 修复分支：`codex/stage1-implementation-repair-20260823`
 - 允许修改范围：`04_第一阶段预测改进版/**`
-- 最终提交：待提交后固化
+- 干净工作树被测提交：`0a9b667294b0d28211bfb983bfc153c42779eb22`
+- 最终证据提交：本报告所在提交；它只在上述被测提交之后加入冻结验收目录并更新本报告，不修改被测实现、协议或测试
 - 首轮整包 acceptance（提交前源码内容冻结）：`03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/acceptance.json`
 - 首轮 acceptance SHA-256：`dde4287645c8236fb1f26deb4daaaa672a97a87d6ab4e909a146ee67f6184e0c`
 - 首轮源码内容 SHA-256：`e73523ae933bd3dfba969fe77b67346c2645019e96f83f25c970004ad03b4749`（验证结果历史和缓存按协议排除）
+- 干净提交冻结 acceptance：`03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104730Z-predictive-stage1-repair-v2/acceptance.json`
+- 干净提交 acceptance SHA-256：`53289990eae1901f82ccdc106e31050ae4451620a8a69fb607d93824874c485f`
+- 干净提交源码内容 SHA-256：`7d8df2782472301df29af2e4abd6e37bd82e2f8d107be309c274c9469a142ee6`
 
 受保护原目录 tree：
 
@@ -58,7 +62,7 @@ PASS_STAGE1_IMPLEMENTATION__NO_GO_PHYSICAL_PREDICTION
 | 5. 数值诊断可审计 | PASS | transport/CLS 残差与动量重映射逐步保存；协议阈值实数检查；严格 warning 通过 |
 | 6. 验证器可信 | PASS | 无外部 `PYTHONPATH`、源码边界、受保护 tree、命令/返回码/日志/证据哈希、故障注入 fail closed |
 
-首轮正式整包验收的六门均为 true，机器可读证据见上列 `acceptance.json`。提交后还会从干净工作树重新生成一份绑定被测提交的冻结 acceptance；不以本表替代机器证据。
+首轮正式整包验收和干净提交冻结验收的六门均为 true。后者在运行时绑定完整提交 `0a9b667294b0d28211bfb983bfc153c42779eb22`，机器可读证据见上列 `acceptance.json`；不以本表替代机器证据。
 
 ## 已完成测试快照
 

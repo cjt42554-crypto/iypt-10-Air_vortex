@@ -1,0 +1,26 @@
+{
+  "common_valid_domain_sufficient": true,
+  "comparison_format_version": 2,
+  "comparison_sha256": "5d9fc66f02c2225613be71eb565d09fd13fc922a7692c943cb23e04710a53762",
+  "completion_class": "completed",
+  "domains": {
+    "left": {
+      "domain_status": "IN_MODEL_DOMAIN",
+      "first_out_of_domain_s": null,
+      "model_domain_limit": false,
+      "out_of_model_domain": false
+    },
+    "right": {
+      "domain_status": "NOT_REPORTED",
+      "first_out_of_domain_s": null,
+      "model_domain_limit": false,
+      "out_of_model_domain": false
+    }
+  },
+  "insufficient_reason": null,
+  "observable_count": 8,
+  "status": "completed",
+  "truncated_to_common_valid_domain": false,
+  "valid_time_end": 0.0002,
+  "valid_time_start": 0.0
+}
