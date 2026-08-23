@@ -1,0 +1,19 @@
+{
+  "imports": [
+    "__future__",
+    "argparse",
+    "dataclasses",
+    "functools",
+    "json",
+    "math",
+    "numpy",
+    "numpy.typing",
+    "pathlib",
+    "scipy.integrate",
+    "scipy.special",
+    "typing"
+  ],
+  "imports_airvortex": false,
+  "path": "/home/cjt/Desktop/iypt/10 空气涡流/validation/results/20260820T095000Z-forward-final-v5/frozen_execution_input/research/scripts/verify_nonlinear_surface.py",
+  "sha256": "c2a72c77aba1ba1dd1ac00d6f698c1377b97ecf6f65d6bc585c3abba6d366ce1"
+}

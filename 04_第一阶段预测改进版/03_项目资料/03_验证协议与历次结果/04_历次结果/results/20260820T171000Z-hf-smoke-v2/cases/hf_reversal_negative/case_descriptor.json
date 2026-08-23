@@ -1,0 +1,22 @@
+{
+  "backend_options": {
+    "cls_compression_interval": 1,
+    "cls_compression_speed_m_s": 0.04,
+    "enable_surface_tension": true
+  },
+  "direction": -1,
+  "dt_s": 0.0004,
+  "duration_s": 0.5,
+  "id": "hf_reversal_negative",
+  "interface_thickness_cells": 2.5,
+  "nr": 24,
+  "nz": 36,
+  "output_interval_s": 0.05,
+  "ramp_s": 0.05,
+  "rpm": 800.0,
+  "tags": [
+    "hf-smoke",
+    "hf-core",
+    "reversal"
+  ]
+}

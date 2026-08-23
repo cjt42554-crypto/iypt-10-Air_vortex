@@ -1,0 +1,40 @@
+{
+  "schema": "airvortex-numerical-validation-protocol-v5",
+  "amended_at": "2026-08-20T18:42:00+08:00",
+  "base_protocol": "protocol_v4.json",
+  "base_protocol_sha256": "a8640b701a0fb06cb530d6d0dd3fcde16fb0a00a2036e740a2a9c0d15d4698d9",
+  "reason_for_amendment": [
+    "The v4 extended run exposed that backend status=completed can accompany early termination at the declared pre-contact model-domain boundary.",
+    "Configured duration, actual end time, and termination reason must be distinct archived quantities; ordinary completed-status acceptance requires the configured duration to be reached.",
+    "The former hf_default_48x72_long10s case is transparently renamed as a time-to-domain-limit/performance-until-domain-limit case and cannot be cited as a complete 10 s stability or performance run.",
+    "A decreasing profile norm cannot hide a non-monotone decision-facing funnel-depth sequence."
+  ],
+  "amendments": {
+    "case_replacement": {
+      "superseded_id": "hf_default_48x72_long10s",
+      "effective_id": "hf_default_until_domain_limit_48x72",
+      "tags": ["hf-extended", "performance-until-domain-limit", "domain-limit"],
+      "expected_termination_reason": "resolved_instantaneous_connection_candidate_domain_limit",
+      "expected_status": "DOMAIN_LIMIT_EXPECTED",
+      "configured_duration_s_is_upper_bound_not_completed_claim": true
+    },
+    "completion_gate": {
+      "ordinary_case_requires_backend_status_completed": true,
+      "ordinary_case_requires_configured_duration_reached": true,
+      "ordinary_case_requires_termination_reason": "configured_duration_reached",
+      "time_comparison_absolute_tolerance_s": 1e-12,
+      "expected_domain_limit_is_separate_status": "DOMAIN_LIMIT_EXPECTED",
+      "expected_domain_limit_must_not_be_called_full_duration": true
+    },
+    "scalar_convergence": {
+      "metric": "final_funnel_depth_m",
+      "minimum_levels": 3,
+      "rule": "CONVERGENCE_TREND requires a common signed approach direction and strictly decreasing adjacent absolute changes; otherwise NOT_DEMONSTRATED",
+      "profile_norm_and_scalar_status_must_both_be_archived": true
+    },
+    "suite_status": {
+      "negative_or_inconclusive_records_prohibit_plain_completed_all_green": true,
+      "non_hard_failure_status": "completed_with_negative_or_inconclusive_results"
+    }
+  }
+}

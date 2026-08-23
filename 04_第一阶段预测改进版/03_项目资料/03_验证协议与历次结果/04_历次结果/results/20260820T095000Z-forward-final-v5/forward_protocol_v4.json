@@ -1,0 +1,20 @@
+{
+  "amended_at": "2026-08-20T18:50:00+08:00",
+  "amendments": {
+    "backend_radial_points": [
+      80,
+      128,
+      256,
+      512
+    ],
+    "default_sigma_minimum_required_points": 68,
+    "n64_role": "expected UnderresolvedSurfaceError counterexample, never a convergence datum"
+  },
+  "base_protocol": "forward_protocol_v3.json",
+  "base_protocol_sha256": "6f8b8c6d6671623bc0b1aa0684eebca35adeface0fe90177dd9c0f1ba5620425",
+  "reason_for_amendment": [
+    "Applying v3's four-interval capillary floor shows that the v1 radial-grid level n=64 is not an admissible finite-sigma discretisation at the default parameters (l_c/dr approximately 3.80).",
+    "The representative finite-sigma radial sequence must contain only admissible grids; n=64 remains covered separately as an expected underresolution counterexample."
+  ],
+  "schema": "airvortex-forward-numerical-validation-protocol-v4"
+}

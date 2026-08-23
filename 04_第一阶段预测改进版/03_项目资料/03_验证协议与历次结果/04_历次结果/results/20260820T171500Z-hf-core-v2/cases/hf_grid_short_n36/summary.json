@@ -1,0 +1,698 @@
+{
+  "all_outputs_finite": true,
+  "array_summaries": {
+    "field:diagnostic_phase_clip_absolute_volume_m3": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": 0.0,
+      "sha256": "0ce9cb48e8a2b5ad595772ce396ba02f62fe7edee00061cb58be981d0eb157da",
+      "shape": [
+        2500
+      ]
+    },
+    "field:diagnostic_phase_clip_signed_volume_m3": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": 0.0,
+      "sha256": "0ce9cb48e8a2b5ad595772ce396ba02f62fe7edee00061cb58be981d0eb157da",
+      "shape": [
+        2500
+      ]
+    },
+    "field:diagnostic_phase_mass_repair_absolute_volume_m3": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": 0.0,
+      "sha256": "0ce9cb48e8a2b5ad595772ce396ba02f62fe7edee00061cb58be981d0eb157da",
+      "shape": [
+        2500
+      ]
+    },
+    "field:diagnostic_phase_mass_repair_signed_volume_m3": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": 0.0,
+      "sha256": "0ce9cb48e8a2b5ad595772ce396ba02f62fe7edee00061cb58be981d0eb157da",
+      "shape": [
+        2500
+      ]
+    },
+    "field:diagnostic_phase_raw_mass_error_relative": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": -4.262450145503243e-16,
+      "sha256": "dce22de9578d8ca938acbe2ff01e2812c6b3be34193fa1b172b85fc4f10e4a57",
+      "shape": [
+        2500
+      ]
+    },
+    "field:diagnostic_pressure_removed_rhs_mean_pa_m2": {
+      "dtype": "float64",
+      "maximum": 1.0052123437711855e-10,
+      "minimum": -1.0610574739806958e-10,
+      "sha256": "1fbb86b93a255bcbf18f41df1e7c0e774c23275acab5d7fbede8b0af602efc6e",
+      "shape": [
+        2500
+      ]
+    },
+    "field:diagnostic_step_time_s": {
+      "dtype": "float64",
+      "maximum": 0.49999999999999445,
+      "minimum": 0.0002,
+      "sha256": "10c3ed6492ce456694f63aa98c4de7952580fbae19f07a84b64a33d5ac00744a",
+      "shape": [
+        2500
+      ]
+    },
+    "field:frame_time_s": {
+      "dtype": "float64",
+      "maximum": 0.5,
+      "minimum": 0.0,
+      "sha256": "36db433a5cedc332f0b5609b75850e3ce5066980abdef85918aecd24838a3f06",
+      "shape": [
+        11
+      ]
+    },
+    "field:phase_liquid_fraction": {
+      "dtype": "float64",
+      "maximum": 0.9999999961110946,
+      "minimum": 0.00879448579158391,
+      "sha256": "eda8308d7236148a016abef11280789c2e71fd25a6cac343922652c1c4df344b",
+      "shape": [
+        11,
+        36,
+        54
+      ]
+    },
+    "field:pressure_projection_pa": {
+      "dtype": "float64",
+      "maximum": 121.29099849088668,
+      "minimum": -529.8261310289847,
+      "sha256": "6e7899fb9209671722d7f5f31927a7ae6b6a1b2831a176cb5ff3164dad4e6c29",
+      "shape": [
+        11,
+        36,
+        54
+      ]
+    },
+    "field:r_m": {
+      "dtype": "float64",
+      "maximum": 0.044375,
+      "minimum": 0.000625,
+      "sha256": "ecf64a7f68af84127fff71942003c453882e1360d574f504e8c03c1ec3935896",
+      "shape": [
+        36
+      ]
+    },
+    "field:radius_m": {
+      "dtype": "float64",
+      "maximum": 0.044375,
+      "minimum": 0.000625,
+      "sha256": "ecf64a7f68af84127fff71942003c453882e1360d574f504e8c03c1ec3935896",
+      "shape": [
+        36
+      ]
+    },
+    "field:u_r_m_s": {
+      "dtype": "float64",
+      "maximum": 0.3200937479373168,
+      "minimum": -0.06642111329433004,
+      "sha256": "561ffbfe985c38f5f6781a66e3c948bdbc5c28b5a0c1e72a3a3ad66da7fa6796",
+      "shape": [
+        11,
+        36,
+        54
+      ]
+    },
+    "field:u_theta_m_s": {
+      "dtype": "float64",
+      "maximum": 0.7421267440928208,
+      "minimum": 0.0,
+      "sha256": "e1f925e6bba9c9232e152b7bee6bf1463b6e87fb2febdc9d6916b070342f1e1c",
+      "shape": [
+        11,
+        36,
+        54
+      ]
+    },
+    "field:u_z_m_s": {
+      "dtype": "float64",
+      "maximum": 0.0655844894038156,
+      "minimum": -0.18945211847246218,
+      "sha256": "87f151b95bac878a9f69111a27ae57e89e43dc9a560dd2bad966a15d5d9cb895",
+      "shape": [
+        11,
+        36,
+        54
+      ]
+    },
+    "field:z_m": {
+      "dtype": "float64",
+      "maximum": 0.07430555555555556,
+      "minimum": 0.0006944444444444445,
+      "sha256": "99491e5d6d70d39634c7f3bcf012c47e010cb74bd4414af12f5f1bef5b2e5a92",
+      "shape": [
+        54
+      ]
+    },
+    "observable:cfl_advective": {
+      "dtype": "float64",
+      "maximum": 0.07717286893649576,
+      "minimum": 0.0,
+      "sha256": "3daf1a5c5d23ddfddd10b5206d269633df6c95e1613326412a14200af921d666",
+      "shape": [
+        11
+      ]
+    },
+    "observable:cfl_capillary": {
+      "dtype": "float64",
+      "maximum": 0.2724942667988203,
+      "minimum": 0.0,
+      "sha256": "3f5a5051c2803a44a69fc18496f075e5d70ca3eb3185ba18b581108f290b8442",
+      "shape": [
+        11
+      ]
+    },
+    "observable:cfl_viscous": {
+      "dtype": "float64",
+      "maximum": 0.0004651239430975757,
+      "minimum": 0.0,
+      "sha256": "af75a0c16414c13c14ba3cc6db1283b1261ab8ccd8bc48fbc30ed117757e6bc2",
+      "shape": [
+        11
+      ]
+    },
+    "observable:connection_candidate": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": 0.0,
+      "sha256": "8c906ee48abd1f0571da0ecf5cc7742a660b8ef050f765e2ce204240d2cbae77",
+      "shape": [
+        11
+      ]
+    },
+    "observable:connection_minimum_throat_cells": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": 0.0,
+      "sha256": "8c906ee48abd1f0571da0ecf5cc7742a660b8ef050f765e2ce204240d2cbae77",
+      "shape": [
+        11
+      ]
+    },
+    "observable:connection_minimum_throat_diameter_m": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": 0.0,
+      "sha256": "8c906ee48abd1f0571da0ecf5cc7742a660b8ef050f765e2ce204240d2cbae77",
+      "shape": [
+        11
+      ]
+    },
+    "observable:connection_minimum_throat_radius_m": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": 0.0,
+      "sha256": "8c906ee48abd1f0571da0ecf5cc7742a660b8ef050f765e2ce204240d2cbae77",
+      "shape": [
+        11
+      ]
+    },
+    "observable:connection_one_cell_precursor": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": 0.0,
+      "sha256": "8c906ee48abd1f0571da0ecf5cc7742a660b8ef050f765e2ce204240d2cbae77",
+      "shape": [
+        11
+      ]
+    },
+    "observable:connection_required_throat_cells": {
+      "dtype": "float64",
+      "maximum": 5.0,
+      "minimum": 5.0,
+      "sha256": "e90464df414428ae1ba9267f120b24f2371b1c3df0ac85ddedefbcdea3ccd6b4",
+      "shape": [
+        11
+      ]
+    },
+    "observable:connection_required_throat_radius_m": {
+      "dtype": "float64",
+      "maximum": 0.00625,
+      "minimum": 0.00625,
+      "sha256": "5b9f72dc231eb0e987f89e88d7ab843ec4db5809e397b31d90e65f69a4f136d9",
+      "shape": [
+        11
+      ]
+    },
+    "observable:divergence_before_projection": {
+      "dtype": "float64",
+      "maximum": 12.955084100113979,
+      "minimum": 0.0,
+      "sha256": "8f46c8bf05a5dc38c0adfcd66d732d425be6324a57d4b4d2446a319b5cae0bf6",
+      "shape": [
+        11
+      ]
+    },
+    "observable:equivalent_bar_rpm": {
+      "dtype": "float64",
+      "maximum": 900.0,
+      "minimum": 0.0,
+      "sha256": "f760fd6542b8230d0131b261ef6fe6843e028a64d4ce850d9b2c83bb52ba1548",
+      "shape": [
+        11
+      ]
+    },
+    "observable:first_contact_proxy": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": 0.0,
+      "sha256": "8c906ee48abd1f0571da0ecf5cc7742a660b8ef050f765e2ce204240d2cbae77",
+      "shape": [
+        11
+      ]
+    },
+    "observable:funnel_depth_m": {
+      "dtype": "float64",
+      "maximum": 0.0014691152942968716,
+      "minimum": 0.0,
+      "sha256": "0a07fcab875f8079f80400a36e35f226a87063117ae1e88470174bb60a275ce6",
+      "shape": [
+        11
+      ]
+    },
+    "observable:kinetic_energy_j": {
+      "dtype": "float64",
+      "maximum": 0.002755381069425933,
+      "minimum": 0.0,
+      "sha256": "f711ea9b79cca708033083164a93c57d5b596b640a116ad0cbbf9a480ba72dda",
+      "shape": [
+        11
+      ]
+    },
+    "observable:liquid_mass_error_relative": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": -2.8416334303354953e-16,
+      "sha256": "912270c32c8851d3909e15fe123ca4b05e2deb0f987e682c33269e8295c67b2e",
+      "shape": [
+        11
+      ]
+    },
+    "observable:liquid_volume_error": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": -2.8416334303354953e-16,
+      "sha256": "912270c32c8851d3909e15fe123ca4b05e2deb0f987e682c33269e8295c67b2e",
+      "shape": [
+        11
+      ]
+    },
+    "observable:liquid_volume_error_m3": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": -1.0842021724855044e-19,
+      "sha256": "23eb08f09dba7a568f97d9d0abf4f1fad70d47a5ce5a53e648e39d4737841041",
+      "shape": [
+        11
+      ]
+    },
+    "observable:liquid_volume_m3": {
+      "dtype": "float64",
+      "maximum": 0.00038154188394296125,
+      "minimum": 0.00038154188394296114,
+      "sha256": "e436194896f10f6ed1236d439cf48875a3044703862e2e9b21af918c26f5755e",
+      "shape": [
+        11
+      ]
+    },
+    "observable:max_divergence": {
+      "dtype": "float64",
+      "maximum": 2.508907526177495e-10,
+      "minimum": 0.0,
+      "sha256": "c01c009037796051ab04e567c25f2ac61574668b104f1a11369deb3e2d791135",
+      "shape": [
+        11
+      ]
+    },
+    "observable:min_gap_to_bar": {
+      "dtype": "float64",
+      "maximum": 0.05249808981446762,
+      "minimum": 0.05126561522520863,
+      "sha256": "224dcfaf1dff937c6ee082bce73626969ed46f94ee3f46d7b464f23c5e5ad230",
+      "shape": [
+        11
+      ]
+    },
+    "observable:min_gap_to_bar_m": {
+      "dtype": "float64",
+      "maximum": 0.05249808981446762,
+      "minimum": 0.05126561522520863,
+      "sha256": "224dcfaf1dff937c6ee082bce73626969ed46f94ee3f46d7b464f23c5e5ad230",
+      "shape": [
+        11
+      ]
+    },
+    "observable:minimum_gap_m": {
+      "dtype": "float64",
+      "maximum": 0.05249808981446762,
+      "minimum": 0.05126561522520863,
+      "sha256": "224dcfaf1dff937c6ee082bce73626969ed46f94ee3f46d7b464f23c5e5ad230",
+      "shape": [
+        11
+      ]
+    },
+    "observable:phase_clip_absolute_volume_m3": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": 0.0,
+      "sha256": "8c906ee48abd1f0571da0ecf5cc7742a660b8ef050f765e2ce204240d2cbae77",
+      "shape": [
+        11
+      ]
+    },
+    "observable:phase_clip_signed_volume_m3": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": 0.0,
+      "sha256": "8c906ee48abd1f0571da0ecf5cc7742a660b8ef050f765e2ce204240d2cbae77",
+      "shape": [
+        11
+      ]
+    },
+    "observable:phase_mass_repair_absolute_volume_m3": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": 0.0,
+      "sha256": "8c906ee48abd1f0571da0ecf5cc7742a660b8ef050f765e2ce204240d2cbae77",
+      "shape": [
+        11
+      ]
+    },
+    "observable:phase_mass_repair_signed_volume_m3": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": 0.0,
+      "sha256": "8c906ee48abd1f0571da0ecf5cc7742a660b8ef050f765e2ce204240d2cbae77",
+      "shape": [
+        11
+      ]
+    },
+    "observable:phase_raw_mass_error_relative": {
+      "dtype": "float64",
+      "maximum": 0.0,
+      "minimum": -2.8416334303354953e-16,
+      "sha256": "ea6f4ea93a15ab456071c860512bad8a1bac465ca5ba7d8e5f085ac5760ac881",
+      "shape": [
+        11
+      ]
+    },
+    "observable:pressure_removed_rhs_mean_pa_m2": {
+      "dtype": "float64",
+      "maximum": 4.8399112848242266e-11,
+      "minimum": -2.4199556424121133e-11,
+      "sha256": "1b4792643cb7a712e05069e14ee0c5d3655246ad2d7985b4af251ce4c9f7ec8c",
+      "shape": [
+        11
+      ]
+    },
+    "observable:pressure_residual": {
+      "dtype": "float64",
+      "maximum": 7.905577579217085e-12,
+      "minimum": 0.0,
+      "sha256": "0ddb8e58798b1c0b02a9ef122fbbd3110f80c2487a7f0e5a02d27c7235406de2",
+      "shape": [
+        11
+      ]
+    },
+    "observable:rotation_increment_rad": {
+      "dtype": "float64",
+      "maximum": 0.01884955592153876,
+      "minimum": 0.0,
+      "sha256": "862dfd4e468a5fea4b305bece93bdd6ac0dccff3d696b8eeb00f66be4ab406f5",
+      "shape": [
+        11
+      ]
+    },
+    "observable:surface_depth": {
+      "dtype": "float64",
+      "maximum": 0.0014691152942968716,
+      "minimum": 0.0,
+      "sha256": "0a07fcab875f8079f80400a36e35f226a87063117ae1e88470174bb60a275ce6",
+      "shape": [
+        11
+      ]
+    },
+    "observable:surface_depth_m": {
+      "dtype": "float64",
+      "maximum": 0.0014691152942968716,
+      "minimum": 0.0,
+      "sha256": "0a07fcab875f8079f80400a36e35f226a87063117ae1e88470174bb60a275ce6",
+      "shape": [
+        11
+      ]
+    },
+    "observable:surface_min_z": {
+      "dtype": "float64",
+      "maximum": 0.05999808981446762,
+      "minimum": 0.05876561522520863,
+      "sha256": "c50a775019061baa77456588bb8e2460633a3d2dac746495ed39d147701dfadd",
+      "shape": [
+        11
+      ]
+    },
+    "observable:surface_min_z_m": {
+      "dtype": "float64",
+      "maximum": 0.05999808981446762,
+      "minimum": 0.05876561522520863,
+      "sha256": "c50a775019061baa77456588bb8e2460633a3d2dac746495ed39d147701dfadd",
+      "shape": [
+        11
+      ]
+    },
+    "observable:surface_profile_m": {
+      "dtype": "float64",
+      "maximum": 0.06039316335960081,
+      "minimum": 0.05876561522520863,
+      "sha256": "8505d0c0446ff48862a23c935d972b02eed5c8cece12c8f3d83f0ea575520875",
+      "shape": [
+        11,
+        36
+      ]
+    },
+    "observable:surface_profile_range_m": {
+      "dtype": "float64",
+      "maximum": 0.0015493155624626206,
+      "minimum": 0.0,
+      "sha256": "14220a37243227fd62f682ae9af667649d80254aaf21e838f47cc5097ae3cea0",
+      "shape": [
+        11
+      ]
+    }
+  },
+  "average_effective_dt_s": 0.0002,
+  "azimuthal_cells_counted_in_work": false,
+  "case_id": "hf_grid_short_n36",
+  "completed_steps": 2500,
+  "completed_utc": "2026-08-20T09:07:42.640144+00:00",
+  "configured_cfl_limit": 0.35,
+  "connection_candidate_observed": false,
+  "cpu_time_s": 3.920795094,
+  "cumulative_phase_clip_absolute_volume_m3": 0.0,
+  "cumulative_phase_clip_fraction": 0.0,
+  "cumulative_phase_mass_repair_absolute_volume_m3": 0.0,
+  "cumulative_phase_mass_repair_fraction": 0.0,
+  "effective_2d_cell_steps": 4860000,
+  "effective_2d_cell_steps_per_wall_s": 962902.9169183365,
+  "events": [],
+  "final_funnel_depth_m": 0.0010907118587402884,
+  "initial_final_phase_linf": 0.08567815548154334,
+  "maximum_advective_cfl": 0.07718600672031424,
+  "maximum_capillary_cfl": 0.2724942667988203,
+  "maximum_dimensionless_projected_divergence": 2.677635699816284e-13,
+  "maximum_funnel_depth_m": 0.0014691152942968716,
+  "maximum_pressure_relative_residual": 3.439035994032798e-11,
+  "maximum_projected_divergence_s-1": 3.0283346316717363e-10,
+  "maximum_raw_phase_mass_error_relative": 4.262450145503243e-16,
+  "maximum_relative_liquid_volume_error": 2.8416334303354953e-16,
+  "maximum_rotation_increment_rad": 0.01884955592153876,
+  "maximum_speed_m_s": 0.7858296092136854,
+  "maximum_viscous_cfl": 0.0004651239430975757,
+  "metadata": {
+    "backend_id": "axisymmetric_color_fluid_h1",
+    "boundary_conditions": {
+      "axis": "axisymmetric parity",
+      "bottom": "impermeable; swept-bar Brinkman region",
+      "headspace": "finite closed gas headspace; not an open atmosphere",
+      "outer_wall": "impermeable; preview no-slip damping",
+      "top": "impermeable closed lid"
+    },
+    "capabilities": {
+      "axisymmetric_r_z_with_swirl": true,
+      "azimuthal_cells_used": false,
+      "connection_candidate_requires_resolved_throat": true,
+      "diffuse_interface": true,
+      "evidence_level": "H1 qualitative; semiquantitative only after frozen validation",
+      "fail_closed_mass_repair_quality_gate": true,
+      "fidelity_label": "HF-preview",
+      "first_connection_candidate": true,
+      "model": "axisymmetric constant-inertia-coefficient Boussinesq-form/color-fluid diffuse-interface surrogate",
+      "open_atmospheric_headspace": false,
+      "persistent_air_channel": false,
+      "projected_color_gradient_csf_option": true,
+      "quantitative_absolute_critical_rpm": false,
+      "quantitative_air_channel_radius": false,
+      "quantitative_post_contact_air_channel": false,
+      "resolved_contact_wetting_hysteresis": false,
+      "resolved_three_dimensional_bar_tip_wake": false,
+      "strict_balanced_force_csf": false,
+      "terminates_at_resolved_connection_candidate": true,
+      "transient_fields": true
+    },
+    "diagnostics": {
+      "axial_cells_used": 54,
+      "azimuthal_cells_used": false,
+      "brinkman_forcing": "axisymmetric swept-bar azimuthal relaxation, liquid weighted",
+      "brinkman_relaxation_s": 0.02,
+      "cls_compression_interval": 1,
+      "cls_compression_speed_m_s": 0.04,
+      "completed_steps": 2500,
+      "configured_azimuthal_cells": 16,
+      "connection_candidate_criterion": "instantaneous top-connected central gas path with r_throat >= max(2*interface_thickness, 4*max(dr,dz))",
+      "connection_candidate_observed": false,
+      "connection_evaluation": {
+        "configured_interval_s": 0.05,
+        "event_time_resolution_is_not_internal_time_step": true,
+        "schedule": "saved_output_frames_only"
+      },
+      "constant_reference_density_kg_m3": 998.2,
+      "cumulative_mass_repair_relative": 0.0,
+      "cumulative_phase_clip_absolute_volume_m3": 0.0,
+      "cumulative_phase_mass_repair_absolute_volume_m3": 0.0,
+      "interface_model": "conservative donor-cell liquid colour + conservative CLS compression/diffusion",
+      "maximum_absolute_pressure_removed_rhs_mean_pa_m2": 1.0610574739806958e-10,
+      "maximum_advective_cfl": 0.07718600672031424,
+      "maximum_liquid_volume_error": 2.8416334303354953e-16,
+      "maximum_pressure_relative_residual": 3.439035994032798e-11,
+      "maximum_projected_divergence_s-1": 3.0283346316717363e-10,
+      "maximum_raw_phase_mass_error_relative": 4.262450145503243e-16,
+      "maximum_rotation_increment_rad": 0.01884955592153876,
+      "maximum_single_step_mass_repair_relative": 0.0,
+      "minimum_time_step_s": 0.00019999999999856244,
+      "numerical_quality_gate": {
+        "failure_policy": "fail_closed_with_FloatingPointError",
+        "kind": "pre_registered_numerical_acceptance_convention",
+        "maximum_cumulative_mass_repair_relative": 1e-06,
+        "maximum_single_step_mass_repair_relative": 1e-08,
+        "pass": true
+      },
+      "persistent_for_three_bar_periods_assessed": false,
+      "phase_transport": "conservative axisymmetric donor-cell finite volume",
+      "pressure_factorizations": 1,
+      "pressure_max_iterations": {
+        "configured": 300,
+        "status": "reserved_not_applicable_to_direct_splu"
+      },
+      "pressure_relative_tolerance_enforced": 1e-06,
+      "pressure_solver": "fixed axisymmetric MAC Laplacian + scipy.sparse.splu",
+      "quality_gate_pass": true,
+      "quantitative_absolute_critical_rpm": false,
+      "quantitative_post_contact_air_channel": false,
+      "radial_cells_used": 36,
+      "rotation_increment_limit_rad": 0.08,
+      "simulated_duration_s": 0.5,
+      "surface_tension_model": "projected colour-gradient CSF surrogate; not strict balanced-force",
+      "termination_reason": "configured_duration_reached"
+    },
+    "evidence_level": "H1 qualitative; semiquantitative only after frozen validation",
+    "fidelity_label": "HF-preview",
+    "field_units": {
+      "diagnostic_phase_clip_absolute_volume_m3": "m^3",
+      "diagnostic_phase_clip_signed_volume_m3": "m^3",
+      "diagnostic_phase_mass_repair_absolute_volume_m3": "m^3",
+      "diagnostic_phase_mass_repair_signed_volume_m3": "m^3",
+      "diagnostic_phase_raw_mass_error_relative": "1",
+      "diagnostic_pressure_removed_rhs_mean_pa_m2": "Pa/m^2",
+      "diagnostic_step_time_s": "s",
+      "frame_time_s": "s",
+      "phase_liquid_fraction": "1",
+      "pressure_projection_pa": "Pa",
+      "r_m": "m",
+      "radius_m": "m",
+      "u_r_m_s": "m/s",
+      "u_theta_m_s": "m/s",
+      "u_z_m_s": "m/s",
+      "z_m": "m"
+    },
+    "limitations": [
+      "HF-preview only: the air/water density ratio is represented by a constant-inertia-coefficient Boussinesq-form colour-fluid surrogate, not a controlled small-density-contrast Boussinesq limit.",
+      "The real horizontal bar is replaced by an axisymmetric swept-volume Brinkman forcing; its three-dimensional bar-tip wake and slip require experimental calibration.",
+      "A top-connected gas cell reaching the swept-bar neighbourhood is only a connection candidate. Post-contact channel dynamics, channel radius, wetting, breakup, entrainment and hysteresis are outside H1.",
+      "Absolute critical rpm is not a quantitative prediction of this preview; grid/time-step convergence and frozen experimental validation are required.",
+      "The computational lid is impermeable and the finite gas headspace is closed; H1 does not impose an open atmospheric reservoir or gas outflow boundary.",
+      "Connection output is an instantaneous resolution-gated candidate only; H1 does not certify persistence for three bar periods or a stable channel.",
+      "Surface tension uses a projected cell-centred colour-gradient CSF surrogate, not a strict identical-face-gradient balanced-force discretisation; no quantitative Laplace-pressure or static-drop claim is made."
+    ],
+    "model": "axisymmetric constant-inertia-coefficient Boussinesq-form/color-fluid diffuse-interface surrogate",
+    "observable_definitions": {
+      "funnel_depth_m": "mean(surface_profile_m for r >= 0.8*R) - min(surface_profile_m for r <= stir_bar.half_length_m)",
+      "surface_depth": "legacy exact alias of funnel_depth_m",
+      "surface_depth_m": "exact alias of funnel_depth_m",
+      "surface_profile_range_m": "max(surface_profile_m) - min(surface_profile_m)"
+    },
+    "observable_units": {
+      "cfl_advective": "1",
+      "cfl_capillary": "1",
+      "cfl_viscous": "1",
+      "connection_candidate": "1",
+      "connection_minimum_throat_cells": "1",
+      "connection_minimum_throat_diameter_m": "m",
+      "connection_minimum_throat_radius_m": "m",
+      "connection_one_cell_precursor": "1",
+      "connection_required_throat_cells": "1",
+      "connection_required_throat_radius_m": "m",
+      "divergence_before_projection": "s^-1",
+      "equivalent_bar_rpm": "rpm",
+      "first_contact_proxy": "1",
+      "funnel_depth_m": "m",
+      "kinetic_energy_j": "J",
+      "liquid_mass_error_relative": "1",
+      "liquid_volume_error": "1",
+      "liquid_volume_error_m3": "m^3",
+      "liquid_volume_m3": "m^3",
+      "max_divergence": "s^-1",
+      "min_gap_to_bar": "m",
+      "min_gap_to_bar_m": "m",
+      "minimum_gap_m": "m",
+      "phase_clip_absolute_volume_m3": "m^3",
+      "phase_clip_signed_volume_m3": "m^3",
+      "phase_mass_repair_absolute_volume_m3": "m^3",
+      "phase_mass_repair_signed_volume_m3": "m^3",
+      "phase_raw_mass_error_relative": "1",
+      "pressure_removed_rhs_mean_pa_m2": "Pa/m^2",
+      "pressure_residual": "1",
+      "rotation_increment_rad": "rad",
+      "surface_depth": "m",
+      "surface_depth_m": "m",
+      "surface_min_z": "m",
+      "surface_min_z_m": "m",
+      "surface_profile_m": "m",
+      "surface_profile_range_m": "m"
+    }
+  },
+  "minimum_effective_dt_s": 0.00019999999999856244,
+  "peak_rss_kib": 72864,
+  "phase_maximum": 0.9999999961110946,
+  "phase_minimum": 0.00879448579158391,
+  "schema": "airvortex-numerical-validation-result-v1",
+  "source_tree_sha256_end": "64c2d0495321adcc3d0b9073189474ecc72b4f034cf62e74ec91592ceccd3e7b",
+  "source_tree_sha256_start": "64c2d0495321adcc3d0b9073189474ecc72b4f034cf62e74ec91592ceccd3e7b",
+  "source_unchanged_during_case": true,
+  "started_utc": "2026-08-20T09:07:37.555028+00:00",
+  "status": "completed",
+  "tags": [
+    "hf-core",
+    "grid-short"
+  ],
+  "wall_time_s": 5.047237799999493
+}

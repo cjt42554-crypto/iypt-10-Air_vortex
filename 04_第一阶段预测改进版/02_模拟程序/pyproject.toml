@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "airvortex"
+version = "0.1.0"
+description = "IYPT 2027 Problem 10 magnetic-stirrer air-vortex research platform"
+readme = { text = "IYPT 2027 Problem 10 magnetic-stirrer air-vortex research platform.", content-type = "text/markdown" }
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+  { name = "AirVortexLab contributors" },
+]
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "matplotlib>=3.6",
+]
+
+[project.optional-dependencies]
+gpu = [
+  "cupy-cuda13x[ctk]>=14.2,<15",
+  "scipy>=1.14,<1.18",
+]
+
+[project.scripts]
+airvortex = "airvortex.cli:main"
+airvortex-gui = "airvortex.gui:launch"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]

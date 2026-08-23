@@ -1,0 +1,12 @@
+{
+  "case_count": 11,
+  "created_at": "2026-08-21T08:17:33.276492+00:00",
+  "output_is_append_only_by_construction": true,
+  "overall_status": "PASS_NUMERICAL_IMPLEMENTATION_ONLY",
+  "protocol": "protocol.snapshot.json",
+  "protocol_sha256": "ba9f190655ef38049ec855e1932dbe172e8bac1e2ac3ce0ea3f4a2316efa6c77",
+  "schema": "airvortex-forward-f1-validation-result-v1",
+  "source_tree_sha256": "b03a6f75b51f8a9853386714899daa9583a01a82129d197982c57a15f9ae538a",
+  "theory_sha256": "02541b680c0ee19c172fbbe87a8a6b6b2c646d6ad72e3da0298ccb25ba231a03",
+  "unit_test_returncode": 0
+}

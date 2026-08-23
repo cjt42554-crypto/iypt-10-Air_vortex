@@ -1,0 +1,5 @@
+group,metric,value,status,note
+rotation_reversal,phase_relative_l2,0.0,PASS,轴对称方程的奇偶对称；通过不代表真实三维装置无旋向效应
+rotation_reversal,surface_relative_l2,0.0,PASS,轴对称方程的奇偶对称；通过不代表真实三维装置无旋向效应
+rotation_reversal,meridional_velocity_symmetry_relative_l2,0.0,PASS,轴对称方程的奇偶对称；通过不代表真实三维装置无旋向效应
+rotation_reversal,azimuthal_velocity_antisymmetry_relative_l2,0.0,PASS,轴对称方程的奇偶对称；通过不代表真实三维装置无旋向效应

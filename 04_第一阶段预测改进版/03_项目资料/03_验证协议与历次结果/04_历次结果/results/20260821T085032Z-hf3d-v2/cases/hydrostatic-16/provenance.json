@@ -1,0 +1,119 @@
+{
+  "airvortex_version": "0.1.0",
+  "config_sha256": "0746ac83847e59854ef10556409c6cbacf9dc44036561d26f14cedee17c748f4",
+  "dependencies": {
+    "numpy": "1.26.4",
+    "scipy": "1.11.4"
+  },
+  "extra": {
+    "case_id": "hydrostatic-16",
+    "validation_protocol_sha256": "e409d613063f6b20cc4e197026f63269f9aec6b15b5461b91f2d953cc587acbf",
+    "validation_schema": "airvortex-hf3d-validation-result-v1"
+  },
+  "invocation": {
+    "absolute_paths_stored": false,
+    "argument_summary": {
+      "backend": "high_fidelity",
+      "config_sha256": "0746ac83847e59854ef10556409c6cbacf9dc44036561d26f14cedee17c748f4"
+    },
+    "argument_summary_sha256": "c26593666016749c5195ef65f87692cfdc642b7a04ff89e7ad77732288ae9b87",
+    "entry_point": "airvortex.io.save_run_archive",
+    "privacy_policy": "raw argv and filesystem paths are omitted because they may contain credentials or private user paths; reproducibility uses the archived config and its SHA-256",
+    "raw_argv_stored": false
+  },
+  "platform": {
+    "machine": "x86_64",
+    "release": "7.0.0-28-generic",
+    "system": "Linux"
+  },
+  "provenance_format_version": 2,
+  "python": {
+    "implementation": "CPython",
+    "version": "3.12.3"
+  },
+  "recorded_at_utc": "2026-08-21T08:50:53.241002+00:00",
+  "resources": {
+    "peak_resident_set_size": {
+      "attribution_note": "process-lifetime high-water mark, not a per-run increment; it can include memory peaks from earlier work and concurrent tasks in the same process",
+      "available": true,
+      "conversion_to_bytes": 1024,
+      "native_unit": "KiB",
+      "reason": null,
+      "scope": "current process lifetime high-water mark",
+      "source": "resource.getrusage(resource.RUSAGE_SELF).ru_maxrss",
+      "unit": "byte",
+      "value": 1396641792
+    },
+    "process_cpu_time": {
+      "available": false,
+      "clock_semantics": "sum of current-process user and system CPU time; excludes elapsed sleep",
+      "concurrency_note": "process-wide intervals can include concurrent threads or runs in the same process",
+      "end_sample_point": "immediately after JobController reaches a terminal state",
+      "reason": "calling runtime did not provide a time.process_time interval",
+      "scope": "process-wide CPU time over the backend execution interval",
+      "source": "time.process_time",
+      "start_sample_point": "immediately before JobController.start",
+      "unit": "s",
+      "value": null
+    }
+  },
+  "source_identity": {
+    "disk_content_tree": {
+      "boundary_match": null,
+      "execution_end": {
+        "absolute_root_stored": false,
+        "algorithm": "sha256",
+        "available": true,
+        "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+        "file_count": 48,
+        "reason": null,
+        "sample_point": "during archive creation after result serialization",
+        "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+        "total_bytes": 913494,
+        "unit": null,
+        "value": "b40fadd270cb714703f036bd9689cdc51f38edd53c3aba0d505adbadb0c47cb8"
+      },
+      "execution_start": {
+        "absolute_root_stored": false,
+        "algorithm": "sha256",
+        "available": false,
+        "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+        "file_count": 0,
+        "reason": "calling runtime did not provide an execution-start source-tree snapshot",
+        "sample_point": "unavailable",
+        "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+        "total_bytes": 0,
+        "unit": null,
+        "value": null
+      }
+    },
+    "execution_source_identity_valid": false,
+    "git_revision": {
+      "boundary_match": null,
+      "execution_end": {
+        "available": false,
+        "object_id_algorithm": null,
+        "reason": "Git metadata unavailable; no revision claimed",
+        "sample_point": "during archive creation after result serialization",
+        "unit": null,
+        "value": null,
+        "vcs": "git"
+      },
+      "execution_start": {
+        "available": false,
+        "object_id_algorithm": null,
+        "reason": "calling runtime did not provide an execution-start Git snapshot",
+        "sample_point": "unavailable",
+        "unit": null,
+        "value": null,
+        "vcs": "git"
+      }
+    },
+    "interpretation": "disk boundary hashes identify allow-listed files at two sample points. A match does not exclude a transient edit-and-restore or prove that already imported Python module bytes equal either disk snapshot. A mismatch invalidates a single execution-source identity. Git revisions are reported only when metadata resolves HEAD and are never synthesized",
+    "loaded_module_bytes_verified": false,
+    "reproducibility_status": "indeterminate_missing_source_tree_boundary",
+    "source_tree_sha256_end": "b40fadd270cb714703f036bd9689cdc51f38edd53c3aba0d505adbadb0c47cb8",
+    "source_tree_sha256_start": null,
+    "unchanged": null
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "archive_format_version": 2,
+  "backend": "forward",
+  "config_sha256": "5b6758acbefa5359aca8e5c82e119d84a44e4a3c3194d847a55680c337559fb8",
+  "created_at_utc": "2026-08-20T19:03:54.729653+00:00",
+  "csv_observable_columns": [
+    "actual_angular_velocity_rad_s",
+    "actual_bar_rpm",
+    "advancing_contact_faces",
+    "bulk_potential_energy_j",
+    "burgers_C_m2_s",
+    "circulation_m2_s",
+    "discrete_top_connected_gap_m",
+    "finite_channel",
+    "forward_effective_energy_j",
+    "funnel_depth_m",
+    "gas_pressure_closure_error",
+    "isolated_gas_volume_m3",
+    "liquid_volume_error_m3",
+    "liquid_volume_m3",
+    "min_gap_to_bar_m",
+    "minimum_gap_m",
+    "minimum_throat_radius_m",
+    "physical_circulation_gamma_m2_s",
+    "pinned_contact_faces",
+    "receding_contact_faces",
+    "required_resolved_throat_radius_m",
+    "resolved_channel",
+    "surface_depth_m",
+    "surface_energy_j",
+    "surface_profile_range_m",
+    "sustained_channel",
+    "target_gas_area_m2",
+    "target_touch",
+    "top_connected_gas_volume_m3",
+    "visible_funnel_depth_m",
+    "volume_lagrange_pressure_pa",
+    "wall_energy_j"
+  ],
+  "execution_source_identity_valid": false,
+  "files": {
+    "arrays.npz": {
+      "sha256": "ade544f73f37fe8911516de0f1dc4a0ed15e755336b5402beb694179b04cadbb",
+      "size_bytes": 132587
+    },
+    "config.json": {
+      "sha256": "ee88455d4d2520035f132c4da636cfd12d12a45c83b5f5f42e943231da07937e",
+      "size_bytes": 2641
+    },
+    "provenance.json": {
+      "sha256": "88fce790e7f129fed45aeff147f886691d368cb5a3ea3ef80037f9ee65c72cfd",
+      "size_bytes": 5554
+    },
+    "result.json": {
+      "sha256": "38b3b0fa70f263cb289cb33b96d86d20415ac8ac965c107391c851f35902603c",
+      "size_bytes": 13680
+    },
+    "timeseries.csv": {
+      "sha256": "b04317eefa677324dfe8bad49ba2df765bb2f5bc8382932654623b49457d9322",
+      "size_bytes": 29817
+    }
+  },
+  "integrity_model": {
+    "manifest_self_authenticated": false,
+    "payload_hash_algorithm": "sha256",
+    "sealed_blind_requirement": "store a canonical manifest digest in an independent trusted location, apply a digital signature, or enforce external write-once access control before unsealing validation",
+    "security_claim": "internal payload hashes detect accidental corruption or an unsynchronised partial rewrite; they do not prove authenticity against an adversary who can rewrite both payloads and manifest"
+  },
+  "problem_id": "iypt-2027-10-air-vortex",
+  "provenance_reproducibility_status": "indeterminate_missing_source_tree_boundary",
+  "status": "completed"
+}

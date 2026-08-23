@@ -1,0 +1,63 @@
+{
+  "artifacts": {
+    "REPORT.md": {
+      "bytes": 4935,
+      "sha256": "32287cc1c7e2744905b87ee55fa4c2e06182958367c5f43b81e683d4b9fa354b"
+    },
+    "acceptance.json": {
+      "bytes": 4781,
+      "sha256": "223f16e21578b5b1f9f812ffe80b0972864d72cb67d40d9df4bb5de31be3c60a"
+    },
+    "case_index.csv": {
+      "bytes": 7369,
+      "sha256": "c483c7a1251e2d911b00e676b2ac0fcfb9f288a4bc5beada39d40b24354aa64b"
+    },
+    "dynamic_grid_audit.json": {
+      "bytes": 7301,
+      "sha256": "e488811276626c6e1f659641be1b12d739b77854974eb346a884e915b20ff48e"
+    },
+    "negative_results.json": {
+      "bytes": 317,
+      "sha256": "91c97f3082bec0c47f2143cc404e79a47bbe9ab3d5c530b6bdce4de5238154fb"
+    },
+    "projection_check.json": {
+      "bytes": 388,
+      "sha256": "2d056226a40db8acb414790f85c6ca33e76d9e1d4b00adb687154fa690df5398"
+    },
+    "protocol.snapshot.json": {
+      "bytes": 4441,
+      "sha256": "e6741e5cb1f381dd8941cc3ceebbc7a9efe948325d5b7024657cb1fa89d098a5"
+    },
+    "reversal.json": {
+      "bytes": 251,
+      "sha256": "196b016d9d846ca4480c4cbd6c7c5cdbecd31b15b6719f16ffa4f8e4af35f8c5"
+    },
+    "source.after.json": {
+      "bytes": 11696,
+      "sha256": "03ddf74235ea9cf8fee6bcb043559440f01ef886a1f7818077eb9a69edec60e0"
+    },
+    "source.before.json": {
+      "bytes": 11696,
+      "sha256": "03ddf74235ea9cf8fee6bcb043559440f01ef886a1f7818077eb9a69edec60e0"
+    },
+    "time_refinement.json": {
+      "bytes": 218,
+      "sha256": "1bf734b5d9c74e68b3f79c12eae74d8a352111c9507de6e42da7fd4f9fd9127d"
+    },
+    "unit_tests.txt": {
+      "bytes": 27827,
+      "sha256": "3641e4e4c922e40826ee4da8eb0347f0ae5a5032d00460f80c6765014f44248e"
+    }
+  },
+  "case_count": 11,
+  "created_at": "2026-08-21T10:04:29.229683+00:00",
+  "implementation_status": "PASS_NUMERICAL_IMPLEMENTATION_ONLY",
+  "output_is_append_only_by_construction": true,
+  "overall_status": "PASS_IMPLEMENTATION__NO_GO_PHYSICAL_PREDICTION",
+  "physical_prediction_status": "NO_GO_UNDERRESOLVED_UNCONVERGED_UNVALIDATED",
+  "protocol_sha256": "e409d613063f6b20cc4e197026f63269f9aec6b15b5461b91f2d953cc587acbf",
+  "schema": "airvortex-hf3d-validation-result-v1",
+  "source_tree_sha256": "436e5457ebe5dcc5a20c57170c2ddfb637cfbc375286919c0a95dbad046863f4",
+  "unit_test_count": 173,
+  "unit_test_returncode": 0
+}

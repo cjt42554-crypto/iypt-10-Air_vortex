@@ -1,0 +1,36 @@
+[
+  {
+    "source": "postrun_convergence_audit",
+    "group": "grid_moderate",
+    "metric": "funnel_depth_m_monotonic_convergence",
+    "case_ids": [
+      "hf_grid_moderate_n24",
+      "hf_grid_moderate_n36",
+      "hf_grid_moderate_n54"
+    ],
+    "radial_cells": [24, 36, 54],
+    "values_m": [
+      0.00840461691662972,
+      0.012366838398434263,
+      0.010095613390325511
+    ],
+    "successive_signed_changes_m": [
+      0.003962221481804543,
+      -0.002271225008108752
+    ],
+    "status": "NOT_DEMONSTRATED",
+    "interpretation": "The signed refinement change reverses. Quantitative convergence of final funnel depth is not demonstrated, even though the area-weighted profile difference decreases."
+  },
+  {
+    "source": "postrun_completion_audit",
+    "group": "hf_default_48x72_long10s",
+    "metric": "configured_duration_reached",
+    "backend_status": "completed",
+    "requested_duration_s": 10.0,
+    "actual_end_time_s": 9.0,
+    "completed_steps": 45005,
+    "termination_reason": "resolved_instantaneous_connection_candidate_domain_limit",
+    "status": "NOT_COMPLETED_CONFIGURED_DURATION",
+    "interpretation": "The pre-contact model-domain boundary was reached at 9.0 s. This is neither a complete 10 s run nor evidence of 10 s stability/performance; the old case label and all-green completion summary are superseded by this audit."
+  }
+]

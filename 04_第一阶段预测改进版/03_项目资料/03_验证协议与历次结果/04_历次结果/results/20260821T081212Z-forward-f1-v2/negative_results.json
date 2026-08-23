@@ -1,0 +1,14 @@
+{
+  "experimental_threshold_established": false,
+  "physical_model_validated": false,
+  "single_grid_event_time_quantitative": false,
+  "unassessed": [
+    "apparatus-specific A,c,tau_C calibration",
+    "multi-height S_z calibration",
+    "multi-scale M_Gamma calibration",
+    "wetting-law calibration",
+    "axisymmetry error from 3D observation",
+    "comparison against independent high-fidelity backend",
+    "comparison against frozen experimental validation set"
+  ]
+}

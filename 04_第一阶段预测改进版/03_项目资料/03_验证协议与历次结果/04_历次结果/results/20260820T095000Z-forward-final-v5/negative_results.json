@@ -1,0 +1,41 @@
+[
+  {
+    "W": [
+      0.1,
+      0.2,
+      0.4
+    ],
+    "correction_over_W3": [
+      -2.0139037379201474e-05,
+      -4.36436233442768e-06,
+      -4.207147100096936e-07
+    ],
+    "interpretation": "the cubic correction is below the declared production discretisation/collocation accuracy at these loads; the independent high-accuracy BVP resolves the asymptotic",
+    "relative_spread": 46.868631402827475,
+    "source": "backend_weak_W3_resolution",
+    "status": "NOT_RESOLVED_AT_DECLARED_NUMERICAL_ACCURACY"
+  },
+  {
+    "extrapolated_last_error": null,
+    "interpretation": "tolerance convergence not demonstrated; not a physical failure",
+    "metric": "critical_actual_rpm",
+    "observed_order_last_three": null,
+    "same_signed_approach": false,
+    "source": "backend_tolerance_sequence",
+    "status": "NOT_DEMONSTRATED",
+    "strictly_decreasing_changes": true,
+    "successive_absolute_changes": [
+      0.02769824114079711,
+      0.00012185371724626748
+    ],
+    "successive_signed_changes": [
+      -0.02769824114079711,
+      0.00012185371724626748
+    ],
+    "values": [
+      1033.927609187559,
+      1033.8999109464182,
+      1033.9000328001355
+    ]
+  }
+]

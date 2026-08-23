@@ -1,0 +1,94 @@
+{
+  "claim_boundary": {
+    "experimental_threshold_established": false,
+    "numerical_implementation_verified_if_implementation_gates_pass": true,
+    "physical_go_requires": [
+      "resolved capsule and boundary layer on a frozen dynamic grid refinement",
+      "time and interface refinement",
+      "apparatus-specific measured actual bar trajectory",
+      "sealed calibration and independent validation experiments"
+    ],
+    "physical_model_validated_by_this_protocol": false,
+    "single_grid_channel_or_critical_rpm_quantitative": false
+  },
+  "common_driven_case": {
+    "actual_bar_rpm": 200.0,
+    "duration_s": 0.004,
+    "interface_compression_interval": 1,
+    "interface_compression_pseudo_cfl": 0.02,
+    "interface_thickness_cells": 2.5,
+    "output_interval_s": 0.001,
+    "parameter_status": "REFERENCE_WATER_AIR_AND_GEOMETRY_NOT_EXPERIMENTALLY_VALIDATED",
+    "pressure_max_iterations": 1800,
+    "pressure_relative_tolerance": 1e-08,
+    "ramp_duration_s": 0.002
+  },
+  "dynamic_grid_audit": {
+    "axial_cells_rule": "max(10, round(1.25*Nxy))",
+    "expected_protocol_status": "NO_GO_ALLOWED_AND_REPORTED",
+    "maximum_dt_s": 7.5e-05,
+    "minimum_bar_diameter_cells_for_physical_go": 6.0,
+    "physical_convergence_gate_finest_pair_relative_difference_max": 0.05,
+    "transverse_cells": [
+      8,
+      12,
+      16,
+      20
+    ]
+  },
+  "frozen_at": "2026-08-21T00:00:00+08:00",
+  "implementation": {
+    "backend": "src/airvortex/backends/high_fidelity_3d.py",
+    "coordinate_frame": "bar-co-rotating Cartesian frame",
+    "geometry": "voxelised cylindrical vessel and actual horizontal capsule bar",
+    "governing_class": "variable-density incompressible two-phase one-fluid Navier-Stokes with local Newtonian stress, conservative colour transport, CSF and variable-coefficient projection",
+    "grid": "src/airvortex/numerics/cartesian3d.py",
+    "interface": "src/airvortex/numerics/interface3d.py",
+    "legacy_h1_is_normative": false,
+    "model_id": "hf3d-local-law-one-fluid-v1",
+    "momentum": "src/airvortex/numerics/momentum3d.py",
+    "projection": "src/airvortex/numerics/projection3d.py",
+    "top_boundary": "open atmospheric p_gauge=0 with pure-gas inflow"
+  },
+  "implementation_gates": {
+    "complete_unit_suite_must_pass": true,
+    "maximum_configured_phase_clip_and_repair_limits_must_pass": true,
+    "maximum_open_boundary_volume_balance_error_relative": 1e-10,
+    "random_projection_relative_residual_max": 1.1e-09,
+    "random_variable_density_projection_divergence_ratio_max": 2e-08,
+    "reversal_angular_momentum_antisymmetry_relative_difference_max": 0.0001,
+    "reversal_kinetic_energy_relative_difference_max": 0.0001,
+    "reversal_phase_mirror_relative_l2_max": 0.06,
+    "reversal_velocity_mirror_relative_l2_max": 0.02,
+    "source_must_remain_unchanged_during_campaign": true,
+    "time_refinement_medium_to_coarse_error_ratio_max": 0.75,
+    "zero_drive_hydrostatic_max_speed_m_s": 2e-06,
+    "zero_drive_shared_funnel_depth_max_m": 1e-08
+  },
+  "problem_id": "iypt-2027-10-air-vortex",
+  "requirements": {
+    "path": "/home/cjt/竞赛物理研究四层通用框架与统一计算平台需求说明.md",
+    "sha256": "e4c622f6a236642ce6c8eb94f8ad45097f268b016919bb0d1965108cfa23918e"
+  },
+  "schema": "airvortex-hf3d-validation-protocol-v1",
+  "separation_boundary": {
+    "forward_numerical_theory_path": "deliverables/02_前向预测理论的数值计算理论.md",
+    "forward_numerical_theory_sha256": "bab5b88b7feb22fdc832ec2f3a6339c0ff175d768bde18f025198c28dfde57e7",
+    "forward_theory_path": "deliverables/01_前向预测理论.md",
+    "forward_theory_sha256": "bc153b362aad5801d964b12c1293b54e3ae2194e9526ca5e9350100da6958537",
+    "rule": "HF3D must not import or evaluate any F1 Burgers field, circulation closure, interface mobility, contact hysteresis mobility, or effective target."
+  },
+  "time_refinement": {
+    "comparison": "final full 3D laboratory velocity relative L2 against the finest run",
+    "grid_xyz": [
+      12,
+      12,
+      15
+    ],
+    "maximum_dt_s": [
+      0.00015,
+      7.5e-05,
+      3.75e-05
+    ]
+  }
+}

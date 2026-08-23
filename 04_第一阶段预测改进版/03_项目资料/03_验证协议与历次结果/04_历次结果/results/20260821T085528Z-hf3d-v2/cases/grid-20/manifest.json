@@ -1,0 +1,78 @@
+{
+  "archive_format_version": 2,
+  "backend": "high_fidelity",
+  "config_sha256": "fa5d2f8f0820d2ebb179e5224a959ce7dd99cde7f2ad3f4c4730ffe00d4bd9ef",
+  "created_at_utc": "2026-08-21T08:55:51.732684+00:00",
+  "csv_observable_columns": [
+    "actual_bar_rpm",
+    "angular_momentum_z_kg_m2_s",
+    "axisymmetry_error",
+    "bar_angle_rad",
+    "bar_gas_contact_area_m2",
+    "cfl_advective",
+    "cfl_capillary",
+    "cfl_viscous",
+    "connection_candidate",
+    "connection_minimum_throat_radius_m",
+    "connection_required_throat_radius_m",
+    "divergence_before_projection",
+    "equivalent_bar_rpm",
+    "finite_channel_candidate",
+    "first_contact_proxy",
+    "funnel_depth_m",
+    "isolated_gas_volume_m3",
+    "kinetic_energy_j",
+    "kinetic_energy_lab_j",
+    "kinetic_energy_rotating_j",
+    "liquid_mass_error_relative",
+    "liquid_volume_balance_error_relative",
+    "liquid_volume_error",
+    "liquid_volume_error_m3",
+    "liquid_volume_m3",
+    "max_divergence",
+    "min_gap_to_bar",
+    "min_gap_to_bar_m",
+    "minimum_gap_m",
+    "nominal_central_depression_m",
+    "pressure_iterations",
+    "pressure_residual",
+    "rotation_increment_rad",
+    "surface_depth",
+    "surface_depth_m",
+    "surface_min_z_m",
+    "surface_profile_range_m",
+    "viscous_dissipation_w"
+  ],
+  "execution_source_identity_valid": false,
+  "files": {
+    "arrays.npz": {
+      "sha256": "f11ae99b4048a60470d7eb1be7b2f7b9f0aab034842240d3d4105ec16e57e77c",
+      "size_bytes": 468875
+    },
+    "config.json": {
+      "sha256": "200e5b3abd2be159300b9a9b21f06cfd711f18fecc2d856ce53631de78610452",
+      "size_bytes": 3413
+    },
+    "provenance.json": {
+      "sha256": "34f9635b14cad237fbf8b4539eb8770e4b7c150ae94d4b99a12f5ea94c88eebe",
+      "size_bytes": 5545
+    },
+    "result.json": {
+      "sha256": "453e60ac0bf6b8bd9d9dc2ee03de11add875282e58f9530189bf934f98d3cd35",
+      "size_bytes": 20669
+    },
+    "timeseries.csv": {
+      "sha256": "aeae54b0a3023b4d9c5a47c36698a3fa4e909136e4c59dc86fff1dddf7feaba0",
+      "size_bytes": 3559
+    }
+  },
+  "integrity_model": {
+    "manifest_self_authenticated": false,
+    "payload_hash_algorithm": "sha256",
+    "sealed_blind_requirement": "store a canonical manifest digest in an independent trusted location, apply a digital signature, or enforce external write-once access control before unsealing validation",
+    "security_claim": "internal payload hashes detect accidental corruption or an unsynchronised partial rewrite; they do not prove authenticity against an adversary who can rewrite both payloads and manifest"
+  },
+  "problem_id": "iypt-2027-10-air-vortex",
+  "provenance_reproducibility_status": "indeterminate_missing_source_tree_boundary",
+  "status": "completed"
+}

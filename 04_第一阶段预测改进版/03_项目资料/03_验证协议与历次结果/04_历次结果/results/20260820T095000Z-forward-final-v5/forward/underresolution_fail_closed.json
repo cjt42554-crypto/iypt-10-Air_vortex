@@ -1,0 +1,27 @@
+{
+  "ForwardBackend_exception_type": "UnderresolvedSurfaceError",
+  "ForwardBackend_traceback": "Traceback (most recent call last):\n  File \"/home/cjt/Desktop/iypt/10 空气涡流/validation/results/20260820T095000Z-forward-final-v5/frozen_execution_input/validation/run_forward_matrix.py\", line 1482, in run_matrix\n    backend.run(backend_underresolved_config)\n  File \"/home/cjt/Desktop/iypt/10 空气涡流/validation/results/20260820T095000Z-forward-final-v5/frozen_execution_input/src/airvortex/backends/forward.py\", line 687, in run\n    append_snapshot(0.0)\n  File \"/home/cjt/Desktop/iypt/10 空气涡流/validation/results/20260820T095000Z-forward-final-v5/frozen_execution_input/src/airvortex/backends/forward.py\", line 599, in append_snapshot\n    nonlinear_state = nonlinear_solver.solve(\n                      ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/cjt/Desktop/iypt/10 空气涡流/validation/results/20260820T095000Z-forward-final-v5/frozen_execution_input/src/airvortex/backends/nonlinear_surface.py\", line 810, in solve\n    return self.solve_forcing(\n           ^^^^^^^^^^^^^^^^^^^\n  File \"/home/cjt/Desktop/iypt/10 空气涡流/validation/results/20260820T095000Z-forward-final-v5/frozen_execution_input/src/airvortex/backends/nonlinear_surface.py\", line 751, in solve_forcing\n    raise UnderresolvedSurfaceError(\nairvortex.backends.nonlinear_surface.UnderresolvedSurfaceError: finite-sigma Young-Laplace wall layer is underresolved: l_c/dr=0.000572741 < 4; the declared output grid must provide at least four intervals per capillary length; increase forward.surface_radial_points to at least 1780910. The sigma->0 outer solution is available only through explicit solve_capillary_singular_limit().\n",
+  "interpretation": "expected fail-closed evidence for a positive finite sigma; not a physical instability and not a failed explicit asymptotic call",
+  "solver_cases": [
+    {
+      "capillary_length_to_spacing": 0.00014150080648247463,
+      "explicit_outer_regime": "CAPILLARY_SINGULAR_LIMIT_OUTER",
+      "finite_capillary_layer_resolved": false,
+      "normal_path_exception_type": "UnderresolvedSurfaceError",
+      "normal_path_traceback": "Traceback (most recent call last):\n  File \"/home/cjt/Desktop/iypt/10 空气涡流/validation/results/20260820T095000Z-forward-final-v5/frozen_execution_input/validation/run_forward_matrix.py\", line 1450, in run_matrix\n    solver.solve_forcing(1.0)\n  File \"/home/cjt/Desktop/iypt/10 空气涡流/validation/results/20260820T095000Z-forward-final-v5/frozen_execution_input/src/airvortex/backends/nonlinear_surface.py\", line 751, in solve_forcing\n    raise UnderresolvedSurfaceError(\nairvortex.backends.nonlinear_surface.UnderresolvedSurfaceError: finite-sigma Young-Laplace wall layer is underresolved: l_c/dr=0.000141501 < 4; the declared output grid must provide at least four intervals per capillary length; increase forward.surface_radial_points to at least 1780910. The sigma->0 outer solution is available only through explicit solve_capillary_singular_limit().\n",
+      "passed": true,
+      "surface_radial_points": 64,
+      "surface_tension_n_m": 1e-10
+    },
+    {
+      "capillary_length_to_spacing": 0.0005727413595719213,
+      "explicit_outer_regime": "CAPILLARY_SINGULAR_LIMIT_OUTER",
+      "finite_capillary_layer_resolved": false,
+      "normal_path_exception_type": "UnderresolvedSurfaceError",
+      "normal_path_traceback": "Traceback (most recent call last):\n  File \"/home/cjt/Desktop/iypt/10 空气涡流/validation/results/20260820T095000Z-forward-final-v5/frozen_execution_input/validation/run_forward_matrix.py\", line 1450, in run_matrix\n    solver.solve_forcing(1.0)\n  File \"/home/cjt/Desktop/iypt/10 空气涡流/validation/results/20260820T095000Z-forward-final-v5/frozen_execution_input/src/airvortex/backends/nonlinear_surface.py\", line 751, in solve_forcing\n    raise UnderresolvedSurfaceError(\nairvortex.backends.nonlinear_surface.UnderresolvedSurfaceError: finite-sigma Young-Laplace wall layer is underresolved: l_c/dr=0.000572741 < 4; the declared output grid must provide at least four intervals per capillary length; increase forward.surface_radial_points to at least 1780910. The sigma->0 outer solution is available only through explicit solve_capillary_singular_limit().\n",
+      "passed": true,
+      "surface_radial_points": 256,
+      "surface_tension_n_m": 1e-10
+    }
+  ]
+}

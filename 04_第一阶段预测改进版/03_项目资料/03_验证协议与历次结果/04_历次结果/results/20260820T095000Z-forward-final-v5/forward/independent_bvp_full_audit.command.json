@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/cjt/Desktop/iypt/10 空气涡流/validation/results/20260820T095000Z-forward-final-v5/frozen_execution_input/research/scripts/verify_nonlinear_surface.py",
+    "--summary-json"
+  ],
+  "completed_utc": "2026-08-20T09:49:25.837446+00:00",
+  "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/validation/results/20260820T095000Z-forward-final-v5/frozen_execution_input",
+  "returncode": 0,
+  "started_utc": "2026-08-20T09:49:16.633454+00:00",
+  "stderr_path": "/home/cjt/Desktop/iypt/10 空气涡流/validation/results/20260820T095000Z-forward-final-v5/forward/independent_bvp_full_audit.stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_path": "/home/cjt/Desktop/iypt/10 空气涡流/validation/results/20260820T095000Z-forward-final-v5/forward/independent_bvp_full_audit.stdout.txt",
+  "stdout_sha256": "6ff6421bfdfcccbdc90496a10e07908cbab83a280525424d4125ca54cefb3bbe",
+  "wall_time_s": 9.203789836001306
+}

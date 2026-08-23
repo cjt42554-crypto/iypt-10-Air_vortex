@@ -1,0 +1,22 @@
+{
+  "equivalence_limit": 1e-08,
+  "extrapolated_last_error": null,
+  "observed_order_last_three": null,
+  "raw_signed_sequence_status": "NOT_DEMONSTRATED",
+  "same_signed_approach": false,
+  "status": "TOLERANCE_LIMITED_EQUIVALENT",
+  "strictly_decreasing_changes": true,
+  "successive_absolute_changes": [
+    6.475353586665733e-10,
+    2.904880780363328e-10
+  ],
+  "successive_signed_changes": [
+    -6.475353586665733e-10,
+    2.904880780363328e-10
+  ],
+  "values": [
+    3.1108692516820775,
+    3.110869251034542,
+    3.1108692513250302
+  ]
+}

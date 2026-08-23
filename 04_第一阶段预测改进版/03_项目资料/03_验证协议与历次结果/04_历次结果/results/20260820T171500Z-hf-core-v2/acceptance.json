@@ -1,0 +1,1654 @@
+[
+  {
+    "gate": "source_unchanged_during_case",
+    "limit": true,
+    "scope": "hf_static_16x24_short",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "completed_status",
+    "limit": "completed",
+    "scope": "hf_static_16x24_short",
+    "status": "PASS",
+    "value": "completed"
+  },
+  {
+    "gate": "finite_outputs",
+    "limit": true,
+    "scope": "hf_static_16x24_short",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "phase_minimum",
+    "limit": -1e-12,
+    "scope": "hf_static_16x24_short",
+    "status": "PASS",
+    "value": 0.12885607605062266
+  },
+  {
+    "gate": "phase_maximum",
+    "limit": 1.000000000001,
+    "scope": "hf_static_16x24_short",
+    "status": "PASS",
+    "value": 0.9997542895755362
+  },
+  {
+    "gate": "relative_liquid_volume_error",
+    "limit": 1e-10,
+    "scope": "hf_static_16x24_short",
+    "status": "PASS",
+    "value": 2.8778526283721285e-16
+  },
+  {
+    "gate": "advective_cfl",
+    "limit": 0.3675,
+    "scope": "hf_static_16x24_short",
+    "status": "PASS",
+    "value": 7.600464252911285e-15
+  },
+  {
+    "gate": "viscous_cfl",
+    "limit": 0.4500000001,
+    "scope": "hf_static_16x24_short",
+    "status": "PASS",
+    "value": 0.00022969083609756207
+  },
+  {
+    "gate": "capillary_cfl",
+    "limit": 1.0000000001,
+    "scope": "hf_static_16x24_short",
+    "status": "PASS",
+    "value": 0.20184760503615776
+  },
+  {
+    "gate": "rotation_increment",
+    "limit": 0.0800000001,
+    "scope": "hf_static_16x24_short",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "pressure_relative_residual",
+    "limit": 1e-07,
+    "scope": "hf_static_16x24_short",
+    "status": "PASS",
+    "value": 3.1042103545494743e-12
+  },
+  {
+    "gate": "dimensionless_projected_divergence",
+    "limit": 1e-08,
+    "scope": "hf_static_16x24_short",
+    "status": "PASS",
+    "value": 2.0339100548455895e-12
+  },
+  {
+    "gate": "static_maximum_speed_m_s",
+    "limit": 1e-08,
+    "scope": "hf_static_16x24_short",
+    "status": "PASS",
+    "value": 3.2150449359907e-14
+  },
+  {
+    "gate": "static_maximum_funnel_depth_m",
+    "limit": 1e-08,
+    "scope": "hf_static_16x24_short",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "static_initial_final_phase_linf",
+    "limit": 1e-10,
+    "scope": "hf_static_16x24_short",
+    "status": "PASS",
+    "value": 1.7860157797144893e-12
+  },
+  {
+    "gate": "mass_repair_intervention_warning",
+    "limit": 0.001,
+    "scope": "hf_static_16x24_short",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "source_unchanged_during_case",
+    "limit": true,
+    "scope": "hf_reversal_positive",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "completed_status",
+    "limit": "completed",
+    "scope": "hf_reversal_positive",
+    "status": "PASS",
+    "value": "completed"
+  },
+  {
+    "gate": "finite_outputs",
+    "limit": true,
+    "scope": "hf_reversal_positive",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "phase_minimum",
+    "limit": -1e-12,
+    "scope": "hf_reversal_positive",
+    "status": "PASS",
+    "value": 0.04390846713469709
+  },
+  {
+    "gate": "phase_maximum",
+    "limit": 1.000000000001,
+    "scope": "hf_reversal_positive",
+    "status": "PASS",
+    "value": 0.9999973683422596
+  },
+  {
+    "gate": "relative_liquid_volume_error",
+    "limit": 1e-10,
+    "scope": "hf_reversal_positive",
+    "status": "PASS",
+    "value": 1.4246272462682736e-16
+  },
+  {
+    "gate": "advective_cfl",
+    "limit": 0.3675,
+    "scope": "hf_reversal_positive",
+    "status": "PASS",
+    "value": 0.08690136003964061
+  },
+  {
+    "gate": "viscous_cfl",
+    "limit": 0.4500000001,
+    "scope": "hf_reversal_positive",
+    "status": "PASS",
+    "value": 0.00041344350497562283
+  },
+  {
+    "gate": "capillary_cfl",
+    "limit": 1.0000000001,
+    "scope": "hf_reversal_positive",
+    "status": "PASS",
+    "value": 0.2966541828848591
+  },
+  {
+    "gate": "rotation_increment",
+    "limit": 0.0800000001,
+    "scope": "hf_reversal_positive",
+    "status": "PASS",
+    "value": 0.03351032163829113
+  },
+  {
+    "gate": "pressure_relative_residual",
+    "limit": 1e-07,
+    "scope": "hf_reversal_positive",
+    "status": "PASS",
+    "value": 1.1103902240341564e-11
+  },
+  {
+    "gate": "dimensionless_projected_divergence",
+    "limit": 1e-08,
+    "scope": "hf_reversal_positive",
+    "status": "PASS",
+    "value": 1.5845251388304314e-13
+  },
+  {
+    "gate": "mass_repair_intervention_warning",
+    "limit": 0.001,
+    "scope": "hf_reversal_positive",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "source_unchanged_during_case",
+    "limit": true,
+    "scope": "hf_reversal_negative",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "completed_status",
+    "limit": "completed",
+    "scope": "hf_reversal_negative",
+    "status": "PASS",
+    "value": "completed"
+  },
+  {
+    "gate": "finite_outputs",
+    "limit": true,
+    "scope": "hf_reversal_negative",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "phase_minimum",
+    "limit": -1e-12,
+    "scope": "hf_reversal_negative",
+    "status": "PASS",
+    "value": 0.04390846713469709
+  },
+  {
+    "gate": "phase_maximum",
+    "limit": 1.000000000001,
+    "scope": "hf_reversal_negative",
+    "status": "PASS",
+    "value": 0.9999973683422596
+  },
+  {
+    "gate": "relative_liquid_volume_error",
+    "limit": 1e-10,
+    "scope": "hf_reversal_negative",
+    "status": "PASS",
+    "value": 1.4246272462682736e-16
+  },
+  {
+    "gate": "advective_cfl",
+    "limit": 0.3675,
+    "scope": "hf_reversal_negative",
+    "status": "PASS",
+    "value": 0.08690136003964061
+  },
+  {
+    "gate": "viscous_cfl",
+    "limit": 0.4500000001,
+    "scope": "hf_reversal_negative",
+    "status": "PASS",
+    "value": 0.00041344350497562283
+  },
+  {
+    "gate": "capillary_cfl",
+    "limit": 1.0000000001,
+    "scope": "hf_reversal_negative",
+    "status": "PASS",
+    "value": 0.2966541828848591
+  },
+  {
+    "gate": "rotation_increment",
+    "limit": 0.0800000001,
+    "scope": "hf_reversal_negative",
+    "status": "PASS",
+    "value": 0.03351032163829113
+  },
+  {
+    "gate": "pressure_relative_residual",
+    "limit": 1e-07,
+    "scope": "hf_reversal_negative",
+    "status": "PASS",
+    "value": 1.1103902240341564e-11
+  },
+  {
+    "gate": "dimensionless_projected_divergence",
+    "limit": 1e-08,
+    "scope": "hf_reversal_negative",
+    "status": "PASS",
+    "value": 1.5845251388304314e-13
+  },
+  {
+    "gate": "mass_repair_intervention_warning",
+    "limit": 0.001,
+    "scope": "hf_reversal_negative",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "source_unchanged_during_case",
+    "limit": true,
+    "scope": "hf_dt_800us",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "completed_status",
+    "limit": "completed",
+    "scope": "hf_dt_800us",
+    "status": "PASS",
+    "value": "completed"
+  },
+  {
+    "gate": "finite_outputs",
+    "limit": true,
+    "scope": "hf_dt_800us",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "phase_minimum",
+    "limit": -1e-12,
+    "scope": "hf_dt_800us",
+    "status": "PASS",
+    "value": 0.04592818069810165
+  },
+  {
+    "gate": "phase_maximum",
+    "limit": 1.000000000001,
+    "scope": "hf_dt_800us",
+    "status": "PASS",
+    "value": 0.9999972108918219
+  },
+  {
+    "gate": "relative_liquid_volume_error",
+    "limit": 1e-10,
+    "scope": "hf_dt_800us",
+    "status": "PASS",
+    "value": 1.4246272462682736e-16
+  },
+  {
+    "gate": "advective_cfl",
+    "limit": 0.3675,
+    "scope": "hf_dt_800us",
+    "status": "PASS",
+    "value": 0.23009695086316598
+  },
+  {
+    "gate": "viscous_cfl",
+    "limit": 0.4500000001,
+    "scope": "hf_dt_800us",
+    "status": "PASS",
+    "value": 0.0004134435049759502
+  },
+  {
+    "gate": "capillary_cfl",
+    "limit": 1.0000000001,
+    "scope": "hf_dt_800us",
+    "status": "PASS",
+    "value": 0.29665418288509404
+  },
+  {
+    "gate": "rotation_increment",
+    "limit": 0.0800000001,
+    "scope": "hf_dt_800us",
+    "status": "PASS",
+    "value": 0.07539822368615504
+  },
+  {
+    "gate": "pressure_relative_residual",
+    "limit": 1e-07,
+    "scope": "hf_dt_800us",
+    "status": "PASS",
+    "value": 1.0895377920176984e-11
+  },
+  {
+    "gate": "dimensionless_projected_divergence",
+    "limit": 1e-08,
+    "scope": "hf_dt_800us",
+    "status": "PASS",
+    "value": 2.769967711451497e-13
+  },
+  {
+    "gate": "mass_repair_intervention_warning",
+    "limit": 0.001,
+    "scope": "hf_dt_800us",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "source_unchanged_during_case",
+    "limit": true,
+    "scope": "hf_dt_400us",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "completed_status",
+    "limit": "completed",
+    "scope": "hf_dt_400us",
+    "status": "PASS",
+    "value": "completed"
+  },
+  {
+    "gate": "finite_outputs",
+    "limit": true,
+    "scope": "hf_dt_400us",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "phase_minimum",
+    "limit": -1e-12,
+    "scope": "hf_dt_400us",
+    "status": "PASS",
+    "value": 0.043706402795794345
+  },
+  {
+    "gate": "phase_maximum",
+    "limit": 1.000000000001,
+    "scope": "hf_dt_400us",
+    "status": "PASS",
+    "value": 0.9999973213823179
+  },
+  {
+    "gate": "relative_liquid_volume_error",
+    "limit": 1e-10,
+    "scope": "hf_dt_400us",
+    "status": "PASS",
+    "value": 2.849254492536547e-16
+  },
+  {
+    "gate": "advective_cfl",
+    "limit": 0.3675,
+    "scope": "hf_dt_400us",
+    "status": "PASS",
+    "value": 0.09697026879178701
+  },
+  {
+    "gate": "viscous_cfl",
+    "limit": 0.4500000001,
+    "scope": "hf_dt_400us",
+    "status": "PASS",
+    "value": 0.00041344350497562283
+  },
+  {
+    "gate": "capillary_cfl",
+    "limit": 1.0000000001,
+    "scope": "hf_dt_400us",
+    "status": "PASS",
+    "value": 0.2966541828848591
+  },
+  {
+    "gate": "rotation_increment",
+    "limit": 0.0800000001,
+    "scope": "hf_dt_400us",
+    "status": "PASS",
+    "value": 0.03769911184307752
+  },
+  {
+    "gate": "pressure_relative_residual",
+    "limit": 1e-07,
+    "scope": "hf_dt_400us",
+    "status": "PASS",
+    "value": 1.1695696698022867e-11
+  },
+  {
+    "gate": "dimensionless_projected_divergence",
+    "limit": 1e-08,
+    "scope": "hf_dt_400us",
+    "status": "PASS",
+    "value": 1.489723865199449e-13
+  },
+  {
+    "gate": "mass_repair_intervention_warning",
+    "limit": 0.001,
+    "scope": "hf_dt_400us",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "source_unchanged_during_case",
+    "limit": true,
+    "scope": "hf_dt_200us",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "completed_status",
+    "limit": "completed",
+    "scope": "hf_dt_200us",
+    "status": "PASS",
+    "value": "completed"
+  },
+  {
+    "gate": "finite_outputs",
+    "limit": true,
+    "scope": "hf_dt_200us",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "phase_minimum",
+    "limit": -1e-12,
+    "scope": "hf_dt_200us",
+    "status": "PASS",
+    "value": 0.0386287514327574
+  },
+  {
+    "gate": "phase_maximum",
+    "limit": 1.000000000001,
+    "scope": "hf_dt_200us",
+    "status": "PASS",
+    "value": 0.9999975236083225
+  },
+  {
+    "gate": "relative_liquid_volume_error",
+    "limit": 1e-10,
+    "scope": "hf_dt_200us",
+    "status": "PASS",
+    "value": 4.273881738804821e-16
+  },
+  {
+    "gate": "advective_cfl",
+    "limit": 0.3675,
+    "scope": "hf_dt_200us",
+    "status": "PASS",
+    "value": 0.038354742412511404
+  },
+  {
+    "gate": "viscous_cfl",
+    "limit": 0.4500000001,
+    "scope": "hf_dt_200us",
+    "status": "PASS",
+    "value": 0.00020672175248781142
+  },
+  {
+    "gate": "capillary_cfl",
+    "limit": 1.0000000001,
+    "scope": "hf_dt_200us",
+    "status": "PASS",
+    "value": 0.14832709144242956
+  },
+  {
+    "gate": "rotation_increment",
+    "limit": 0.0800000001,
+    "scope": "hf_dt_200us",
+    "status": "PASS",
+    "value": 0.01884955592153876
+  },
+  {
+    "gate": "pressure_relative_residual",
+    "limit": 1e-07,
+    "scope": "hf_dt_200us",
+    "status": "PASS",
+    "value": 1.1590264121450867e-11
+  },
+  {
+    "gate": "dimensionless_projected_divergence",
+    "limit": 1e-08,
+    "scope": "hf_dt_200us",
+    "status": "PASS",
+    "value": 7.345661752376282e-14
+  },
+  {
+    "gate": "mass_repair_intervention_warning",
+    "limit": 0.001,
+    "scope": "hf_dt_200us",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "source_unchanged_during_case",
+    "limit": true,
+    "scope": "hf_grid_short_n16",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "completed_status",
+    "limit": "completed",
+    "scope": "hf_grid_short_n16",
+    "status": "PASS",
+    "value": "completed"
+  },
+  {
+    "gate": "finite_outputs",
+    "limit": true,
+    "scope": "hf_grid_short_n16",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "phase_minimum",
+    "limit": -1e-12,
+    "scope": "hf_grid_short_n16",
+    "status": "PASS",
+    "value": 0.0997297442838093
+  },
+  {
+    "gate": "phase_maximum",
+    "limit": 1.000000000001,
+    "scope": "hf_grid_short_n16",
+    "status": "PASS",
+    "value": 0.9998095837809252
+  },
+  {
+    "gate": "relative_liquid_volume_error",
+    "limit": 1e-10,
+    "scope": "hf_grid_short_n16",
+    "status": "PASS",
+    "value": 2.8778526283721285e-16
+  },
+  {
+    "gate": "advective_cfl",
+    "limit": 0.3675,
+    "scope": "hf_grid_short_n16",
+    "status": "PASS",
+    "value": 0.01685860002049498
+  },
+  {
+    "gate": "viscous_cfl",
+    "limit": 0.4500000001,
+    "scope": "hf_grid_short_n16",
+    "status": "PASS",
+    "value": 9.18763344390273e-05
+  },
+  {
+    "gate": "capillary_cfl",
+    "limit": 1.0000000001,
+    "scope": "hf_grid_short_n16",
+    "status": "PASS",
+    "value": 0.08073904201446527
+  },
+  {
+    "gate": "rotation_increment",
+    "limit": 0.0800000001,
+    "scope": "hf_grid_short_n16",
+    "status": "PASS",
+    "value": 0.01884955592153876
+  },
+  {
+    "gate": "pressure_relative_residual",
+    "limit": 1e-07,
+    "scope": "hf_grid_short_n16",
+    "status": "PASS",
+    "value": 2.995248094687782e-12
+  },
+  {
+    "gate": "dimensionless_projected_divergence",
+    "limit": 1e-08,
+    "scope": "hf_grid_short_n16",
+    "status": "PASS",
+    "value": 1.5627702103805524e-14
+  },
+  {
+    "gate": "mass_repair_intervention_warning",
+    "limit": 0.001,
+    "scope": "hf_grid_short_n16",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "source_unchanged_during_case",
+    "limit": true,
+    "scope": "hf_grid_short_n24",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "completed_status",
+    "limit": "completed",
+    "scope": "hf_grid_short_n24",
+    "status": "PASS",
+    "value": "completed"
+  },
+  {
+    "gate": "finite_outputs",
+    "limit": true,
+    "scope": "hf_grid_short_n24",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "phase_minimum",
+    "limit": -1e-12,
+    "scope": "hf_grid_short_n24",
+    "status": "PASS",
+    "value": 0.03915760004312633
+  },
+  {
+    "gate": "phase_maximum",
+    "limit": 1.000000000001,
+    "scope": "hf_grid_short_n24",
+    "status": "PASS",
+    "value": 0.9999975469038852
+  },
+  {
+    "gate": "relative_liquid_volume_error",
+    "limit": 1e-10,
+    "scope": "hf_grid_short_n24",
+    "status": "PASS",
+    "value": 1.4246272462682736e-16
+  },
+  {
+    "gate": "advective_cfl",
+    "limit": 0.3675,
+    "scope": "hf_grid_short_n24",
+    "status": "PASS",
+    "value": 0.03836359927112499
+  },
+  {
+    "gate": "viscous_cfl",
+    "limit": 0.4500000001,
+    "scope": "hf_grid_short_n24",
+    "status": "PASS",
+    "value": 0.00020672175248781142
+  },
+  {
+    "gate": "capillary_cfl",
+    "limit": 1.0000000001,
+    "scope": "hf_grid_short_n24",
+    "status": "PASS",
+    "value": 0.14832709144242956
+  },
+  {
+    "gate": "rotation_increment",
+    "limit": 0.0800000001,
+    "scope": "hf_grid_short_n24",
+    "status": "PASS",
+    "value": 0.01884955592153876
+  },
+  {
+    "gate": "pressure_relative_residual",
+    "limit": 1e-07,
+    "scope": "hf_grid_short_n24",
+    "status": "PASS",
+    "value": 1.1366564543160146e-11
+  },
+  {
+    "gate": "dimensionless_projected_divergence",
+    "limit": 1e-08,
+    "scope": "hf_grid_short_n24",
+    "status": "PASS",
+    "value": 7.203584744890711e-14
+  },
+  {
+    "gate": "mass_repair_intervention_warning",
+    "limit": 0.001,
+    "scope": "hf_grid_short_n24",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "source_unchanged_during_case",
+    "limit": true,
+    "scope": "hf_grid_short_n36",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "completed_status",
+    "limit": "completed",
+    "scope": "hf_grid_short_n36",
+    "status": "PASS",
+    "value": "completed"
+  },
+  {
+    "gate": "finite_outputs",
+    "limit": true,
+    "scope": "hf_grid_short_n36",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "phase_minimum",
+    "limit": -1e-12,
+    "scope": "hf_grid_short_n36",
+    "status": "PASS",
+    "value": 0.00879448579158391
+  },
+  {
+    "gate": "phase_maximum",
+    "limit": 1.000000000001,
+    "scope": "hf_grid_short_n36",
+    "status": "PASS",
+    "value": 0.9999999961110946
+  },
+  {
+    "gate": "relative_liquid_volume_error",
+    "limit": 1e-10,
+    "scope": "hf_grid_short_n36",
+    "status": "PASS",
+    "value": 2.8416334303354953e-16
+  },
+  {
+    "gate": "advective_cfl",
+    "limit": 0.3675,
+    "scope": "hf_grid_short_n36",
+    "status": "PASS",
+    "value": 0.07718600672031424
+  },
+  {
+    "gate": "viscous_cfl",
+    "limit": 0.4500000001,
+    "scope": "hf_grid_short_n36",
+    "status": "PASS",
+    "value": 0.0004651239430975757
+  },
+  {
+    "gate": "capillary_cfl",
+    "limit": 1.0000000001,
+    "scope": "hf_grid_short_n36",
+    "status": "PASS",
+    "value": 0.2724942667988203
+  },
+  {
+    "gate": "rotation_increment",
+    "limit": 0.0800000001,
+    "scope": "hf_grid_short_n36",
+    "status": "PASS",
+    "value": 0.01884955592153876
+  },
+  {
+    "gate": "pressure_relative_residual",
+    "limit": 1e-07,
+    "scope": "hf_grid_short_n36",
+    "status": "PASS",
+    "value": 3.439035994032798e-11
+  },
+  {
+    "gate": "dimensionless_projected_divergence",
+    "limit": 1e-08,
+    "scope": "hf_grid_short_n36",
+    "status": "PASS",
+    "value": 2.677635699816284e-13
+  },
+  {
+    "gate": "mass_repair_intervention_warning",
+    "limit": 0.001,
+    "scope": "hf_grid_short_n36",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "source_unchanged_during_case",
+    "limit": true,
+    "scope": "hf_grid_short_n54",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "completed_status",
+    "limit": "completed",
+    "scope": "hf_grid_short_n54",
+    "status": "PASS",
+    "value": "completed"
+  },
+  {
+    "gate": "finite_outputs",
+    "limit": true,
+    "scope": "hf_grid_short_n54",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "phase_minimum",
+    "limit": -1e-12,
+    "scope": "hf_grid_short_n54",
+    "status": "PASS",
+    "value": 0.0008219486816462373
+  },
+  {
+    "gate": "phase_maximum",
+    "limit": 1.000000000001,
+    "scope": "hf_grid_short_n54",
+    "status": "PASS",
+    "value": 0.999999999999612
+  },
+  {
+    "gate": "relative_liquid_volume_error",
+    "limit": 1e-10,
+    "scope": "hf_grid_short_n54",
+    "status": "PASS",
+    "value": 2.8405032123199745e-16
+  },
+  {
+    "gate": "advective_cfl",
+    "limit": 0.3675,
+    "scope": "hf_grid_short_n54",
+    "status": "PASS",
+    "value": 0.14667971067418648
+  },
+  {
+    "gate": "viscous_cfl",
+    "limit": 0.4500000001,
+    "scope": "hf_grid_short_n54",
+    "status": "PASS",
+    "value": 0.0010465288719695455
+  },
+  {
+    "gate": "capillary_cfl",
+    "limit": 1.0000000001,
+    "scope": "hf_grid_short_n54",
+    "status": "PASS",
+    "value": 0.5006039336181998
+  },
+  {
+    "gate": "rotation_increment",
+    "limit": 0.0800000001,
+    "scope": "hf_grid_short_n54",
+    "status": "PASS",
+    "value": 0.01884955592153876
+  },
+  {
+    "gate": "pressure_relative_residual",
+    "limit": 1e-07,
+    "scope": "hf_grid_short_n54",
+    "status": "PASS",
+    "value": 2.8840574947110504e-10
+  },
+  {
+    "gate": "dimensionless_projected_divergence",
+    "limit": 1e-08,
+    "scope": "hf_grid_short_n54",
+    "status": "PASS",
+    "value": 2.7364530326754096e-12
+  },
+  {
+    "gate": "mass_repair_intervention_warning",
+    "limit": 0.001,
+    "scope": "hf_grid_short_n54",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "source_unchanged_during_case",
+    "limit": true,
+    "scope": "hf_interface_base",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "completed_status",
+    "limit": "completed",
+    "scope": "hf_interface_base",
+    "status": "PASS",
+    "value": "completed"
+  },
+  {
+    "gate": "finite_outputs",
+    "limit": true,
+    "scope": "hf_interface_base",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "phase_minimum",
+    "limit": -1e-12,
+    "scope": "hf_interface_base",
+    "status": "PASS",
+    "value": 0.03768471291884524
+  },
+  {
+    "gate": "phase_maximum",
+    "limit": 1.000000000001,
+    "scope": "hf_interface_base",
+    "status": "PASS",
+    "value": 0.9999975275994774
+  },
+  {
+    "gate": "relative_liquid_volume_error",
+    "limit": 1e-10,
+    "scope": "hf_interface_base",
+    "status": "PASS",
+    "value": 4.273881738804821e-16
+  },
+  {
+    "gate": "advective_cfl",
+    "limit": 0.3675,
+    "scope": "hf_interface_base",
+    "status": "PASS",
+    "value": 0.03832202128493567
+  },
+  {
+    "gate": "viscous_cfl",
+    "limit": 0.4500000001,
+    "scope": "hf_interface_base",
+    "status": "PASS",
+    "value": 0.00020672175248781142
+  },
+  {
+    "gate": "capillary_cfl",
+    "limit": 1.0000000001,
+    "scope": "hf_interface_base",
+    "status": "PASS",
+    "value": 0.14832709144242956
+  },
+  {
+    "gate": "rotation_increment",
+    "limit": 0.0800000001,
+    "scope": "hf_interface_base",
+    "status": "PASS",
+    "value": 0.01884955592153876
+  },
+  {
+    "gate": "pressure_relative_residual",
+    "limit": 1e-07,
+    "scope": "hf_interface_base",
+    "status": "PASS",
+    "value": 1.1665227753168672e-11
+  },
+  {
+    "gate": "dimensionless_projected_divergence",
+    "limit": 1e-08,
+    "scope": "hf_interface_base",
+    "status": "PASS",
+    "value": 7.392825199667965e-14
+  },
+  {
+    "gate": "mass_repair_intervention_warning",
+    "limit": 0.001,
+    "scope": "hf_interface_base",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "source_unchanged_during_case",
+    "limit": true,
+    "scope": "hf_interface_thickness_1p5",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "completed_status",
+    "limit": "completed",
+    "scope": "hf_interface_thickness_1p5",
+    "status": "PASS",
+    "value": "completed"
+  },
+  {
+    "gate": "finite_outputs",
+    "limit": true,
+    "scope": "hf_interface_thickness_1p5",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "phase_minimum",
+    "limit": -1e-12,
+    "scope": "hf_interface_thickness_1p5",
+    "status": "PASS",
+    "value": 0.004094594224314243
+  },
+  {
+    "gate": "phase_maximum",
+    "limit": 1.000000000001,
+    "scope": "hf_interface_thickness_1p5",
+    "status": "PASS",
+    "value": 0.9999999995657616
+  },
+  {
+    "gate": "relative_liquid_volume_error",
+    "limit": 1e-10,
+    "scope": "hf_interface_thickness_1p5",
+    "status": "PASS",
+    "value": 2.841057284470912e-16
+  },
+  {
+    "gate": "advective_cfl",
+    "limit": 0.3675,
+    "scope": "hf_interface_thickness_1p5",
+    "status": "PASS",
+    "value": 0.038456051296501426
+  },
+  {
+    "gate": "viscous_cfl",
+    "limit": 0.4500000001,
+    "scope": "hf_interface_thickness_1p5",
+    "status": "PASS",
+    "value": 0.00020672175248781142
+  },
+  {
+    "gate": "capillary_cfl",
+    "limit": 1.0000000001,
+    "scope": "hf_interface_thickness_1p5",
+    "status": "PASS",
+    "value": 0.14832709144242956
+  },
+  {
+    "gate": "rotation_increment",
+    "limit": 0.0800000001,
+    "scope": "hf_interface_thickness_1p5",
+    "status": "PASS",
+    "value": 0.01884955592153876
+  },
+  {
+    "gate": "pressure_relative_residual",
+    "limit": 1e-07,
+    "scope": "hf_interface_thickness_1p5",
+    "status": "PASS",
+    "value": 1.1365130980120812e-11
+  },
+  {
+    "gate": "dimensionless_projected_divergence",
+    "limit": 1e-08,
+    "scope": "hf_interface_thickness_1p5",
+    "status": "PASS",
+    "value": 7.346601306152016e-14
+  },
+  {
+    "gate": "mass_repair_intervention_warning",
+    "limit": 0.001,
+    "scope": "hf_interface_thickness_1p5",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "source_unchanged_during_case",
+    "limit": true,
+    "scope": "hf_interface_thickness_4p0",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "completed_status",
+    "limit": "completed",
+    "scope": "hf_interface_thickness_4p0",
+    "status": "PASS",
+    "value": "completed"
+  },
+  {
+    "gate": "finite_outputs",
+    "limit": true,
+    "scope": "hf_interface_thickness_4p0",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "phase_minimum",
+    "limit": -1e-12,
+    "scope": "hf_interface_thickness_4p0",
+    "status": "PASS",
+    "value": 0.115683963149616
+  },
+  {
+    "gate": "phase_maximum",
+    "limit": 1.000000000001,
+    "scope": "hf_interface_thickness_4p0",
+    "status": "PASS",
+    "value": 0.9996930752067142
+  },
+  {
+    "gate": "relative_liquid_volume_error",
+    "limit": 1e-10,
+    "scope": "hf_interface_thickness_4p0",
+    "status": "PASS",
+    "value": 2.885976839694305e-16
+  },
+  {
+    "gate": "advective_cfl",
+    "limit": 0.3675,
+    "scope": "hf_interface_thickness_4p0",
+    "status": "PASS",
+    "value": 0.03797766727777927
+  },
+  {
+    "gate": "viscous_cfl",
+    "limit": 0.4500000001,
+    "scope": "hf_interface_thickness_4p0",
+    "status": "PASS",
+    "value": 0.00020672175248781142
+  },
+  {
+    "gate": "capillary_cfl",
+    "limit": 1.0000000001,
+    "scope": "hf_interface_thickness_4p0",
+    "status": "PASS",
+    "value": 0.14832709144242956
+  },
+  {
+    "gate": "rotation_increment",
+    "limit": 0.0800000001,
+    "scope": "hf_interface_thickness_4p0",
+    "status": "PASS",
+    "value": 0.01884955592153876
+  },
+  {
+    "gate": "pressure_relative_residual",
+    "limit": 1e-07,
+    "scope": "hf_interface_thickness_4p0",
+    "status": "PASS",
+    "value": 1.1460804775126218e-11
+  },
+  {
+    "gate": "dimensionless_projected_divergence",
+    "limit": 1e-08,
+    "scope": "hf_interface_thickness_4p0",
+    "status": "PASS",
+    "value": 7.228942503441367e-14
+  },
+  {
+    "gate": "mass_repair_intervention_warning",
+    "limit": 0.001,
+    "scope": "hf_interface_thickness_4p0",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "source_unchanged_during_case",
+    "limit": true,
+    "scope": "hf_interface_cls_off",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "completed_status",
+    "limit": "completed",
+    "scope": "hf_interface_cls_off",
+    "status": "PASS",
+    "value": "completed"
+  },
+  {
+    "gate": "finite_outputs",
+    "limit": true,
+    "scope": "hf_interface_cls_off",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "phase_minimum",
+    "limit": -1e-12,
+    "scope": "hf_interface_cls_off",
+    "status": "PASS",
+    "value": 0.04843995605507623
+  },
+  {
+    "gate": "phase_maximum",
+    "limit": 1.000000000001,
+    "scope": "hf_interface_cls_off",
+    "status": "PASS",
+    "value": 0.9999965522664102
+  },
+  {
+    "gate": "relative_liquid_volume_error",
+    "limit": 1e-10,
+    "scope": "hf_interface_cls_off",
+    "status": "PASS",
+    "value": 1.4246272462682736e-16
+  },
+  {
+    "gate": "advective_cfl",
+    "limit": 0.3675,
+    "scope": "hf_interface_cls_off",
+    "status": "PASS",
+    "value": 0.03830066676765818
+  },
+  {
+    "gate": "viscous_cfl",
+    "limit": 0.4500000001,
+    "scope": "hf_interface_cls_off",
+    "status": "PASS",
+    "value": 0.00020672175248781142
+  },
+  {
+    "gate": "capillary_cfl",
+    "limit": 1.0000000001,
+    "scope": "hf_interface_cls_off",
+    "status": "PASS",
+    "value": 0.14832709144242956
+  },
+  {
+    "gate": "rotation_increment",
+    "limit": 0.0800000001,
+    "scope": "hf_interface_cls_off",
+    "status": "PASS",
+    "value": 0.01884955592153876
+  },
+  {
+    "gate": "pressure_relative_residual",
+    "limit": 1e-07,
+    "scope": "hf_interface_cls_off",
+    "status": "PASS",
+    "value": 1.1665227753168672e-11
+  },
+  {
+    "gate": "dimensionless_projected_divergence",
+    "limit": 1e-08,
+    "scope": "hf_interface_cls_off",
+    "status": "PASS",
+    "value": 7.392825199667965e-14
+  },
+  {
+    "gate": "mass_repair_intervention_warning",
+    "limit": 0.001,
+    "scope": "hf_interface_cls_off",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "source_unchanged_during_case",
+    "limit": true,
+    "scope": "hf_interface_cls_interval4",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "completed_status",
+    "limit": "completed",
+    "scope": "hf_interface_cls_interval4",
+    "status": "PASS",
+    "value": "completed"
+  },
+  {
+    "gate": "finite_outputs",
+    "limit": true,
+    "scope": "hf_interface_cls_interval4",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "phase_minimum",
+    "limit": -1e-12,
+    "scope": "hf_interface_cls_interval4",
+    "status": "PASS",
+    "value": 0.03768690423191388
+  },
+  {
+    "gate": "phase_maximum",
+    "limit": 1.000000000001,
+    "scope": "hf_interface_cls_interval4",
+    "status": "PASS",
+    "value": 0.9999975319802396
+  },
+  {
+    "gate": "relative_liquid_volume_error",
+    "limit": 1e-10,
+    "scope": "hf_interface_cls_interval4",
+    "status": "PASS",
+    "value": 1.4246272462682736e-16
+  },
+  {
+    "gate": "advective_cfl",
+    "limit": 0.3675,
+    "scope": "hf_interface_cls_interval4",
+    "status": "PASS",
+    "value": 0.038322105128384014
+  },
+  {
+    "gate": "viscous_cfl",
+    "limit": 0.4500000001,
+    "scope": "hf_interface_cls_interval4",
+    "status": "PASS",
+    "value": 0.00020672175248781142
+  },
+  {
+    "gate": "capillary_cfl",
+    "limit": 1.0000000001,
+    "scope": "hf_interface_cls_interval4",
+    "status": "PASS",
+    "value": 0.14832709144242956
+  },
+  {
+    "gate": "rotation_increment",
+    "limit": 0.0800000001,
+    "scope": "hf_interface_cls_interval4",
+    "status": "PASS",
+    "value": 0.01884955592153876
+  },
+  {
+    "gate": "pressure_relative_residual",
+    "limit": 1e-07,
+    "scope": "hf_interface_cls_interval4",
+    "status": "PASS",
+    "value": 1.1665227753168672e-11
+  },
+  {
+    "gate": "dimensionless_projected_divergence",
+    "limit": 1e-08,
+    "scope": "hf_interface_cls_interval4",
+    "status": "PASS",
+    "value": 7.392825199667965e-14
+  },
+  {
+    "gate": "mass_repair_intervention_warning",
+    "limit": 0.001,
+    "scope": "hf_interface_cls_interval4",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "source_unchanged_during_case",
+    "limit": true,
+    "scope": "hf_interface_cls_speed_0p02",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "completed_status",
+    "limit": "completed",
+    "scope": "hf_interface_cls_speed_0p02",
+    "status": "PASS",
+    "value": "completed"
+  },
+  {
+    "gate": "finite_outputs",
+    "limit": true,
+    "scope": "hf_interface_cls_speed_0p02",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "phase_minimum",
+    "limit": -1e-12,
+    "scope": "hf_interface_cls_speed_0p02",
+    "status": "PASS",
+    "value": 0.042358175397957554
+  },
+  {
+    "gate": "phase_maximum",
+    "limit": 1.000000000001,
+    "scope": "hf_interface_cls_speed_0p02",
+    "status": "PASS",
+    "value": 0.9999971427204023
+  },
+  {
+    "gate": "relative_liquid_volume_error",
+    "limit": 1e-10,
+    "scope": "hf_interface_cls_speed_0p02",
+    "status": "PASS",
+    "value": 1.4246272462682736e-16
+  },
+  {
+    "gate": "advective_cfl",
+    "limit": 0.3675,
+    "scope": "hf_interface_cls_speed_0p02",
+    "status": "PASS",
+    "value": 0.03831620803093996
+  },
+  {
+    "gate": "viscous_cfl",
+    "limit": 0.4500000001,
+    "scope": "hf_interface_cls_speed_0p02",
+    "status": "PASS",
+    "value": 0.00020672175248781142
+  },
+  {
+    "gate": "capillary_cfl",
+    "limit": 1.0000000001,
+    "scope": "hf_interface_cls_speed_0p02",
+    "status": "PASS",
+    "value": 0.14832709144242956
+  },
+  {
+    "gate": "rotation_increment",
+    "limit": 0.0800000001,
+    "scope": "hf_interface_cls_speed_0p02",
+    "status": "PASS",
+    "value": 0.01884955592153876
+  },
+  {
+    "gate": "pressure_relative_residual",
+    "limit": 1e-07,
+    "scope": "hf_interface_cls_speed_0p02",
+    "status": "PASS",
+    "value": 1.1665227753168672e-11
+  },
+  {
+    "gate": "dimensionless_projected_divergence",
+    "limit": 1e-08,
+    "scope": "hf_interface_cls_speed_0p02",
+    "status": "PASS",
+    "value": 7.392825199667965e-14
+  },
+  {
+    "gate": "mass_repair_intervention_warning",
+    "limit": 0.001,
+    "scope": "hf_interface_cls_speed_0p02",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "source_unchanged_during_case",
+    "limit": true,
+    "scope": "hf_interface_cls_speed_0p08",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "completed_status",
+    "limit": "completed",
+    "scope": "hf_interface_cls_speed_0p08",
+    "status": "PASS",
+    "value": "completed"
+  },
+  {
+    "gate": "finite_outputs",
+    "limit": true,
+    "scope": "hf_interface_cls_speed_0p08",
+    "status": "PASS",
+    "value": true
+  },
+  {
+    "gate": "phase_minimum",
+    "limit": -1e-12,
+    "scope": "hf_interface_cls_speed_0p08",
+    "status": "PASS",
+    "value": 0.03246756469742379
+  },
+  {
+    "gate": "phase_maximum",
+    "limit": 1.000000000001,
+    "scope": "hf_interface_cls_speed_0p08",
+    "status": "PASS",
+    "value": 0.9999978651527662
+  },
+  {
+    "gate": "relative_liquid_volume_error",
+    "limit": 1e-10,
+    "scope": "hf_interface_cls_speed_0p08",
+    "status": "PASS",
+    "value": 5.698508985073094e-16
+  },
+  {
+    "gate": "advective_cfl",
+    "limit": 0.3675,
+    "scope": "hf_interface_cls_speed_0p08",
+    "status": "PASS",
+    "value": 0.038331222795174494
+  },
+  {
+    "gate": "viscous_cfl",
+    "limit": 0.4500000001,
+    "scope": "hf_interface_cls_speed_0p08",
+    "status": "PASS",
+    "value": 0.00020672175248781142
+  },
+  {
+    "gate": "capillary_cfl",
+    "limit": 1.0000000001,
+    "scope": "hf_interface_cls_speed_0p08",
+    "status": "PASS",
+    "value": 0.14832709144242956
+  },
+  {
+    "gate": "rotation_increment",
+    "limit": 0.0800000001,
+    "scope": "hf_interface_cls_speed_0p08",
+    "status": "PASS",
+    "value": 0.01884955592153876
+  },
+  {
+    "gate": "pressure_relative_residual",
+    "limit": 1e-07,
+    "scope": "hf_interface_cls_speed_0p08",
+    "status": "PASS",
+    "value": 1.1665227753168672e-11
+  },
+  {
+    "gate": "dimensionless_projected_divergence",
+    "limit": 1e-08,
+    "scope": "hf_interface_cls_speed_0p08",
+    "status": "PASS",
+    "value": 7.392825199667965e-14
+  },
+  {
+    "gate": "mass_repair_intervention_warning",
+    "limit": 0.001,
+    "scope": "hf_interface_cls_speed_0p08",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "zero_width",
+    "limit": "PASS",
+    "scope": "synthetic_throat",
+    "status": "PASS",
+    "value": "PASS"
+  },
+  {
+    "gate": "one_cell_precursor",
+    "limit": "PASS",
+    "scope": "synthetic_throat",
+    "status": "PASS",
+    "value": "PASS"
+  },
+  {
+    "gate": "one_below_required",
+    "limit": "PASS",
+    "scope": "synthetic_throat",
+    "status": "PASS",
+    "value": "PASS"
+  },
+  {
+    "gate": "exactly_required",
+    "limit": "PASS",
+    "scope": "synthetic_throat",
+    "status": "PASS",
+    "value": "PASS"
+  },
+  {
+    "gate": "one_above_required",
+    "limit": "PASS",
+    "scope": "synthetic_throat",
+    "status": "PASS",
+    "value": "PASS"
+  },
+  {
+    "gate": "wide_with_one_below_required_bottleneck",
+    "limit": "PASS",
+    "scope": "synthetic_throat",
+    "status": "PASS",
+    "value": "PASS"
+  },
+  {
+    "gate": "required_width_disconnected",
+    "limit": "PASS",
+    "scope": "synthetic_throat",
+    "status": "PASS",
+    "value": "PASS"
+  },
+  {
+    "gate": "phase_relative_l2",
+    "limit": 1e-08,
+    "scope": "rotation_reversal",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "surface_relative_l2",
+    "limit": 1e-08,
+    "scope": "rotation_reversal",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "meridional_velocity_symmetry_relative_l2",
+    "limit": 1e-08,
+    "scope": "rotation_reversal",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "azimuthal_velocity_antisymmetry_relative_l2",
+    "limit": 1e-08,
+    "scope": "rotation_reversal",
+    "status": "PASS",
+    "value": 0.0
+  },
+  {
+    "gate": "immutable_execution_source_unchanged",
+    "limit": "64c2d0495321adcc3d0b9073189474ecc72b4f034cf62e74ec91592ceccd3e7b",
+    "scope": "suite",
+    "status": "PASS",
+    "value": "64c2d0495321adcc3d0b9073189474ecc72b4f034cf62e74ec91592ceccd3e7b"
+  }
+]

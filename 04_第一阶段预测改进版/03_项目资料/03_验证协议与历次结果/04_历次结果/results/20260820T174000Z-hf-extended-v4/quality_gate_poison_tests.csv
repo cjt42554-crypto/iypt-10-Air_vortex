@@ -1,0 +1,6 @@
+test,duration_s,clip_absolute_fraction_per_step,clip_signed_fraction_per_step,repair_absolute_fraction_per_step,repair_signed_fraction_per_step,expected_exception_substring,completed,actual_exception,status
+below_limit_control,0.001,2.5e-09,0.0,0.0,0.0,,True,,PASS
+clip_only_single_step_poison,0.001,2e-08,2e-08,0.0,0.0,phase clipping numerical quality gate failed,False,"FloatingPointError: phase clipping numerical quality gate failed: single=2.000e-08 (limit 1.000e-08), cumulative=2.000e-08 (limit 1.000e-06)",PASS
+positive_negative_clip_cancellation_poison,0.001,2e-08,0.0,0.0,0.0,phase clipping numerical quality gate failed,False,"FloatingPointError: phase clipping numerical quality gate failed: single=2.000e-08 (limit 1.000e-08), cumulative=2.000e-08 (limit 1.000e-06)",PASS
+cumulative_clip_poison,0.1,7.5e-09,0.0,0.0,0.0,phase clipping numerical quality gate failed,False,"FloatingPointError: phase clipping numerical quality gate failed: single=7.500e-09 (limit 1.000e-08), cumulative=1.005e-06 (limit 1.000e-06)",PASS
+repair_only_single_step_poison,0.001,0.0,0.0,2e-08,0.0,phase mass-repair numerical quality gate failed,False,"FloatingPointError: phase mass-repair numerical quality gate failed: single=2.000e-08 (limit 1.000e-08), cumulative=2.000e-08 (limit 1.000e-06)",PASS

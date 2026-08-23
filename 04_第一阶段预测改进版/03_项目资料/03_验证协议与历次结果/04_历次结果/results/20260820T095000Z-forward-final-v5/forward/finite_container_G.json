@@ -1,0 +1,13 @@
+{
+  "F": 0.9643779002301229,
+  "G": 0.8613508340479031,
+  "I_quad": 1.33691164507766,
+  "I_quad_error_estimate": 1.484269952539453e-14,
+  "J_quad": 2.8922232780455244,
+  "J_quad_error_estimate": 3.2110092018197024e-14,
+  "K": 0.10302706618221975,
+  "X": 20.25,
+  "analytic_zero_capillary_axis_contact_C2_m4_s2": 8.62331874635665e-05,
+  "analytic_zero_capillary_axis_contact_rpm": 985.2945765415743,
+  "interpretation": "finite-cylinder zero-capillarity analytic limit relative to the conserved mean surface; not an experimental threshold"
+}

@@ -1,0 +1,5 @@
+critical_W,critical_actual_rpm,height_residual_m,max_abs_q,max_abs_slope,relative_tolerance,route,surface_radial_points_or_mesh
+131.6389227862574,1033.8999109464182,1.2825357414980587e-08,0.9716271073854827,4.10804720366692,1e-06,backend_discrete_exact_curvature,256
+131.63931557860485,1033.9014534524702,-1.0900613744979637e-13,0.9716274018280427,4.108069457832977,3e-07,independent_BVP_continuum,401
+143.61060473989903,1079.890184011422,,,,linear solve,backend_discrete_linear_baseline,256
+143.6143379345168,1079.9042199317876,,,,3e-07,independent_BVP_linear_continuum,401

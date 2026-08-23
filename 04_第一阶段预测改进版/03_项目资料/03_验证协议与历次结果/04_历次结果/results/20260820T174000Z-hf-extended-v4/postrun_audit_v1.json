@@ -1,0 +1,59 @@
+{
+  "schema": "airvortex-numerical-validation-postrun-audit-v1",
+  "audit_scope": "20260820T174000Z-hf-extended-v4",
+  "audit_status": "COMPLETED_WITH_NUMERICAL_NONCONVERGENCE",
+  "physical_validation_claimed": false,
+  "append_only_note": "This audit does not alter the original manifest, comparisons.csv, acceptance.json, or negative_results.json.",
+  "base_evidence": {
+    "manifest_sha256": "fff809f3f3dee43a388b3ebcd9ad70d5b1050f207680fdf48090459d98830dc1",
+    "comparisons_csv_sha256": "74cc30ace349f92df54ff4deb9c748bb03c961b98f0560ff2fb3578189bee5aa",
+    "negative_results_json_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "protocol_v4_sha256": "a8640b701a0fb06cb530d6d0dd3fcde16fb0a00a2036e740a2a9c0d15d4698d9",
+    "long_case_summary_sha256": "88e89aa5c2b308736a43b8484185398a027ef7bb87972d7b0c77131fdf3ced45",
+    "case_index_csv_sha256": "186268d5c92de53e785acc557fa8252a9cadd67a007014d3543cc68a6d7dc6a3"
+  },
+  "reason": "The original comparison correctly reported a decreasing cross-grid profile norm, but its summary omitted the non-monotone decision-facing final funnel-depth sequence. A profile trend does not establish convergence of this scalar observable.",
+  "negative_results": [
+    {
+      "source": "postrun_convergence_audit",
+      "group": "grid_moderate",
+      "metric": "funnel_depth_m_monotonic_convergence",
+      "case_ids": [
+        "hf_grid_moderate_n24",
+        "hf_grid_moderate_n36",
+        "hf_grid_moderate_n54"
+      ],
+      "radial_cells": [24, 36, 54],
+      "values_m": [
+        0.00840461691662972,
+        0.012366838398434263,
+        0.010095613390325511
+      ],
+      "successive_signed_changes_m": [
+        0.003962221481804543,
+        -0.002271225008108752
+      ],
+      "status": "NOT_DEMONSTRATED",
+      "interpretation": "The signed refinement change reverses. Quantitative convergence of final funnel depth is not demonstrated, even though the area-weighted profile difference decreases."
+    },
+    {
+      "source": "postrun_completion_audit",
+      "group": "hf_default_48x72_long10s",
+      "metric": "configured_duration_reached",
+      "backend_status": "completed",
+      "requested_duration_s": 10.0,
+      "actual_end_time_s": 9.0,
+      "completed_steps": 45005,
+      "termination_reason": "resolved_instantaneous_connection_candidate_domain_limit",
+      "status": "NOT_COMPLETED_CONFIGURED_DURATION",
+      "interpretation": "The pre-contact model-domain boundary was reached at 9.0 s. This is neither a complete 10 s run nor evidence of 10 s stability/performance; the old case label and all-green completion summary are superseded by this audit."
+    }
+  ],
+  "audited_summary": {
+    "hard_gate_failures": 0,
+    "case_failures": 0,
+    "negative_or_inconclusive_records": 2,
+    "overall_status": "COMPLETED_WITH_NUMERICAL_NONCONVERGENCE",
+    "all_green_prohibited": true
+  }
+}

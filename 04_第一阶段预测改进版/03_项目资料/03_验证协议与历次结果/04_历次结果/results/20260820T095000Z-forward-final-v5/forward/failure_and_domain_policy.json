@@ -1,0 +1,29 @@
+{
+  "ForwardBackend_collocation_failure": {
+    "exception_type": "NonlinearSurfaceError",
+    "fabricated_result_returned": false,
+    "message": "exact-curvature Young-Laplace solve failed closed at W=1.25623263: status=1, synthetic collocation failure for no-fallback audit",
+    "passed": true
+  },
+  "deep_vessel_low_load": {
+    "critical_domain_reason": "NonlinearSurfaceDomainError: exact-curvature continuation reached the single-valued-graph limit at W=1556.7542: max|q|=0.999800914",
+    "critical_observable_present": false,
+    "critical_status": "UNAVAILABLE_GRAPH_BRANCH",
+    "domain_status": "IN_MODEL_DOMAIN",
+    "minimum_gap_m": 0.5923874527349309,
+    "passed": true,
+    "run_status": "completed"
+  },
+  "direct_collocation_failure": {
+    "exception_type": "NonlinearSurfaceError",
+    "message": "exact-curvature Young-Laplace solve failed closed at W=2: status=1, synthetic collocation failure for no-fallback audit",
+    "passed": true
+  },
+  "q_domain_poison": {
+    "certification_margin": 1.9999999999999998e-05,
+    "exception_type": "NonlinearSurfaceDomainError",
+    "message": "exact-curvature continuation reached the single-valued-graph limit at W=1: max|q|=0.99999",
+    "passed": true,
+    "poisoned_q": 0.99999
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "airvortex-predictive-stage1-protocol-v1",
+  "baseline_commit": "e7cff65b8bda38d0fd6cec848866a2a3d5a8caa6",
+  "target": "CALIBRATION_READY_AND_NUMERICALLY_INTERNALLY_CONSISTENT",
+  "implementation_gates": [
+    "observable identity comparison guard",
+    "face-flux donor-cell CFL",
+    "phase-density-momentum consistent transport",
+    "3D widest-path channel bottleneck",
+    "explicit camera measurement operator",
+    "stage-one modules compile and tests pass"
+  ],
+  "physical_go_gates": [
+    "static-drop Laplace pressure",
+    "spurious-current grid convergence",
+    "capillary-wave frequency and damping",
+    "dynamic grid/time/interface refinement",
+    "sufficient bar and channel resolution",
+    "measured actual bar trajectory",
+    "independent calibration and validation experiments"
+  ],
+  "forbidden_interpretations": [
+    "backend agreement is experimental validation",
+    "same units imply the same observable",
+    "numerically sustained means experimentally stable",
+    "passing implementation tests proves apparatus-level prediction"
+  ]
+}

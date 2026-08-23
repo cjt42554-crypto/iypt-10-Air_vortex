@@ -1,0 +1,5 @@
+{
+  "cls_compression_interval": 1,
+  "cls_compression_speed_m_s": 0.04,
+  "enable_surface_tension": true
+}
