@@ -18,7 +18,8 @@ PASS_STAGE1_IMPLEMENTATION__NO_GO_PHYSICAL_PREDICTION
 - 基线 `origin/main`：`e2a8215baa204b2a7f35c84aa0606c32e1018cc3`
 - 独立审查证据：`codex/local-review-results-20260823`，提交 `a5ce324c82172f663dd553a9804bab2c43f00b8a`
 - 修复分支：`codex/stage1-implementation-repair-20260823`
-- 允许修改范围：`04_第一阶段预测改进版/**`
+- 当次修复允许修改范围（历史路径）：`04_第一阶段预测改进版/**`
+- 2026-08-24 当前工作路径：`未提交修改/当前任务/候选成果/**`
 - 干净工作树被测提交：`0a9b667294b0d28211bfb983bfc153c42779eb22`
 - 最终证据提交：本报告所在提交；它只在上述被测提交之后加入冻结验收目录并更新本报告，不修改被测实现、协议或测试
 - 首轮整包 acceptance（提交前源码内容冻结）：`03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/acceptance.json`

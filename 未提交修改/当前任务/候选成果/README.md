@@ -1,6 +1,6 @@
 # IYPT 10 空气涡流：第一阶段预测改进版
 
-本目录是从仓库基线提交 `e7cff65b8bda38d0fd6cec848866a2a3d5a8caa6` 建立的隔离副本。
+本目录是从仓库基线提交 `e7cff65b8bda38d0fd6cec848866a2a3d5a8caa6` 建立的隔离副本。它在 2026-08-24 从历史路径 `04_第一阶段预测改进版/` 整体迁入当前工作路径 `未提交修改/当前任务/候选成果/`；冻结历史证据中的旧路径仍按生成时原样保留。
 
 仓库根目录原有 `01_最终理论/`、`02_模拟程序/`、`03_项目资料/` 不作任何修改；本目录内部复用其基线 tree，并在副本中追加第一阶段内容。结构性理论只随基线复制，不修改。
 
@@ -28,7 +28,7 @@ PASS_STAGE1_IMPLEMENTATION__NO_GO_PHYSICAL_PREDICTION
 ## 启动隔离版
 
 ```bash
-cd "04_第一阶段预测改进版/02_模拟程序"
+cd "未提交修改/当前任务/候选成果/02_模拟程序"
 ./run_stage1_gui.sh
 ./run_stage1_cli.sh --help
 ```
@@ -38,7 +38,7 @@ cd "04_第一阶段预测改进版/02_模拟程序"
 先进入一个已安装项目依赖（至少 NumPy、SciPy、Matplotlib、pytest）的 Python 环境。随后可从仓库根目录、在不预置 `PYTHONPATH` 的干净 shell 中原样执行：
 
 ```bash
-cd "04_第一阶段预测改进版"
+cd "未提交修改/当前任务/候选成果"
 python3 "03_项目资料/03_验证协议与历次结果/02_验证程序/run_predictive_stage1_validation.py" \
   --include-baseline-tests
 ```

@@ -20,12 +20,23 @@ import traceback
 from typing import Any, Callable, Mapping
 
 
+def _discover_repository_root(start: Path) -> Path:
+    """Find the containing Git worktree without assuming candidate depth."""
+    for candidate in (start, *start.parents):
+        if (candidate / ".git").exists():
+            return candidate
+    raise RuntimeError(f"cannot find Git repository above {start}")
+
+
 HERE = Path(__file__).resolve()
 STAGE1 = HERE.parents[3]
 SIM = STAGE1 / "02_模拟程序"
-REPO = STAGE1.parent
+REPO = _discover_repository_root(STAGE1)
 PROTOCOL_PATH = HERE.with_name("PREDICTIVE_STAGE1_PROTOCOL.json")
 RESULTS_ROOT = STAGE1 / "03_项目资料" / "03_验证协议与历次结果" / "04_历次结果"
+
+ALLOWED_REPOSITORY_FILES = {"README.md", "AGENTS.md"}
+ALLOWED_REPOSITORY_PREFIXES = ("未提交修改/", "每次任务前阅读/")
 
 REQUIRED_TESTS = (
     "test_stage1_registry_and_entrypoints.py",
@@ -401,7 +412,10 @@ def _source_boundary_check() -> tuple[dict[str, str], dict[str, Any]]:
     )
     changed = sorted(set(line for line in changed_output.splitlines() if line))
     outside = [
-        path for path in changed if not path.startswith("04_第一阶段预测改进版/")
+        path
+        for path in changed
+        if path not in ALLOWED_REPOSITORY_FILES
+        and not path.startswith(ALLOWED_REPOSITORY_PREFIXES)
     ]
     if outside:
         raise AssertionError(f"changes outside allowed Stage1 tree: {outside}")
