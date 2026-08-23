@@ -1,0 +1,494 @@
+{
+  "schema": "airvortex-predictive-stage1-result-v2",
+  "created_at_utc": "2026-08-23T10:45:16.622474+00:00",
+  "overall_status": "PASS_STAGE1_IMPLEMENTATION__NO_GO_PHYSICAL_PREDICTION",
+  "implementation_pass": true,
+  "physical_prediction_go": false,
+  "six_gates": {
+    "G1_entrypoints": {
+      "passed": true
+    },
+    "G2_shared_observable_operator": {
+      "passed": true
+    },
+    "G3_comparison_contract": {
+      "passed": true
+    },
+    "G4_events_and_camera": {
+      "passed": true
+    },
+    "G5_numeric_auditability": {
+      "passed": true
+    },
+    "G6_validator": {
+      "passed": true
+    }
+  },
+  "gate_results": {
+    "compileall": {
+      "name": "compileall",
+      "required": true,
+      "command": [
+        "/tmp/iypt10-stage1-env.BepdEl/bin/python3",
+        "-m",
+        "compileall",
+        "-q",
+        "src/airvortex/stage1",
+        "run_stage1_gui.py",
+        "run_stage1_cli.py"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "log_path": "logs/01_compileall.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stage1_required_tests": {
+      "name": "stage1_required_tests",
+      "required": true,
+      "command": [
+        "/tmp/iypt10-stage1-env.BepdEl/bin/python3",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_stage1_registry_and_entrypoints.py",
+        "tests/test_stage1_shared_observable_operator.py",
+        "tests/test_stage1_core_comparison_contract.py",
+        "tests/test_stage1_units.py",
+        "tests/test_stage1_events_and_sampling.py",
+        "tests/test_stage1_camera_integration.py",
+        "tests/test_stage1_transport_conservation.py",
+        "tests/test_stage1_cls_conservation.py",
+        "tests/test_stage1_widest_path_topology.py",
+        "tests/test_stage1_hf3d_strict_warnings.py",
+        "tests/test_stage1_archive_roundtrip.py",
+        "tests/test_stage1_validator_end_to_end.py"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "002aefd63e9e753f27d3ebdc8693017eecf351815cd4d544a8e01d2646bd482e",
+      "log_path": "logs/02_stage1_required_tests.log",
+      "log_sha256": "002aefd63e9e753f27d3ebdc8693017eecf351815cd4d544a8e01d2646bd482e"
+    },
+    "full_baseline_regression": {
+      "name": "full_baseline_regression",
+      "required": true,
+      "command": [
+        "/tmp/iypt10-stage1-env.BepdEl/bin/python3",
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "f878d9bcfdc0a5b0920cef7e8554b8fe8489f4fee45f8bbef086b77c38990989",
+      "log_path": "logs/03_full_baseline_regression.log",
+      "log_sha256": "f878d9bcfdc0a5b0920cef7e8554b8fe8489f4fee45f8bbef086b77c38990989"
+    },
+    "backend_cli_self_check": {
+      "name": "backend_cli_self_check",
+      "required": true,
+      "command": [
+        "/tmp/iypt10-stage1-env.BepdEl/bin/python3",
+        "run_stage1_cli.py",
+        "self-check",
+        "--pretty"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "f26ef928b42c9f6f4f5072dd7aa3d1dba05d4984abf8925f93f7d371e91afd91",
+      "log_path": "logs/04_backend_cli_self_check.log",
+      "log_sha256": "f26ef928b42c9f6f4f5072dd7aa3d1dba05d4984abf8925f93f7d371e91afd91"
+    },
+    "strict_warnings_self_check": {
+      "name": "strict_warnings_self_check",
+      "required": true,
+      "command": [
+        "/tmp/iypt10-stage1-env.BepdEl/bin/python3",
+        "run_stage1_cli.py",
+        "self-check",
+        "--pretty"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "f26ef928b42c9f6f4f5072dd7aa3d1dba05d4984abf8925f93f7d371e91afd91",
+      "log_path": "logs/05_strict_warnings_self_check.log",
+      "log_sha256": "f26ef928b42c9f6f4f5072dd7aa3d1dba05d4984abf8925f93f7d371e91afd91"
+    },
+    "gui_backend_discovery": {
+      "name": "gui_backend_discovery",
+      "required": true,
+      "command": [
+        "/tmp/iypt10-stage1-env.BepdEl/bin/python3",
+        "-c",
+        "from airvortex.stage1 import install_stage1_overlay; install_stage1_overlay(); from airvortex.gui.model import GuiViewModel; GuiViewModel(); from airvortex.runtime import discover_backends; r=discover_backends(probe=True); assert not r.discovery_errors; a=r.create('forward'); b=r.create('high_fidelity'); assert type(a).__module__=='airvortex.stage1.backends'; assert type(b).__module__=='airvortex.stage1.backends'; print(type(a).__name__, type(b).__name__)"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "01092398230fd73e6a52924411501fdf4cf5a53956118d74e100fe29b7c0d8ce",
+      "log_path": "logs/06_gui_backend_discovery.log",
+      "log_sha256": "01092398230fd73e6a52924411501fdf4cf5a53956118d74e100fe29b7c0d8ce"
+    },
+    "forward_cli_archive": {
+      "name": "forward_cli_archive",
+      "required": true,
+      "command": [
+        "/tmp/iypt10-stage1-env.BepdEl/bin/python3",
+        "run_stage1_cli.py",
+        "run",
+        "--backend",
+        "forward",
+        "--config",
+        "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/inputs/forward_smoke.json",
+        "--output",
+        "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/archives/forward",
+        "--quiet"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "fb9ea08e0d3a3b69fc1a7e76a18eab965a128a7c533d546cfb60d14a9ab44d23",
+      "log_path": "logs/07_forward_cli_archive.log",
+      "log_sha256": "fb9ea08e0d3a3b69fc1a7e76a18eab965a128a7c533d546cfb60d14a9ab44d23"
+    },
+    "hf3d_cli_archive": {
+      "name": "hf3d_cli_archive",
+      "required": true,
+      "command": [
+        "/tmp/iypt10-stage1-env.BepdEl/bin/python3",
+        "run_stage1_cli.py",
+        "run",
+        "--backend",
+        "high_fidelity",
+        "--config",
+        "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/inputs/hf3d_smoke.json",
+        "--output",
+        "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/archives/hf3d",
+        "--quiet"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "c87ec042c09651c276bdca88628126ae5c1f08dbf566c1d342d06b9ec525c162",
+      "log_path": "logs/08_hf3d_cli_archive.log",
+      "log_sha256": "c87ec042c09651c276bdca88628126ae5c1f08dbf566c1d342d06b9ec525c162"
+    },
+    "archive_roundtrip_and_contract": {
+      "name": "archive_roundtrip_and_contract",
+      "required": true,
+      "command": null,
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "7a37fb6ef7c48dd03254bc3f3f670c25e6dd27142ebcc4b7edbd09288267c88e",
+      "log_path": "logs/09_archive_roundtrip_and_contract.log",
+      "log_sha256": "7a37fb6ef7c48dd03254bc3f3f670c25e6dd27142ebcc4b7edbd09288267c88e"
+    },
+    "identity_mismatch_counterexample": {
+      "name": "identity_mismatch_counterexample",
+      "required": true,
+      "command": null,
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "485cf0e97a43e48144a8daea6283bd9625690ede8fc68b8ec0a0dee136a85231",
+      "log_path": "logs/10_identity_mismatch_counterexample.log",
+      "log_sha256": "485cf0e97a43e48144a8daea6283bd9625690ede8fc68b8ec0a0dee136a85231"
+    },
+    "camera_end_to_end": {
+      "name": "camera_end_to_end",
+      "required": true,
+      "command": [
+        "/tmp/iypt10-stage1-env.BepdEl/bin/python3",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_stage1_camera_integration.py"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "e24bc4673d90e5371a2d6d2b46885786403a40b3a2802697e54d1c0d8a4fe509",
+      "log_path": "logs/11_camera_end_to_end.log",
+      "log_sha256": "e24bc4673d90e5371a2d6d2b46885786403a40b3a2802697e54d1c0d8a4fe509"
+    },
+    "numeric_algorithm_tests": {
+      "name": "numeric_algorithm_tests",
+      "required": true,
+      "command": [
+        "/tmp/iypt10-stage1-env.BepdEl/bin/python3",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_stage1_transport_conservation.py",
+        "tests/test_stage1_cls_conservation.py",
+        "tests/test_stage1_widest_path_topology.py"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "ebd938888ffaa2af3581cec946b9b58fbc84d3d34af429b416dd4a0ad79f1a12",
+      "log_path": "logs/12_numeric_algorithm_tests.log",
+      "log_sha256": "ebd938888ffaa2af3581cec946b9b58fbc84d3d34af429b416dd4a0ad79f1a12"
+    },
+    "numeric_archive_thresholds": {
+      "name": "numeric_archive_thresholds",
+      "required": true,
+      "command": null,
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "2f75361605bb3f626442bd81e8c8eb3f0cf12dbbf42818059b215313d89842a0",
+      "log_path": "logs/13_numeric_archive_thresholds.log",
+      "log_sha256": "2f75361605bb3f626442bd81e8c8eb3f0cf12dbbf42818059b215313d89842a0"
+    },
+    "comparison_report_generation": {
+      "name": "comparison_report_generation",
+      "required": true,
+      "command": [
+        "/tmp/iypt10-stage1-env.BepdEl/bin/python3",
+        "run_stage1_cli.py",
+        "compare",
+        "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/archives/forward",
+        "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/archives/hf3d",
+        "--output",
+        "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/comparison_report",
+        "--quiet"
+      ],
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/02_模拟程序",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "4a9da2d5c677ee478e3e7eefcf9b36fa049ec31b873bf82f5773ce74ab930752",
+      "log_path": "logs/14_comparison_report_generation.log",
+      "log_sha256": "4a9da2d5c677ee478e3e7eefcf9b36fa049ec31b873bf82f5773ce74ab930752"
+    },
+    "source_boundary": {
+      "name": "source_boundary",
+      "required": true,
+      "command": null,
+      "cwd": "/home/cjt/Desktop/iypt/10 空气涡流",
+      "returncode": 0,
+      "passed": true,
+      "output_sha256": "547e61ea75b19653d7f56a9b5dd4abf06c6b7aeed21233d838a4889af1d5e709",
+      "log_path": "logs/15_source_boundary.log",
+      "log_sha256": "547e61ea75b19653d7f56a9b5dd4abf06c6b7aeed21233d838a4889af1d5e709"
+    }
+  },
+  "environment": {
+    "python_executable": "/tmp/iypt10-stage1-env.BepdEl/bin/python3",
+    "python_version": "3.12.3",
+    "implementation": "CPython",
+    "platform": "Linux-7.0.0-28-generic-x86_64-with-glibc2.39",
+    "dependencies": {
+      "numpy": "1.26.4",
+      "scipy": "1.11.4",
+      "matplotlib": "3.6.3",
+      "pytest": "9.1.1"
+    },
+    "pythonpath_for_subprocesses": "/home/cjt/Desktop/iypt/10 空气涡流/04_第一阶段预测改进版/02_模拟程序/src"
+  },
+  "source_content_identity": {
+    "algorithm": "sha256",
+    "canonicalization": "sorted relative UTF-8 path and length-prefixed bytes",
+    "excluded": [
+      "validation result history",
+      "Python/test caches"
+    ],
+    "sha256": "e73523ae933bd3dfba969fe77b67346c2645019e96f83f25c970004ad03b4749",
+    "file_count": 155,
+    "total_bytes": 3007069
+  },
+  "git": {
+    "branch": "codex/stage1-implementation-repair-20260823",
+    "head": "e2a8215baa204b2a7f35c84aa0606c32e1018cc3",
+    "origin_main": "e2a8215baa204b2a7f35c84aa0606c32e1018cc3",
+    "working_tree_status": [
+      "M 04_第一阶段预测改进版/02_模拟程序/src/airvortex/analysis/comparison.py",
+      " M 04_第一阶段预测改进版/02_模拟程序/src/airvortex/backends/high_fidelity_3d.py",
+      " M 04_第一阶段预测改进版/02_模拟程序/src/airvortex/gui/model.py",
+      " M 04_第一阶段预测改进版/02_模拟程序/src/airvortex/numerics/momentum3d.py",
+      " M 04_第一阶段预测改进版/02_模拟程序/src/airvortex/stage1/backends.py",
+      " M 04_第一阶段预测改进版/02_模拟程序/src/airvortex/stage1/bootstrap.py",
+      " M 04_第一阶段预测改进版/02_模拟程序/src/airvortex/stage1/cls3d.py",
+      " M 04_第一阶段预测改进版/02_模拟程序/src/airvortex/stage1/contracts.py",
+      " M 04_第一阶段预测改进版/02_模拟程序/src/airvortex/stage1/measurement.py",
+      " M 04_第一阶段预测改进版/02_模拟程序/src/airvortex/stage1/observables.py",
+      " M 04_第一阶段预测改进版/02_模拟程序/src/airvortex/stage1/transport3d.py",
+      " M 04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/02_验证程序/PREDICTIVE_STAGE1_PROTOCOL.json",
+      " M 04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/02_验证程序/run_predictive_stage1_validation.py",
+      " M 04_第一阶段预测改进版/CHANGELOG.md",
+      " M 04_第一阶段预测改进版/README.md",
+      "?? 04_第一阶段预测改进版/02_模拟程序/tests/stage1_test_support.py",
+      "?? 04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_archive_roundtrip.py",
+      "?? 04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_camera_integration.py",
+      "?? 04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_cls_conservation.py",
+      "?? 04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_core_comparison_contract.py",
+      "?? 04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_events_and_sampling.py",
+      "?? 04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_hf3d_strict_warnings.py",
+      "?? 04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_registry_and_entrypoints.py",
+      "?? 04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_shared_observable_operator.py",
+      "?? 04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_transport_conservation.py",
+      "?? 04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_units.py",
+      "?? 04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_validator_end_to_end.py",
+      "?? 04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_widest_path_topology.py",
+      "?? 04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/",
+      "?? 04_第一阶段预测改进版/ISSUE_LEDGER.md",
+      "?? 04_第一阶段预测改进版/REPAIR_REPORT.md"
+    ],
+    "changed_paths": [
+      "04_第一阶段预测改进版/02_模拟程序/src/airvortex/analysis/comparison.py",
+      "04_第一阶段预测改进版/02_模拟程序/src/airvortex/backends/high_fidelity_3d.py",
+      "04_第一阶段预测改进版/02_模拟程序/src/airvortex/gui/model.py",
+      "04_第一阶段预测改进版/02_模拟程序/src/airvortex/numerics/momentum3d.py",
+      "04_第一阶段预测改进版/02_模拟程序/src/airvortex/stage1/backends.py",
+      "04_第一阶段预测改进版/02_模拟程序/src/airvortex/stage1/bootstrap.py",
+      "04_第一阶段预测改进版/02_模拟程序/src/airvortex/stage1/cls3d.py",
+      "04_第一阶段预测改进版/02_模拟程序/src/airvortex/stage1/contracts.py",
+      "04_第一阶段预测改进版/02_模拟程序/src/airvortex/stage1/measurement.py",
+      "04_第一阶段预测改进版/02_模拟程序/src/airvortex/stage1/observables.py",
+      "04_第一阶段预测改进版/02_模拟程序/src/airvortex/stage1/transport3d.py",
+      "04_第一阶段预测改进版/02_模拟程序/tests/stage1_test_support.py",
+      "04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_archive_roundtrip.py",
+      "04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_camera_integration.py",
+      "04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_cls_conservation.py",
+      "04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_core_comparison_contract.py",
+      "04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_events_and_sampling.py",
+      "04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_hf3d_strict_warnings.py",
+      "04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_registry_and_entrypoints.py",
+      "04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_shared_observable_operator.py",
+      "04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_transport_conservation.py",
+      "04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_units.py",
+      "04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_validator_end_to_end.py",
+      "04_第一阶段预测改进版/02_模拟程序/tests/test_stage1_widest_path_topology.py",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/02_验证程序/PREDICTIVE_STAGE1_PROTOCOL.json",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/02_验证程序/run_predictive_stage1_validation.py",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/archives/forward/arrays.npz",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/archives/forward/config.json",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/archives/forward/manifest.json",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/archives/forward/provenance.json",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/archives/forward/result.json",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/archives/forward/timeseries.csv",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/archives/hf3d/arrays.npz",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/archives/hf3d/config.json",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/archives/hf3d/manifest.json",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/archives/hf3d/provenance.json",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/archives/hf3d/result.json",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/archives/hf3d/timeseries.csv",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/comparison_report/comparison.json",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/comparison_report/manifest.json",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/inputs/forward_smoke.json",
+      "04_第一阶段预测改进版/03_项目资料/03_验证协议与历次结果/04_历次结果/20260823T104453Z-predictive-stage1-repair-v2/inputs/hf3d_smoke.json",
+      "04_第一阶段预测改进版/CHANGELOG.md",
+      "04_第一阶段预测改进版/ISSUE_LEDGER.md",
+      "04_第一阶段预测改进版/README.md",
+      "04_第一阶段预测改进版/REPAIR_REPORT.md"
+    ],
+    "outside_allowed_scope": []
+  },
+  "original_tree_sha": {
+    "01_最终理论": "238914477bfa15cf6d8dcd1a7e731b1559b6506d",
+    "02_模拟程序": "2d65edcd2717ac262d028ab51d1feecc850b838f",
+    "03_项目资料": "84f0e9e210b86b556935b9117310b5e668813bd7"
+  },
+  "physical_go_gates": {
+    "static_drop_laplace_pressure": false,
+    "spurious_current_grid_convergence": false,
+    "capillary_wave_frequency_and_damping": false,
+    "joint_grid_time_interface_refinement": false,
+    "measured_bar_trajectory": false,
+    "independent_calibration_and_blind_validation": false
+  },
+  "interpretation": "Implementation evidence only. HF3D and forward agreement is not apparatus-level validation.",
+  "evidence_files": {
+    "archives/forward/manifest.json": {
+      "bytes": 2753,
+      "sha256": "a334b4525727d4f1aa76662e059411c334ca1c0d8b0ca5c8b04a5c4ec7991e96"
+    },
+    "archives/hf3d/manifest.json": {
+      "bytes": 3387,
+      "sha256": "05090867c3ae3fe3a18c26148f648c2223395ea5552d050485c053c4954383f7"
+    },
+    "comparison_report/comparison.json": {
+      "bytes": 5770,
+      "sha256": "8867f210b8dc0a98ede8c357824bad37115fbd3df695948411734c1dc94c2312"
+    },
+    "comparison_report/manifest.json": {
+      "bytes": 743,
+      "sha256": "d6eb4a0ce54b4161eb0aad3ca03b71f53b685c16555ef58e14d945781908da29"
+    },
+    "inputs/forward_smoke.json": {
+      "bytes": 3437,
+      "sha256": "cbc6d7f603f203f29279b55f87053f0ffcfb24241058a5a052fa153a88b74ccc"
+    },
+    "inputs/hf3d_smoke.json": {
+      "bytes": 3447,
+      "sha256": "a06a7f4f84850b1d8e2ca05851794f346b5596deef4b5e98440045298038b36d"
+    },
+    "logs/01_compileall.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logs/02_stage1_required_tests.log": {
+      "bytes": 115,
+      "sha256": "002aefd63e9e753f27d3ebdc8693017eecf351815cd4d544a8e01d2646bd482e"
+    },
+    "logs/03_full_baseline_regression.log": {
+      "bytes": 317,
+      "sha256": "f878d9bcfdc0a5b0920cef7e8554b8fe8489f4fee45f8bbef086b77c38990989"
+    },
+    "logs/04_backend_cli_self_check.log": {
+      "bytes": 377,
+      "sha256": "f26ef928b42c9f6f4f5072dd7aa3d1dba05d4984abf8925f93f7d371e91afd91"
+    },
+    "logs/05_strict_warnings_self_check.log": {
+      "bytes": 377,
+      "sha256": "f26ef928b42c9f6f4f5072dd7aa3d1dba05d4984abf8925f93f7d371e91afd91"
+    },
+    "logs/06_gui_backend_discovery.log": {
+      "bytes": 47,
+      "sha256": "01092398230fd73e6a52924411501fdf4cf5a53956118d74e100fe29b7c0d8ce"
+    },
+    "logs/07_forward_cli_archive.log": {
+      "bytes": 634,
+      "sha256": "fb9ea08e0d3a3b69fc1a7e76a18eab965a128a7c533d546cfb60d14a9ab44d23"
+    },
+    "logs/08_hf3d_cli_archive.log": {
+      "bytes": 945,
+      "sha256": "c87ec042c09651c276bdca88628126ae5c1f08dbf566c1d342d06b9ec525c162"
+    },
+    "logs/09_archive_roundtrip_and_contract.log": {
+      "bytes": 64,
+      "sha256": "7a37fb6ef7c48dd03254bc3f3f670c25e6dd27142ebcc4b7edbd09288267c88e"
+    },
+    "logs/10_identity_mismatch_counterexample.log": {
+      "bytes": 119,
+      "sha256": "485cf0e97a43e48144a8daea6283bd9625690ede8fc68b8ec0a0dee136a85231"
+    },
+    "logs/11_camera_end_to_end.log": {
+      "bytes": 114,
+      "sha256": "e24bc4673d90e5371a2d6d2b46885786403a40b3a2802697e54d1c0d8a4fe509"
+    },
+    "logs/12_numeric_algorithm_tests.log": {
+      "bytes": 98,
+      "sha256": "ebd938888ffaa2af3581cec946b9b58fbc84d3d34af429b416dd4a0ad79f1a12"
+    },
+    "logs/13_numeric_archive_thresholds.log": {
+      "bytes": 1151,
+      "sha256": "2f75361605bb3f626442bd81e8c8eb3f0cf12dbbf42818059b215313d89842a0"
+    },
+    "logs/14_comparison_report_generation.log": {
+      "bytes": 618,
+      "sha256": "4a9da2d5c677ee478e3e7eefcf9b36fa049ec31b873bf82f5773ce74ab930752"
+    },
+    "logs/15_source_boundary.log": {
+      "bytes": 5537,
+      "sha256": "547e61ea75b19653d7f56a9b5dd4abf06c6b7aeed21233d838a4889af1d5e709"
+    }
+  }
+}

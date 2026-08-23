@@ -4,11 +4,13 @@
 
 仓库根目录原有 `01_最终理论/`、`02_模拟程序/`、`03_项目资料/` 不作任何修改；本目录内部复用其基线 tree，并在副本中追加第一阶段内容。结构性理论只随基线复制，不修改。
 
-第一阶段目标是：
+本轮修复的唯一实现状态目标是：
 
 ```text
-CALIBRATION_READY_AND_NUMERICALLY_INTERNALLY_CONSISTENT
+PASS_STAGE1_IMPLEMENTATION__NO_GO_PHYSICAL_PREDICTION
 ```
+
+`PASS_STAGE1_IMPLEMENTATION` 只表示入口、观测合同、比较门、事件/相机链、数值诊断和验证器形成了可执行闭环。它不表示模型已经校准，更不表示 HF3D 具有装置级预测效力。
 
 核心修改：
 
@@ -33,11 +35,22 @@ cd "04_第一阶段预测改进版/02_模拟程序"
 
 ## 验证
 
+先进入一个已安装项目依赖（至少 NumPy、SciPy、Matplotlib、pytest）的 Python 环境。随后可从仓库根目录、在不预置 `PYTHONPATH` 的干净 shell 中原样执行：
+
 ```bash
 cd "04_第一阶段预测改进版"
-PYTHONPATH="02_模拟程序/src" \
 python3 "03_项目资料/03_验证协议与历次结果/02_验证程序/run_predictive_stage1_validation.py" \
   --include-baseline-tests
 ```
 
-注意：仓库提交本身不等于测试已经运行。只有执行上述验证脚本并生成 `acceptance.json` 后，才能声称相应实现门通过。HF3D 的静滴、寄生流、毛细波、联合收敛、真实磁子轨迹与独立实验仍是物理预测 GO 的后续硬门。
+验证器会自行建立绝对源码路径、执行 12 个 Stage1 指定测试与完整回归，并把命令、返回码、日志哈希、Git 身份、受保护 tree 和源码内容 SHA-256 写入新建的 `acceptance.json`。任一必需门失败时，它会返回非零并写入 `implementation_pass=false`。
+
+也可在解压的修复交付包中执行总验收脚本；它会先核对 manifest，再串行执行相同硬门：
+
+```bash
+bash scripts/10_run_acceptance.sh "/home/cjt/Desktop/iypt/10 空气涡流"
+```
+
+注意：仓库提交本身不等于测试已经运行。只有同一源码身份对应的验证器证据全部通过，才能声称实现门通过。HF3D 的静滴、寄生流、毛细波、联合收敛、真实磁子轨迹与独立实验仍是物理预测 GO 的后续硬门；当前物理预测状态始终是 `NO_GO`。
+
+逐项根因与残余风险见 `ISSUE_LEDGER.md`，实现与验收摘要见 `REPAIR_REPORT.md`。
