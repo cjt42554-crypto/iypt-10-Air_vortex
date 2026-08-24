@@ -1,0 +1,65 @@
+{
+  "apparatus_prediction_allowed": false,
+  "backend": "high_fidelity",
+  "claim_ceiling": "PREVIEW_ONLY",
+  "config_sha256": "da687821c127a9d4b949806b5c837b45150b6db3f95ee58a1c4cfe70d7f204f0",
+  "experimental_validation": "NOT_PERFORMED",
+  "grid": {
+    "aspect_ratio": 1.5,
+    "bar_diameter_cells_best_axis": 1.2,
+    "bar_diameter_cells_worst_axis": 0.8,
+    "bar_diameter_m": 0.006,
+    "boundary_layer_width_cells_worst_axis": 1.0,
+    "boundary_layer_width_m": 0.0075,
+    "box_cell_count": 2304,
+    "dx_m": 0.0075,
+    "dy_m": 0.0075,
+    "dz_m": 0.005,
+    "exact_bar_volume_m3": 7.916813487046278e-07,
+    "h_geometric_m": 0.006551853485522244,
+    "h_max_m": 0.0075,
+    "h_min_m": 0.005,
+    "interface_width_cells_worst_axis": 1.6666666666666667,
+    "interface_width_m": 0.0125,
+    "nominal_bar_voxel_count": 2.8148670176164545,
+    "nx": 12,
+    "ny": 12,
+    "nz": 16
+  },
+  "label": "02_模拟程序/configs/hf_preview_quick.json",
+  "run": {
+    "configured_signed_bar_revolutions": 0.02,
+    "duration_s": 0.005,
+    "maximum_time_step_s": 0.0002,
+    "nominal_maximum_step_count": 25,
+    "output_interval_s": 0.001
+  },
+  "schema_version": 1,
+  "warnings": [
+    {
+      "code": "BAR_SUBCELL_WORST_AXIS",
+      "message": "磁子直径在最粗网格方向上不足一个单元。",
+      "severity": "critical"
+    },
+    {
+      "code": "BAR_TOO_FEW_VOXELS",
+      "message": "磁子精确体积对应的 Cartesian 单元少于 50 个。",
+      "severity": "major"
+    },
+    {
+      "code": "GRID_ANISOTROPY",
+      "message": "最大与最小网格间距之比超过 1.25。",
+      "severity": "major"
+    },
+    {
+      "code": "INTERFACE_UNDERRESOLVED_WORST_AXIS",
+      "message": "实现中的弥散界面宽度在最差方向上不足两格。",
+      "severity": "major"
+    },
+    {
+      "code": "SUB_ROTATION_WINDOW",
+      "message": "配置时长覆盖的带符号磁子转数不足一圈。",
+      "severity": "major"
+    }
+  ]
+}
