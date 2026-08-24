@@ -55,6 +55,8 @@ REMOVED_REFERENCES = REMOVED_PATHS + (
     "WORK" + "FLOW.md",
     "LAY" + "OUT.md",
     "archive/pre-" + "03-90-consolidation",
+    "01-" + "最终理论",
+    "02-" + "模拟程序",
 )
 
 REQUIRED_AGENT_TEXT = (
