@@ -23,38 +23,47 @@ REQUIRED_FILES = (
     "00_项目控制/STATUS.md",
     "00_项目控制/LAYOUT.md",
     "00_项目控制/WORKFLOW.md",
-    "00_项目控制/LAYOUT_VERSION.txt",
     "01_最终理论/README.md",
     "02_模拟程序/README.md",
     "03_项目资料/README.md",
     "90_候选工作区/README.md",
     "90_候选工作区/current/README.md",
+    "90_候选工作区/current/候选成果/README.md",
     "90_候选工作区/archive/README.md",
 )
-LEGACY_TOP_LEVEL = (
-    "每次任务前阅读",
-    "未提交修改",
-    "02_最终模拟程序",
-    "01-最终理论",
-    "02-模拟程序",
-    "03-项目资料",
+ALLOWED_TOP_LEVEL = (
+    ".git",
+    ".github",
+    ".gitignore",
+    "README.md",
+    "AGENTS.md",
+    "00_项目控制",
+    "01_最终理论",
+    "02_模拟程序",
+    "03_项目资料",
+    "90_候选工作区",
+    "tools",
 )
 ACTIVE_DOCS = (
     "README.md",
     "AGENTS.md",
     "00_项目控制/README.md",
     "00_项目控制/STATUS.md",
+    "00_项目控制/LAYOUT.md",
     "00_项目控制/WORKFLOW.md",
     "01_最终理论/README.md",
     "02_模拟程序/README.md",
     "03_项目资料/README.md",
     "90_候选工作区/README.md",
     "90_候选工作区/current/README.md",
-)
-FORBIDDEN_ACTIVE_TEXT = (
-    "每次任务前阅读/",
-    "未提交修改/当前任务/",
-    "/home/cjt/",
+    "90_候选工作区/current/候选成果/README.md",
+    "90_候选工作区/archive/README.md",
+    "90_候选工作区/current/管理/修改记录.md",
+    "90_候选工作区/current/管理/变更映射.md",
+    "90_候选工作区/current/管理/验收清单.md",
+    "90_候选工作区/current/管理/验证记录.md",
+    "90_候选工作区/current/审查与复现/README.md",
+    "90_候选工作区/current/审查与复现/当前审查/README.md",
 )
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 
@@ -68,13 +77,10 @@ def main() -> int:
     for relative in REQUIRED_FILES:
         if not (ROOT / relative).is_file():
             errors.append(f"missing file: {relative}")
-    for relative in LEGACY_TOP_LEVEL:
-        if (ROOT / relative).exists():
-            errors.append(f"legacy top-level path still exists: {relative}")
-
-    version_path = ROOT / "00_项目控制/LAYOUT_VERSION.txt"
-    if version_path.is_file() and version_path.read_text(encoding="utf-8").strip() != "2":
-        errors.append("LAYOUT_VERSION.txt must contain 2")
+    allowed_top_level = set(ALLOWED_TOP_LEVEL)
+    for path in ROOT.iterdir():
+        if path.name not in allowed_top_level:
+            errors.append(f"unexpected top-level path: {path.name}")
 
     status_path = ROOT / "00_项目控制/STATUS.md"
     if status_path.is_file() and "90_候选工作区/current/" not in status_path.read_text(encoding="utf-8"):
@@ -85,9 +91,6 @@ def main() -> int:
         if not path.is_file():
             continue
         text = path.read_text(encoding="utf-8")
-        for token in FORBIDDEN_ACTIVE_TEXT:
-            if token in text:
-                errors.append(f"legacy active reference {token!r} in {relative}")
         for raw_target in LINK_RE.findall(text):
             target = raw_target.strip().split(maxsplit=1)[0].strip("<>")
             if not target or target.startswith(("#", "http://", "https://", "mailto:")):

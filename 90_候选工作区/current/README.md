@@ -7,7 +7,7 @@
 ## 当前结论
 
 - 候选位置：[`候选成果/`](候选成果/)。
-- 实现证据状态：`PASS_STAGE1_IMPLEMENTATION__NO_GO_PHYSICAL_PREDICTION`，但历史 PASS 只绑定其记录的源码和环境。
+- 已记录的实现证据：`PASS_STAGE1_IMPLEMENTATION__NO_GO_PHYSICAL_PREDICTION`，只绑定 acceptance 记录的源码、配置、命令和环境。
 - 装置级物理预测：`NO-GO`。
 - 成熟基线回写：未执行。
 
@@ -33,7 +33,7 @@ cd "90_候选工作区/current/候选成果/02_模拟程序"
 ./run_stage1_gui.sh
 ```
 
-布局迁移后应重新运行与当前提交绑定的验证。历史 PASS 不能代替新路径复验，也不能证明物理预测。
+必须为当前提交重新运行验证并保存绑定证据。其他身份绑定的 PASS 不能代替当前复验，也不能证明物理预测。
 
 ## 下一步
 
