@@ -1,0 +1,19 @@
+name: Repository policy
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check repository policy
+        run: python3 tools/check_repository_policy.py
+      - name: Check Markdown math
+        if: ${{ hashFiles('tools/check_markdown_math.py') != '' }}
+        run: python3 tools/check_markdown_math.py
