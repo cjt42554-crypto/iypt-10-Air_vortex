@@ -1,8 +1,0 @@
-test,expected_precursor,actual_precursor,expected_resolved,actual_resolved,expected_throat_cells,actual_throat_cells,required_throat_cells,expected_required_throat_cells,required_throat_radius_m,interface_thickness_m,minimum_throat_radius_m,status
-zero_width,False,False,False,False,0,0,5,5,0.009375,0.0046875,0.0,PASS
-one_cell_precursor,True,True,False,False,1,1,5,5,0.009375,0.0046875,0.001875,PASS
-one_below_required,True,True,False,False,4,4,5,5,0.009375,0.0046875,0.0075,PASS
-exactly_required,True,True,True,True,5,5,5,5,0.009375,0.0046875,0.009375,PASS
-one_above_required,True,True,True,True,6,6,5,5,0.009375,0.0046875,0.01125,PASS
-wide_with_one_below_required_bottleneck,True,True,False,False,4,4,5,5,0.009375,0.0046875,0.0075,PASS
-required_width_disconnected,False,False,False,False,0,0,5,5,0.009375,0.0046875,0.0,PASS

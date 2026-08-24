@@ -1,4 +1,0 @@
-time_s,bar_speed_rpm,surface_depth_mm,min_gap_to_bar_mm,connectivity_fraction,local_air_core_radius_mm,local_relative_speed_mm_s,intermittent_contact,detached_bubbles,unstable,bar_desynchronized
-0,0,0,52.5,0,0,0,0,0,0,0
-1,450,4.2,48.3,0,0,0,0,0,0,0
-2,900,21.8,30.7,0,2.0,80,0,0,0,0

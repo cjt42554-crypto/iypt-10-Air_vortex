@@ -1,4 +1,0 @@
-timestamp_local,device,gpu_utilization_percent,memory_utilization_percent,memory_used_mib,power_w,sm_clock_mhz,classification
-2026-08-21T18:05:44.710+08:00,NVIDIA GeForce RTX 5060 Laptop GPU,43,12,919,33.47,2407,in_run_coarse_sample
-2026-08-21T18:05:45.713+08:00,NVIDIA GeForce RTX 5060 Laptop GPU,41,12,919,33.15,2355,in_run_coarse_sample
-2026-08-21T18:05:46.714+08:00,NVIDIA GeForce RTX 5060 Laptop GPU,37,11,919,33.04,2385,in_run_coarse_sample
