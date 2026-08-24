@@ -61,6 +61,7 @@ REMOVED_REFERENCES = REMOVED_PATHS + (
 
 REQUIRED_AGENT_TEXT = (
     "本文件是本仓库唯一有效的 AI 自主工作规范",
+    "README.md` 可由用户自行编写",
     "01_最终理论/**",
     "02_模拟程序/**",
     "90_候选工作区/current/**",
@@ -136,10 +137,6 @@ def main() -> int:
     for relative in REMOVED_PATHS:
         if (ROOT / relative).exists():
             errors.append(f"removed path still exists: {relative}")
-
-    root_readme = ROOT / "README.md"
-    if root_readme.is_file() and root_readme.read_bytes() != b"":
-        errors.append("root README.md must be exactly zero bytes")
 
     agents_files = sorted(ROOT.rglob("AGENTS.md"))
     if agents_files != [ROOT / "AGENTS.md"]:
