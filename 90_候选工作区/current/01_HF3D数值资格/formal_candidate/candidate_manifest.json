@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-08-26T01:28:50+08:00",
+  "status": "FINE_WINDOW_CANDIDATE_PASS__PROMOTION_DECISION_REQUIRED",
+  "formal_theory_modified": false,
+  "formal_program_modified": false,
+  "baseline": {
+    "repository_commit": "9b79b1ca39461ada176c6e7de5855a935b191983",
+    "formal_source_tree_sha256": "4858dc42121c1bc5dfd926aafef194e4225c8a0c1100118efb7d8ab184dd3c8a"
+  },
+  "candidate_patch": {
+    "path": "0001-Add-transactional-HF3D-CFL-controller-candidate.patch",
+    "sha256": "ee978d7bc9e1b27278b6f89a44c03f789780ba1cb11d648989ca8a3ee29ef4be",
+    "size_bytes": 56955,
+    "patched_source_tree_sha256": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
+    "changed_files": [
+      "src/airvortex/backends/high_fidelity_3d.py",
+      "src/airvortex/core/config.py",
+      "src/airvortex/numerics/__init__.py",
+      "src/airvortex/numerics/projection3d.py",
+      "src/airvortex/numerics/projection3d_gpu.py",
+      "tests/test_config_io.py",
+      "tests/test_gpu_projection.py",
+      "tests/test_high_fidelity_3d.py"
+    ],
+    "default_cfl_controller_target_fraction": 0.95,
+    "default_maximum_cfl_step_retries": 4,
+    "hard_cfl_gate_changed": false
+  },
+  "tracked_candidate_files": {
+    "analyse_fine_window.py": "8cf7f9df6a358f7bd966a5b0d0e51cca5942e77813bff503fa7d192c569348ea",
+    "fine_window_pressure_1e-7.json": "ee8f95bce809e8059071be680cfc8f8a4808305761dbf3695905ed6aad997527",
+    "fine_window_report.json": "80c75d9e5d936a39baa19d5bc5e1a959e8bbfad9c07fa9ade9281be4b05ccf3a",
+    "fine_window_report.md": "9bfc79f374ff19f57b8d57ce1e910bb02670125aab4cf85c56bf814e7611f99a",
+    "promotion_review.md": "2beeacb444af07f2ab66da79b1391004df9833f1f18c38996821952ff836afa1"
+  },
+  "validation": {
+    "git_apply_check": "PASS",
+    "clean_copy_patch_apply_and_reverse_check": "PASS",
+    "patched_source_tree_hash": "PASS",
+    "candidate_tool_tests": {
+      "passed": 24,
+      "failed": 0
+    },
+    "formal_full_test_suite_on_final_patch": {
+      "run": 181,
+      "passed": 177,
+      "skipped_cuda_in_system_python": 4,
+      "failed": 0
+    },
+    "isolated_cuda_tests": {
+      "run": 5,
+      "passed": 5,
+      "failed": 0
+    },
+    "formal_self_check": {
+      "run": 6,
+      "passed": 6,
+      "failed": 0
+    },
+    "compileall": "PASS",
+    "whitespace_and_tab_scan": "PASS"
+  },
+  "fine_window_replay": {
+    "report_status": "FINE_WINDOW_CANDIDATE_PASS__PROMOTION_DECISION_REQUIRED",
+    "archive_manifest_sha256": "514dd79c26441c5755d6635aaae003caa3a7b792c57d843a1c7f13c2881bf4b8",
+    "archive_payload_files": {
+      "arrays.npz": {
+        "sha256": "a1a8112617d93fd23d081451cc45258aea9ac4c4aa0f1f6ba7aabea4ec33f054",
+        "size_bytes": 103617111
+      },
+      "config.json": {
+        "sha256": "ee8f95bce809e8059071be680cfc8f8a4808305761dbf3695905ed6aad997527",
+        "size_bytes": 3532
+      },
+      "provenance.json": {
+        "sha256": "67c37b5e463954dc05ddf2692927abeb8e077b4fb4193dc1c27b1c941b59851f",
+        "size_bytes": 6899
+      },
+      "result.json": {
+        "sha256": "a94bda2a5d4349e40103c5d205744b084632b200ea69825084b273fbf1416209",
+        "size_bytes": 26935
+      },
+      "timeseries.csv": {
+        "sha256": "4335d023f17f73f8803e3f3b99d2a345914c766c38e919a70757040fae47c35c",
+        "size_bytes": 9134
+      }
+    },
+    "completed_steps": 1757,
+    "simulated_duration_s": 0.013,
+    "runtime_wall_s": 3998.592221981002,
+    "pressure_accelerator_selected": "cuda",
+    "pressure_accelerator_fallback": false,
+    "source_tree_sha256_start": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
+    "source_tree_sha256_end": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
+    "loaded_module_bytes_verified": false,
+    "maximum_accepted_post_projection_cfl": 0.3369061776118556,
+    "hard_cfl_limit": 0.35,
+    "cfl_retry_attempts_total": 0,
+    "combined_known_source_limited_steps": 112,
+    "minimum_combined_known_source_limited_dt_s": 5.82815205187083e-06,
+    "registered_dt_hit_fraction": 0.9288560045532157,
+    "q1r2_required_registered_dt_hit_fraction": 0.95,
+    "maximum_projected_divergence_s_inv": 2.4909184404009466e-05,
+    "absolute_divergence_gate_s_inv": 0.0001,
+    "maximum_pressure_relative_residual": 9.999968295266298e-08,
+    "pressure_relative_tolerance": 1e-07
+  },
+  "decision_required": {
+    "question": "Apply the frozen candidate patch to the formal program with target fraction 0.95, at most four transactional retries, and the new dense diagnostics?",
+    "authorization_received": false
+  },
+  "not_performed": [
+    "formal patch promotion",
+    "replay from promoted formal source",
+    "Q1R2 freeze or execution",
+    "multi-grid or multi-time-step convergence qualification",
+    "physical validation",
+    "experimental validation"
+  ],
+  "claim_ceiling": "IMPLEMENTATION_CANDIDATE_AND_ONE_FINE_WINDOW_PASS__Q1R2_NOT_FROZEN__NO_GO_PHYSICAL_PREDICTION"
+}

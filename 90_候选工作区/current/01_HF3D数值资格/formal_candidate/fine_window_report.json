@@ -1,0 +1,194 @@
+{
+  "allowed_input_difference_paths": [
+    "high_fidelity.cfl_controller_target_fraction",
+    "high_fidelity.maximum_cfl_step_retries",
+    "high_fidelity.pressure_relative_tolerance",
+    "high_fidelity.pressure_solver_device",
+    "run.duration_s"
+  ],
+  "archive": {
+    "completed_steps": 1757,
+    "config_sha256": "c753267235ac464d09ca4d931a533817d149230967ab55f935c2447c47419742",
+    "manifest_sha256": "514dd79c26441c5755d6635aaae003caa3a7b792c57d843a1c7f13c2881bf4b8",
+    "manifest_size_bytes": 2729,
+    "path": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/01_HF3D数值资格/runs/cfl_candidate/fine_window_pressure_1e-7",
+    "payload_files": {
+      "arrays.npz": {
+        "sha256": "a1a8112617d93fd23d081451cc45258aea9ac4c4aa0f1f6ba7aabea4ec33f054",
+        "size_bytes": 103617111
+      },
+      "config.json": {
+        "sha256": "ee8f95bce809e8059071be680cfc8f8a4808305761dbf3695905ed6aad997527",
+        "size_bytes": 3532
+      },
+      "provenance.json": {
+        "sha256": "67c37b5e463954dc05ddf2692927abeb8e077b4fb4193dc1c27b1c941b59851f",
+        "size_bytes": 6899
+      },
+      "result.json": {
+        "sha256": "a94bda2a5d4349e40103c5d205744b084632b200ea69825084b273fbf1416209",
+        "size_bytes": 26935
+      },
+      "timeseries.csv": {
+        "sha256": "4335d023f17f73f8803e3f3b99d2a345914c766c38e919a70757040fae47c35c",
+        "size_bytes": 9134
+      }
+    },
+    "pressure_accelerator": {
+      "compute_capability": "12.0",
+      "detail": "CuPy FP64 device operation passed",
+      "device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+      "fallback": false,
+      "host_device_transfer_each_solve": true,
+      "requested": "cuda",
+      "selected": "cuda",
+      "total_memory_bytes": 8053915648
+    },
+    "runtime_wall_s": 3998.592221981002,
+    "simulated_duration_s": 0.013,
+    "source_identity": {
+      "boundary_match": true,
+      "execution_source_identity_valid": true,
+      "loaded_module_bytes_verified": false,
+      "source_tree_sha256_end": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
+      "source_tree_sha256_start": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010"
+    }
+  },
+  "candidate_patch": {
+    "expected_source_tree_sha256": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
+    "path": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/01_HF3D数值资格/formal_candidate/0001-Add-transactional-HF3D-CFL-controller-candidate.patch",
+    "sha256": "ee978d7bc9e1b27278b6f89a44c03f789780ba1cb11d648989ca8a3ee29ef4be"
+  },
+  "cfl": {
+    "controller_target_fraction": 0.95,
+    "hard_limit": 0.35,
+    "maximum_accepted_post_projection_cfl": 0.3369061776118556,
+    "maximum_accepted_step_one_based": 1686,
+    "maximum_accepted_step_time_s": 0.012569466126207084,
+    "maximum_pre_projection_advective_cfl": 0.3381360043332351,
+    "maximum_pre_source_advective_cfl": 0.33813068689645126,
+    "maximum_rejected_post_projection_cfl": 0.0,
+    "maximum_starting_advective_cfl": 0.3322602074852399,
+    "minimum_accepted_dt_s": 6.764656902431138e-07,
+    "minimum_combined_known_source_limited_dt_s": 5.82815205187083e-06,
+    "peak_step_operator_acceleration_m_s2": {
+      "boundary_acceleration_m_s2": 823.3554934966929,
+      "gravity_acceleration_m_s2": 9.80665,
+      "momentum_advection_acceleration_m_s2": 112250.61472144992,
+      "pressure_projection_acceleration_m_s2": 60453.56791773697,
+      "rotating_frame_acceleration_m_s2": 131.31693547369807,
+      "surface_tension_acceleration_m_s2": 775.6726220345744,
+      "viscous_acceleration_m_s2": 351.0287750057833
+    },
+    "registered_dt_hit_fraction": 0.9288560045532157,
+    "retried_accepted_steps": 0,
+    "retry_attempts_total": 0,
+    "retry_events": [],
+    "time_step_limiter_counts": {
+      "capillary_stability": 0,
+      "combined_known_source_cfl": 112,
+      "direct_call": 0,
+      "initial_state": 0,
+      "output_alignment": 13,
+      "post_projection_cfl_retry": 0,
+      "registered_time_step": 1632,
+      "rotation_increment": 0,
+      "viscous_stability": 0
+    },
+    "time_step_limiter_statistics": {
+      "combined_known_source_cfl": {
+        "accepted_step_count": 112,
+        "maximum_dt_s": 7.480118729634429e-06,
+        "median_dt_s": 6.449036718770594e-06,
+        "minimum_dt_s": 5.82815205187083e-06
+      },
+      "output_alignment": {
+        "accepted_step_count": 13,
+        "maximum_dt_s": 2.500000000040664e-06,
+        "median_dt_s": 2.4999999999886224e-06,
+        "minimum_dt_s": 6.764656902431138e-07
+      },
+      "registered_time_step": {
+        "accepted_step_count": 1632,
+        "maximum_dt_s": 7.5e-06,
+        "median_dt_s": 7.5e-06,
+        "minimum_dt_s": 7.5e-06
+      }
+    }
+  },
+  "claim_ceiling": {
+    "apparatus_prediction_allowed": false,
+    "experimental_validation_performed": false,
+    "formal_program_modified": false,
+    "loaded_module_bytes_verified": false,
+    "numerical_convergence_demonstrated": false,
+    "physical_validation_performed": false,
+    "q1r2_frozen_or_passed": false
+  },
+  "gate_pass": true,
+  "gates": {
+    "absolute_projected_divergence": true,
+    "accepted_post_projection_cfl": true,
+    "archive_integrity": true,
+    "candidate_disk_source_boundary_identity": true,
+    "completed_targeted_duration": true,
+    "crossed_old_failure_state_time": true,
+    "cuda_selected_without_fallback": true,
+    "formal_numerical_quality_gate": true,
+    "input_change_scope": true,
+    "pressure_relative_residual": true
+  },
+  "input_differences_from_original_fine_case": [
+    {
+      "candidate": 0.95,
+      "path": "high_fidelity.cfl_controller_target_fraction",
+      "reference": null
+    },
+    {
+      "candidate": 4,
+      "path": "high_fidelity.maximum_cfl_step_retries",
+      "reference": null
+    },
+    {
+      "candidate": 1e-07,
+      "path": "high_fidelity.pressure_relative_tolerance",
+      "reference": 1e-06
+    },
+    {
+      "candidate": "cuda",
+      "path": "high_fidelity.pressure_solver_device",
+      "reference": null
+    },
+    {
+      "candidate": 0.013,
+      "path": "run.duration_s",
+      "reference": 0.02
+    }
+  ],
+  "old_failure_window": {
+    "candidate_dt_s": 7.129016261857309e-06,
+    "candidate_post_projection_cfl": 0.3339403756240353,
+    "candidate_pre_projection_advective_cfl": 0.3351688282707108,
+    "candidate_pre_source_advective_cfl": 0.33516119880823836,
+    "candidate_starting_advective_cfl": 0.33219387395526323,
+    "candidate_time_step_limiter": "combined_known_source_cfl",
+    "first_candidate_step_at_or_after_time_s": 0.012148334186887447,
+    "old_last_completed_state_time_s": 0.0121425
+  },
+  "pressure": {
+    "absolute_divergence_gate_s_inv": 0.0001,
+    "maximum_projected_divergence_s_inv": 2.4909184404009466e-05,
+    "maximum_relative_residual": 9.999968295266298e-08,
+    "relative_tolerance": 1e-07
+  },
+  "q1r2_design_implication": {
+    "common_dt_frozen": false,
+    "current_registered_dt_reusable_without_refreeze": false,
+    "current_registered_dt_s": 7.5e-06,
+    "reason": "The candidate controller actively limited the fine grid; a new common spatial dt must be selected from promoted-source trajectories.",
+    "registered_dt_hit_fraction": 0.9288560045532157,
+    "required_hit_fraction": 0.95
+  },
+  "schema_version": 1,
+  "status": "FINE_WINDOW_CANDIDATE_PASS__PROMOTION_DECISION_REQUIRED"
+}
