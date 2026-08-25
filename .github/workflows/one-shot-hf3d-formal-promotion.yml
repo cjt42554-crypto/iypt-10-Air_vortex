@@ -32,4 +32,5 @@ jobs:
           python -m pip install -e "./02_模拟程序"
 
       - name: Promote, validate, report, and commit
-        run: python "90_候选工作区/current/01_HF3D数值资格/formal_candidate/promote_formal_once.py"
+        run: >-
+          python -c 'from pathlib import Path; p=Path("90_候选工作区/current/01_HF3D数值资格/formal_candidate/promote_formal_once.py"); s=p.read_text(encoding="utf-8").replace("parents[5]", "parents[4]", 1); ns={"__name__":"__main__","__file__":str(p)}; exec(compile(s, str(p), "exec"), ns)'
