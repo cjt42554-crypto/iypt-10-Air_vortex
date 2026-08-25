@@ -10,6 +10,7 @@ from hfq_core import QualificationError
 from hfq_cli_common import UserFacingError
 from hfq_cli_run import _audit_command, _generate_command, _run_command
 from hfq_cli_analysis import _analyse_command
+from hfq_failure_diagnostics import FailureDiagnosticError, _diagnose_command
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -42,6 +43,24 @@ def _parser() -> argparse.ArgumentParser:
     analyse.add_argument("manifest", type=Path)
     analyse.add_argument("runs", type=Path)
     analyse.add_argument("output", type=Path)
+    diagnose = sub.add_parser(
+        "diagnose-q1r",
+        help="diagnose the frozen Q1R divergence and terminal CFL failures",
+    )
+    diagnose.add_argument("medium_archive", type=Path)
+    diagnose.add_argument("fine_terminal_archive", type=Path)
+    diagnose.add_argument("output", type=Path)
+    diagnose.add_argument(
+        "--divergence-gate-s-inv", type=float, default=1.0e-4
+    )
+    diagnose.add_argument(
+        "--replay-tolerance",
+        type=float,
+        action="append",
+        default=None,
+    )
+    diagnose.add_argument("--skip-projection-replay", action="store_true")
+    diagnose.add_argument("--completed-pressure-replay-archive", type=Path)
     return parser
 
 
@@ -56,8 +75,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_command(args)
         if args.command == "analyse":
             return _analyse_command(args)
+        if args.command == "diagnose-q1r":
+            return _diagnose_command(args)
         raise AssertionError(args.command)
-    except (QualificationError, UserFacingError, OSError, json.JSONDecodeError) as exc:
+    except (
+        FailureDiagnosticError,
+        QualificationError,
+        UserFacingError,
+        OSError,
+        ValueError,
+        json.JSONDecodeError,
+    ) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
 

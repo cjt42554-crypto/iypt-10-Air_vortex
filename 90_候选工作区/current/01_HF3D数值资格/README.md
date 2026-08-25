@@ -5,13 +5,16 @@
 ## 文件
 
 - `hfq_core.py`：配置审计、细化设计门、算例生成、输入身份、误差范数、三层观测阶、GCI 和拓扑事件一致性。
-- `hfq.py`：`audit-config`、`generate`、`run`、`analyse` 四个命令。
+- `hfq.py`：`audit-config`、`generate`、`run`、`analyse` 和 `diagnose-q1r` 五个命令。
+- `hfq_failure_diagnostics.py`：Q1R 稠密散度轨迹、终端 CFL 完整性、CUDA 单步压力重放和候选控制设计诊断。
 - `campaign_screening.json` 与 `generated_screening/`：原冻结 Q1；真实运行证明其时间步设计不可识别，已失败闭锁，仅保留为反例证据。
 - `reports/q1_screening/`：原 Q1 的 `FAIL_REFINEMENT_DESIGN_GATE` 机读与 Markdown 报告。
 - `campaign_screening_q1r.json` 与 `generated_screening_q1r/`：修复时间步身份后的 Q1R；六个逻辑层级对应五次唯一运行。
 - `reports/q1r_screening/`：Q1R 的真实失败证据；中网格违反候选投影散度门，细网格由源项后 CFL 门终止。
+- `reports/q1r_diagnosis/`：两个失败的定位与候选修复边界；当前状态为 `DIAGNOSED_PRESSURE_REPLAY_PASS__CFL_OPEN__Q1R2_NOT_FROZEN`。
+- `targeted_replay/medium_pressure_1e-7.json`：只收紧压力相对容差的中网格完整重放配置；该单例通过不等于 Q1R2。
 - `evidence/hf_preview_quick_resolution_audit.*`：对正式快速配置的配置级审计。
-- `tests/test_hfq_core.py`：不依赖 HF3D 长时运行的合成单元测试。
+- `tests/`：资格算法、归档失败诊断和候选数值控制的短时单元测试。
 
 ## 关键原则
 
@@ -88,7 +91,24 @@ python3 -m venv "90_候选工作区/current/01_HF3D数值资格/.venv-gpu"
 
 运行器按顺序执行，避免多个大网格同时争用内存。每个唯一算例保存独立日志。若只需检查命令，可加 `--dry-run`；若要先做一个可恢复的真实资源探针，可加 `--only space_L0_4cells`。`--only` 可重复指定，未选算例不会运行。`--resume` 不会把终端失败档案当作完成结果；出现失败后必须先诊断原因，不能以续跑规避失败门。
 
-### 4. 生成资格报告
+### 4. 重放 Q1R 失败诊断
+
+该命令读取本地忽略的 Q1R 中网格完整档案与细网格终端档案，生成已跟踪机读诊断；默认还会在 CUDA 上用归档终态重建一个中网格单步，比较 $10^{-6}$、$10^{-7}$ 和 $10^{-8}$ 三个压力容差。重建单步不是稠密峰值步的精确恢复。提供 `--completed-pressure-replay-archive` 时，命令还会校验只改变压力容差的完整重放档案及其全部 Q1R 单例质量门。
+
+```bash
+"90_候选工作区/current/01_HF3D数值资格/.venv-gpu/bin/python" \
+  "90_候选工作区/current/01_HF3D数值资格/hfq.py" \
+  diagnose-q1r \
+  "90_候选工作区/current/01_HF3D数值资格/runs/q1r_screening/space_L1_6cells" \
+  "90_候选工作区/current/01_HF3D数值资格/runs/q1r_screening/space_L2_9cells" \
+  "90_候选工作区/current/01_HF3D数值资格/reports/q1r_diagnosis/diagnosis_report.json" \
+  --completed-pressure-replay-archive \
+  "90_候选工作区/current/01_HF3D数值资格/runs/q1r_diagnosis/medium_pressure_1e-7"
+```
+
+没有可用 CUDA 时可加 `--skip-projection-replay`，但这种输出只能重算归档轨迹、终端完整性和已有完整重放档案，不能声称本机重新执行了压力机制单步。完整重放原始档案同样位于本地忽略目录；已跟踪 JSON 报告保存其载荷哈希、执行源码身份、CUDA 身份、稠密峰值和质量门结果。
+
+### 5. 生成资格报告
 
 ```bash
 "90_候选工作区/current/01_HF3D数值资格/.venv-gpu/bin/python" \
@@ -115,7 +135,9 @@ python3 -m venv "90_候选工作区/current/01_HF3D数值资格/.venv-gpu"
 
 原 Q1 已因细化设计门失败而作废，不能把其中任何层间差异解释为空间或时间收敛。Q1R 的静态设计门通过，但真实运行没有通过：粗层完整结束且单例质量门通过；中层完整结束但最大投影散度为 $5.807218\times10^{-4}\ \mathrm{s}^{-1}$，超过候选上限 $1.0\times10^{-4}\ \mathrm{s}^{-1}$；细层在约 60.7% 处因源项后对流 CFL 为 0.3504、超过冻结上限 0.3500 而失败闭锁；两个更细时间层未运行。因此 Q1R 当前状态是 `FAIL_PROVENANCE_INPUT_OR_COMPLETION_GATE`，并同时存在独立数值质量失败，不能据此声称空间或时间收敛。
 
-Q1R 的时长和分辨率本来也只用于早期瞬态筛查；它不覆盖统计稳态，不足以给出漏斗稳态深度、首次触杆转速、稳定气道半径或结构性分岔。后续应先在候选工作区诊断时间步安全性和投影散度，冻结新的 Q1R2 并完整通过；之后仍应另行冻结平滑区 Q2 和近拓扑区 Q2，不得把任何数值状态直接升级为物理预测通过。
+Q1R 失败已经完成候选层定位：中网格共有 212 个稠密步超过绝对散度门，峰值为第 2228 步；正式相对压力残差门不保证候选绝对散度门。只把压力相对容差从 $10^{-6}$ 收紧为 $10^{-7}$ 的中网格完整 CUDA 重放在同一峰值步把最大散度降至 $5.018070\times10^{-5}\ \mathrm{s}^{-1}$，零步超门，并通过全部 Q1R 单例质量门。细网格则证明正式时间步控制没有把选步目标与源项后硬门分开，且失败档案缺少前 CFL 与逐算子增量，不能唯一归因。详细证据见 `reports/q1r_diagnosis/diagnosis_report.*`。
+
+Q1R2 当前仍为 `NOT_FROZEN`。中网格压力容差路径已有完整重放支持，但正式 CFL 控制器替换稿、细网格失败窗口重放和新的共同/递减步长仍未完成；不得把候选首轮缩步值或单个中网格通过伪装成 Q1R2 通过。Q1R 的时长和分辨率本来也只用于早期瞬态筛查，不覆盖统计稳态，不足以给出漏斗稳态深度、首次触杆转速、稳定气道半径或结构性分岔。Q1R2 完整通过后仍应另行冻结平滑区 Q2 和近拓扑区 Q2，不得把任何数值状态直接升级为物理预测通过。
 
 ## 测试
 
@@ -124,4 +146,4 @@ cd "90_候选工作区/current/01_HF3D数值资格"
 python3 -Werror -m unittest discover -s tests -v
 ```
 
-单元测试只验证资格算法和配置冻结逻辑；它不替代 HF3D 多层运行。
+单元测试只验证资格算法、归档诊断和候选控制关系；CUDA 终态单步重放也只验证压力容差机制。本轮完整中网格重放验证了该单例的真实峰值窗口，但这些证据都不替代 Q1R2 多网格、多时间步完整运行。
