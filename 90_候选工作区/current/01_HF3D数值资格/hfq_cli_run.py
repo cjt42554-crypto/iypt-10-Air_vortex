@@ -5,7 +5,14 @@ import json
 from pathlib import Path
 import subprocess
 from typing import Any, Mapping
-from hfq_core import audit_config, audit_markdown, generate_campaign, read_json, write_json
+from hfq_core import (
+    audit_config,
+    audit_markdown,
+    audit_refinement_design,
+    generate_campaign,
+    read_json,
+    write_json,
+)
 from hfq_cli_common import UserFacingError
 
 def _audit_command(args: argparse.Namespace) -> int:
@@ -48,6 +55,11 @@ def _load_archive_for_resume(path: Path) -> bool:
 def _run_command(args: argparse.Namespace) -> int:
     manifest_path = args.manifest.resolve()
     manifest = read_json(manifest_path)
+    design_audit = audit_refinement_design(manifest_path)
+    if design_audit.get("pass") is not True:
+        reasons = design_audit.get("reasons", [])
+        detail = "; ".join(str(item) for item in reasons) or "unspecified design failure"
+        raise UserFacingError(f"refinement design gate failed: {detail}")
     cases = manifest.get("cases")
     if not isinstance(cases, list) or not cases:
         raise UserFacingError("manifest has no cases")
@@ -57,6 +69,15 @@ def _run_command(args: argparse.Namespace) -> int:
     failed: list[str] = []
     skipped: list[str] = []
     commands: list[list[str]] = []
+    selected_ids = set(getattr(args, "only", []) or [])
+    manifest_ids = {
+        str(item.get("id")) for item in cases if isinstance(item, Mapping)
+    }
+    unknown_ids = sorted(selected_ids - manifest_ids)
+    if unknown_ids:
+        raise UserFacingError(
+            "--only names unknown cases: " + ", ".join(unknown_ids)
+        )
 
     for raw_case in cases:
         if not isinstance(raw_case, Mapping):
@@ -65,6 +86,9 @@ def _run_command(args: argparse.Namespace) -> int:
         config_file = raw_case.get("config_file")
         if not case_id or not isinstance(config_file, str):
             raise UserFacingError("case requires id and config_file")
+        if selected_ids and case_id not in selected_ids:
+            skipped.append(f"{case_id}->not-selected")
+            continue
         config_path = (config_root / config_file).resolve()
         reuse_case_id = raw_case.get("reuse_case_id")
         if reuse_case_id is not None:
@@ -86,6 +110,8 @@ def _run_command(args: argparse.Namespace) -> int:
             "-m",
             "airvortex",
             "run",
+            "--backend",
+            "high_fidelity",
             "--config",
             str(config_path),
             "--output",

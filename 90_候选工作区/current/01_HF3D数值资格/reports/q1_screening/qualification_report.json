@@ -1,0 +1,307 @@
+{
+  "campaign_manifest_sha256": "891eed09779f476e358dfb8f410f3a8bd6515c596836d0058c3a93fe9be64794",
+  "claim_boundary": {
+    "absolute_critical_rpm_validated": false,
+    "apparatus_prediction_allowed": false,
+    "experimental_validation": "NOT_PERFORMED",
+    "stable_channel_radius_validated": false
+  },
+  "execution_identity_coverage": {
+    "complete": false,
+    "loaded_logical_case_count": 1,
+    "manifest_logical_case_count": 6
+  },
+  "execution_requirements": {},
+  "execution_runtime_consistent_across_runs": true,
+  "execution_runtime_identity_sha256": "0f1bf7cecd3be43d26add242822bc59a4e8904f09f6c7853aaf42597f49d57f5",
+  "groups": {
+    "spatial": {
+      "reason": "fewer than three completed levels",
+      "status": "INCOMPLETE"
+    },
+    "temporal": {
+      "reason": "fewer than three completed levels",
+      "status": "INCOMPLETE"
+    }
+  },
+  "load_errors": {},
+  "missing_cases": [
+    "space_L1_6cells",
+    "space_L2_9cells",
+    "time_L0_1.000e-04s",
+    "time_L1_5.000e-05s",
+    "time_L2_2.500e-05s"
+  ],
+  "numerical_quality": {
+    "space_L0_4cells": {
+      "backend_fail_closed_gate_pass": true,
+      "checks": {
+        "advective_cfl": {
+          "maximum": 0.35,
+          "pass": true,
+          "value": 0.04431697439102667
+        },
+        "cumulative_phase_clip_relative": {
+          "maximum": 0.001,
+          "pass": true,
+          "value": 1.4154357787564135e-10
+        },
+        "cumulative_phase_repair_relative": {
+          "maximum": 0.001,
+          "pass": true,
+          "value": 1.4041575260270835e-10
+        },
+        "liquid_mass_error_relative": {
+          "maximum": 0.001,
+          "pass": true,
+          "value": 1.2455300979347514e-05
+        },
+        "liquid_volume_balance_error_relative": {
+          "maximum": 0.001,
+          "pass": true,
+          "value": 1.1289982675567115e-12
+        },
+        "pressure_residual": {
+          "maximum": 1e-06,
+          "pass": true,
+          "value": 9.999430277471414e-07
+        },
+        "projected_divergence_s_inv": {
+          "maximum": 0.0001,
+          "pass": true,
+          "value": 3.85136281875198e-05
+        }
+      },
+      "pass": true
+    }
+  },
+  "pressure_accelerator_requirement_met": true,
+  "pressure_accelerator_requirement_met_for_loaded_runs": true,
+  "refinement_design_audit": {
+    "capillary_limiter": {
+      "coefficient": 0.2,
+      "formula": "coefficient*sqrt(rho_g*h_min^3/(pi*sigma))",
+      "scope": "necessary static preflight only; completed runs still require an effective-step audit for dynamic limiters"
+    },
+    "cases": [
+      {
+        "configured_maximum_time_step_s": 2.5e-05,
+        "configured_step_active_under_static_capillary_bound": true,
+        "group": "spatial",
+        "id": "space_L0_4cells",
+        "level": 0,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 2.5e-05,
+        "static_capillary_time_step_ceiling_s": 2.631154772261131e-05,
+        "static_effective_maximum_time_step_s": 2.5e-05
+      },
+      {
+        "configured_maximum_time_step_s": 2.5e-05,
+        "configured_step_active_under_static_capillary_bound": false,
+        "group": "spatial",
+        "id": "space_L1_6cells",
+        "level": 1,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 2.5e-05,
+        "static_capillary_time_step_ceiling_s": 1.4591571063179744e-05,
+        "static_effective_maximum_time_step_s": 1.4591571063179744e-05
+      },
+      {
+        "configured_maximum_time_step_s": 2.5e-05,
+        "configured_step_active_under_static_capillary_bound": false,
+        "group": "spatial",
+        "id": "space_L2_9cells",
+        "level": 2,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 2.5e-05,
+        "static_capillary_time_step_ceiling_s": 7.85520378288456e-06,
+        "static_effective_maximum_time_step_s": 7.85520378288456e-06
+      },
+      {
+        "configured_maximum_time_step_s": 0.0001,
+        "configured_step_active_under_static_capillary_bound": false,
+        "group": "temporal",
+        "id": "time_L0_1.000e-04s",
+        "level": 0,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 0.0001,
+        "static_capillary_time_step_ceiling_s": 7.85520378288456e-06,
+        "static_effective_maximum_time_step_s": 7.85520378288456e-06
+      },
+      {
+        "configured_maximum_time_step_s": 5e-05,
+        "configured_step_active_under_static_capillary_bound": false,
+        "group": "temporal",
+        "id": "time_L1_5.000e-05s",
+        "level": 1,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 5e-05,
+        "static_capillary_time_step_ceiling_s": 7.85520378288456e-06,
+        "static_effective_maximum_time_step_s": 7.85520378288456e-06
+      },
+      {
+        "configured_maximum_time_step_s": 2.5e-05,
+        "configured_step_active_under_static_capillary_bound": false,
+        "group": "temporal",
+        "id": "time_L2_2.500e-05s",
+        "level": 2,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 2.5e-05,
+        "static_capillary_time_step_ceiling_s": 7.85520378288456e-06,
+        "static_effective_maximum_time_step_s": 7.85520378288456e-06
+      }
+    ],
+    "gate_identity": "HF3D_STATIC_TIME_STEP_IDENTIFIABILITY_V1",
+    "groups": {
+      "spatial": {
+        "all_registered_steps_active": false,
+        "case_ids_in_level_order": [
+          "space_L0_4cells",
+          "space_L1_6cells",
+          "space_L2_9cells"
+        ],
+        "configured_maximum_time_step_s": [
+          2.5e-05,
+          2.5e-05,
+          2.5e-05
+        ],
+        "effective_structure_valid": false,
+        "pass": false,
+        "registered_structure_valid": true,
+        "static_capillary_time_step_ceiling_s": [
+          2.631154772261131e-05,
+          1.4591571063179744e-05,
+          7.85520378288456e-06
+        ],
+        "static_effective_maximum_time_step_s": [
+          2.5e-05,
+          1.4591571063179744e-05,
+          7.85520378288456e-06
+        ]
+      },
+      "temporal": {
+        "all_registered_steps_active": false,
+        "case_ids_in_level_order": [
+          "time_L0_1.000e-04s",
+          "time_L1_5.000e-05s",
+          "time_L2_2.500e-05s"
+        ],
+        "configured_maximum_time_step_s": [
+          0.0001,
+          5e-05,
+          2.5e-05
+        ],
+        "effective_structure_valid": false,
+        "pass": false,
+        "registered_structure_valid": true,
+        "static_capillary_time_step_ceiling_s": [
+          7.85520378288456e-06,
+          7.85520378288456e-06,
+          7.85520378288456e-06
+        ],
+        "static_effective_maximum_time_step_s": [
+          7.85520378288456e-06,
+          7.85520378288456e-06,
+          7.85520378288456e-06
+        ]
+      }
+    },
+    "pass": false,
+    "reasons": [
+      "space_L1_6cells: configured 2.5e-05 s exceeds static capillary ceiling 1.45915711e-05 s",
+      "space_L2_9cells: configured 2.5e-05 s exceeds static capillary ceiling 7.85520378e-06 s",
+      "time_L0_1.000e-04s: configured 0.0001 s exceeds static capillary ceiling 7.85520378e-06 s",
+      "time_L1_5.000e-05s: configured 5e-05 s exceeds static capillary ceiling 7.85520378e-06 s",
+      "time_L2_2.500e-05s: configured 2.5e-05 s exceeds static capillary ceiling 7.85520378e-06 s",
+      "spatial: static effective time steps differ across grids",
+      "temporal: static effective time steps collapse under stability limits"
+    ]
+  },
+  "run_audits": {
+    "space_L0_4cells": {
+      "actual_end_s": 0.02,
+      "archived_config_sha256": "60b5d7f94487068a3e9df9f43b78017166df0ab521c498fb604e3c31eb38bfc3",
+      "completed": true,
+      "diagnostics": {
+        "cumulative_phase_clip_relative": 1.4154357787564135e-10,
+        "cumulative_phase_repair_relative": 1.4041575260270835e-10,
+        "liquid_open_boundary_balance_error_relative": -1.1289982675567115e-12,
+        "maximum_advective_cfl": 0.04431697439102667,
+        "maximum_pressure_relative_residual": 9.999430277471414e-07,
+        "maximum_projected_divergence_s_inv": 3.85136281875198e-05,
+        "maximum_single_step_phase_clip_relative": 2.848278468354839e-12,
+        "maximum_single_step_phase_repair_relative": 2.8483775056767945e-12,
+        "numerical_quality_gate_pass": true,
+        "physical_prediction_gate_pass": false,
+        "pressure_accelerator_fallback": true,
+        "pressure_accelerator_selected": "cpu"
+      },
+      "execution_metrics": {
+        "configured_maximum_time_step_s": 2.5e-05,
+        "configured_step_active_fraction": 1.0,
+        "diagnostic_time_step_count": 800,
+        "maximum_actual_time_step_s": 2.5e-05,
+        "minimum_actual_time_step_s": 2.4999999999962552e-05,
+        "peak_resident_set_size_bytes": 218718208,
+        "wall_clock_duration_s": 122.48451122400002
+      },
+      "execution_runtime_identity": {
+        "dependencies": {
+          "numpy": "1.26.4",
+          "scipy": "1.11.4"
+        },
+        "numerical_thread_policy": {
+          "requested": "2",
+          "selected_threads": 2
+        },
+        "pressure_accelerator": {
+          "compute_capability": null,
+          "device_name": null,
+          "fallback": true,
+          "requested": "auto",
+          "selected": "cpu"
+        },
+        "python": {
+          "implementation": "CPython",
+          "version": "3.12.3"
+        }
+      },
+      "execution_runtime_identity_sha256": "0f1bf7cecd3be43d26add242822bc59a4e8904f09f6c7853aaf42597f49d57f5",
+      "execution_source_identity_valid": true,
+      "generated_config_sha256": "15ed3ef999bcd9db0af917dc030f78fa858633d5b26b4de66492a9d1a922e009",
+      "grid": {
+        "aspect_ratio": 1.0125000000000002,
+        "bar_diameter_cells_best_axis": 4.050000000000001,
+        "bar_diameter_cells_worst_axis": 4.0,
+        "bar_diameter_m": 0.006,
+        "boundary_layer_width_cells_worst_axis": 1.4814814814814814,
+        "boundary_layer_width_m": 0.0022222222222222222,
+        "box_cell_count": 194400,
+        "dx_m": 0.0015,
+        "dy_m": 0.0015,
+        "dz_m": 0.0014814814814814814,
+        "exact_bar_volume_m3": 7.916813487046278e-07,
+        "h_geometric_m": 0.001493801582185722,
+        "h_max_m": 0.0015,
+        "h_min_m": 0.0014814814814814814,
+        "interface_width_cells_worst_axis": 2.4691358024691357,
+        "interface_width_m": 0.0037037037037037034,
+        "nominal_bar_voxel_count": 237.50440461138834,
+        "nx": 60,
+        "ny": 60,
+        "nz": 54
+      },
+      "physical_signature_match": true,
+      "physical_signature_sha256": "e43a9a2cdc554ad4714897a67503ca2eb443041c77480d0b9dcd0c3590a15b95",
+      "requested_end_s": 0.02,
+      "result_status": "completed",
+      "source_tree_sha256_start": "4858dc42121c1bc5dfd926aafef194e4225c8a0c1100118efb7d8ab184dd3c8a"
+    }
+  },
+  "schema_version": 1,
+  "source_identity_evidence_logical_case_count": 1,
+  "source_tree_consistent_across_runs": true,
+  "source_tree_sha256": "4858dc42121c1bc5dfd926aafef194e4225c8a0c1100118efb7d8ab184dd3c8a",
+  "status": "FAIL_REFINEMENT_DESIGN_GATE",
+  "terminal_failures": {}
+}

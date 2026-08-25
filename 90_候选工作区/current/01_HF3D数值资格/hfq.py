@@ -32,6 +32,12 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--resume", action="store_true")
     run.add_argument("--keep-going", action="store_true")
     run.add_argument("--dry-run", action="store_true")
+    run.add_argument(
+        "--only",
+        action="append",
+        default=[],
+        help="run only the named unique case; repeat for more than one case",
+    )
     analyse = sub.add_parser("analyse", help="analyse completed AirVortex archives")
     analyse.add_argument("manifest", type=Path)
     analyse.add_argument("runs", type=Path)

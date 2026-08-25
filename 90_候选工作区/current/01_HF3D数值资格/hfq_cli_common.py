@@ -18,6 +18,7 @@ from hfq_core import (
 class LoadedCase:
     case: dict[str, Any]
     config: dict[str, Any]
+    archived_config: dict[str, Any]
     time_s: np.ndarray
     observables: dict[str, np.ndarray]
     fields: dict[str, np.ndarray]
@@ -52,13 +53,24 @@ def _load_case(
     archive = load_run_archive(runs_root / archive_id)
     generated_config = read_json(manifest_path.parent / str(case["config_file"]))
     archived_config = archive.config.to_dict()
-    if canonical_sha256(generated_config) != canonical_sha256(archived_config):
-        raise UserFacingError(f"{case_id}: archived config differs from generated config")
+    registered_digest = case.get("config_sha256")
+    generated_digest = canonical_sha256(generated_config)
+    if not isinstance(registered_digest, str) or generated_digest != registered_digest:
+        raise UserFacingError(
+            f"{case_id}: generated config differs from its manifest digest"
+        )
+    differences = _explicit_config_differences(generated_config, archived_config)
+    if differences:
+        raise UserFacingError(
+            f"{case_id}: archived config differs at explicit generated paths: "
+            + ", ".join(differences[:8])
+        )
     result = archive.result
     status = getattr(result.status, "value", str(result.status))
     return LoadedCase(
         case=dict(case),
-        config=archived_config,
+        config=generated_config,
+        archived_config=archived_config,
         time_s=np.asarray(result.time_s, dtype=np.float64),
         observables={
             name: np.asarray(value, dtype=np.float64)
@@ -74,6 +86,47 @@ def _load_case(
         result_status=status,
     )
 
+
+def _explicit_config_differences(
+    expected: Any,
+    actual: Any,
+    path: str = "",
+) -> list[str]:
+    """Return generated paths whose archived values are absent or different.
+
+    Formal config loading may add source-versioned defaults.  Those additions
+    are retained in the archive and anchored by the execution source hash, but
+    every value explicitly frozen by the generated JSON must match exactly.
+    """
+
+    if isinstance(expected, Mapping):
+        if not isinstance(actual, Mapping):
+            return [path or "<root>"]
+        differences: list[str] = []
+        for key, value in expected.items():
+            child = f"{path}.{key}" if path else str(key)
+            if key not in actual:
+                differences.append(child)
+            else:
+                differences.extend(
+                    _explicit_config_differences(value, actual[key], child)
+                )
+        return differences
+    if isinstance(expected, list):
+        if not isinstance(actual, list) or len(expected) != len(actual):
+            return [path or "<root>"]
+        differences = []
+        for index, (left, right) in enumerate(zip(expected, actual)):
+            differences.extend(
+                _explicit_config_differences(left, right, f"{path}[{index}]")
+            )
+        return differences
+    if isinstance(expected, bool) or isinstance(actual, bool):
+        return [] if type(expected) is type(actual) and expected == actual else [path]
+    if isinstance(expected, (int, float)) and isinstance(actual, (int, float)):
+        return [] if float(expected) == float(actual) else [path]
+    return [] if expected == actual else [path]
+
 def _nested(mapping: Mapping[str, Any], *path: str) -> Any:
     current: Any = mapping
     for part in path:
@@ -87,7 +140,57 @@ def _run_audit(loaded: LoadedCase, expected_signature: str) -> dict[str, Any]:
     source_digest = source_identity.get("source_tree_sha256_start")
     source_valid = source_identity.get("execution_source_identity_valid") is True
     diagnostics = _to_plain_mapping(loaded.metadata.get("diagnostics"))
+    pressure_accelerator = _to_plain_mapping(
+        diagnostics.get("pressure_accelerator")
+    )
+    numerical_thread_policy = _to_plain_mapping(
+        diagnostics.get("numerical_thread_policy")
+    )
+    runtime_identity = {
+        "python": _to_plain_mapping(loaded.provenance.get("python")),
+        "dependencies": _to_plain_mapping(
+            loaded.provenance.get("dependencies")
+        ),
+        "pressure_accelerator": {
+            "requested": pressure_accelerator.get("requested"),
+            "selected": pressure_accelerator.get("selected"),
+            "fallback": pressure_accelerator.get("fallback"),
+            "device_name": pressure_accelerator.get("device_name"),
+            "compute_capability": pressure_accelerator.get(
+                "compute_capability"
+            ),
+        },
+        "numerical_thread_policy": {
+            "requested": numerical_thread_policy.get("requested"),
+            "selected_threads": numerical_thread_policy.get(
+                "selected_threads"
+            ),
+        },
+    }
     termination = _to_plain_mapping(loaded.manifest.get("termination"))
+    provenance_extra = _to_plain_mapping(loaded.provenance.get("extra"))
+    provenance_runtime = _to_plain_mapping(provenance_extra.get("runtime"))
+    resources = _to_plain_mapping(loaded.provenance.get("resources"))
+    peak_rss = _to_plain_mapping(resources.get("peak_resident_set_size"))
+    raw_steps = loaded.fields.get("diagnostic_dt_s")
+    time_steps = np.asarray(raw_steps, dtype=np.float64).reshape(-1)
+    valid_time_steps = time_steps[
+        np.isfinite(time_steps) & (time_steps > 0.0)
+    ]
+    configured_maximum_step = float(
+        _nested(loaded.config, "high_fidelity", "time_step_s")
+    )
+    step_tolerance = max(1.0e-15, 1.0e-9 * configured_maximum_step)
+    configured_step_active_fraction = (
+        float(
+            np.mean(
+                np.abs(valid_time_steps - configured_maximum_step)
+                <= step_tolerance
+            )
+        )
+        if valid_time_steps.size
+        else None
+    )
     actual_end = float(loaded.time_s[-1]) if loaded.time_s.size else None
     requested_end = float(_nested(loaded.config, "run", "duration_s"))
     tolerance = max(1.0e-12, 1.0e-9 * max(1.0, requested_end))
@@ -109,7 +212,25 @@ def _run_audit(loaded: LoadedCase, expected_signature: str) -> dict[str, Any]:
         "source_tree_sha256_start": source_digest,
         "physical_signature_match": signature == expected_signature,
         "physical_signature_sha256": signature,
-        "config_sha256": canonical_sha256(loaded.config),
+        "generated_config_sha256": canonical_sha256(loaded.config),
+        "archived_config_sha256": canonical_sha256(loaded.archived_config),
+        "execution_runtime_identity": runtime_identity,
+        "execution_runtime_identity_sha256": canonical_sha256(runtime_identity),
+        "execution_metrics": {
+            "wall_clock_duration_s": provenance_runtime.get("duration_s"),
+            "peak_resident_set_size_bytes": peak_rss.get("value"),
+            "diagnostic_time_step_count": int(valid_time_steps.size),
+            "configured_maximum_time_step_s": configured_maximum_step,
+            "minimum_actual_time_step_s": (
+                float(np.min(valid_time_steps)) if valid_time_steps.size else None
+            ),
+            "maximum_actual_time_step_s": (
+                float(np.max(valid_time_steps)) if valid_time_steps.size else None
+            ),
+            "configured_step_active_fraction": (
+                configured_step_active_fraction
+            ),
+        },
         "grid": grid.to_dict(),
         "diagnostics": {
             "numerical_quality_gate_pass": (
@@ -142,6 +263,12 @@ def _run_audit(loaded: LoadedCase, expected_signature: str) -> dict[str, Any]:
             "cumulative_phase_repair_relative": diagnostics.get(
                 "cumulative_phase_repair_relative"
             ),
+            "pressure_accelerator_selected": pressure_accelerator.get(
+                "selected"
+            ),
+            "pressure_accelerator_fallback": pressure_accelerator.get(
+                "fallback"
+            ),
             "liquid_open_boundary_balance_error_relative": diagnostics.get(
                 "liquid_open_boundary_balance_error_relative"
             ),
@@ -166,11 +293,18 @@ def _quality_gate(loaded: LoadedCase, gates: Mapping[str, Any]) -> dict[str, Any
         "liquid_volume_balance_error_relative": max_abs_observable(
             loaded.observables, "liquid_volume_balance_error_relative"
         ),
-        "pressure_residual": max_abs_observable(loaded.observables, "pressure_residual"),
-        "projected_divergence_s_inv": max_abs_observable(
-            loaded.observables, "max_divergence"
+        "pressure_residual": _maximum_absolute_evidence(
+            max_abs_observable(loaded.observables, "pressure_residual"),
+            diagnostics.get("maximum_pressure_relative_residual"),
         ),
-        "advective_cfl": max_abs_observable(loaded.observables, "cfl_advective"),
+        "projected_divergence_s_inv": _maximum_absolute_evidence(
+            max_abs_observable(loaded.observables, "max_divergence"),
+            diagnostics.get("maximum_projected_divergence_s_inv"),
+        ),
+        "advective_cfl": _maximum_absolute_evidence(
+            max_abs_observable(loaded.observables, "cfl_advective"),
+            diagnostics.get("maximum_advective_cfl"),
+        ),
         "cumulative_phase_clip_relative": diagnostics.get(
             "cumulative_phase_clip_relative"
         ),
@@ -208,10 +342,144 @@ def _quality_gate(loaded: LoadedCase, gates: Mapping[str, Any]) -> dict[str, Any
         "checks": checks,
     }
 
+
+def _maximum_absolute_evidence(*values: Any) -> float | None:
+    finite: list[float] = []
+    for raw in values:
+        if raw is None or isinstance(raw, bool):
+            continue
+        try:
+            value = abs(float(raw))
+        except (TypeError, ValueError):
+            continue
+        if math.isfinite(value):
+            finite.append(value)
+    return max(finite) if finite else None
+
 def _series(loaded: LoadedCase, name: str) -> SeriesData:
     if name not in loaded.observables:
         raise UserFacingError(f"{loaded.case['id']}: missing observable {name}")
     return SeriesData(loaded.time_s, loaded.observables[name])
+
+
+def _effective_time_step_gate(
+    group_name: str,
+    group_cases: list[LoadedCase],
+    *,
+    minimum_configured_step_fraction: float = 0.95,
+) -> dict[str, Any]:
+    """Verify that completed runs actually exercised the registered step path."""
+
+    if group_name not in {"spatial", "temporal"}:
+        raise UserFacingError("effective time-step gate requires spatial or temporal group")
+    if (
+        not math.isfinite(minimum_configured_step_fraction)
+        or minimum_configured_step_fraction <= 0.0
+        or minimum_configured_step_fraction > 1.0
+    ):
+        raise UserFacingError(
+            "configured time-step active fraction must be finite in (0, 1]"
+        )
+    ordered = sorted(group_cases, key=lambda item: int(item.case["level"]))
+    records: list[dict[str, Any]] = []
+    for loaded in ordered:
+        case_id = str(loaded.case["id"])
+        configured = float(
+            _nested(loaded.config, "high_fidelity", "time_step_s")
+        )
+        raw_steps = loaded.fields.get("diagnostic_dt_s")
+        steps = np.asarray(raw_steps, dtype=np.float64).reshape(-1)
+        valid = bool(
+            steps.size > 0
+            and np.all(np.isfinite(steps))
+            and np.all(steps > 0.0)
+            and math.isfinite(configured)
+            and configured > 0.0
+        )
+        if valid:
+            tolerance = max(1.0e-15, 1.0e-9 * configured)
+            maximum_actual = float(np.max(steps))
+            at_configured = np.abs(steps - configured) <= tolerance
+            active_fraction = float(np.mean(at_configured))
+            maximum_matches = math.isclose(
+                maximum_actual,
+                configured,
+                rel_tol=1.0e-9,
+                abs_tol=1.0e-15,
+            )
+        else:
+            maximum_actual = None
+            active_fraction = 0.0
+            maximum_matches = False
+        record_pass = bool(
+            valid
+            and maximum_matches
+            and active_fraction >= minimum_configured_step_fraction
+        )
+        records.append(
+            {
+                "id": case_id,
+                "pass": record_pass,
+                "step_count": int(steps.size),
+                "configured_maximum_time_step_s": configured,
+                "maximum_actual_time_step_s": maximum_actual,
+                "configured_step_active_fraction": active_fraction,
+                "minimum_configured_step_active_fraction": (
+                    minimum_configured_step_fraction
+                ),
+                "maximum_actual_matches_configured": maximum_matches,
+            }
+        )
+
+    configured_values = [
+        float(item["configured_maximum_time_step_s"]) for item in records
+    ]
+    actual_values = [item["maximum_actual_time_step_s"] for item in records]
+    actual_numeric = [float(value) for value in actual_values if value is not None]
+    if group_name == "spatial":
+        registered_structure_valid = _step_values_close(configured_values)
+        effective_structure_valid = (
+            len(actual_numeric) == len(records)
+            and _step_values_close(actual_numeric)
+        )
+    else:
+        registered_structure_valid = _step_values_strictly_decrease(
+            configured_values
+        )
+        effective_structure_valid = (
+            len(actual_numeric) == len(records)
+            and _step_values_strictly_decrease(actual_numeric)
+        )
+    return {
+        "pass": bool(
+            len(records) >= 3
+            and all(bool(item["pass"]) for item in records)
+            and registered_structure_valid
+            and effective_structure_valid
+        ),
+        "group": group_name,
+        "registered_structure_valid": registered_structure_valid,
+        "effective_structure_valid": effective_structure_valid,
+        "cases": records,
+    }
+
+
+def _step_values_close(values: list[float]) -> bool:
+    if not values:
+        return False
+    reference = values[0]
+    return all(
+        math.isclose(value, reference, rel_tol=1.0e-9, abs_tol=1.0e-15)
+        for value in values[1:]
+    )
+
+
+def _step_values_strictly_decrease(values: list[float]) -> bool:
+    return len(values) >= 2 and all(
+        left > right
+        and not math.isclose(left, right, rel_tol=1.0e-9, abs_tol=1.0e-15)
+        for left, right in zip(values, values[1:])
+    )
 
 def _configuration_gate_group(
     group_cases: list[LoadedCase],
