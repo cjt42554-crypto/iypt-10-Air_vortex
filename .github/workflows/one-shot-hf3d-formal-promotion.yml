@@ -31,8 +31,5 @@ jobs:
           python -m pip install pytest
           python -m pip install -e "./02_模拟程序"
 
-      - name: Diagnose exact skipped tests
-        run: |
-          git apply --directory=02_模拟程序 "90_候选工作区/current/01_HF3D数值资格/formal_candidate/0001-Add-transactional-HF3D-CFL-controller-candidate.patch"
-          python -m pytest "02_模拟程序/tests" -q -rs
-          exit 1
+      - name: Promote, validate, report, and commit
+        run: python "90_候选工作区/current/01_HF3D数值资格/formal_candidate/finalize_formal_promotion.py"
