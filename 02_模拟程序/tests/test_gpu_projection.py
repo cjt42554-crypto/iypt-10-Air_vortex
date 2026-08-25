@@ -94,6 +94,39 @@ class CuPyProjectionParityTests(unittest.TestCase):
         for device, reference in zip(gpu_result[:4], cpu_result[:4]):
             np.testing.assert_allclose(device, reference, rtol=2.0e-8, atol=2.0e-10)
 
+    def test_device_pressure_history_checkpoint_restores_rejected_trial(self) -> None:
+        rng = np.random.default_rng(20260829)
+        ux = rng.normal(scale=0.02, size=self.grid.face_shape_x) * self.grid.open_x
+        uy = rng.normal(scale=0.02, size=self.grid.face_shape_y) * self.grid.open_y
+        uz = rng.normal(scale=0.02, size=self.grid.face_shape_z) * self.grid.open_z
+        density = np.where(self.grid.z_cell < 0.060, 998.2, 1.204)
+        gpu = CuPyVariableDensityProjection3D(
+            self.grid, relative_tolerance=1.0e-9, maximum_iterations=1600
+        )
+        *_, pressure, _ = gpu.project(ux, uy, uz, density, 1.0e-4)
+        checkpoint = gpu.checkpoint_history()
+        self.assertIs(
+            checkpoint.last_pressure_solution, gpu._last_pressure_solution
+        )
+        gpu.project(
+            1.1 * ux,
+            1.1 * uy,
+            1.1 * uz,
+            density,
+            8.0e-5,
+            initial_pressure_pa=pressure,
+        )
+        self.assertGreater(gpu.solve_count, checkpoint.solve_count)
+        gpu.restore_history(checkpoint)
+        self.assertEqual(gpu.solve_count, checkpoint.solve_count)
+        self.assertIs(
+            gpu._last_pressure_solution, checkpoint.last_pressure_solution
+        )
+        self.assertIs(
+            gpu._previous_pressure_solution,
+            checkpoint.previous_pressure_solution,
+        )
+
     def test_one_complete_hf3d_step_matches_explicit_cpu_path(self) -> None:
         base = SimulationConfig()
         common = replace(

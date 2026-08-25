@@ -1,0 +1,135 @@
+{
+  "authorization": {
+    "accepted_candidate_defaults": {
+      "cfl_controller_target_fraction": 0.95,
+      "dense_diagnostics": true,
+      "maximum_cfl_step_retries": 4
+    },
+    "frozen_candidate_manifest_preserved": true,
+    "historical_manifest_note": "candidate_manifest.json was frozen before authorization; its historical authorization_received=false field was intentionally not rewritten",
+    "instruction_summary": "按照交付文件完成任务",
+    "received": true
+  },
+  "candidate_patch": {
+    "applied_exactly_once": true,
+    "hard_cfl_gate_changed": false,
+    "path": "90_候选工作区/current/01_HF3D数值资格/formal_candidate/0001-Add-transactional-HF3D-CFL-controller-candidate.patch",
+    "sha256": "ee978d7bc9e1b27278b6f89a44c03f789780ba1cb11d648989ca8a3ee29ef4be"
+  },
+  "changes": {
+    "formal_program_files": [
+      "02_模拟程序/src/airvortex/backends/high_fidelity_3d.py",
+      "02_模拟程序/src/airvortex/core/config.py",
+      "02_模拟程序/src/airvortex/numerics/__init__.py",
+      "02_模拟程序/src/airvortex/numerics/projection3d.py",
+      "02_模拟程序/src/airvortex/numerics/projection3d_gpu.py",
+      "02_模拟程序/tests/test_config_io.py",
+      "02_模拟程序/tests/test_gpu_projection.py",
+      "02_模拟程序/tests/test_high_fidelity_3d.py"
+    ],
+    "formal_program_modified": true,
+    "formal_theory_modified": false,
+    "frozen_candidate_evidence_rewritten": false
+  },
+  "claim_ceiling": "FORMAL_IMPLEMENTATION_PROMOTED_AND_CPU_REVALIDATED__CUDA_FORMAL_REPLAY_PENDING__Q1R2_NOT_FROZEN__NO_GO_PHYSICAL_PREDICTION",
+  "created_at": "2026-08-26T03:35:18+09:00",
+  "environment": {
+    "matplotlib": "3.11.1",
+    "numpy": "2.4.6",
+    "pytest": "9.1.1",
+    "python": "3.11.16",
+    "runner": "GitHub-hosted Ubuntu CPU runner without CUDA or display",
+    "scipy": "1.17.1"
+  },
+  "not_performed": [
+    "isolated CUDA tests from the promoted formal path",
+    "0.013 s fine-grid CUDA replay from the promoted formal path",
+    "Q1R2 common-time-step refreeze",
+    "Q1R2 multi-grid and multi-time-step execution",
+    "numerical convergence qualification",
+    "physical validation",
+    "experimental validation"
+  ],
+  "prior_candidate_cuda_evidence": {
+    "evidence_boundary": "The byte-identical executable source preserves the relevance of the prior candidate CUDA evidence, but this run did not replay it from the promoted formal directory.",
+    "fine_window_gate_pass": true,
+    "fine_window_source_sha256_end": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
+    "fine_window_source_sha256_start": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
+    "fine_window_status": "FINE_WINDOW_CANDIDATE_PASS__PROMOTION_DECISION_REQUIRED",
+    "isolated_cuda_tests": {
+      "failed": 0,
+      "passed": 5,
+      "run": 5
+    },
+    "same_executable_source_identity_as_promoted_formal": true
+  },
+  "q1r2_status": "NOT_FROZEN",
+  "repository": {
+    "branch": "main",
+    "formal_baseline_commit": "9b79b1ca39461ada176c6e7de5855a935b191983",
+    "workflow_run_id": "32884515643",
+    "workflow_trigger_commit": "7cddbafd26acacbdcfdbb292a0f16d33d0d60aa9"
+  },
+  "schema_version": 1,
+  "source_identity": {
+    "expected_sha256": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
+    "match": true,
+    "observed": {
+      "absolute_root_stored": false,
+      "algorithm": "sha256",
+      "available": true,
+      "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+      "file_count": 50,
+      "reason": null,
+      "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+      "total_bytes": 994366,
+      "unit": null,
+      "value": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010"
+    }
+  },
+  "status": "FORMAL_PROMOTION_CPU_PASS__CUDA_FORMAL_REPLAY_PENDING",
+  "validation": {
+    "candidate_qualification_tests": {
+      "failed": 0,
+      "passed": 24,
+      "run": 24
+    },
+    "compileall": "PASS",
+    "formal_baseline_unchanged_before_apply": "PASS",
+    "formal_full_test_suite": {
+      "failed": 0,
+      "passed": 176,
+      "runner_exit_code": 0,
+      "skip_classification": {
+        "cupy_cuda_runtime_unavailable": 4,
+        "tk_display_unavailable": 1
+      },
+      "skipped": 5,
+      "subtests_passed": 52,
+      "top_level_collected": 181
+    },
+    "formal_self_check": {
+      "failed": 0,
+      "passed": 6,
+      "run": 6
+    },
+    "formal_self_check_names": [
+      "backend_discovery",
+      "backend_forward",
+      "backend_high_fidelity",
+      "config_round_trip",
+      "forward_minimal_smoke",
+      "high_fidelity_16x16x24_smoke"
+    ],
+    "formal_theory_unchanged": "PASS",
+    "git_apply_check": "PASS",
+    "git_diff_check": "PASS",
+    "gui_layout_test": "SKIPPED__TK_DISPLAY_UNAVAILABLE",
+    "isolated_cuda_tests_on_promoted_formal_path": "NOT_EXECUTED__CUPY_CUDA_RUNTIME_UNAVAILABLE",
+    "patch_scope_exact": "PASS",
+    "patch_sha256": "PASS",
+    "promoted_formal_0_013s_cuda_window": "NOT_EXECUTED__CUPY_CUDA_RUNTIME_UNAVAILABLE",
+    "reverse_apply_check_after_apply": "PASS",
+    "whitespace_and_tab_scan": "PASS"
+  }
+}

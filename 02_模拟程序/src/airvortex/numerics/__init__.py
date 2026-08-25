@@ -61,7 +61,11 @@ from .momentum3d import (
     rotating_frame_acceleration_3d,
     rotating_to_laboratory_velocity_3d,
 )
-from .projection3d import Projection3DDiagnostics, VariableDensityProjection3D
+from .projection3d import (
+    Projection3DDiagnostics,
+    Projection3DHistoryCheckpoint,
+    VariableDensityProjection3D,
+)
 from .projection3d_gpu import (
     CuPyVariableDensityProjection3D,
     GPUProjectionProbe,
@@ -106,6 +110,7 @@ __all__ = [
     "MomentumAdvection3DDiagnostics",
     "NewtonianStress3DDiagnostics",
     "Projection3DDiagnostics",
+    "Projection3DHistoryCheckpoint",
     "SurfaceGeometry3D",
     "SurfaceTension3DDiagnostics",
     "Topology3DDiagnostics",

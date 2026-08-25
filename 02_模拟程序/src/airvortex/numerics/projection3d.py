@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import inspect
 import math
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -28,6 +29,22 @@ class Projection3DDiagnostics:
     active_unknowns: int
     matrix_nonzeros: int
     converged: bool
+
+
+@dataclass(frozen=True, slots=True)
+class Projection3DHistoryCheckpoint:
+    """Opaque pressure-history state for one transactional trial step.
+
+    Registered history arrays are replaced, never mutated, so checkpointing is
+    constant-time and does not copy a full pressure field on every HF3D step.
+    """
+
+    owner: object
+    solve_count: int
+    initial_guess_extrapolation_count: int
+    last_initial_guess_extrapolation_factor: float
+    previous_pressure_solution: Any | None
+    last_pressure_solution: Any | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -250,6 +267,42 @@ class VariableDensityProjection3D:
             ),
             dtype=np.float64,
         )
+
+    def checkpoint_history(self) -> Projection3DHistoryCheckpoint:
+        """Return an opaque O(1) checkpoint for a potentially rejected step."""
+
+        return Projection3DHistoryCheckpoint(
+            owner=self,
+            solve_count=self.solve_count,
+            initial_guess_extrapolation_count=(
+                self.initial_guess_extrapolation_count
+            ),
+            last_initial_guess_extrapolation_factor=(
+                self.last_initial_guess_extrapolation_factor
+            ),
+            previous_pressure_solution=self._previous_pressure_solution,
+            last_pressure_solution=self._last_pressure_solution,
+        )
+
+    def restore_history(
+        self, checkpoint: Projection3DHistoryCheckpoint
+    ) -> None:
+        """Restore a checkpoint after the corresponding trial step is rejected."""
+
+        if (
+            not isinstance(checkpoint, Projection3DHistoryCheckpoint)
+            or checkpoint.owner is not self
+        ):
+            raise ValueError("pressure history checkpoint belongs to another solver")
+        self.solve_count = checkpoint.solve_count
+        self.initial_guess_extrapolation_count = (
+            checkpoint.initial_guess_extrapolation_count
+        )
+        self.last_initial_guess_extrapolation_factor = (
+            checkpoint.last_initial_guess_extrapolation_factor
+        )
+        self._previous_pressure_solution = checkpoint.previous_pressure_solution
+        self._last_pressure_solution = checkpoint.last_pressure_solution
 
     def _factor_vertical_line_preconditioner(self) -> None:
         """Factor the SPD block-Jacobi matrix made of vertical grid lines."""
@@ -574,4 +627,8 @@ class VariableDensityProjection3D:
         return ux, uy, uz, pressure, diagnostics
 
 
-__all__ = ["Projection3DDiagnostics", "VariableDensityProjection3D"]
+__all__ = [
+    "Projection3DDiagnostics",
+    "Projection3DHistoryCheckpoint",
+    "VariableDensityProjection3D",
+]

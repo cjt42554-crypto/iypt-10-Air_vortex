@@ -15,7 +15,8 @@ prediction.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+import json
 import math
 import time
 from types import MappingProxyType
@@ -72,6 +73,19 @@ from airvortex.numerics.projection3d_gpu import (
 ProgressCallback = Callable[[Progress], None]
 PressureProjection3D = VariableDensityProjection3D | CuPyVariableDensityProjection3D
 _LIVE_SURFACE_PREVIEW_INTERVAL_WALL_S = 1.0
+_TIME_STEP_LIMITER_CODES = MappingProxyType(
+    {
+        "registered_time_step": 0,
+        "combined_known_source_cfl": 1,
+        "viscous_stability": 2,
+        "capillary_stability": 3,
+        "rotation_increment": 4,
+        "output_alignment": 5,
+        "post_projection_cfl_retry": 6,
+        "direct_call": 7,
+        "initial_state": 8,
+    }
+)
 
 
 MODEL_NAME = (
@@ -145,6 +159,13 @@ class HF3DState:
 @dataclass(frozen=True, slots=True)
 class HF3DStepDiagnostics:
     dt_s: float
+    initial_attempt_dt_s: float
+    time_step_limiter: str
+    cfl_retry_count: int
+    starting_advective_cfl: float
+    pre_source_advective_cfl: float
+    pre_projection_advective_cfl: float
+    maximum_rejected_post_projection_cfl: float
     actual_bar_rpm: float
     angular_velocity_rad_s: float
     angular_acceleration_rad_s2: float
@@ -167,10 +188,73 @@ class HF3DStepDiagnostics:
     angular_momentum_z_kg_m2_s: float
     viscous_dissipation_w: float
     maximum_surface_tension_acceleration_m_s2: float
+    maximum_momentum_advection_acceleration_m_s2: float
     maximum_viscous_acceleration_m_s2: float
     maximum_boundary_acceleration_m_s2: float
+    maximum_rotating_frame_acceleration_m_s2: float
+    gravity_acceleration_m_s2: float
+    maximum_pressure_projection_acceleration_m_s2: float
     boundary_rotating_energy_change_j: float
     topology: Topology3DDiagnostics
+
+
+@dataclass(frozen=True, slots=True)
+class HF3DRejectedStepDiagnostics:
+    step_one_based: int
+    state_time_s: float
+    attempted_dt_s: float
+    starting_advective_cfl: float
+    pre_source_advective_cfl: float
+    pre_projection_advective_cfl: float
+    post_projection_advective_cfl: float
+    cfl_hard_limit: float
+    pressure_relative_residual: float
+    pressure_iterations: int
+    maximum_momentum_advection_acceleration_m_s2: float
+    maximum_viscous_acceleration_m_s2: float
+    maximum_boundary_acceleration_m_s2: float
+    maximum_surface_tension_acceleration_m_s2: float
+    maximum_rotating_frame_acceleration_m_s2: float
+    gravity_acceleration_m_s2: float
+    maximum_pressure_projection_acceleration_m_s2: float
+
+
+class HF3DPostProjectionCFLExceeded(FloatingPointError):
+    """A complete trial step was rejected before its state was committed."""
+
+    def __init__(self, diagnostics: HF3DRejectedStepDiagnostics) -> None:
+        self.diagnostics = diagnostics
+        super().__init__(
+            "HF3D post-projection advective CFL "
+            f"{diagnostics.post_projection_advective_cfl:.6e} exceeds hard limit "
+            f"{diagnostics.cfl_hard_limit:.6e} at step "
+            f"{diagnostics.step_one_based}; trial state and pressure history restored"
+        )
+
+
+def _maximum_vector_magnitude(
+    grid: ImmersedCartesianGrid,
+    x: FloatArray,
+    y: FloatArray,
+    z: FloatArray,
+) -> float:
+    magnitude = np.sqrt(x * x + y * y + z * z)
+    return float(np.max(magnitude[grid.active_mask]))
+
+
+def _retry_time_step_s(
+    attempted_dt_s: float,
+    observed_post_cfl: float,
+    cfl_hard_limit: float,
+    controller_target_fraction: float,
+) -> float:
+    target = controller_target_fraction * cfl_hard_limit
+    proposed = attempted_dt_s * target / observed_post_cfl
+    if not math.isfinite(proposed) or proposed <= np.finfo(float).tiny:
+        raise FloatingPointError("HF3D CFL retry time step became non-positive")
+    if proposed >= attempted_dt_s:
+        proposed = math.nextafter(attempted_dt_s, 0.0)
+    return proposed
 
 
 def _rpm_to_omega(rpm: float) -> float:
@@ -399,7 +483,7 @@ class HighFidelityBackend:
         state: HF3DState,
         config: SimulationConfig,
         grid: ImmersedCartesianGrid,
-    ) -> tuple[float, dict[str, float]]:
+    ) -> tuple[float, dict[str, float | str]]:
         hf = config.high_fidelity
         fluid = config.fluid
         ux, uy, uz = grid.faces_to_cells(
@@ -417,8 +501,9 @@ class HighFidelityBackend:
             1.0 / grid.dx + 1.0 / grid.dy
         )
         rate_bound = max(advective_rate, wall_rate)
+        cfl_target = hf.cfl_controller_target_fraction * hf.cfl_limit
         dt_advective = (
-            math.inf if rate_bound <= np.finfo(float).tiny else hf.cfl_limit / rate_bound
+            math.inf if rate_bound <= np.finfo(float).tiny else cfl_target / rate_bound
         )
         nu_max = max(
             fluid.liquid_dynamic_viscosity_pa_s / fluid.liquid_density_kg_m3,
@@ -437,34 +522,52 @@ class HighFidelityBackend:
         speed_max = float(
             np.max(np.sqrt(ux * ux + uy * uy + uz * uz)[grid.active_mask])
         )
-        source_acceleration = (
-            fluid.gravity_m_s2
-            + omega_bound * omega_bound * grid.radius_m
+        horizontal_source_acceleration_bound = (
+            omega_bound * omega_bound * grid.radius_m
             + omega_dot * grid.radius_m
             + 2.0 * omega_bound * speed_max
         )
+        source_rate_acceleration = (
+            horizontal_source_acceleration_bound
+            * (1.0 / grid.dx + 1.0 / grid.dy)
+            + fluid.gravity_m_s2 / grid.dz
+        )
         dt_source = math.sqrt(
-            hf.cfl_limit * h / max(source_acceleration, np.finfo(float).tiny)
+            cfl_target / max(source_rate_acceleration, np.finfo(float).tiny)
+        )
+        dt_combined_cfl = 2.0 * cfl_target / (
+            rate_bound
+            + math.sqrt(
+                rate_bound * rate_bound
+                + 4.0 * source_rate_acceleration * cfl_target
+            )
         )
         dt_rotation = (
             math.inf
             if omega_bound <= np.finfo(float).tiny
             else hf.maximum_rotation_increment_rad / omega_bound
         )
-        stable = min(
-            hf.time_step_s,
-            dt_advective,
-            dt_viscous,
-            dt_capillary,
-            dt_source,
-            dt_rotation,
-        )
+        candidate_limits = {
+            "registered_time_step": hf.time_step_s,
+            "combined_known_source_cfl": dt_combined_cfl,
+            "viscous_stability": dt_viscous,
+            "capillary_stability": dt_capillary,
+            "rotation_increment": dt_rotation,
+        }
+        selected_limiter = min(candidate_limits, key=candidate_limits.__getitem__)
+        stable = candidate_limits[selected_limiter]
         return stable, {
+            "cfl_hard_limit": hf.cfl_limit,
+            "cfl_controller_target": cfl_target,
             "advective_rate_s_inv": rate_bound,
+            "known_source_rate_acceleration_s_inv2": source_rate_acceleration,
+            "independent_advective_dt_s": dt_advective,
+            "independent_source_dt_s": dt_source,
+            "combined_known_source_cfl_dt_s": dt_combined_cfl,
             "viscous_rate_s_inv": diffusion_rate,
             "capillary_dt_s": dt_capillary,
-            "source_dt_s": dt_source,
             "rotation_dt_s": dt_rotation,
+            "selected_limiter": selected_limiter,
         }
 
     def advance_one_step(
@@ -476,13 +579,34 @@ class HighFidelityBackend:
         dt_s: float,
         *,
         expected_liquid_volume_m3: float,
+        time_step_limiter: str = "direct_call",
+        cfl_retry_count: int = 0,
+        initial_attempt_dt_s: float | None = None,
+        maximum_rejected_post_projection_cfl: float = 0.0,
     ) -> HF3DStepDiagnostics:
-        """Advance one conservative local-law step and mutate ``state``."""
+        """Advance one conservative local-law step and commit only after all gates."""
 
         hf = config.high_fidelity
         fluid = config.fluid
         if not math.isfinite(dt_s) or dt_s <= 0.0:
             raise ValueError("dt_s must be finite and positive")
+        if time_step_limiter not in _TIME_STEP_LIMITER_CODES:
+            raise ValueError(f"unknown HF3D time-step limiter: {time_step_limiter}")
+        if cfl_retry_count < 0:
+            raise ValueError("cfl_retry_count must be non-negative")
+        initial_dt = dt_s if initial_attempt_dt_s is None else initial_attempt_dt_s
+        if not math.isfinite(initial_dt) or initial_dt < dt_s:
+            raise ValueError("initial_attempt_dt_s must be finite and at least dt_s")
+        if (
+            not math.isfinite(maximum_rejected_post_projection_cfl)
+            or maximum_rejected_post_projection_cfl < 0.0
+        ):
+            raise ValueError(
+                "maximum_rejected_post_projection_cfl must be finite and non-negative"
+            )
+        starting_cfl = advective_cfl(
+            state.u_x_face, state.u_y_face, state.u_z_face, grid, dt_s
+        )
         old_phase = state.phase
         old_density = mixture_property_3d(
             old_phase,
@@ -553,6 +677,12 @@ class HighFidelityBackend:
             top_inflow_u_y_m_s=top_y,
             top_inflow_u_z_m_s=0.0,
         )
+        maximum_momentum_advection_acceleration = _maximum_vector_magnitude(
+            grid,
+            (ux - old_ux) / dt_s,
+            (uy - old_uy) / dt_s,
+            (uz - old_uz) / dt_s,
+        )
 
         viscous_x, viscous_y, viscous_z, viscous_diagnostics = (
             newtonian_stress_acceleration_3d(
@@ -593,13 +723,30 @@ class HighFidelityBackend:
             relaxation_time_s=hf.boundary_relaxation_time_s,
             layer_cells=hf.boundary_layer_cells,
         )
+        pre_source_ux_face, pre_source_uy_face, pre_source_uz_face = (
+            grid.cells_to_faces(ux, uy, uz)
+        )
+        pre_source_cfl = advective_cfl(
+            pre_source_ux_face,
+            pre_source_uy_face,
+            pre_source_uz_face,
+            grid,
+            dt_s,
+        )
         frame_x, frame_y, frame_z = rotating_frame_acceleration_3d(
             ux, uy, grid, omega_mid, omega_dot
+        )
+        maximum_rotating_frame_acceleration = _maximum_vector_magnitude(
+            grid, frame_x, frame_y, frame_z
         )
         ux = ux + dt_s * (csf_x + frame_x)
         uy = uy + dt_s * (csf_y + frame_y)
         uz = uz + dt_s * (csf_z + frame_z - fluid.gravity_m_s2)
         ux_face, uy_face, uz_face = grid.cells_to_faces(ux, uy, uz)
+        pre_projection_cfl = advective_cfl(
+            ux_face, uy_face, uz_face, grid, dt_s
+        )
+        pressure_history_checkpoint = projection.checkpoint_history()
         ux_face, uy_face, uz_face, pressure, projection_diagnostics = (
             projection.project(
                 ux_face,
@@ -613,14 +760,51 @@ class HighFidelityBackend:
         projected_ux, projected_uy, projected_uz = grid.faces_to_cells(
             ux_face, uy_face, uz_face
         )
+        maximum_pressure_projection_acceleration = _maximum_vector_magnitude(
+            grid,
+            (projected_ux - ux) / dt_s,
+            (projected_uy - uy) / dt_s,
+            (projected_uz - uz) / dt_s,
+        )
         post_cfl = advective_cfl(
             ux_face, uy_face, uz_face, grid, dt_s
         )
         if post_cfl > hf.cfl_limit * (1.0 + 1.0e-9):
-            raise FloatingPointError(
-                f"HF3D post-source advective CFL {post_cfl:.3e} exceeds "
-                f"configured limit {hf.cfl_limit:.3e}; reduce time_step_s"
+            rejected = HF3DRejectedStepDiagnostics(
+                step_one_based=next_step,
+                state_time_s=state.time_s,
+                attempted_dt_s=dt_s,
+                starting_advective_cfl=starting_cfl,
+                pre_source_advective_cfl=pre_source_cfl,
+                pre_projection_advective_cfl=pre_projection_cfl,
+                post_projection_advective_cfl=post_cfl,
+                cfl_hard_limit=hf.cfl_limit,
+                pressure_relative_residual=(
+                    projection_diagnostics.pressure_relative_residual
+                ),
+                pressure_iterations=projection_diagnostics.iterations,
+                maximum_momentum_advection_acceleration_m_s2=(
+                    maximum_momentum_advection_acceleration
+                ),
+                maximum_viscous_acceleration_m_s2=(
+                    viscous_diagnostics.maximum_viscous_acceleration_m_s2
+                ),
+                maximum_boundary_acceleration_m_s2=(
+                    boundary_diagnostics.maximum_relaxation_acceleration_m_s2
+                ),
+                maximum_surface_tension_acceleration_m_s2=(
+                    csf_diagnostics.maximum_acceleration_m_s2
+                ),
+                maximum_rotating_frame_acceleration_m_s2=(
+                    maximum_rotating_frame_acceleration
+                ),
+                gravity_acceleration_m_s2=fluid.gravity_m_s2,
+                maximum_pressure_projection_acceleration_m_s2=(
+                    maximum_pressure_projection_acceleration
+                ),
             )
+            projection.restore_history(pressure_history_checkpoint)
+            raise HF3DPostProjectionCFLExceeded(rejected)
         if (
             projection_diagnostics.pressure_relative_residual
             > hf.pressure_relative_tolerance * 1.05
@@ -694,6 +878,15 @@ class HighFidelityBackend:
         )
         return HF3DStepDiagnostics(
             dt_s=dt_s,
+            initial_attempt_dt_s=initial_dt,
+            time_step_limiter=time_step_limiter,
+            cfl_retry_count=cfl_retry_count,
+            starting_advective_cfl=starting_cfl,
+            pre_source_advective_cfl=pre_source_cfl,
+            pre_projection_advective_cfl=pre_projection_cfl,
+            maximum_rejected_post_projection_cfl=(
+                maximum_rejected_post_projection_cfl
+            ),
             actual_bar_rpm=rpm_end,
             angular_velocity_rad_s=omega_end,
             angular_acceleration_rad_s2=omega_dot,
@@ -724,11 +917,21 @@ class HighFidelityBackend:
             maximum_surface_tension_acceleration_m_s2=(
                 csf_diagnostics.maximum_acceleration_m_s2
             ),
+            maximum_momentum_advection_acceleration_m_s2=(
+                maximum_momentum_advection_acceleration
+            ),
             maximum_viscous_acceleration_m_s2=(
                 viscous_diagnostics.maximum_viscous_acceleration_m_s2
             ),
             maximum_boundary_acceleration_m_s2=(
                 boundary_diagnostics.maximum_relaxation_acceleration_m_s2
+            ),
+            maximum_rotating_frame_acceleration_m_s2=(
+                maximum_rotating_frame_acceleration
+            ),
+            gravity_acceleration_m_s2=fluid.gravity_m_s2,
+            maximum_pressure_projection_acceleration_m_s2=(
+                maximum_pressure_projection_acceleration
             ),
             boundary_rotating_energy_change_j=(
                 boundary_diagnostics.rotating_frame_kinetic_energy_change_j
@@ -770,6 +973,13 @@ class HighFidelityBackend:
         volume = grid.integrate(state.phase)
         return HF3DStepDiagnostics(
             dt_s=0.0,
+            initial_attempt_dt_s=0.0,
+            time_step_limiter="initial_state",
+            cfl_retry_count=0,
+            starting_advective_cfl=0.0,
+            pre_source_advective_cfl=0.0,
+            pre_projection_advective_cfl=0.0,
+            maximum_rejected_post_projection_cfl=0.0,
             actual_bar_rpm=rpm,
             angular_velocity_rad_s=omega,
             angular_acceleration_rad_s2=_rpm_to_omega(slope),
@@ -806,8 +1016,12 @@ class HighFidelityBackend:
             ),
             viscous_dissipation_w=0.0,
             maximum_surface_tension_acceleration_m_s2=0.0,
+            maximum_momentum_advection_acceleration_m_s2=0.0,
             maximum_viscous_acceleration_m_s2=0.0,
             maximum_boundary_acceleration_m_s2=0.0,
+            maximum_rotating_frame_acceleration_m_s2=0.0,
+            gravity_acceleration_m_s2=config.fluid.gravity_m_s2,
+            maximum_pressure_projection_acceleration_m_s2=0.0,
             boundary_rotating_energy_change_j=0.0,
             topology=topology,
         )
@@ -819,6 +1033,7 @@ class HighFidelityBackend:
         progress: ProgressCallback | None = None,
     ) -> SimulationResult:
         self._validate_config(config)
+        hf = config.high_fidelity
         if control is not None and not isinstance(control, Control):
             raise TypeError("control must be Control or None")
         if progress is not None and not callable(progress):
@@ -868,6 +1083,21 @@ class HighFidelityBackend:
         events: list[Event] = []
         step_time: list[float] = []
         step_dt: list[float] = []
+        step_initial_attempt_dt: list[float] = []
+        step_time_limiter_code: list[float] = []
+        step_cfl_retry_count: list[float] = []
+        step_starting_cfl: list[float] = []
+        step_pre_source_cfl: list[float] = []
+        step_pre_projection_cfl: list[float] = []
+        step_post_projection_cfl: list[float] = []
+        step_maximum_rejected_cfl: list[float] = []
+        step_momentum_advection_acceleration: list[float] = []
+        step_viscous_acceleration: list[float] = []
+        step_boundary_acceleration: list[float] = []
+        step_surface_tension_acceleration: list[float] = []
+        step_rotating_frame_acceleration: list[float] = []
+        step_gravity_acceleration: list[float] = []
+        step_pressure_projection_acceleration: list[float] = []
         step_clip: list[float] = []
         step_repair: list[float] = []
         step_divergence: list[float] = []
@@ -880,6 +1110,10 @@ class HighFidelityBackend:
         maximum_divergence = 0.0
         maximum_pressure_residual = 0.0
         maximum_cfl = 0.0
+        maximum_rejected_cfl = 0.0
+        cfl_retry_attempts_total = 0
+        cfl_retried_accepted_steps = 0
+        limiter_counts = {name: 0 for name in _TIME_STEP_LIMITER_CODES}
         minimum_dt = math.inf
         previous_topology: Topology3DDiagnostics | None = None
         first_resolved_seen = False
@@ -1152,23 +1386,137 @@ class HighFidelityBackend:
                     )
                 )
                 break
-            stable_dt, _ = self._time_step_limits(state, config, grid)
+            stable_dt, time_step_limits = self._time_step_limits(
+                state, config, grid
+            )
             target_time = min(next_output, end_time)
-            dt_s = min(stable_dt, target_time - state.time_s)
+            remaining_to_target = target_time - state.time_s
+            dt_s = min(stable_dt, remaining_to_target)
             if not math.isfinite(dt_s) or dt_s <= 0.0:
                 raise FloatingPointError("HF3D adaptive time step became non-positive")
-            last_diag = self.advance_one_step(
-                state,
-                config,
-                grid,
-                projection,
-                dt_s,
-                expected_liquid_volume_m3=expected_volume,
-            )
+            if remaining_to_target < stable_dt:
+                limiter = "output_alignment"
+            else:
+                limiter = str(time_step_limits["selected_limiter"])
+            initial_attempt_dt_s = dt_s
+            retry_count = 0
+            rejected_cfl_for_step = 0.0
+            while True:
+                try:
+                    last_diag = self.advance_one_step(
+                        state,
+                        config,
+                        grid,
+                        projection,
+                        dt_s,
+                        expected_liquid_volume_m3=expected_volume,
+                        time_step_limiter=limiter,
+                        cfl_retry_count=retry_count,
+                        initial_attempt_dt_s=initial_attempt_dt_s,
+                        maximum_rejected_post_projection_cfl=(
+                            rejected_cfl_for_step
+                        ),
+                    )
+                    break
+                except HF3DPostProjectionCFLExceeded as exc:
+                    failure = exc.diagnostics
+                    rejected_cfl_for_step = max(
+                        rejected_cfl_for_step,
+                        failure.post_projection_advective_cfl,
+                    )
+                    if retry_count >= hf.maximum_cfl_step_retries:
+                        payload = {
+                            "kind": "HF3D_CFL_RETRY_EXHAUSTED",
+                            "attempt_count": retry_count + 1,
+                            "retry_count": retry_count,
+                            "maximum_cfl_step_retries": (
+                                hf.maximum_cfl_step_retries
+                            ),
+                            "initial_attempt_dt_s": initial_attempt_dt_s,
+                            "time_step_limiter": limiter,
+                            "cfl_controller_target_fraction": (
+                                hf.cfl_controller_target_fraction
+                            ),
+                            "maximum_rejected_post_projection_cfl": (
+                                rejected_cfl_for_step
+                            ),
+                            "pressure_accelerator": pressure_accelerator,
+                            "last_rejected_trial": asdict(failure),
+                        }
+                        raise FloatingPointError(
+                            "HF3D CFL retry gate exhausted: "
+                            + json.dumps(
+                                payload,
+                                sort_keys=True,
+                                separators=(",", ":"),
+                            )
+                        ) from exc
+                    retry_count += 1
+                    next_dt_s = _retry_time_step_s(
+                        dt_s,
+                        failure.post_projection_advective_cfl,
+                        hf.cfl_limit,
+                        hf.cfl_controller_target_fraction,
+                    )
+                    events.append(
+                        Event(
+                            state.time_s,
+                            "cfl_step_retry",
+                            "Rejected trial was rolled back and retried below the independent CFL controller target.",
+                            {
+                                "retry_number": retry_count,
+                                "previous_limiter": limiter,
+                                "next_dt_s": next_dt_s,
+                                "pressure_accelerator_selected": (
+                                    pressure_accelerator["selected"]
+                                ),
+                                **asdict(failure),
+                            },
+                        )
+                    )
+                    dt_s = next_dt_s
+                    limiter = "post_projection_cfl_retry"
             expected_volume = last_diag.expected_liquid_volume_m3
             update_events(last_diag)
             step_time.append(state.time_s)
-            step_dt.append(dt_s)
+            step_dt.append(last_diag.dt_s)
+            step_initial_attempt_dt.append(last_diag.initial_attempt_dt_s)
+            step_time_limiter_code.append(
+                float(_TIME_STEP_LIMITER_CODES[last_diag.time_step_limiter])
+            )
+            step_cfl_retry_count.append(float(last_diag.cfl_retry_count))
+            step_starting_cfl.append(last_diag.starting_advective_cfl)
+            step_pre_source_cfl.append(last_diag.pre_source_advective_cfl)
+            step_pre_projection_cfl.append(
+                last_diag.pre_projection_advective_cfl
+            )
+            step_post_projection_cfl.append(last_diag.advective_cfl)
+            step_maximum_rejected_cfl.append(
+                last_diag.maximum_rejected_post_projection_cfl
+            )
+            step_momentum_advection_acceleration.append(
+                last_diag.maximum_momentum_advection_acceleration_m_s2
+            )
+            step_viscous_acceleration.append(
+                last_diag.maximum_viscous_acceleration_m_s2
+            )
+            step_boundary_acceleration.append(
+                last_diag.maximum_boundary_acceleration_m_s2
+            )
+            step_surface_tension_acceleration.append(
+                last_diag.maximum_surface_tension_acceleration_m_s2
+            )
+            step_rotating_frame_acceleration.append(
+                last_diag.maximum_rotating_frame_acceleration_m_s2
+            )
+            step_gravity_acceleration.append(last_diag.gravity_acceleration_m_s2)
+            step_pressure_projection_acceleration.append(
+                last_diag.maximum_pressure_projection_acceleration_m_s2
+            )
+            cfl_retry_attempts_total += last_diag.cfl_retry_count
+            if last_diag.cfl_retry_count:
+                cfl_retried_accepted_steps += 1
+            limiter_counts[last_diag.time_step_limiter] += 1
             step_clip.append(last_diag.phase_clip_absolute_volume_m3)
             step_repair.append(last_diag.phase_repair_absolute_volume_m3)
             step_divergence.append(last_diag.divergence_after_s_inv)
@@ -1187,7 +1535,11 @@ class HighFidelityBackend:
                 maximum_pressure_residual, last_diag.pressure_relative_residual
             )
             maximum_cfl = max(maximum_cfl, last_diag.advective_cfl)
-            minimum_dt = min(minimum_dt, dt_s)
+            maximum_rejected_cfl = max(
+                maximum_rejected_cfl,
+                last_diag.maximum_rejected_post_projection_cfl,
+            )
+            minimum_dt = min(minimum_dt, last_diag.dt_s)
             if (
                 single_clip
                 > config.high_fidelity.maximum_single_step_phase_clip_relative
@@ -1378,6 +1730,51 @@ class HighFidelityBackend:
             ),
             "diagnostic_step_time_s": np.asarray(step_time, dtype=np.float64),
             "diagnostic_dt_s": np.asarray(step_dt, dtype=np.float64),
+            "diagnostic_initial_attempt_dt_s": np.asarray(
+                step_initial_attempt_dt, dtype=np.float64
+            ),
+            "diagnostic_time_step_limiter_code": np.asarray(
+                step_time_limiter_code, dtype=np.float64
+            ),
+            "diagnostic_cfl_retry_count": np.asarray(
+                step_cfl_retry_count, dtype=np.float64
+            ),
+            "diagnostic_starting_advective_cfl": np.asarray(
+                step_starting_cfl, dtype=np.float64
+            ),
+            "diagnostic_pre_source_advective_cfl": np.asarray(
+                step_pre_source_cfl, dtype=np.float64
+            ),
+            "diagnostic_pre_projection_advective_cfl": np.asarray(
+                step_pre_projection_cfl, dtype=np.float64
+            ),
+            "diagnostic_post_projection_advective_cfl": np.asarray(
+                step_post_projection_cfl, dtype=np.float64
+            ),
+            "diagnostic_maximum_rejected_post_projection_cfl": np.asarray(
+                step_maximum_rejected_cfl, dtype=np.float64
+            ),
+            "diagnostic_maximum_momentum_advection_acceleration_m_s2": np.asarray(
+                step_momentum_advection_acceleration, dtype=np.float64
+            ),
+            "diagnostic_maximum_viscous_acceleration_m_s2": np.asarray(
+                step_viscous_acceleration, dtype=np.float64
+            ),
+            "diagnostic_maximum_boundary_acceleration_m_s2": np.asarray(
+                step_boundary_acceleration, dtype=np.float64
+            ),
+            "diagnostic_maximum_surface_tension_acceleration_m_s2": np.asarray(
+                step_surface_tension_acceleration, dtype=np.float64
+            ),
+            "diagnostic_maximum_rotating_frame_acceleration_m_s2": np.asarray(
+                step_rotating_frame_acceleration, dtype=np.float64
+            ),
+            "diagnostic_gravity_acceleration_m_s2": np.asarray(
+                step_gravity_acceleration, dtype=np.float64
+            ),
+            "diagnostic_maximum_pressure_projection_acceleration_m_s2": np.asarray(
+                step_pressure_projection_acceleration, dtype=np.float64
+            ),
             "diagnostic_phase_clip_absolute_volume_m3": np.asarray(
                 step_clip, dtype=np.float64
             ),
@@ -1445,12 +1842,20 @@ class HighFidelityBackend:
                 if "pressure" in name
                 else "s"
                 if name.endswith("time_s") or name.endswith("dt_s")
+                else "m/s^2"
+                if "acceleration_m_s2" in name
                 else "m^3"
                 if "volume_m3" in name
                 else "s^-1"
                 if "divergence" in name
                 else "1"
-                if "residual" in name or "iterations" in name
+                if (
+                    "residual" in name
+                    or "iterations" in name
+                    or "cfl" in name
+                    or "limiter_code" in name
+                    or "retry_count" in name
+                )
                 else "m/s"
                 if "u_" in name
                 else "m"
@@ -1543,6 +1948,44 @@ class HighFidelityBackend:
                 "pressure_last_initial_guess_extrapolation_factor": (
                     projection.last_initial_guess_extrapolation_factor
                 ),
+                "cfl_controller": {
+                    "hard_limit": hf.cfl_limit,
+                    "target_fraction": hf.cfl_controller_target_fraction,
+                    "target": (
+                        hf.cfl_limit * hf.cfl_controller_target_fraction
+                    ),
+                    "known_source_bound": (
+                        "positive root of R*dt + A*dt^2 <= target for current/wall advection plus analytic gravity/rotating-frame bounds"
+                    ),
+                    "unknown_operator_policy": (
+                        "complete-step post-projection gate with transactional retry"
+                    ),
+                    "maximum_step_retries": hf.maximum_cfl_step_retries,
+                },
+                "time_step_limiter_codes": dict(_TIME_STEP_LIMITER_CODES),
+                "time_step_limiter_counts": limiter_counts,
+                "cfl_retry_attempts_total": cfl_retry_attempts_total,
+                "cfl_retried_accepted_steps": cfl_retried_accepted_steps,
+                "maximum_rejected_post_projection_cfl": maximum_rejected_cfl,
+                "maximum_operator_acceleration_m_s2": {
+                    "momentum_advection": max(
+                        step_momentum_advection_acceleration, default=0.0
+                    ),
+                    "viscous": max(step_viscous_acceleration, default=0.0),
+                    "boundary_relaxation": max(
+                        step_boundary_acceleration, default=0.0
+                    ),
+                    "surface_tension": max(
+                        step_surface_tension_acceleration, default=0.0
+                    ),
+                    "rotating_frame": max(
+                        step_rotating_frame_acceleration, default=0.0
+                    ),
+                    "gravity": max(step_gravity_acceleration, default=0.0),
+                    "pressure_projection": max(
+                        step_pressure_projection_acceleration, default=0.0
+                    ),
+                },
                 "completed_steps": state.step,
                 "simulated_duration_s": state.time_s,
                 "minimum_time_step_s": 0.0 if not math.isfinite(minimum_dt) else minimum_dt,
@@ -1599,6 +2042,8 @@ HF3DBackend = HighFidelityBackend
 __all__ = [
     "CAPABILITIES",
     "HF3DBackend",
+    "HF3DPostProjectionCFLExceeded",
+    "HF3DRejectedStepDiagnostics",
     "HF3DState",
     "HF3DStepDiagnostics",
     "HighFidelityBackend",

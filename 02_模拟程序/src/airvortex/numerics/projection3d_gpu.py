@@ -19,6 +19,7 @@ from numpy.typing import NDArray
 from .cartesian3d import ImmersedCartesianGrid
 from .projection3d import (
     Projection3DDiagnostics,
+    Projection3DHistoryCheckpoint,
     _VERTICAL_LINE_SPACING_RATIO_MAX,
     _build_pressure_matrix_topology,
 )
@@ -295,6 +296,42 @@ class CuPyVariableDensityProjection3D:
             dtype=cp.float64,
         )
         self._cupy_sparse_linalg = cupy_sparse_linalg
+
+    def checkpoint_history(self) -> Projection3DHistoryCheckpoint:
+        """Return an opaque O(1) checkpoint for a potentially rejected step."""
+
+        return Projection3DHistoryCheckpoint(
+            owner=self,
+            solve_count=self.solve_count,
+            initial_guess_extrapolation_count=(
+                self.initial_guess_extrapolation_count
+            ),
+            last_initial_guess_extrapolation_factor=(
+                self.last_initial_guess_extrapolation_factor
+            ),
+            previous_pressure_solution=self._previous_pressure_solution,
+            last_pressure_solution=self._last_pressure_solution,
+        )
+
+    def restore_history(
+        self, checkpoint: Projection3DHistoryCheckpoint
+    ) -> None:
+        """Restore a checkpoint after the corresponding trial step is rejected."""
+
+        if (
+            not isinstance(checkpoint, Projection3DHistoryCheckpoint)
+            or checkpoint.owner is not self
+        ):
+            raise ValueError("pressure history checkpoint belongs to another solver")
+        self.solve_count = checkpoint.solve_count
+        self.initial_guess_extrapolation_count = (
+            checkpoint.initial_guess_extrapolation_count
+        )
+        self.last_initial_guess_extrapolation_factor = (
+            checkpoint.last_initial_guess_extrapolation_factor
+        )
+        self._previous_pressure_solution = checkpoint.previous_pressure_solution
+        self._last_pressure_solution = checkpoint.last_pressure_solution
 
     def _require_shape(self, value: Any, expected: tuple[int, ...], name: str) -> None:
         if tuple(value.shape) != expected:

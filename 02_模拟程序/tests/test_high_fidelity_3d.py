@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 from dataclasses import replace
+import json
 import math
 from pathlib import Path
 import unittest
@@ -12,6 +13,7 @@ from unittest.mock import patch
 import numpy as np
 from scipy.sparse import coo_matrix
 
+import airvortex.backends.high_fidelity_3d as hf3d_module
 from airvortex.backends.high_fidelity_3d import (
     HighFidelityBackend,
     _drive_rpm_and_slope,
@@ -33,6 +35,7 @@ from airvortex.numerics import (
     ImmersedCartesianGrid,
     VariableDensityProjection3D,
     advect_bounded_scalar,
+    advective_cfl,
     conservative_cls_3d,
     initialise_flat_phase_3d,
     masked_gradient_axis_3d,
@@ -440,6 +443,88 @@ class LocalLawOperatorTests(unittest.TestCase):
         )
         self.assertEqual(projection.initial_guess_extrapolation_count, 1)
 
+    def test_pressure_history_checkpoint_restores_rejected_trial_in_constant_time(
+        self,
+    ) -> None:
+        grid = self.grid
+        rng = np.random.default_rng(20260826)
+        ux = rng.normal(scale=0.02, size=grid.face_shape_x) * grid.open_x
+        uy = rng.normal(scale=0.02, size=grid.face_shape_y) * grid.open_y
+        uz = rng.normal(scale=0.02, size=grid.face_shape_z) * grid.open_z
+        density = np.where(grid.z_cell < 0.060, 998.2, 1.204)
+        projection = VariableDensityProjection3D(
+            grid, relative_tolerance=1.0e-10, maximum_iterations=1600
+        )
+        reference = VariableDensityProjection3D(
+            grid, relative_tolerance=1.0e-10, maximum_iterations=1600
+        )
+
+        pressure = None
+        reference_pressure = None
+        for scale in (1.0, 1.1):
+            *_, pressure, _ = projection.project(
+                scale * ux,
+                scale * uy,
+                scale * uz,
+                density,
+                1.0e-4,
+                initial_pressure_pa=pressure,
+            )
+            *_, reference_pressure, _ = reference.project(
+                scale * ux,
+                scale * uy,
+                scale * uz,
+                density,
+                1.0e-4,
+                initial_pressure_pa=reference_pressure,
+            )
+
+        checkpoint = projection.checkpoint_history()
+        previous_identity = projection._previous_pressure_solution
+        latest_identity = projection._last_pressure_solution
+        projection.project(
+            1.2 * ux,
+            1.2 * uy,
+            1.2 * uz,
+            density,
+            8.0e-5,
+            initial_pressure_pa=pressure,
+        )
+        self.assertGreater(projection.solve_count, checkpoint.solve_count)
+        projection.restore_history(checkpoint)
+        self.assertEqual(projection.solve_count, checkpoint.solve_count)
+        self.assertEqual(
+            projection.initial_guess_extrapolation_count,
+            checkpoint.initial_guess_extrapolation_count,
+        )
+        self.assertIs(projection._previous_pressure_solution, previous_identity)
+        self.assertIs(projection._last_pressure_solution, latest_identity)
+
+        observed = projection.project(
+            1.2 * ux,
+            1.2 * uy,
+            1.2 * uz,
+            density,
+            8.0e-5,
+            initial_pressure_pa=pressure,
+        )
+        expected = reference.project(
+            1.2 * ux,
+            1.2 * uy,
+            1.2 * uz,
+            density,
+            8.0e-5,
+            initial_pressure_pa=reference_pressure,
+        )
+        for actual, wanted in zip(observed[:4], expected[:4]):
+            np.testing.assert_array_equal(actual, wanted)
+
+        other = VariableDensityProjection3D(
+            grid, relative_tolerance=1.0e-10, maximum_iterations=1600
+        )
+        with self.assertRaisesRegex(ValueError, "another solver"):
+            other.restore_history(checkpoint)
+
     def test_pressure_preconditioner_falls_back_when_vertical_lines_are_coarse(
         self,
     ) -> None:
@@ -562,6 +647,212 @@ class HF3DBackendContractTests(unittest.TestCase):
         self.assertEqual(record["selected"], "cpu")
         self.assertFalse(record["fallback"])
         self.assertFalse(record["host_device_transfer_each_solve"])
+
+    def test_combined_known_source_bound_targets_margin_below_hard_gate(self) -> None:
+        config = small_hf3d_config(rpm=100.0)
+        backend = HighFidelityBackend()
+        grid = backend.make_grid(config)
+        state = backend.initialise_state(config, grid)
+        stable_dt, limits = backend._time_step_limits(state, config, grid)
+        combined_dt = float(limits["combined_known_source_cfl_dt_s"])
+        rate = float(limits["advective_rate_s_inv"])
+        acceleration = float(
+            limits["known_source_rate_acceleration_s_inv2"]
+        )
+        target = float(limits["cfl_controller_target"])
+        self.assertLess(target, config.high_fidelity.cfl_limit)
+        self.assertLessEqual(
+            rate * combined_dt + acceleration * combined_dt**2,
+            target * (1.0 + 1.0e-14),
+        )
+        self.assertLessEqual(stable_dt, combined_dt)
+
+    def test_synthetic_post_projection_cfl_failure_rolls_back_and_retries(self) -> None:
+        config = small_hf3d_config(rpm=100.0)
+        config = replace(
+            config,
+            high_fidelity=replace(
+                config.high_fidelity, pressure_solver_device="cpu"
+            ),
+        )
+        call_count = 0
+
+        def inject_one_rejected_post_projection_cfl(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            observed = advective_cfl(*args, **kwargs)
+            if call_count == 4:
+                return config.high_fidelity.cfl_limit * 1.001
+            return observed
+
+        with patch.object(
+            hf3d_module,
+            "advective_cfl",
+            side_effect=inject_one_rejected_post_projection_cfl,
+        ):
+            result = HighFidelityBackend().run(config)
+
+        diagnostics = result.metadata["diagnostics"]
+        self.assertEqual(diagnostics["cfl_retry_attempts_total"], 1)
+        self.assertEqual(diagnostics["cfl_retried_accepted_steps"], 1)
+        self.assertEqual(
+            diagnostics["pressure_solves"], diagnostics["completed_steps"]
+        )
+        self.assertEqual(
+            int(result.fields["diagnostic_cfl_retry_count"][0]), 1
+        )
+        self.assertLess(
+            result.fields["diagnostic_dt_s"][0],
+            result.fields["diagnostic_initial_attempt_dt_s"][0],
+        )
+        retry_code = diagnostics["time_step_limiter_codes"][
+            "post_projection_cfl_retry"
+        ]
+        self.assertEqual(
+            int(result.fields["diagnostic_time_step_limiter_code"][0]),
+            retry_code,
+        )
+        retry_events = [
+            event for event in result.events if event.kind == "cfl_step_retry"
+        ]
+        self.assertEqual(len(retry_events), 1)
+        self.assertEqual(
+            retry_events[0].data["pressure_accelerator_selected"], "cpu"
+        )
+
+    def test_rejected_trial_leaves_flow_state_and_pressure_history_unchanged(
+        self,
+    ) -> None:
+        config = small_hf3d_config(rpm=100.0)
+        config = replace(
+            config,
+            high_fidelity=replace(
+                config.high_fidelity, pressure_solver_device="cpu"
+            ),
+        )
+        backend = HighFidelityBackend()
+        grid = backend.make_grid(config)
+        state = backend.initialise_state(config, grid)
+        projection, _ = _make_pressure_projection(config, grid)
+        pressure_checkpoint = projection.checkpoint_history()
+        scalar_state = (state.time_s, state.step, state.bar_angle_rad)
+        array_state = tuple(
+            value.copy()
+            for value in (
+                state.u_x_face,
+                state.u_y_face,
+                state.u_z_face,
+                state.phase,
+                state.pressure_pa,
+            )
+        )
+        call_count = 0
+
+        def inject_rejected_post_projection_cfl(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            observed = advective_cfl(*args, **kwargs)
+            if call_count == 4:
+                return config.high_fidelity.cfl_limit * 1.001
+            return observed
+
+        with patch.object(
+            hf3d_module,
+            "advective_cfl",
+            side_effect=inject_rejected_post_projection_cfl,
+        ):
+            with self.assertRaises(hf3d_module.HF3DPostProjectionCFLExceeded):
+                backend.advance_one_step(
+                    state,
+                    config,
+                    grid,
+                    projection,
+                    config.high_fidelity.time_step_s,
+                    expected_liquid_volume_m3=backend._initial_liquid_volume(
+                        config, grid
+                    ),
+                )
+
+        self.assertEqual(
+            (state.time_s, state.step, state.bar_angle_rad), scalar_state
+        )
+        for actual, expected in zip(
+            (
+                state.u_x_face,
+                state.u_y_face,
+                state.u_z_face,
+                state.phase,
+                state.pressure_pa,
+            ),
+            array_state,
+        ):
+            np.testing.assert_array_equal(actual, expected)
+        self.assertEqual(projection.solve_count, pressure_checkpoint.solve_count)
+        self.assertEqual(
+            projection.initial_guess_extrapolation_count,
+            pressure_checkpoint.initial_guess_extrapolation_count,
+        )
+        self.assertIs(
+            projection._previous_pressure_solution,
+            pressure_checkpoint.previous_pressure_solution,
+        )
+        self.assertIs(
+            projection._last_pressure_solution,
+            pressure_checkpoint.last_pressure_solution,
+        )
+
+    def test_exhausted_retry_error_is_machine_readable_and_names_accelerator(
+        self,
+    ) -> None:
+        config = small_hf3d_config(rpm=100.0)
+        config = replace(
+            config,
+            high_fidelity=replace(
+                config.high_fidelity,
+                pressure_solver_device="cpu",
+                maximum_cfl_step_retries=0,
+            ),
+        )
+        call_count = 0
+
+        def inject_rejected_post_projection_cfl(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            observed = advective_cfl(*args, **kwargs)
+            if call_count == 4:
+                return config.high_fidelity.cfl_limit * 1.001
+            return observed
+
+        with patch.object(
+            hf3d_module,
+            "advective_cfl",
+            side_effect=inject_rejected_post_projection_cfl,
+        ):
+            with self.assertRaisesRegex(
+                FloatingPointError, "HF3D CFL retry gate exhausted"
+            ) as raised:
+                HighFidelityBackend().run(config)
+
+        _, payload_text = str(raised.exception).split(": ", 1)
+        payload = json.loads(payload_text)
+        self.assertEqual(payload["kind"], "HF3D_CFL_RETRY_EXHAUSTED")
+        self.assertEqual(payload["retry_count"], 0)
+        self.assertEqual(payload["pressure_accelerator"]["selected"], "cpu")
+        rejected = payload["last_rejected_trial"]
+        for required in (
+            "starting_advective_cfl",
+            "pre_source_advective_cfl",
+            "pre_projection_advective_cfl",
+            "post_projection_advective_cfl",
+            "maximum_momentum_advection_acceleration_m_s2",
+            "maximum_viscous_acceleration_m_s2",
+            "maximum_boundary_acceleration_m_s2",
+            "maximum_surface_tension_acceleration_m_s2",
+            "maximum_rotating_frame_acceleration_m_s2",
+            "gravity_acceleration_m_s2",
+            "maximum_pressure_projection_acceleration_m_s2",
+        ):
+            self.assertIn(required, rejected)
 
     def test_backend_smoke_archives_full_final_3d_and_gui_averages(self) -> None:
         config = small_hf3d_config(rpm=100.0)

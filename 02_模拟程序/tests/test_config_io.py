@@ -115,6 +115,16 @@ class ConfigTests(unittest.TestCase):
             SimulationConfig.from_dict(raw)
 
         raw = SimulationConfig().to_dict()
+        raw["high_fidelity"]["cfl_controller_target_fraction"] = 1.0
+        with self.assertRaisesRegex(ConfigError, "must be less than 1"):
+            SimulationConfig.from_dict(raw)
+
+        raw = SimulationConfig().to_dict()
+        raw["high_fidelity"]["maximum_cfl_step_retries"] = -1
+        with self.assertRaisesRegex(ConfigError, ">= 0"):
+            SimulationConfig.from_dict(raw)
+
+        raw = SimulationConfig().to_dict()
         del raw["high_fidelity"]["pressure_solver_device"]
         self.assertEqual(
             SimulationConfig.from_dict(raw).high_fidelity.pressure_solver_device,

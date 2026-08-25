@@ -450,6 +450,8 @@ class HighFidelityConfig:
     axial_cells: int = 72
     time_step_s: float = 2.0e-4
     cfl_limit: float = 0.40
+    cfl_controller_target_fraction: float = 0.95
+    maximum_cfl_step_retries: int = 4
     interface_thickness_cells: float = 2.5
     pressure_solver_device: str = "auto"
     pressure_relative_tolerance: float = 1.0e-7
@@ -484,6 +486,22 @@ class HighFidelityConfig:
             minimum=0.0,
             strict=True,
             maximum=1.0,
+        )
+        _require_real(
+            "high_fidelity.cfl_controller_target_fraction",
+            self.cfl_controller_target_fraction,
+            minimum=0.0,
+            strict=True,
+            maximum=1.0,
+        )
+        if self.cfl_controller_target_fraction >= 1.0:
+            raise ConfigError(
+                "high_fidelity.cfl_controller_target_fraction must be less than 1"
+            )
+        _require_int(
+            "high_fidelity.maximum_cfl_step_retries",
+            self.maximum_cfl_step_retries,
+            minimum=0,
         )
         _require_real(
             "high_fidelity.interface_thickness_cells",
@@ -576,6 +594,7 @@ class HighFidelityConfig:
             (
                 "time_step_s",
                 "cfl_limit",
+                "cfl_controller_target_fraction",
                 "interface_thickness_cells",
                 "pressure_relative_tolerance",
                 "interface_compression_pseudo_cfl",
