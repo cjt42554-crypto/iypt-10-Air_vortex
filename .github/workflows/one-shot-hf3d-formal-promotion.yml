@@ -31,7 +31,8 @@ jobs:
           python -m pip install pytest
           python -m pip install -e "./02_模拟程序"
 
-      - name: Promote, validate, report, and commit
+      - name: Diagnose exact skipped tests
         run: |
-          git config core.quotepath false
-          python -c 'from pathlib import Path; p=Path("90_候选工作区/current/01_HF3D数值资格/formal_candidate/promote_formal_once.py"); s=p.read_text(encoding="utf-8").replace("parents[5]", "parents[4]", 1).replace("run(\"git\", \"-C\", \"02_模拟程序\", \"apply\"", "run(\"git\", \"apply\", \"--directory=02_模拟程序\""); ns={"__name__":"__main__","__file__":str(p)}; exec(compile(s, str(p), "exec"), ns)'
+          git apply --directory=02_模拟程序 "90_候选工作区/current/01_HF3D数值资格/formal_candidate/0001-Add-transactional-HF3D-CFL-controller-candidate.patch"
+          python -m pytest "02_模拟程序/tests" -q -rs
+          exit 1
