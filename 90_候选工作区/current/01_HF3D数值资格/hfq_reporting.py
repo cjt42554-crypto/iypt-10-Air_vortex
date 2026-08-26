@@ -123,12 +123,40 @@ def report_markdown(report: Mapping[str, Any]) -> str:
         lines.append("- 本清单未登记特定压力加速器要求。")
     lines.append("")
     numerical_quality = report.get("numerical_quality", {})
+    quality_contract = report.get("quality_contract_audit")
+    if isinstance(quality_contract, Mapping):
+        inventory = quality_contract.get("inventory_observation", {})
+        if not isinstance(inventory, Mapping):
+            inventory = {}
+        lines.extend(
+            [
+                "## 开边界质量合同",
+                "",
+                f"- 合同：`{quality_contract.get('contract_id')}`；审计通过="
+                f"{quality_contract.get('pass')}。",
+                "- 数值守恒门使用按规定开边界通量修正后的 "
+                "`liquid_volume_balance_error_relative`。",
+                "- `liquid_mass_error_relative` 在本合同中重分类为液体净存量变化观测；"
+                "不设无物理标定依据的绝对通过阈值，但必须有有限值并参与平滑量收敛。",
+                f"- 库存观测已登记为平滑量："
+                f"{inventory.get('smooth_observable_registered')}。",
+                "",
+            ]
+        )
     if isinstance(numerical_quality, Mapping) and numerical_quality:
         lines.extend(["## 数值质量门", ""])
         for case_id, result in numerical_quality.items():
             if not isinstance(result, Mapping):
                 continue
             lines.append(f"- `{case_id}`：通过={result.get('pass')}。")
+            inventory = result.get("inventory_observation")
+            if isinstance(inventory, Mapping):
+                lines.append(
+                    "  - `liquid_inventory_change_relative`：值="
+                    f"{_fmt_value(inventory.get('value'))}，绝对门="
+                    f"{inventory.get('absolute_gate_enabled')}，角色="
+                    f"`{inventory.get('role')}`。"
+                )
             checks = result.get("checks", {})
             if not isinstance(checks, Mapping):
                 continue

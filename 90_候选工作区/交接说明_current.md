@@ -2,55 +2,64 @@
 
 ## 当前唯一待续任务
 
-正式事务性 CFL 控制器的本机 CUDA 重放缺口已经关闭；Q1R2 已冻结并执行完三层空间算例，但触发两个预注册门后失败闭锁。当前状态为 `FORMAL_PROMOTION_AND_CUDA_FORMAL_REPLAY_PASS__Q1R2_FAIL_CLOSED_AFTER_COMPLETED_SPATIAL_GATES__TEMPORAL_NOT_COMPLETED`。
+Q1R3 已完成开边界质量语义拆分、冻结前细网格探针和正式冻结；冻结后的三层空间 CUDA 原始算例也已全部完整结束并通过归档完整性读取，但尚未执行空间组质量与收敛裁决。当前状态为 `Q1R3_FROZEN__SPATIAL_RUNS_COMPLETE__SPATIAL_DECISION_PENDING__TEMPORAL_NOT_STARTED`。
 
-下一步不是直接恢复 Q1R2 时间层或进入 Q2，而是先完成 Q1R3 的预注册裁决：修正“液体净存量变化”和“开边界守恒残差”的门禁语义，并用完整 `0.02 s` 正式轨迹验证新的共同登记步长。正式理论 `01_最终理论/**` 和正式程序 `02_模拟程序/**` 本轮均未修改。
+下一步不得直接启动时间组。必须先分析现有三层空间归档，并形成绑定冻结清单的空间阶段 PASS/FAIL 裁决；只有空间阶段全部门通过，才允许执行时间中、细层。正式理论 `01_最终理论/**` 和正式程序 `02_模拟程序/**` 本轮均未修改。
 
 ## 必要入口
 
-- 正式路径 CUDA 重放：`90_候选工作区/current/01_HF3D数值资格/reports/formal_replay/formal_replay_report.md`、`formal_replay_report.json`；
-- Q1R2 冻结身份：`reports/q1r2_freeze/freeze_manifest.md`、`freeze_manifest.json`；
-- Q1R2 原始资格报告：`reports/q1r2/qualification_report.md`、`qualification_report.json`；
-- 失败闭锁裁决：`reports/q1r2/early_stop_decision.md`、`early_stop_decision.json`；
-- 下一共同步长只读诊断：`reports/q1r2/next_dt_diagnostic.md`、`next_dt_diagnostic.json`；
-- 轨迹步长工具：`analyse_q1r2_dt_pilot.py`；
-- 失败闭锁裁决器：`analyse_q1r2_early_stop.py`；
-- 本地忽略的完整空间档案：`runs/q1r2/space_L0_4cells`、`space_L1_6cells`、`space_L2_9cells`。
+- Q1R3 探针前预注册：`90_候选工作区/current/01_HF3D数值资格/reports/q1r3_preregistration/preregistration_report.md`、`preregistration_report.json`；
+- 冻结前细网格探针：`reports/q1r3_probe/probe_report.md`、`probe_report.json`；
+- Q1R3 冻结身份与早停协议：`reports/q1r3_freeze/freeze_manifest.md`、`freeze_manifest.json`；
+- 冻结 campaign 与生成清单：`campaign_q1r3.json`、`generated_q1r3/cases_manifest.json`；
+- 质量语义实现：`hfq_quality_contract.py`、`hfq_cli_common.py`、`hfq_cli_analysis.py`；
+- 本地忽略的冻结后空间档案：`runs/q1r3/space_L0_4cells`、`space_L1_6cells`、`space_L2_9cells`；
+- Q1R2 历史失败证据仍保留在 `reports/q1r2/`，不得用 Q1R3 结果改写。
 
 ## 冻结与证据身份
 
-- 正式程序最近变更提交：`462da97293d86747100c29b6194d8313fdbb7bde`；
 - 正式可执行源码树 SHA-256：`03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010`；
-- 冻结补丁 SHA-256：`ee978d7bc9e1b27278b6f89a44c03f789780ba1cb11d648989ca8a3ee29ef4be`；
-- Q1R2 campaign SHA-256：`afca1dd03214120e978f90f8401d188e8cf41cc2c7d27556af7713298922029d`；
-- Q1R2 生成清单逐字节 SHA-256：`33fffa8b96a69ced47bbf2dbf291acfd9899237963912637e7cc4b968ce7932a`；
-- Q1R2 资格报告 SHA-256：`896d3675d019a82aa4d832c910bae3bc248d1cc75929d860f1f655a002b35b94`；
-- Q1R2 失败闭锁裁决 SHA-256：`2c2401523ceb2da8fa3044d5bd6065c0a0b8107aaa5dabf5e9012aecb41c3e57`；
-- 下一共同步长诊断 SHA-256：`cd9cddb12aa25ca0d644540482250932919407caafcf461e5710bee73d0e5dc5`；
-- 三层空间归档清单 SHA-256：粗层 `b798708a582440b66d000d4aaba81d1f4925a7b9dfecf0570fb3b8bb5fdb3583`，中层 `855d86162972fcebad00f998b17fbf1191ce54638aa1298202459851b6f2ceec`，细层 `6c02cc45df7f2a78d75de96807e0c497d2bde9d18b2aa7ff79c009747d56a16e`。
+- Q1R3 campaign 逐字节 SHA-256：`e400a31bec6ae9f907093ec418e81d6ae03850ed27a13c6e5663759186e4aaf4`；
+- Q1R3 生成清单逐字节 SHA-256：`d2d95a599b831e1741f0df38be6069a8ebd93301d981726429bf632cdb823da6`；
+- 探针前预注册报告 SHA-256：`6397664427fcc86661e0688c0ea16865f62be74a139577961eb2c9a1bdfabe30`；
+- 冻结前探针报告 SHA-256：`08b03271b95ea1ae0d9db24cf19b8ed62fe60f70994ea2edf7c3d7ef8c0e04fb`；
+- Q1R3 冻结清单 SHA-256：`76df3985b63badd43f8517548c17f195e7388b2fcc6e197ec551ba60413829ef`；
+- 冻结后空间归档清单 SHA-256：粗层 `44faf36211d88a6569daaf6e4285151ab52f7e604f8063b7fbf257b50a827d56`，中层 `794b0bc63f9bec688f32f0bc71e4ca05160d3b4ffce9d0af90636ef87f6705ae`，细层 `99b7cf26cd5e2c50959e09af1fcfa998a34df63778297e78ee6e27d9abd78b4d`；
+- 冻结物理输入签名：`fb4e3a3b993fa5e569aed09d062239b0895f2fcaf40f642405edd502d6ad1059`；
+- 质量契约：`OPEN_BOUNDARY_INVENTORY_CONSERVATION_SPLIT_V1`。
 
 ## 本轮已完成
 
-1. 在正式路径执行隔离 CUDA 测试，5/5 通过，覆盖投影 CPU/CUDA 对等、完整 HF3D 单步对等和 GPU 压力历史回滚。
-2. 从正式源码重跑 `136 × 136 × 120`、`0.013 s` CUDA 窗口，1757 步完整结束；冻结分析器 10/10 门通过，最大接受 CFL 为 0.336906，最大投影散度为 $2.490918\times10^{-5}\ \mathrm{s}^{-1}$。
-3. 执行三层 `0.013 s` 正式轨迹试点；按 `0.1 µs` 量化、实际验收 0.95、设计门 0.97 选择 `6.0e-6 s`，并冻结 Q1R2 空间共同步长及 `6.0e-6→3.0e-6→1.5e-6 s` 时间层。冻结输入独立再生成逐字节一致。
-4. Q1R2 三层空间均完整到 `0.02 s`，实际正式源码身份一致，CUDA 无回退。粗、中、细层登记步长命中率分别为 0.994012、0.994012、0.938264；细层低于冻结门 0.95，空间实际时间步身份门失败。
-5. 细层冻结 `liquid_mass_error_relative` 门的值为 0.00132108，超过 0.001；但该正式量是相对初始体积的净存量变化，包含规定开边界通量。真正按通量修正的 `liquid_volume_balance_error_relative` 为 $8.60575\times10^{-12}$，因此不能把前者的门失败解释成求解器数值不守恒，也不能在看到结果后从 Q1R2 合同中删除。
-6. 两个空间门已足以使 Q1R2 失败；时间中层在 110 步主动中断，进程已退出，留下 `state=cancelling`、非完整但载荷哈希和配置身份有效的诊断目录；时间细层未启动。裁决器确认失败证据在时间层完成前已经成立。
-7. 当前候选测试 29/29、正式全量测试 181/181、正式 self-check 6/6 通过；正式全量测试在本机 CUDA 环境为 0 跳过、0 失败。Q1R2 原始分析顶层状态为 `FAIL_PROVENANCE_INPUT_OR_COMPLETION_GATE`，补充裁决状态为 `Q1R2_FAIL_CLOSED_AFTER_COMPLETED_SPATIAL_GATES__TEMPORAL_NOT_COMPLETED`。
+1. 审核正式输出语义：`liquid_mass_error_relative` 实际是相对初始液体体积的开边界净存量变化，不是通量修正后的数值守恒残差。Q1R2 原始冻结失败保持不变；Q1R3 将 `liquid_volume_balance_error_relative` 保留为数值守恒硬门，并把前者重分类为必需、非绝对门控的空间/时间平滑观测量。
+2. 生成 Q1R3 探针前设计和预注册裁决；8/8 门通过。旧 Q1R2 和 pilot 清单在新框架下仍可逐字节再生成，避免事后改写旧合同。
+3. 完成 `136 × 136 × 120`、`0.02 s`、`5.5e-6 s` 正式 CUDA 冻结前探针；3650 步完整结束，登记步长命中率 0.957808 高于 0.95，CUDA 无回退，正式源码身份前后一致，11/11 探针门通过。通量修正守恒残差为 `9.66857e-12`；液体净存量变化为 `0.00140927`，只保留为非绝对门控平滑量。
+4. 探针通过后冻结 Q1R3；12/12 冻结门通过，独立临时目录再生成逐字节一致。冻结协议明确禁止复用探针归档，并要求空间组三层先运行、先裁决，任一空间门失败即不执行时间新增算例。
+5. 在全新的 `runs/q1r3/` 顺序执行冻结后空间粗、中、细三层。三层均达到 `0.02 s`，分别完成 3640、3640、3650 步；归档使用 `load_run_archive(..., verify=True)` 均可完整读取，稠密时步数量与完成步数一致，CUDA 无回退，正式源码树前后均匹配冻结身份。
+6. 候选测试 32/32、相关 Python `compileall`、17 个 Q1R3 JSON 严格解析、Q1R3 与探针设计独立逐字节再生成均通过。顶层 `AGENTS.md`、两份交接及三份 Q1R3 报告通过 Pandoc `markdown` reader；三份含表格/公式报告已转为独立 HTML/MathML，并用本机 Chrome 实际渲染目视检查，未见截断、错表或公式异常。
+7. 按用户要求调整并纳入顶层 `AGENTS.md` 的授权边界措辞，明确“继续任务”等措辞本身不授权修改正式成果；该治理修改不改变正式理论或正式程序内容。
 
 ## 尚未完成及结论边界
 
-1. Q1R2 时间中、细层没有完整运行；时间收敛未评估。空间组因实际步长身份门先失败，平滑量空间收敛也未评估。
-2. 完整 `0.02 s` 三层轨迹的只读投影暂选 `5.5e-6 s`，三层最小预测命中率为 0.973755；相邻更大值 `5.6e-6 s` 只有 0.965404。该数值没有冻结为 Q1R3，改变登记步长后的真实轨迹仍需重跑验证。
-3. Q1R3 必须在运行前区分：数值守恒门使用开边界通量修正后的平衡残差；若仍关心容器内液体净存量，应把它另列为模型域/边界充分性或物理库存门，不能继续称作数值质量误差。
+1. 冻结后空间组三层尚未运行 `hfq.py analyse`，因此实际登记步长命中率、数值质量门、六个平滑量的空间相对误差、观测阶、GCI 和二值事件一致性均未裁决。
+2. 时间中层 `2.75e-6 s` 和时间细层 `1.375e-6 s` 未启动；时间粗层只能复用冻结后的 `space_L2_9cells`，不得复用冻结前探针。
+3. 现有通用分析器在时间层缺失时，顶层会按设计报告 `INCOMPLETE_MISSING_OR_UNREADABLE_RUNS`，但仍会生成空间组结果。不得把该顶层“时间缺失”状态直接当作空间组失败；应另形成绑定冻结早停协议的空间阶段裁决。
 4. 未执行更长时统计稳态、平滑区 Q2、近拓扑区 Q2、物理校准、盲法实验或装置级预测验证。
-5. 当前结论上限为 `FORMAL_IMPLEMENTATION_PROMOTED_AND_CPU_CUDA_REVALIDATED__Q1R2_FAIL_CLOSED__NO_GO_NUMERICAL_QUALIFICATION__NO_GO_PHYSICAL_PREDICTION`。
+5. 当前结论上限为 `Q1R3_FROZEN__SPATIAL_RAW_RUNS_COMPLETE__NO_GO_NUMERICAL_QUALIFICATION__NO_GO_PHYSICAL_PREDICTION`。
 
 ## 下一次执行顺序
 
-1. 先在候选区形成 Q1R3 门禁语义审查，明确保留、重命名或拆分液体净存量门；不得改写 Q1R2 冻结清单和原始报告。
-2. 用现有三层 `0.02 s` 归档重新生成可追踪的 Q1R3 步长诊断；把 `5.5e-6 s` 只作为待验证候选，不直接冻结。
-3. 先运行一个细网格 `0.02 s`、候选 `5.5e-6 s` 的正式 CUDA 探针，重新检查实际命中率至少 0.95、开边界守恒残差、液体净存量、CFL、散度和压力残差。
-4. 只有探针与门禁语义审查都通过，才冻结并执行 Q1R3；不得用删除 `runs/q1r2/time_L1_3.000e-06s` 或原样续跑来把 Q1R2 改写为通过。
-5. 只有新的早期瞬态多网格/多时间步筛查通过后，才讨论更长时和平滑区/近拓扑区资格；物理与实验预测继续保持 `NO-GO`。
+1. 保持 `runs/q1r3/**` 原样，先执行：
+
+   ```bash
+   cd '90_候选工作区/current/01_HF3D数值资格'
+   .venv-gpu/bin/python hfq.py analyse \
+     generated_q1r3/cases_manifest.json \
+     runs/q1r3 \
+     reports/q1r3_spatial_stage
+   ```
+
+   由于时间层尚缺失，该命令预期返回非零并写出顶层 `INCOMPLETE_MISSING_OR_UNREADABLE_RUNS`；这是预期的全清单状态，不得删除输出或误报为工具失败。
+2. 只从该报告中读取并复核三个空间运行的来源/配置身份、实际时步门、数值质量门和 `groups.spatial`。新增一个绑定 `reports/q1r3_freeze/freeze_manifest.json` 的空间阶段裁决，明确列出每个空间门和是否授权时间阶段；不得修改冻结 campaign、生成清单或原始分析报告。
+3. 若任一空间配置、质量、实际时步、平滑收敛或二值事件门失败，按冻结协议写出失败闭锁，停止且不运行时间层。
+4. 只有空间阶段裁决全部通过，才顺序执行 `time_L1_2.750e-06s` 和 `time_L2_1.375e-06s`；随后才允许生成完整 Q1R3 总报告。
+5. 无论数值筛查结果如何，物理与实验预测继续保持 `NO-GO`，不得把实现或数值门 PASS 提升为装置预测。

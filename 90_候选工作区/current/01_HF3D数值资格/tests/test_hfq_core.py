@@ -38,6 +38,11 @@ from hfq_cli_common import (  # noqa: E402
     _quality_gate,
 )
 from hfq_cli_analysis import _analyse_command, _terminal_failure_record  # noqa: E402
+from hfq_quality_contract import (  # noqa: E402
+    OPEN_BOUNDARY_QUALITY_CONTRACT_ID,
+    QualityContractError,
+    audit_quality_contract,
+)
 
 
 def base_config() -> dict:
@@ -238,6 +243,7 @@ class CampaignGenerationTests(unittest.TestCase):
             self.assertEqual(len(manifest["cases"]), 6)
             self.assertEqual(manifest["unique_run_count"], 5)
             self.assertTrue(manifest["refinement_design_audit"]["pass"])
+            self.assertNotIn("quality_contract_audit", manifest)
             aliases = [case for case in manifest["cases"] if "reuse_case_id" in case]
             self.assertEqual(len(aliases), 1)
             self.assertTrue((output / "cases_manifest.json").is_file())
@@ -246,6 +252,48 @@ class CampaignGenerationTests(unittest.TestCase):
                 config = json.loads((output / case["config_file"]).read_text())
                 signatures.add(json.dumps(physical_signature(config), sort_keys=True))
             self.assertEqual(len(signatures), 1)
+
+    def test_generation_freezes_open_boundary_quality_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            base = root / "base.json"
+            base.write_text(json.dumps(base_config()), encoding="utf-8")
+            spec = {
+                "schema_version": 1,
+                "base_config": "base.json",
+                "spatial_study": {
+                    "target_bar_diameter_cells_worst_axis": [4.0, 6.0, 9.0],
+                    "common_time_step_s": 7.5e-6,
+                    "round_to_multiple": 2,
+                },
+                "temporal_study": {
+                    "target_bar_diameter_cells_worst_axis": 9.0,
+                    "time_step_s": [7.5e-6, 3.75e-6, 1.875e-6],
+                },
+                "observables": {
+                    "smooth": [
+                        "funnel_depth_m",
+                        "liquid_mass_error_relative",
+                    ],
+                    "binary": ["connection_candidate"],
+                },
+                "gates": {
+                    "numerical_quality": _open_boundary_quality_gates(),
+                },
+            }
+            spec_path = root / "campaign.json"
+            spec_path.write_text(json.dumps(spec), encoding="utf-8")
+            manifest = generate_campaign(spec_path, root / "generated")
+            audit = manifest["quality_contract_audit"]
+            self.assertTrue(audit["pass"])
+            self.assertEqual(
+                audit["contract_id"], OPEN_BOUNDARY_QUALITY_CONTRACT_ID
+            )
+            self.assertTrue(
+                audit["inventory_observation"][
+                    "smooth_observable_registered"
+                ]
+            )
 
     def test_design_gate_rejects_capillary_limited_registered_steps(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -525,6 +573,74 @@ class EffectiveTimeStepGateTests(unittest.TestCase):
             result["checks"]["projected_divergence_s_inv"]["value"],
             2.0e-4,
         )
+
+    def test_open_boundary_contract_keeps_inventory_non_gating(self) -> None:
+        observables = {
+            "liquid_mass_error_relative": np.asarray([0.0, 0.02]),
+            "liquid_volume_balance_error_relative": np.asarray([0.0, 1.0e-10]),
+            "pressure_residual": np.asarray([5.0e-8, 5.0e-8]),
+            "max_divergence": np.asarray([5.0e-5, 5.0e-5]),
+            "cfl_advective": np.asarray([0.1, 0.1]),
+        }
+        loaded = LoadedCase(
+            case={"id": "case"},
+            config={"high_fidelity": {"time_step_s": 1.0e-5}},
+            archived_config={"high_fidelity": {"time_step_s": 1.0e-5}},
+            time_s=np.asarray([0.0, 1.0]),
+            observables=observables,
+            fields={},
+            metadata={
+                "diagnostics": {
+                    "maximum_pressure_relative_residual": 5.0e-8,
+                    "maximum_projected_divergence_s_inv": 5.0e-5,
+                    "maximum_advective_cfl": 0.1,
+                    "cumulative_phase_clip_relative": 0.0,
+                    "cumulative_phase_repair_relative": 0.0,
+                    "numerical_quality_gate": {"pass": True},
+                }
+            },
+            manifest={},
+            provenance={},
+            result_status="completed",
+        )
+        result = _quality_gate(loaded, _open_boundary_quality_gates())
+        self.assertTrue(result["pass"])
+        self.assertEqual(result["inventory_observation"]["value"], 0.02)
+        self.assertFalse(
+            result["inventory_observation"]["absolute_gate_enabled"]
+        )
+        self.assertNotIn("liquid_mass_error_relative", result["checks"])
+
+    def test_open_boundary_contract_rejects_legacy_mass_gate(self) -> None:
+        gates = _open_boundary_quality_gates()
+        gates["liquid_mass_error_relative_max"] = 1.0e-3
+        with self.assertRaisesRegex(QualityContractError, "forbids"):
+            audit_quality_contract(
+                gates,
+                smooth_observables=["liquid_mass_error_relative"],
+            )
+
+
+def _open_boundary_quality_gates() -> dict:
+    return {
+        "contract_id": OPEN_BOUNDARY_QUALITY_CONTRACT_ID,
+        "liquid_inventory_change": {
+            "archive_observable": "liquid_mass_error_relative",
+            "canonical_name": "liquid_inventory_change_relative",
+            "role": "MODEL_DOMAIN_AND_BOUNDARY_INVENTORY_OBSERVABLE",
+            "absolute_gate_enabled": False,
+            "required_smooth_observable": True,
+            "absolute_gate_reason": (
+                "NO_CALIBRATED_PHYSICAL_OR_DOMAIN_ADEQUACY_THRESHOLD"
+            ),
+        },
+        "liquid_volume_balance_error_relative_max": 1.0e-3,
+        "pressure_residual_max": 1.0e-6,
+        "projected_divergence_max_s_inv": 1.0e-4,
+        "advective_cfl_max": 0.35,
+        "cumulative_phase_clip_relative_max": 1.0e-3,
+        "cumulative_phase_repair_relative_max": 1.0e-3,
+    }
 
 
 if __name__ == "__main__":

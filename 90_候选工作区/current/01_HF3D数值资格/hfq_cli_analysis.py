@@ -33,6 +33,12 @@ from hfq_cli_common import (
     _series,
     _to_plain_mapping,
 )
+from hfq_quality_contract import (
+    LEGACY_QUALITY_CONTRACT_ID,
+    QualityContractError,
+    audit_quality_contract,
+    quality_contract_id,
+)
 
 def _group_analysis(
     group_name: str,
@@ -291,6 +297,24 @@ def _analyse_command(args: argparse.Namespace) -> int:
 
     gates = _to_plain_mapping(manifest.get("gates"))
     quality_gates = _to_plain_mapping(gates.get("numerical_quality"))
+    observables = _to_plain_mapping(manifest.get("observables"))
+    raw_smooth_observables = observables.get("smooth", [])
+    if not isinstance(raw_smooth_observables, list):
+        raise UserFacingError("observables.smooth must be an array")
+    try:
+        contract_id = quality_contract_id(quality_gates)
+        quality_contract_audit = audit_quality_contract(
+            quality_gates,
+            smooth_observables=[str(item) for item in raw_smooth_observables],
+        )
+    except QualityContractError as exc:
+        raise UserFacingError(str(exc)) from exc
+    if contract_id != LEGACY_QUALITY_CONTRACT_ID:
+        registered_contract_audit = manifest.get("quality_contract_audit")
+        if registered_contract_audit != quality_contract_audit:
+            raise UserFacingError(
+                "manifest quality_contract_audit differs from the active contract"
+            )
     quality = {
         case_id: _quality_gate(item, quality_gates)
         for case_id, item in loaded.items()
@@ -301,7 +325,6 @@ def _analyse_command(args: argparse.Namespace) -> int:
         group = str(item.case.get("group"))
         if group in grouped:
             grouped[group].append(item)
-    observables = _to_plain_mapping(manifest.get("observables"))
     group_reports = {
         group: _group_analysis(
             group,
@@ -403,6 +426,8 @@ def _analyse_command(args: argparse.Namespace) -> int:
             "stable_channel_radius_validated": False,
         },
     }
+    if contract_id != LEGACY_QUALITY_CONTRACT_ID:
+        report["quality_contract_audit"] = quality_contract_audit
     write_json(output / "qualification_report.json", report)
     (output / "qualification_report.md").write_text(
         report_markdown(report), encoding="utf-8"

@@ -8,7 +8,7 @@
   "input": {
     "generated_manifest_sha256": "33fffa8b96a69ced47bbf2dbf291acfd9899237963912637e7cc4b968ce7932a",
     "physical_signature_sha256": "fb4e3a3b993fa5e569aed09d062239b0895f2fcaf40f642405edd502d6ad1059",
-    "formal_source_tree_sha256": "03ebc4dcd194d0ffadc7f24228720d775dc7f888ceb5a9737816368626482010",
+    "formal_source_tree_sha256": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
     "spatial_archive_manifest_sha256": {
       "space_L0_4cells": "b798708a582440b66d000d4aaba81d1f4925a7b9dfecf0570fb3b8bb5fdb3583",
       "space_L1_6cells": "855d86162972fcebad00f998b17fbf1191ce54638aa1298202459851b6f2ceec",

@@ -1,0 +1,436 @@
+{
+  "allowed_discretization_paths": [
+    "high_fidelity.radial_cells",
+    "high_fidelity.azimuthal_cells",
+    "high_fidelity.axial_cells",
+    "high_fidelity.time_step_s"
+  ],
+  "base_config_sha256": "3793a5cb015bf3c2abe5478eccc8a6d6f18ba40a4ae9173058d8725310466745",
+  "base_config_source": "formal_candidate/fine_window_pressure_1e-7.json",
+  "cases": [
+    {
+      "config_file": "space_L0_4cells.json",
+      "config_sha256": "8700eacf384fc1a2dac0451ecf45a83247518ce345ea0ce76573483e5eba6935",
+      "effective_refinement_coordinate_m": 0.0015,
+      "grid": {
+        "aspect_ratio": 1.0125000000000002,
+        "bar_diameter_cells_best_axis": 4.050000000000001,
+        "bar_diameter_cells_worst_axis": 4.0,
+        "bar_diameter_m": 0.006,
+        "boundary_layer_width_cells_worst_axis": 1.4814814814814814,
+        "boundary_layer_width_m": 0.0022222222222222222,
+        "box_cell_count": 194400,
+        "dx_m": 0.0015,
+        "dy_m": 0.0015,
+        "dz_m": 0.0014814814814814814,
+        "exact_bar_volume_m3": 7.916813487046278e-07,
+        "h_geometric_m": 0.001493801582185722,
+        "h_max_m": 0.0015,
+        "h_min_m": 0.0014814814814814814,
+        "interface_width_cells_worst_axis": 2.4691358024691357,
+        "interface_width_m": 0.0037037037037037034,
+        "nominal_bar_voxel_count": 237.50440461138834,
+        "nx": 60,
+        "ny": 60,
+        "nz": 54
+      },
+      "group": "spatial",
+      "id": "space_L0_4cells",
+      "level": 0,
+      "maximum_time_step_s": 5.5e-06,
+      "target_bar_diameter_cells_worst_axis": 4.0
+    },
+    {
+      "config_file": "space_L1_6cells.json",
+      "config_sha256": "e1579506c9a7b61e165182e00d0e16d7b6ab332041693be3e36b2726416b1323",
+      "effective_refinement_coordinate_m": 0.001,
+      "grid": {
+        "aspect_ratio": 1.0,
+        "bar_diameter_cells_best_axis": 6.0,
+        "bar_diameter_cells_worst_axis": 6.0,
+        "bar_diameter_m": 0.006,
+        "boundary_layer_width_cells_worst_axis": 1.5,
+        "boundary_layer_width_m": 0.0015,
+        "box_cell_count": 648000,
+        "dx_m": 0.001,
+        "dy_m": 0.001,
+        "dz_m": 0.001,
+        "exact_bar_volume_m3": 7.916813487046278e-07,
+        "h_geometric_m": 0.0010000000000000005,
+        "h_max_m": 0.001,
+        "h_min_m": 0.001,
+        "interface_width_cells_worst_axis": 2.5,
+        "interface_width_m": 0.0025,
+        "nominal_bar_voxel_count": 791.6813487046278,
+        "nx": 90,
+        "ny": 90,
+        "nz": 80
+      },
+      "group": "spatial",
+      "id": "space_L1_6cells",
+      "level": 1,
+      "maximum_time_step_s": 5.5e-06,
+      "target_bar_diameter_cells_worst_axis": 6.0
+    },
+    {
+      "config_file": "space_L2_9cells.json",
+      "config_sha256": "43b86ff35a16d5b4f6d71d203982fffa80d68db15edc03bdbd25db76241d5a32",
+      "effective_refinement_coordinate_m": 0.0006666666666666666,
+      "grid": {
+        "aspect_ratio": 1.0074074074074075,
+        "bar_diameter_cells_best_axis": 9.066666666666666,
+        "bar_diameter_cells_worst_axis": 9.0,
+        "bar_diameter_m": 0.006,
+        "boundary_layer_width_cells_worst_axis": 1.488970588235294,
+        "boundary_layer_width_m": 0.0009926470588235293,
+        "box_cell_count": 2219520,
+        "dx_m": 0.0006617647058823529,
+        "dy_m": 0.0006617647058823529,
+        "dz_m": 0.0006666666666666666,
+        "exact_bar_volume_m3": 7.916813487046278e-07,
+        "h_geometric_m": 0.0006633946747963127,
+        "h_max_m": 0.0006666666666666666,
+        "h_min_m": 0.0006617647058823529,
+        "interface_width_cells_worst_axis": 2.4816176470588234,
+        "interface_width_m": 0.0016544117647058823,
+        "nominal_bar_voxel_count": 2711.6552269705185,
+        "nx": 136,
+        "ny": 136,
+        "nz": 120
+      },
+      "group": "spatial",
+      "id": "space_L2_9cells",
+      "level": 2,
+      "maximum_time_step_s": 5.5e-06,
+      "target_bar_diameter_cells_worst_axis": 9.0
+    },
+    {
+      "config_file": "space_L2_9cells.json",
+      "config_sha256": "43b86ff35a16d5b4f6d71d203982fffa80d68db15edc03bdbd25db76241d5a32",
+      "effective_refinement_coordinate_m": 5.5e-06,
+      "grid": {
+        "aspect_ratio": 1.0074074074074075,
+        "bar_diameter_cells_best_axis": 9.066666666666666,
+        "bar_diameter_cells_worst_axis": 9.0,
+        "bar_diameter_m": 0.006,
+        "boundary_layer_width_cells_worst_axis": 1.488970588235294,
+        "boundary_layer_width_m": 0.0009926470588235293,
+        "box_cell_count": 2219520,
+        "dx_m": 0.0006617647058823529,
+        "dy_m": 0.0006617647058823529,
+        "dz_m": 0.0006666666666666666,
+        "exact_bar_volume_m3": 7.916813487046278e-07,
+        "h_geometric_m": 0.0006633946747963127,
+        "h_max_m": 0.0006666666666666666,
+        "h_min_m": 0.0006617647058823529,
+        "interface_width_cells_worst_axis": 2.4816176470588234,
+        "interface_width_m": 0.0016544117647058823,
+        "nominal_bar_voxel_count": 2711.6552269705185,
+        "nx": 136,
+        "ny": 136,
+        "nz": 120
+      },
+      "group": "temporal",
+      "id": "time_L0_5.500e-06s",
+      "level": 0,
+      "maximum_time_step_s": 5.5e-06,
+      "reuse_case_id": "space_L2_9cells",
+      "target_bar_diameter_cells_worst_axis": 9.0
+    },
+    {
+      "config_file": "time_L1_2.750e-06s.json",
+      "config_sha256": "5a58f0a9e29aeef3554b3cf72d6338ed59dcf7a98a6f54b262a67ee214c1d9d7",
+      "effective_refinement_coordinate_m": 2.75e-06,
+      "grid": {
+        "aspect_ratio": 1.0074074074074075,
+        "bar_diameter_cells_best_axis": 9.066666666666666,
+        "bar_diameter_cells_worst_axis": 9.0,
+        "bar_diameter_m": 0.006,
+        "boundary_layer_width_cells_worst_axis": 1.488970588235294,
+        "boundary_layer_width_m": 0.0009926470588235293,
+        "box_cell_count": 2219520,
+        "dx_m": 0.0006617647058823529,
+        "dy_m": 0.0006617647058823529,
+        "dz_m": 0.0006666666666666666,
+        "exact_bar_volume_m3": 7.916813487046278e-07,
+        "h_geometric_m": 0.0006633946747963127,
+        "h_max_m": 0.0006666666666666666,
+        "h_min_m": 0.0006617647058823529,
+        "interface_width_cells_worst_axis": 2.4816176470588234,
+        "interface_width_m": 0.0016544117647058823,
+        "nominal_bar_voxel_count": 2711.6552269705185,
+        "nx": 136,
+        "ny": 136,
+        "nz": 120
+      },
+      "group": "temporal",
+      "id": "time_L1_2.750e-06s",
+      "level": 1,
+      "maximum_time_step_s": 2.75e-06,
+      "target_bar_diameter_cells_worst_axis": 9.0
+    },
+    {
+      "config_file": "time_L2_1.375e-06s.json",
+      "config_sha256": "02f10addfa03b8b8faff22d05ea47ed3bc87322d92135243663ae01ab5e2f283",
+      "effective_refinement_coordinate_m": 1.375e-06,
+      "grid": {
+        "aspect_ratio": 1.0074074074074075,
+        "bar_diameter_cells_best_axis": 9.066666666666666,
+        "bar_diameter_cells_worst_axis": 9.0,
+        "bar_diameter_m": 0.006,
+        "boundary_layer_width_cells_worst_axis": 1.488970588235294,
+        "boundary_layer_width_m": 0.0009926470588235293,
+        "box_cell_count": 2219520,
+        "dx_m": 0.0006617647058823529,
+        "dy_m": 0.0006617647058823529,
+        "dz_m": 0.0006666666666666666,
+        "exact_bar_volume_m3": 7.916813487046278e-07,
+        "h_geometric_m": 0.0006633946747963127,
+        "h_max_m": 0.0006666666666666666,
+        "h_min_m": 0.0006617647058823529,
+        "interface_width_cells_worst_axis": 2.4816176470588234,
+        "interface_width_m": 0.0016544117647058823,
+        "nominal_bar_voxel_count": 2711.6552269705185,
+        "nx": 136,
+        "ny": 136,
+        "nz": 120
+      },
+      "group": "temporal",
+      "id": "time_L2_1.375e-06s",
+      "level": 2,
+      "maximum_time_step_s": 1.375e-06,
+      "target_bar_diameter_cells_worst_axis": 9.0
+    }
+  ],
+  "claim_boundary": {
+    "apparatus_prediction_allowed": false,
+    "experimental_validation": "NOT_PERFORMED",
+    "maximum_possible_status": "NUMERICAL_SCREENING_ONLY"
+  },
+  "execution_requirements": {
+    "pressure_accelerator_selected": "cuda"
+  },
+  "gates": {
+    "binary_event": {
+      "absolute_time_tolerance_s": 0.002,
+      "duty_fraction_tolerance": 0.1,
+      "period_fraction_tolerance": 0.1,
+      "transition_count_tolerance": 1
+    },
+    "configuration": {
+      "coarsest_bar_diameter_cells_worst_axis_min": 4.0,
+      "finest_bar_diameter_cells_worst_axis_min": 8.0,
+      "finest_nominal_bar_voxel_count_min": 500.0,
+      "grid_aspect_ratio_max": 1.25,
+      "interface_width_cells_worst_axis_min": 2.0
+    },
+    "numerical_quality": {
+      "advective_cfl_max": 0.35,
+      "contract_id": "OPEN_BOUNDARY_INVENTORY_CONSERVATION_SPLIT_V1",
+      "cumulative_phase_clip_relative_max": 0.001,
+      "cumulative_phase_repair_relative_max": 0.001,
+      "liquid_inventory_change": {
+        "absolute_gate_enabled": false,
+        "absolute_gate_reason": "NO_CALIBRATED_PHYSICAL_OR_DOMAIN_ADEQUACY_THRESHOLD",
+        "archive_observable": "liquid_mass_error_relative",
+        "canonical_name": "liquid_inventory_change_relative",
+        "required_smooth_observable": true,
+        "role": "MODEL_DOMAIN_AND_BOUNDARY_INVENTORY_OBSERVABLE"
+      },
+      "liquid_volume_balance_error_relative_max": 0.001,
+      "pressure_residual_max": 1e-07,
+      "projected_divergence_max_s_inv": 0.0001
+    },
+    "refinement_design": {
+      "configured_time_step_active_fraction_min": 0.95
+    },
+    "smooth_convergence": {
+      "absolute_scale_floors": {
+        "angular_momentum_z_kg_m2_s": 1e-09,
+        "axisymmetry_error": 0.001,
+        "funnel_depth_m": 1e-05,
+        "kinetic_energy_lab_j": 1e-08,
+        "liquid_mass_error_relative": 1e-06,
+        "min_gap_to_bar_m": 1e-05
+      },
+      "gci_l2_max": 0.05,
+      "gci_safety_factor": 1.25,
+      "observed_order_min": 0.5,
+      "relative_l2_max": 0.05,
+      "relative_linf_max": 0.1
+    }
+  },
+  "observables": {
+    "binary": [
+      "first_contact_proxy",
+      "connection_candidate",
+      "finite_channel_candidate"
+    ],
+    "smooth": [
+      "funnel_depth_m",
+      "min_gap_to_bar_m",
+      "kinetic_energy_lab_j",
+      "angular_momentum_z_kg_m2_s",
+      "axisymmetry_error",
+      "liquid_mass_error_relative"
+    ]
+  },
+  "physical_signature_sha256": "fb4e3a3b993fa5e569aed09d062239b0895f2fcaf40f642405edd502d6ad1059",
+  "quality_contract_audit": {
+    "contract_id": "OPEN_BOUNDARY_INVENTORY_CONSERVATION_SPLIT_V1",
+    "inventory_observation": {
+      "absolute_gate_enabled": false,
+      "absolute_gate_reason": "NO_CALIBRATED_PHYSICAL_OR_DOMAIN_ADEQUACY_THRESHOLD",
+      "archive_observable": "liquid_mass_error_relative",
+      "canonical_name": "liquid_inventory_change_relative",
+      "required_smooth_observable": true,
+      "role": "MODEL_DOMAIN_AND_BOUNDARY_INVENTORY_OBSERVABLE",
+      "smooth_observable_registered": true
+    },
+    "legacy_mass_error_gate_forbidden": true,
+    "numerical_conservation": {
+      "absolute_gate_enabled": true,
+      "archive_observable": "liquid_volume_balance_error_relative",
+      "maximum_gate_key": "liquid_volume_balance_error_relative_max",
+      "role": "OPEN_BOUNDARY_FLUX_CORRECTED_NUMERICAL_CONSERVATION_GATE"
+    },
+    "pass": true,
+    "schema_version": 1
+  },
+  "refinement_design_audit": {
+    "capillary_limiter": {
+      "coefficient": 0.2,
+      "formula": "coefficient*sqrt(rho_g*h_min^3/(pi*sigma))",
+      "scope": "necessary static preflight only; completed runs still require an effective-step audit for dynamic limiters"
+    },
+    "cases": [
+      {
+        "configured_maximum_time_step_s": 5.5e-06,
+        "configured_step_active_under_static_capillary_bound": true,
+        "group": "spatial",
+        "id": "space_L0_4cells",
+        "level": 0,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 5.5e-06,
+        "static_capillary_time_step_ceiling_s": 2.631154772261131e-05,
+        "static_effective_maximum_time_step_s": 5.5e-06
+      },
+      {
+        "configured_maximum_time_step_s": 5.5e-06,
+        "configured_step_active_under_static_capillary_bound": true,
+        "group": "spatial",
+        "id": "space_L1_6cells",
+        "level": 1,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 5.5e-06,
+        "static_capillary_time_step_ceiling_s": 1.4591571063179744e-05,
+        "static_effective_maximum_time_step_s": 5.5e-06
+      },
+      {
+        "configured_maximum_time_step_s": 5.5e-06,
+        "configured_step_active_under_static_capillary_bound": true,
+        "group": "spatial",
+        "id": "space_L2_9cells",
+        "level": 2,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 5.5e-06,
+        "static_capillary_time_step_ceiling_s": 7.85520378288456e-06,
+        "static_effective_maximum_time_step_s": 5.5e-06
+      },
+      {
+        "configured_maximum_time_step_s": 5.5e-06,
+        "configured_step_active_under_static_capillary_bound": true,
+        "group": "temporal",
+        "id": "time_L0_5.500e-06s",
+        "level": 0,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 5.5e-06,
+        "static_capillary_time_step_ceiling_s": 7.85520378288456e-06,
+        "static_effective_maximum_time_step_s": 5.5e-06
+      },
+      {
+        "configured_maximum_time_step_s": 2.75e-06,
+        "configured_step_active_under_static_capillary_bound": true,
+        "group": "temporal",
+        "id": "time_L1_2.750e-06s",
+        "level": 1,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 2.75e-06,
+        "static_capillary_time_step_ceiling_s": 7.85520378288456e-06,
+        "static_effective_maximum_time_step_s": 2.75e-06
+      },
+      {
+        "configured_maximum_time_step_s": 1.375e-06,
+        "configured_step_active_under_static_capillary_bound": true,
+        "group": "temporal",
+        "id": "time_L2_1.375e-06s",
+        "level": 2,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 1.375e-06,
+        "static_capillary_time_step_ceiling_s": 7.85520378288456e-06,
+        "static_effective_maximum_time_step_s": 1.375e-06
+      }
+    ],
+    "gate_identity": "HF3D_STATIC_TIME_STEP_IDENTIFIABILITY_V1",
+    "groups": {
+      "spatial": {
+        "all_registered_steps_active": true,
+        "case_ids_in_level_order": [
+          "space_L0_4cells",
+          "space_L1_6cells",
+          "space_L2_9cells"
+        ],
+        "configured_maximum_time_step_s": [
+          5.5e-06,
+          5.5e-06,
+          5.5e-06
+        ],
+        "effective_structure_valid": true,
+        "pass": true,
+        "registered_structure_valid": true,
+        "static_capillary_time_step_ceiling_s": [
+          2.631154772261131e-05,
+          1.4591571063179744e-05,
+          7.85520378288456e-06
+        ],
+        "static_effective_maximum_time_step_s": [
+          5.5e-06,
+          5.5e-06,
+          5.5e-06
+        ]
+      },
+      "temporal": {
+        "all_registered_steps_active": true,
+        "case_ids_in_level_order": [
+          "time_L0_5.500e-06s",
+          "time_L1_2.750e-06s",
+          "time_L2_1.375e-06s"
+        ],
+        "configured_maximum_time_step_s": [
+          5.5e-06,
+          2.75e-06,
+          1.375e-06
+        ],
+        "effective_structure_valid": true,
+        "pass": true,
+        "registered_structure_valid": true,
+        "static_capillary_time_step_ceiling_s": [
+          7.85520378288456e-06,
+          7.85520378288456e-06,
+          7.85520378288456e-06
+        ],
+        "static_effective_maximum_time_step_s": [
+          5.5e-06,
+          2.75e-06,
+          1.375e-06
+        ]
+      }
+    },
+    "pass": true,
+    "reasons": []
+  },
+  "schema_version": 1,
+  "scope": "在预注册细网格探针全部门通过后冻结的空间与时间离散化筛查；只允许数值筛查结论，不证明物理或装置预测",
+  "study_name": "HF3D-Q1R3 冻结数值资格早期筛查（开边界库存与守恒拆分）",
+  "unique_run_count": 5
+}

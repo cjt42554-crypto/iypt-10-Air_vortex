@@ -13,6 +13,15 @@ from hfq_core import (
     physical_signature,
     read_json,
 )
+from hfq_quality_contract import (
+    INVENTORY_ARCHIVE_OBSERVABLE,
+    INVENTORY_CANONICAL_NAME,
+    INVENTORY_ROLE,
+    OPEN_BOUNDARY_QUALITY_CONTRACT_ID,
+    QualityContractError,
+    audit_quality_contract,
+    quality_contract_id,
+)
 
 @dataclass(slots=True)
 class LoadedCase:
@@ -313,7 +322,6 @@ def _quality_gate(loaded: LoadedCase, gates: Mapping[str, Any]) -> dict[str, Any
         ),
     }
     threshold_names = {
-        "liquid_mass_error_relative": "liquid_mass_error_relative_max",
         "liquid_volume_balance_error_relative": (
             "liquid_volume_balance_error_relative_max"
         ),
@@ -323,6 +331,16 @@ def _quality_gate(loaded: LoadedCase, gates: Mapping[str, Any]) -> dict[str, Any
         "cumulative_phase_clip_relative": "cumulative_phase_clip_relative_max",
         "cumulative_phase_repair_relative": "cumulative_phase_repair_relative_max",
     }
+    try:
+        contract_id = quality_contract_id(gates)
+        contract_audit = audit_quality_contract(gates)
+    except QualityContractError as exc:
+        raise UserFacingError(str(exc)) from exc
+    if contract_id != OPEN_BOUNDARY_QUALITY_CONTRACT_ID:
+        threshold_names = {
+            "liquid_mass_error_relative": "liquid_mass_error_relative_max",
+            **threshold_names,
+        }
     checks: dict[str, Any] = {}
     passed = True
     for name, threshold_name in threshold_names.items():
@@ -335,12 +353,38 @@ def _quality_gate(loaded: LoadedCase, gates: Mapping[str, Any]) -> dict[str, Any
         ok = value is not None and math.isfinite(value) and value <= threshold
         checks[name] = {"pass": ok, "value": value, "maximum": threshold}
         passed = passed and ok
+    inventory_observation = None
+    if contract_id == OPEN_BOUNDARY_QUALITY_CONTRACT_ID:
+        raw_inventory = values[INVENTORY_ARCHIVE_OBSERVABLE]
+        try:
+            inventory_value = (
+                abs(float(raw_inventory)) if raw_inventory is not None else None
+            )
+        except (TypeError, ValueError):
+            inventory_value = None
+        inventory_available = bool(
+            inventory_value is not None and math.isfinite(inventory_value)
+        )
+        inventory_observation = {
+            "available": inventory_available,
+            "value": inventory_value,
+            "archive_observable": INVENTORY_ARCHIVE_OBSERVABLE,
+            "canonical_name": INVENTORY_CANONICAL_NAME,
+            "role": INVENTORY_ROLE,
+            "absolute_gate_enabled": False,
+            "required_smooth_observable": True,
+        }
+        passed = passed and inventory_available
     numerical_gate = _nested(diagnostics, "numerical_quality_gate", "pass") is True
-    return {
+    result = {
         "pass": passed and numerical_gate,
         "backend_fail_closed_gate_pass": numerical_gate,
         "checks": checks,
     }
+    if contract_id == OPEN_BOUNDARY_QUALITY_CONTRACT_ID:
+        result["quality_contract"] = contract_audit
+        result["inventory_observation"] = inventory_observation
+    return result
 
 
 def _maximum_absolute_evidence(*values: Any) -> float | None:

@@ -21,6 +21,11 @@ from hfq_json import (
     write_json,
 )
 from hfq_grid import apply_overrides, grid_audit, make_refinement_config
+from hfq_quality_contract import (
+    LEGACY_QUALITY_CONTRACT_ID,
+    audit_quality_contract,
+    quality_contract_id,
+)
 
 _CAPILLARY_STABILITY_COEFFICIENT = 0.20
 _DESIGN_RELATIVE_TOLERANCE = 1.0e-12
@@ -346,6 +351,22 @@ def generate_campaign(
         raise QualificationError(
             "generated cases differ in physical inputs; only discretization controls may vary"
         )
+    observable_spec = _require_mapping(spec.get("observables", {}), "observables")
+    smooth_observables = list(
+        _string_sequence(
+            observable_spec.get("smooth", list(DEFAULT_SMOOTH_OBSERVABLES)),
+            "observables.smooth",
+        )
+    )
+    binary_observables = list(
+        _string_sequence(
+            observable_spec.get("binary", list(DEFAULT_BINARY_OBSERVABLES)),
+            "observables.binary",
+        )
+    )
+    frozen_gates = deepcopy(
+        dict(_require_mapping(spec.get("gates", {}), "gates"))
+    )
     manifest = {
         "schema_version": 1,
         "study_name": spec.get("study_name", "HF3D numerical qualification"),
@@ -357,24 +378,10 @@ def generate_campaign(
         "cases": cases,
         "unique_run_count": len(first_case_by_hash),
         "observables": {
-            "smooth": list(
-                _string_sequence(
-                    _require_mapping(spec.get("observables", {}), "observables").get(
-                        "smooth", list(DEFAULT_SMOOTH_OBSERVABLES)
-                    ),
-                    "observables.smooth",
-                )
-            ),
-            "binary": list(
-                _string_sequence(
-                    _require_mapping(spec.get("observables", {}), "observables").get(
-                        "binary", list(DEFAULT_BINARY_OBSERVABLES)
-                    ),
-                    "observables.binary",
-                )
-            ),
+            "smooth": smooth_observables,
+            "binary": binary_observables,
         },
-        "gates": deepcopy(dict(_require_mapping(spec.get("gates", {}), "gates"))),
+        "gates": frozen_gates,
         "execution_requirements": deepcopy(
             dict(
                 _require_mapping(
@@ -389,6 +396,17 @@ def generate_campaign(
             "apparatus_prediction_allowed": False,
         },
     }
+    raw_numerical_quality = frozen_gates.get("numerical_quality")
+    numerical_quality = (
+        dict(raw_numerical_quality)
+        if isinstance(raw_numerical_quality, Mapping)
+        else {}
+    )
+    if quality_contract_id(numerical_quality) != LEGACY_QUALITY_CONTRACT_ID:
+        manifest["quality_contract_audit"] = audit_quality_contract(
+            numerical_quality,
+            smooth_observables=smooth_observables,
+        )
     manifest_path = out / "cases_manifest.json"
     write_json(manifest_path, manifest)
     manifest["refinement_design_audit"] = audit_refinement_design(manifest_path)

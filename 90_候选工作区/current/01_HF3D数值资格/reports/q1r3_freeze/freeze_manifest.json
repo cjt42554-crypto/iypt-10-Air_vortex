@@ -1,0 +1,89 @@
+{
+  "decision_boundary": {
+    "apparatus_prediction_allowed": false,
+    "experimental_validation_performed": false,
+    "numerical_qualification_demonstrated": false,
+    "physical_validation_performed": false,
+    "q1r3_frozen": true,
+    "spatial_screening_authorized": true,
+    "temporal_screening_authorized_now": false
+  },
+  "execution_protocol": {
+    "early_stop": {
+      "action": "DO_NOT_EXECUTE_TEMPORAL_NEW_CASES",
+      "condition": "ANY_SPATIAL_CONFIGURATION_QUALITY_EFFECTIVE_STEP_OR_CONVERGENCE_GATE_FAILS"
+    },
+    "fresh_run_root_required": true,
+    "probe_archive_reuse_forbidden": true,
+    "stage_1": {
+      "analyse_before_stage_2": true,
+      "case_ids": [
+        "space_L0_4cells",
+        "space_L1_6cells",
+        "space_L2_9cells"
+      ],
+      "name": "spatial",
+      "run_sequentially": true
+    },
+    "stage_2": {
+      "authorized_only_if_stage_1_passes": true,
+      "name": "temporal",
+      "new_case_ids": [
+        "time_L1_2.750e-06s",
+        "time_L2_1.375e-06s"
+      ],
+      "reuse_case_id": "space_L2_9cells",
+      "run_sequentially": true
+    }
+  },
+  "expected_formal_source_tree_sha256": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
+  "frozen_identity": {
+    "physical_signature_sha256": "fb4e3a3b993fa5e569aed09d062239b0895f2fcaf40f642405edd502d6ad1059",
+    "quality_contract_id": "OPEN_BOUNDARY_INVENTORY_CONSERVATION_SPLIT_V1",
+    "spatial_case_ids": [
+      "space_L0_4cells",
+      "space_L1_6cells",
+      "space_L2_9cells"
+    ],
+    "temporal_new_case_ids": [
+      "time_L1_2.750e-06s",
+      "time_L2_1.375e-06s"
+    ],
+    "temporal_reuse_case_id": "space_L2_9cells"
+  },
+  "gate_pass": true,
+  "gates": {
+    "claim_boundary_remains_screening_only": true,
+    "fine_probe_passed_and_bound": true,
+    "formal_source_identity_bound": true,
+    "frozen_case_inventory_exact": true,
+    "frozen_fine_config_is_exact_probe_input": true,
+    "frozen_generated_configs_match_probe_design": true,
+    "frozen_spec_changes_only_descriptions": true,
+    "independent_regeneration_byte_identical": true,
+    "open_boundary_quality_contract_frozen": true,
+    "physical_signature_unchanged": true,
+    "preregistration_passed_and_bound": true,
+    "static_refinement_design_passed": true
+  },
+  "inputs": {
+    "campaign_file_sha256": "e400a31bec6ae9f907093ec418e81d6ae03850ed27a13c6e5663759186e4aaf4",
+    "campaign_path": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/01_HF3D数值资格/campaign_q1r3.json",
+    "design_campaign_file_sha256": "effb85a8fa89f1b3e2c53a36a48df686d5369a99722ecc7ebbe4f0c8146c57d5",
+    "design_manifest_file_sha256": "900ba440925621bf0408a81e80842d8115367fcbcd2c7938c50cc425bbafbbae",
+    "frozen_generated_file_sha256": {
+      "cases_manifest.json": "d2d95a599b831e1741f0df38be6069a8ebd93301d981726429bf632cdb823da6",
+      "space_L0_4cells.json": "0de19a3d081e9236d6a4908f3c428c83e40c20721c9db83ddae8af50b920b2b5",
+      "space_L1_6cells.json": "8a1df1f50418094176b4226cd37e526bd034bd44b5697fc607be1302f7c74595",
+      "space_L2_9cells.json": "2fdb7504e62560963734343b7bda9091164868985c521a17f22574e74ee6a594",
+      "time_L1_2.750e-06s.json": "c28425bddf5fc69f32d28116b8235fa9293d226b6e8d722a4105c2dd62a9699e",
+      "time_L2_1.375e-06s.json": "10a5d39c4f4ac7b2e0cb572e6d346d65e6faf289e4ffdea0551b5ef0efcedbc5"
+    },
+    "frozen_manifest_file_sha256": "d2d95a599b831e1741f0df38be6069a8ebd93301d981726429bf632cdb823da6",
+    "frozen_manifest_path": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/01_HF3D数值资格/generated_q1r3/cases_manifest.json",
+    "preregistration_file_sha256": "6397664427fcc86661e0688c0ea16865f62be74a139577961eb2c9a1bdfabe30",
+    "probe_report_file_sha256": "08b03271b95ea1ae0d9db24cf19b8ed62fe60f70994ea2edf7c3d7ef8c0e04fb"
+  },
+  "schema_version": 1,
+  "status": "Q1R3_FROZEN__SPATIAL_SCREENING_AUTHORIZED"
+}
