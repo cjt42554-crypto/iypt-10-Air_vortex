@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "study_name": "HF3D-Q1R2 共同登记步长正式轨迹设计",
+  "scope": "在已提升正式源码上，用统一 0.013 s 窗口取得三层空间网格的真实稠密步长轨迹；本研究只设计 Q1R2 登记步长，不执行或判定收敛",
+  "maximum_claim_status": "NUMERICAL_SCREENING_ONLY",
+  "execution_requirements": {
+    "pressure_accelerator_selected": "cuda"
+  },
+  "base_config": "formal_candidate/fine_window_pressure_1e-7.json",
+  "case_overrides": {
+    "drive.ramp_duration_s": 0.005,
+    "high_fidelity.cfl_controller_target_fraction": 0.95,
+    "high_fidelity.maximum_cfl_step_retries": 4,
+    "high_fidelity.pressure_relative_tolerance": 1e-7,
+    "high_fidelity.pressure_solver_device": "cuda",
+    "run.duration_s": 0.013,
+    "run.output_interval_s": 0.001
+  },
+  "spatial_study": {
+    "target_bar_diameter_cells_worst_axis": [
+      4.0,
+      6.0,
+      9.0
+    ],
+    "common_time_step_s": 7.5e-6,
+    "round_to_multiple": 2
+  },
+  "temporal_study": {
+    "target_bar_diameter_cells_worst_axis": 9.0,
+    "time_step_s": [
+      7.5e-6,
+      3.75e-6,
+      1.875e-6
+    ]
+  },
+  "observables": {
+    "smooth": [
+      "funnel_depth_m",
+      "min_gap_to_bar_m",
+      "kinetic_energy_lab_j",
+      "angular_momentum_z_kg_m2_s",
+      "axisymmetry_error"
+    ],
+    "binary": [
+      "first_contact_proxy",
+      "connection_candidate",
+      "finite_channel_candidate"
+    ]
+  },
+  "gates": {
+    "refinement_design": {
+      "configured_time_step_active_fraction_min": 0.95
+    },
+    "configuration": {
+      "coarsest_bar_diameter_cells_worst_axis_min": 4.0,
+      "finest_bar_diameter_cells_worst_axis_min": 8.0,
+      "grid_aspect_ratio_max": 1.25,
+      "interface_width_cells_worst_axis_min": 2.0,
+      "finest_nominal_bar_voxel_count_min": 500.0
+    },
+    "numerical_quality": {
+      "liquid_mass_error_relative_max": 0.001,
+      "liquid_volume_balance_error_relative_max": 0.001,
+      "pressure_residual_max": 1e-7,
+      "projected_divergence_max_s_inv": 1e-4,
+      "advective_cfl_max": 0.35,
+      "cumulative_phase_clip_relative_max": 0.001,
+      "cumulative_phase_repair_relative_max": 0.001
+    },
+    "smooth_convergence": {
+      "relative_l2_max": 0.05,
+      "relative_linf_max": 0.1,
+      "gci_l2_max": 0.05,
+      "observed_order_min": 0.5,
+      "gci_safety_factor": 1.25,
+      "absolute_scale_floors": {
+        "funnel_depth_m": 1e-5,
+        "min_gap_to_bar_m": 1e-5,
+        "kinetic_energy_lab_j": 1e-8,
+        "angular_momentum_z_kg_m2_s": 1e-9,
+        "axisymmetry_error": 0.001
+      }
+    },
+    "binary_event": {
+      "absolute_time_tolerance_s": 0.002,
+      "period_fraction_tolerance": 0.1,
+      "duty_fraction_tolerance": 0.1,
+      "transition_count_tolerance": 1
+    }
+  }
+}

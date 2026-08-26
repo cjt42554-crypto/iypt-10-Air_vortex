@@ -31,8 +31,9 @@
     "formal_theory_modified": false,
     "frozen_candidate_evidence_rewritten": false
   },
-  "claim_ceiling": "FORMAL_IMPLEMENTATION_PROMOTED_AND_CPU_REVALIDATED__CUDA_FORMAL_REPLAY_PENDING__Q1R2_NOT_FROZEN__NO_GO_PHYSICAL_PREDICTION",
+  "claim_ceiling": "FORMAL_IMPLEMENTATION_PROMOTED_AND_CPU_CUDA_REVALIDATED__Q1R2_FAIL_CLOSED__NO_GO_NUMERICAL_QUALIFICATION__NO_GO_PHYSICAL_PREDICTION",
   "created_at": "2026-08-26T03:35:18+09:00",
+  "updated_at": "2026-08-26T21:08:04+08:00",
   "environment": {
     "matplotlib": "3.11.1",
     "numpy": "2.4.6",
@@ -42,16 +43,31 @@
     "scipy": "1.17.1"
   },
   "not_performed": [
-    "isolated CUDA tests from the promoted formal path",
-    "0.013 s fine-grid CUDA replay from the promoted formal path",
-    "Q1R2 common-time-step refreeze",
-    "Q1R2 multi-grid and multi-time-step execution",
-    "numerical convergence qualification",
+    "completed Q1R2 temporal refinement after spatial fail-closed decision",
+    "Q1R2 spatial smooth-observable convergence after effective-step gate failure",
+    "Q1R2 temporal convergence",
+    "numerical qualification",
     "physical validation",
     "experimental validation"
   ],
+  "formal_cuda_replay": {
+    "report": "90_候选工作区/current/01_HF3D数值资格/reports/formal_replay/formal_replay_report.json",
+    "status": "FORMAL_CUDA_TESTS_AND_FINE_WINDOW_REPLAY_PASS",
+    "isolated_cuda_tests": {
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0
+    },
+    "fine_window_frozen_analyser_gates": {
+      "passed": 10,
+      "failed": 0
+    },
+    "archive_manifest_sha256": "6b14898f5bf6e6ecff4c70c68ba9931c142f8f129fae57c08f06d063dbc3e28e",
+    "source_tree_sha256_start": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
+    "source_tree_sha256_end": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010"
+  },
   "prior_candidate_cuda_evidence": {
-    "evidence_boundary": "The byte-identical executable source preserves the relevance of the prior candidate CUDA evidence, but this run did not replay it from the promoted formal directory.",
+    "evidence_boundary": "The original promotion run did not replay CUDA from the promoted formal directory; that historical gap was later closed by formal_cuda_replay, while this object preserves the earlier candidate evidence separately.",
     "fine_window_gate_pass": true,
     "fine_window_source_sha256_end": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
     "fine_window_source_sha256_start": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
@@ -63,7 +79,21 @@
     },
     "same_executable_source_identity_as_promoted_formal": true
   },
-  "q1r2_status": "NOT_FROZEN",
+  "q1r2_status": "Q1R2_FAIL_CLOSED_AFTER_COMPLETED_SPATIAL_GATES__TEMPORAL_NOT_COMPLETED",
+  "q1r2_execution": {
+    "qualification_report": "90_候选工作区/current/01_HF3D数值资格/reports/q1r2/qualification_report.json",
+    "qualification_report_sha256": "896d3675d019a82aa4d832c910bae3bc248d1cc75929d860f1f655a002b35b94",
+    "early_stop_decision": "90_候选工作区/current/01_HF3D数值资格/reports/q1r2/early_stop_decision.json",
+    "early_stop_decision_sha256": "2c2401523ceb2da8fa3044d5bd6065c0a0b8107aaa5dabf5e9012aecb41c3e57",
+    "completed_spatial_cases": 3,
+    "fine_registered_dt_active_fraction": 0.9382642409782285,
+    "registered_dt_active_fraction_minimum": 0.95,
+    "fine_liquid_mass_error_relative": 0.0013210842126547867,
+    "liquid_mass_error_relative_maximum": 0.001,
+    "fine_liquid_volume_balance_error_relative": 8.60574766682047e-12,
+    "time_L1_complete": false,
+    "time_L2_started": false
+  },
   "repository": {
     "branch": "main",
     "formal_baseline_commit": "9b79b1ca39461ada176c6e7de5855a935b191983",
@@ -87,12 +117,28 @@
       "value": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010"
     }
   },
-  "status": "FORMAL_PROMOTION_CPU_PASS__CUDA_FORMAL_REPLAY_PENDING",
+  "status": "FORMAL_PROMOTION_AND_CUDA_FORMAL_REPLAY_PASS__Q1R2_FAIL_CLOSED",
   "validation": {
     "candidate_qualification_tests": {
       "failed": 0,
       "passed": 24,
       "run": 24
+    },
+    "current_candidate_qualification_tests": {
+      "failed": 0,
+      "passed": 29,
+      "run": 29
+    },
+    "current_formal_full_test_suite": {
+      "failed": 0,
+      "passed": 181,
+      "run": 181,
+      "skipped": 0
+    },
+    "current_formal_self_check": {
+      "failed": 0,
+      "passed": 6,
+      "run": 6
     },
     "compileall": "PASS",
     "formal_baseline_unchanged_before_apply": "PASS",
@@ -125,10 +171,10 @@
     "git_apply_check": "PASS",
     "git_diff_check": "PASS",
     "gui_layout_test": "SKIPPED__TK_DISPLAY_UNAVAILABLE",
-    "isolated_cuda_tests_on_promoted_formal_path": "NOT_EXECUTED__CUPY_CUDA_RUNTIME_UNAVAILABLE",
+    "isolated_cuda_tests_on_promoted_formal_path": "PASS__5_OF_5",
     "patch_scope_exact": "PASS",
     "patch_sha256": "PASS",
-    "promoted_formal_0_013s_cuda_window": "NOT_EXECUTED__CUPY_CUDA_RUNTIME_UNAVAILABLE",
+    "promoted_formal_0_013s_cuda_window": "PASS__10_OF_10_FROZEN_ANALYSER_GATES",
     "reverse_apply_check_after_apply": "PASS",
     "whitespace_and_tab_scan": "PASS"
   }

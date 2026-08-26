@@ -1,0 +1,60 @@
+{
+  "campaign_manifest_sha256": "d237207806548a34e28c90925bc78296a473e2798302ffe7e61beb5fe4e1009b",
+  "claim_boundary": {
+    "apparatus_prediction_allowed": false,
+    "experimental_validation_performed": false,
+    "numerical_qualification_demonstrated": false,
+    "physical_validation_performed": false,
+    "q1r2_passed": false,
+    "spatial_convergence_evaluated": false,
+    "temporal_convergence_evaluated": false
+  },
+  "decisive_failures": {
+    "fine_liquid_mass_error_relative": 0.0013210842126547867,
+    "fine_liquid_volume_balance_error_relative": 8.60574766682047e-12,
+    "fine_registered_dt_active_fraction": 0.9382642409782285,
+    "liquid_mass_error_relative_maximum": 0.001,
+    "liquid_volume_balance_error_relative_maximum": 0.001,
+    "registered_dt_active_fraction_minimum": 0.95
+  },
+  "execution_decision": {
+    "failure_established_before_temporal_completion": true,
+    "remaining_temporal_level_required_to_establish_q1r2_failure": false,
+    "resuming_temporal_levels_would_be_a_separate_diagnostic_task": true,
+    "temporal_convergence_status": "NOT_EVALUATED",
+    "time_L1_complete_run_archive": false,
+    "time_L1_diagnostic_state": "cancelling",
+    "time_L1_intentionally_interrupted_after_spatial_decision": true,
+    "time_L1_payload_integrity_valid": true,
+    "time_L2_not_started": true
+  },
+  "expected_formal_source_tree_sha256": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
+  "gate_pass": true,
+  "gates": {
+    "apparatus_prediction_remains_disallowed": true,
+    "fine_open_boundary_conservation_balance_metric_passed": true,
+    "fine_spatial_numerical_quality_gate_already_failed": true,
+    "qualification_report_fail_closed_status": true,
+    "spatial_effective_time_step_gate_already_failed": true,
+    "temporal_group_not_completed": true,
+    "three_completed_spatial_archives_with_formal_cuda_identity": true,
+    "time_L1_interruption_diagnostic_integrity": true,
+    "time_L2_is_missing_not_started": true
+  },
+  "mass_gate_semantics": {
+    "formal_source_reference": "02_模拟程序/src/airvortex/backends/high_fidelity_3d.py",
+    "liquid_mass_error_relative_definition": "(current_liquid_volume - initial_liquid_volume) / initial_liquid_volume",
+    "liquid_volume_balance_error_relative_definition": "(current_liquid_volume - expected_liquid_volume_after_prescribed_boundary_flux) / initial_liquid_volume",
+    "registered_mass_gate_failure_alone_proves_numerical_nonconservation": false,
+    "registered_mass_gate_failure_is_a_frozen_contract_failure": true
+  },
+  "qualification_report_sha256": "896d3675d019a82aa4d832c910bae3bc248d1cc75929d860f1f655a002b35b94",
+  "qualification_report_status": "FAIL_PROVENANCE_INPUT_OR_COMPLETION_GATE",
+  "schema_version": 1,
+  "spatial_identity_by_case": {
+    "space_L0_4cells": true,
+    "space_L1_6cells": true,
+    "space_L2_9cells": true
+  },
+  "status": "Q1R2_FAIL_CLOSED_AFTER_COMPLETED_SPATIAL_GATES__TEMPORAL_NOT_COMPLETED"
+}
