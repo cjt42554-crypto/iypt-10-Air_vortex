@@ -1,0 +1,165 @@
+{
+  "branch": "main",
+  "claim_boundary": {
+    "diagnostics_allow_apparatus_prediction": false,
+    "diagnostics_establish_spatial_convergence": false,
+    "diagnostics_establish_temporal_convergence": false,
+    "diagnostics_validate_experiment": false,
+    "diagnostics_validate_physics": false
+  },
+  "current_status": {
+    "apparatus_prediction_allowed": false,
+    "experimental_validation": false,
+    "hf3d_refactor": "PASS_HF3D_BOUNDED_STRUCTURAL_REFACTOR__CPU_CUDA_STRICT_EQUIVALENCE",
+    "numerical_qualification": false,
+    "physical_validation": false,
+    "q1r3": "Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED"
+  },
+  "d0_scope": {
+    "A_static_geometry_audit": {
+      "dynamic_solver_run": false,
+      "levels_cells_per_bar_diameter": [
+        4.0,
+        6.0,
+        9.0,
+        13.5
+      ],
+      "required_metrics": [
+        "grid_spacing_xyz_m",
+        "active_cell_count",
+        "rasterized_bar_volume_relative_error",
+        "bar_mask_centroid_error_xyz_m",
+        "bar_mask_second_moments",
+        "active_fluid_volume_error"
+      ]
+    },
+    "B_13p5_cuda_resource_probe": {
+      "candidate_dt_is_qualification_freeze": false,
+      "candidate_registered_dt_s": 3.75e-06,
+      "cuda_required_without_fallback": true,
+      "fail_closed_conditions": [
+        "CUDA unavailable or fallback",
+        "construction or first-step OOM",
+        "fewer than 8 accepted steps",
+        "pressure/CFL/divergence numerical-quality failure",
+        "peak resource metrics unavailable",
+        "dirty or unrecorded execution source identity"
+      ],
+      "grid": [
+        204,
+        204,
+        180
+      ],
+      "maximum_accepted_steps": 8,
+      "required_measurements": [
+        "host_rss_baseline_and_peak",
+        "host_available_memory_baseline_and_minimum",
+        "cuda_total_free_and_peak_delta",
+        "cupy_pool_used_and_total_bytes",
+        "construction_wall_s",
+        "accepted_step_wall_s_distribution",
+        "pressure_iteration_distribution",
+        "pressure_residual_max",
+        "projected_divergence_max_s_inv",
+        "advective_cfl_max",
+        "retry_count"
+      ]
+    },
+    "C_source_separation": {
+      "diagnostic_only": true,
+      "diagnostics": [
+        "zero-drive 6/9 relevant-resolution hydrostatic/open-boundary sweep",
+        "fixed-cell-width versus fixed-physical-width regularization sensitivity",
+        "separate liquid inventory response from corrected open-boundary conservation",
+        "compare geometry error with forced smooth-observable differences"
+      ],
+      "fixed_physical_reference": "6-cell level",
+      "formal_solver_change": false,
+      "nine_cell_fixed_physical_controls": {
+        "boundary_layer_cells": 2.2666666666666666,
+        "interface_thickness_cells": 3.7777777777777777,
+        "surface_tension_smoothing_cells": 1.1333333333333333
+      }
+    },
+    "D_conditional_decision": {
+      "regularisation_material": "STOP_FULL_Q1R4__DEFINE_INTENDED_ASYMPTOTIC_MODEL_BEFORE_REFINEMENT",
+      "resource_pass_and_sources_bounded": "DRAFT_NEW_6_9_13P5_PREREGISTRATION__DO_NOT_RUN_AUTOMATICALLY",
+      "resource_probe_fail": "STOP_FULL_Q1R4__OPTIMISATION_OR_MODEL_REDESIGN_REQUIRED"
+    }
+  },
+  "date": "2026-08-27",
+  "decision": {
+    "20p25_cells_per_bar_diameter_path_allowed": false,
+    "candidate_workspace_diagnostics_allowed": true,
+    "formal_theory_or_solver_change_allowed": false,
+    "full_q1r4_campaign_frozen": false,
+    "full_q1r4_campaign_run_allowed": false,
+    "q1r3_6_and_9_reuse_as_q1r4_qualification_evidence_allowed": false,
+    "q1r3_temporal_continuation_allowed": false,
+    "selected_path": "D0_SOURCE_SEPARATION_AND_RESOURCE_PROBE"
+  },
+  "decision_id": "Q1R4_NOT_FROZEN__D0_DIAGNOSTIC_GATE_SELECTED",
+  "evidence": {
+    "extrapolation_warning": "The same-order extrapolation is a resource-decision diagnostic, not a proof of future error or convergence.",
+    "next_13p5_cell_count": 7490880,
+    "next_13p5_grid": [
+      204,
+      204,
+      180
+    ],
+    "next_13p5_linear_cpu_rss_indicator_gib": 6.94031,
+    "next_13p5_static_capillary_dt_max_s": 4.27583e-06,
+    "next_13p5_wall_indicator_h": 9.29394,
+    "next_20p25_cell_count": 24952320,
+    "next_20p25_grid": [
+      304,
+      304,
+      270
+    ],
+    "next_20p25_linear_cpu_rss_indicator_gib": 23.1184,
+    "next_20p25_wall_indicator_h": 56.3175,
+    "q1r3_all_numerical_quality_gates_passed": true,
+    "q1r3_all_smooth_convergence_gates_passed": false,
+    "q1r3_common_registered_dt_s": 5.5e-06,
+    "q1r3_failure_is_open_boundary_corrected_nonconservation": false,
+    "q1r3_failure_is_startup_only": false,
+    "q1r3_fine_completed_steps": 3650,
+    "q1r3_fine_registered_dt_active_fraction": 0.957808219178,
+    "q1r3_fine_runtime_wall_s": 6934.635067,
+    "q1r3_spatial_levels_cells_per_bar_diameter": [
+      4.0,
+      6.0,
+      9.0
+    ],
+    "q1r3_window_s": [
+      0.0,
+      0.02
+    ],
+    "same_order_extrapolation": [
+      {
+        "fine_medium_relative_l2": 1.4839731620028025,
+        "observable": "funnel_depth_m",
+        "observed_order": 0.7129276796704513,
+        "same_order_additional_1p5x_levels_to_5pct": 11.728948062793224,
+        "same_order_predicted_next_relative_l2": 1.111439209887067
+      },
+      {
+        "fine_medium_relative_l2": 0.44606261518529927,
+        "observable": "kinetic_energy_lab_j",
+        "observed_order": 0.19059245965263388,
+        "same_order_additional_1p5x_levels_to_5pct": 28.318791344353322,
+        "same_order_predicted_next_relative_l2": 0.4128898055457274
+      },
+      {
+        "fine_medium_relative_l2": 0.4014727960302999,
+        "observable": "axisymmetry_error",
+        "observed_order": 0.21581240145105518,
+        "same_order_additional_1p5x_levels_to_5pct": 23.805852061355054,
+        "same_order_predicted_next_relative_l2": 0.367835334181919
+      }
+    ]
+  },
+  "repository": "cjt42554-crypto/iypt-10-Air_vortex",
+  "reviewed_head": "9e39944c1e12052dafcfc6a2c48f2034ef37e576",
+  "schema_version": 1
+}

@@ -2,62 +2,43 @@
 
 ## 当前唯一待续任务
 
-HF3D 纯结构限界重构已经完成并通过 CPU/CUDA 严格等价验收。当前没有待续的重构实现工作。
+HF3D 纯结构限界重构已经完成并通过 CPU/CUDA 严格等价验收。Q1R4 的人工科学与资源裁决也已完成，当前选定路径为：
 
-下一项仍是 Q1R4 的人工科学与资源裁决；在当前用户明确选择路径并批准新预注册前，不得自动冻结、启动、补跑或拼接任何 Q1R4 算例。较低成本且保持当前模型身份的优先候选仍是整组重跑 6/9/13.5 格/磁子直径，但必须先独立完成资源探针和更小共同登记步长设计，旧 Q1R3 的 6/9 层不得复用为新三层中的前两层。
+`Q1R4_NOT_FROZEN__D0_DIAGNOSTIC_GATE_SELECTED`
 
-## 本轮完成状态
+下一步只允许在候选工作区内实现并执行 D0 诊断门，不得冻结或启动完整 Q1R4，不得继续 Q1R3 时间组，也不得把旧 Q1R3 的 `6/9` 层与新 `13.5` 层拼接为资格证据。
 
-结论为：
+## 任务入口
 
-`PASS_HF3D_BOUNDED_STRUCTURAL_REFACTOR__CPU_CUDA_STRICT_EQUIVALENCE`
+- `90_候选工作区/current/03_Q1R4科学与资源裁决.md`；
+- `90_候选工作区/current/03_Q1R4诊断门/README.md`；
+- `90_候选工作区/current/03_Q1R4诊断门/q1r4_diagnostic_preregistration.json`。
 
-正式兼容入口 `02_模拟程序/src/airvortex/backends/high_fidelity_3d.py` 从 2054 行降为 657 行，继续保留旧导入和 `HighFidelityBackend`。唯一活动实现按职责拆入 `02_模拟程序/src/airvortex/hf3d/`：
+## D0 必做范围
 
-- `types.py`：状态、诊断、异常和 limiter 编码；
-- `drive.py`：实际转速、右斜率和角度积分；
-- `pressure.py`：CPU/CUDA 选择和禁止中途静默回退；
-- `timestep.py`：有类型的时间步提案和 retry；
-- `stepper.py`：事务式 trial step；
-- `events.py`：拓扑事件状态机；
-- `recording.py`：帧、逐步诊断、alias、单位和结果组装。
+1. 对 `4/6/9/13.5` 四层进行静态磁子体素几何审计，不运行动态求解器；
+2. 在 `204 × 204 × 180`、候选登记步长 `3.75e-6 s`、严格 CUDA 无回退条件下完成八个已接受步骤的资源探针；
+3. 进行 `6/9` 零驱动诊断，并以 `6` 格物理宽度为参照建立 `9` 格固定物理宽度正则化对照；
+4. 分开报告液体净存量响应与开放边界通量校正守恒，并评估体素几何和正则化路径是否与当前层间差异同阶。
 
-没有保留旧、新两套活动 stepper、recorder 或 event tracker；没有 monkey patch、运行时 fallback 或临时功能开关。
+D0 通过的最高权限只是起草新的 `6/9/13.5` 预注册；仍不得自动运行完整资格组。D0 报告完成前不得建立 `campaign_q1r4.json` 或任何 Q1R4 冻结清单。
 
-## 身份与等价证据
+## 裁决依据与资源边界
 
-- 重构前捕获 HEAD：`ce96932b5a122fa284922bebc84db9df92ef6c36`；
-- 重构前正式源码树：`03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010`；
-- 重构实现捕获 HEAD：`f9ba2fc648b3495c8144ec292ecf35e18d36201b`；
-- 重构后正式源码树：`dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8`；
-- CPU 严格比较：88/88 数组逐元素相同；
-- CUDA 严格比较：88/88 数组逐元素相同；
-- CPU 重构前后 NPZ SHA-256 同为 `0fd77a759b064d16cb229b437568e3a669a3fd5383b88812fa2bd24a6da90baf`；
-- CUDA 重构前后 NPZ SHA-256 同为 `3902967478be3e2586b386fe6d92db2887d5b6c323f54575781d0328f78e1250`。
+Q1R3 的数值质量门和执行身份门基本通过，但六个必需平滑量全部未通过空间收敛；启动段及三个后续窗口同样为 0/6 达标。现有差异不能唯一归因于网格不足，因为磁子体素几何、按格数定义的界面/壁层正则化和开放顶边界响应随网格同时改变。
 
-允许差异只有捕获标签、数组归档文件名、Git HEAD 和正式源码树身份。status、事件及 payload、键与顺序、shape、dtype、全部数组、单位、数值 metadata、Progress、逐步诊断和最终完整三维场均相同。
+`13.5` 格对应 `204 × 204 × 180`、约 749 万单元，静态毛细步长上限约 `4.27583e-6 s`，低于 Q1R3 的共同登记步长 `5.5e-6 s`；因此朁来若批准 Q1R4，必须以更小共同步长整组重跑。`20.25` 格路径当前禁止。
 
-必要入口：
+## 正式目录与结论上限
 
-- `90_候选工作区/current/02_HF3D纯结构限界重构/completion_report.json`；
-- `90_候选工作区/current/02_HF3D纯结构限界重构/completion_report.md`；
-- `90_候选工作区/current/02_HF3D纯结构限界重构/evidence/equivalence_cpu.*`；
-- `90_候选工作区/current/02_HF3D纯结构限界重构/evidence/equivalence_cuda.*`。
+本轮裁决只新增候选文档和机器可读合同，`01_最终理论/**` 与 `02_模拟程序/**` 未修改；未运行 D0、Q1R4 或实验。
 
-## 最终验证
+当前状态继续保持：
 
-- 正式完整测试 187/187 通过，其中 5 项 CUDA 测试实际执行；
-- 正式 self-check 6/6 通过；
-- Q1 至 Q1R3 候选资格测试 35/35 通过；
-- 比较器失败闭锁测试 5/5 通过；
-- `compileall`、严格 JSON、Pandoc Markdown、未用导入和 Git 空白检查通过。
-
-## 科学与保护边界
-
-`01_最终理论/**` 未修改。Q1、Q1R、Q1R2、Q1R3 的冻结配置、报告、裁决器、历史补丁、证据身份和本地大型归档均未修改。旧 Q1R3 证据继续绑定重构前源码树，不能改绑到新源码。
-
-Q1R3 仍为：
-
-`Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED`
-
-完整数值资格、物理校准、实验验证和装置级预测仍为 `NO-GO` 或 `NOT_EXECUTED`。本轮没有冻结或运行 Q1R4。
+```text
+Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED
+NUMERICAL_QUALIFICATION = NOT_DEMONSTRATED
+PHYSICAL_VALIDATION = NOT_PERFORMED
+EXPERIMENTAL_VALIDATION = NOT_PERFORMED
+APPARATUS_PREDICTION = DISALLOWED
+```
