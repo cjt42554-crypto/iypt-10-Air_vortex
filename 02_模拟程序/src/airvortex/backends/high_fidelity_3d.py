@@ -15,7 +15,7 @@ prediction.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 import json
 import math
 import time
@@ -62,30 +62,26 @@ from airvortex.numerics.momentum3d import (
     rotating_frame_acceleration_3d,
     rotating_to_laboratory_velocity_3d,
 )
-from airvortex.numerics.projection3d import VariableDensityProjection3D
-from airvortex.numerics.projection3d_gpu import (
-    CuPyVariableDensityProjection3D,
-    GPUProjectionUnavailable,
-    probe_gpu_projection,
+from airvortex.hf3d.drive import (
+    drive_rpm_and_slope as _drive_rpm_and_slope,
+    integrated_bar_angle_rad as _integrated_bar_angle_rad,
+    rpm_to_omega as _rpm_to_omega,
+)
+from airvortex.hf3d.pressure import (
+    PressureProjection3D,
+    make_pressure_projection as _make_pressure_projection,
+)
+from airvortex.hf3d.types import (
+    HF3DPostProjectionCFLExceeded,
+    HF3DRejectedStepDiagnostics,
+    HF3DState,
+    HF3DStepDiagnostics,
+    TIME_STEP_LIMITER_CODES as _TIME_STEP_LIMITER_CODES,
 )
 
 
 ProgressCallback = Callable[[Progress], None]
-PressureProjection3D = VariableDensityProjection3D | CuPyVariableDensityProjection3D
 _LIVE_SURFACE_PREVIEW_INTERVAL_WALL_S = 1.0
-_TIME_STEP_LIMITER_CODES = MappingProxyType(
-    {
-        "registered_time_step": 0,
-        "combined_known_source_cfl": 1,
-        "viscous_stability": 2,
-        "capillary_stability": 3,
-        "rotation_increment": 4,
-        "output_alignment": 5,
-        "post_projection_cfl_retry": 6,
-        "direct_call": 7,
-        "initial_state": 8,
-    }
-)
 
 
 MODEL_NAME = (
@@ -144,94 +140,6 @@ LIMITATIONS = (
 )
 
 
-@dataclass(slots=True)
-class HF3DState:
-    time_s: float
-    step: int
-    bar_angle_rad: float
-    u_x_face: FloatArray
-    u_y_face: FloatArray
-    u_z_face: FloatArray
-    phase: FloatArray
-    pressure_pa: FloatArray
-
-
-@dataclass(frozen=True, slots=True)
-class HF3DStepDiagnostics:
-    dt_s: float
-    initial_attempt_dt_s: float
-    time_step_limiter: str
-    cfl_retry_count: int
-    starting_advective_cfl: float
-    pre_source_advective_cfl: float
-    pre_projection_advective_cfl: float
-    maximum_rejected_post_projection_cfl: float
-    actual_bar_rpm: float
-    angular_velocity_rad_s: float
-    angular_acceleration_rad_s2: float
-    advective_cfl: float
-    viscous_cfl: float
-    capillary_cfl: float
-    rotation_increment_rad: float
-    divergence_before_s_inv: float
-    divergence_after_s_inv: float
-    pressure_relative_residual: float
-    pressure_iterations: int
-    liquid_volume_m3: float
-    expected_liquid_volume_m3: float
-    liquid_volume_balance_error_m3: float
-    phase_top_outward_flux_m3_s: float
-    phase_clip_absolute_volume_m3: float
-    phase_repair_absolute_volume_m3: float
-    kinetic_energy_lab_j: float
-    kinetic_energy_rotating_j: float
-    angular_momentum_z_kg_m2_s: float
-    viscous_dissipation_w: float
-    maximum_surface_tension_acceleration_m_s2: float
-    maximum_momentum_advection_acceleration_m_s2: float
-    maximum_viscous_acceleration_m_s2: float
-    maximum_boundary_acceleration_m_s2: float
-    maximum_rotating_frame_acceleration_m_s2: float
-    gravity_acceleration_m_s2: float
-    maximum_pressure_projection_acceleration_m_s2: float
-    boundary_rotating_energy_change_j: float
-    topology: Topology3DDiagnostics
-
-
-@dataclass(frozen=True, slots=True)
-class HF3DRejectedStepDiagnostics:
-    step_one_based: int
-    state_time_s: float
-    attempted_dt_s: float
-    starting_advective_cfl: float
-    pre_source_advective_cfl: float
-    pre_projection_advective_cfl: float
-    post_projection_advective_cfl: float
-    cfl_hard_limit: float
-    pressure_relative_residual: float
-    pressure_iterations: int
-    maximum_momentum_advection_acceleration_m_s2: float
-    maximum_viscous_acceleration_m_s2: float
-    maximum_boundary_acceleration_m_s2: float
-    maximum_surface_tension_acceleration_m_s2: float
-    maximum_rotating_frame_acceleration_m_s2: float
-    gravity_acceleration_m_s2: float
-    maximum_pressure_projection_acceleration_m_s2: float
-
-
-class HF3DPostProjectionCFLExceeded(FloatingPointError):
-    """A complete trial step was rejected before its state was committed."""
-
-    def __init__(self, diagnostics: HF3DRejectedStepDiagnostics) -> None:
-        self.diagnostics = diagnostics
-        super().__init__(
-            "HF3D post-projection advective CFL "
-            f"{diagnostics.post_projection_advective_cfl:.6e} exceeds hard limit "
-            f"{diagnostics.cfl_hard_limit:.6e} at step "
-            f"{diagnostics.step_one_based}; trial state and pressure history restored"
-        )
-
-
 def _maximum_vector_magnitude(
     grid: ImmersedCartesianGrid,
     x: FloatArray,
@@ -255,148 +163,6 @@ def _retry_time_step_s(
     if proposed >= attempted_dt_s:
         proposed = math.nextafter(attempted_dt_s, 0.0)
     return proposed
-
-
-def _rpm_to_omega(rpm: float) -> float:
-    return 2.0 * math.pi * rpm / 60.0
-
-
-def _drive_rpm_and_slope(
-    config: SimulationConfig, time_s: float
-) -> tuple[float, float]:
-    """Piecewise-linear actual signed bar rpm and its right-hand slope."""
-
-    drive = config.drive
-    t = float(np.clip(time_s, 0.0, config.run.duration_s))
-    if drive.actual_speed_schedule_time_s:
-        times = np.asarray(drive.actual_speed_schedule_time_s, dtype=np.float64)
-        speeds = np.asarray(drive.actual_speed_schedule_rpm, dtype=np.float64)
-        if t >= times[-1]:
-            return float(speeds[-1]), 0.0
-        index = int(np.searchsorted(times, t, side="right") - 1)
-        index = max(0, min(index, times.size - 2))
-        duration = times[index + 1] - times[index]
-        slope = (speeds[index + 1] - speeds[index]) / duration
-        return float(speeds[index] + slope * (t - times[index])), float(slope)
-    direction = float(drive.rotation_direction)
-    if drive.ramp_duration_s > 0.0 and t < drive.ramp_duration_s:
-        slope = direction * (
-            drive.target_rpm - drive.initial_rpm
-        ) / drive.ramp_duration_s
-        return float(direction * drive.initial_rpm + slope * t), float(slope)
-    return float(direction * drive.target_rpm), 0.0
-
-
-def _integrated_bar_angle_rad(config: SimulationConfig, time_s: float) -> float:
-    """Exact integral of the configured piecewise-linear actual bar speed."""
-
-    drive = config.drive
-    t = max(0.0, float(time_s))
-    rpm_seconds = 0.0
-    if drive.actual_speed_schedule_time_s:
-        times = drive.actual_speed_schedule_time_s
-        speeds = drive.actual_speed_schedule_rpm
-        for left, right, rpm_left, rpm_right in zip(
-            times[:-1], times[1:], speeds[:-1], speeds[1:]
-        ):
-            if t <= left:
-                break
-            width = min(t, right) - left
-            if width <= 0.0:
-                continue
-            slope = (rpm_right - rpm_left) / (right - left)
-            rpm_seconds += rpm_left * width + 0.5 * slope * width * width
-            if t <= right:
-                break
-        if t > times[-1]:
-            rpm_seconds += speeds[-1] * (t - times[-1])
-    else:
-        signed_initial = drive.rotation_direction * drive.initial_rpm
-        signed_target = drive.rotation_direction * drive.target_rpm
-        ramp = drive.ramp_duration_s
-        if ramp > 0.0:
-            width = min(t, ramp)
-            slope = (signed_target - signed_initial) / ramp
-            rpm_seconds += signed_initial * width + 0.5 * slope * width * width
-            if t > ramp:
-                rpm_seconds += signed_target * (t - ramp)
-        else:
-            rpm_seconds = signed_target * t
-    return rpm_seconds * (2.0 * math.pi / 60.0)
-
-
-def _make_pressure_projection(
-    config: SimulationConfig,
-    grid: ImmersedCartesianGrid,
-) -> tuple[PressureProjection3D, dict[str, object]]:
-    """Select a reproducible pressure engine without changing its operator.
-
-    ``auto`` falls back only during availability/construction probing.  Once a
-    run has started on CUDA, a device failure remains fail-closed instead of
-    silently switching floating-point reduction order partway through a run.
-    """
-
-    requested = config.high_fidelity.pressure_solver_device
-    common = {
-        "relative_tolerance": config.high_fidelity.pressure_relative_tolerance,
-        "maximum_iterations": config.high_fidelity.pressure_max_iterations,
-    }
-    if requested == "cpu":
-        return VariableDensityProjection3D(grid, **common), {
-            "requested": requested,
-            "selected": "cpu",
-            "fallback": False,
-            "detail": "CPU reference projection selected explicitly",
-            "device_name": None,
-            "compute_capability": None,
-            "host_device_transfer_each_solve": False,
-        }
-
-    probe = probe_gpu_projection()
-    if probe.available:
-        try:
-            projection = CuPyVariableDensityProjection3D(grid, **common)
-        except (GPUProjectionUnavailable, RuntimeError, OSError) as exc:
-            if requested == "cuda":
-                raise RuntimeError(
-                    "HF3D CUDA pressure solver was requested but construction failed: "
-                    f"{type(exc).__name__}: {exc}"
-                ) from exc
-            detail = (
-                "CUDA probe passed but construction failed; using CPU: "
-                f"{type(exc).__name__}: {exc}"
-            )
-        else:
-            return projection, {
-                "requested": requested,
-                "selected": "cuda",
-                "fallback": False,
-                "detail": probe.detail,
-                "device_name": probe.device_name,
-                "compute_capability": probe.compute_capability,
-                "total_memory_bytes": probe.total_memory_bytes,
-                # The other HF3D laws remain on the CPU in this lossless first
-                # stage, so four velocity/pressure fields cross the bus here.
-                "host_device_transfer_each_solve": True,
-            }
-    else:
-        if requested == "cuda":
-            raise RuntimeError(
-                "HF3D CUDA pressure solver was requested but is unavailable: "
-                f"{probe.detail}"
-            )
-        detail = f"CUDA unavailable; using CPU: {probe.detail}"
-
-    return VariableDensityProjection3D(grid, **common), {
-        "requested": requested,
-        "selected": "cpu",
-        "fallback": True,
-        "detail": detail,
-        "device_name": probe.device_name,
-        "compute_capability": probe.compute_capability,
-        "total_memory_bytes": probe.total_memory_bytes,
-        "host_device_transfer_each_solve": False,
-    }
 
 
 class HighFidelityBackend:
