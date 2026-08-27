@@ -3,13 +3,22 @@
 from __future__ import annotations
 
 import ast
+from dataclasses import replace
 from pathlib import Path
 import unittest
 
 import numpy as np
 
 import airvortex.backends.high_fidelity_3d as compatibility
-from airvortex.core import SimulationConfig
+from airvortex.backends.high_fidelity_3d import HighFidelityBackend
+from airvortex.core import (
+    BackendMode,
+    Control,
+    DriveConfig,
+    RunConfig,
+    RunStatus,
+    SimulationConfig,
+)
 from airvortex.hf3d import (
     HF3DPostProjectionCFLExceeded,
     HF3DRejectedStepDiagnostics,
@@ -91,6 +100,33 @@ def diagnostics(
         maximum_pressure_projection_acceleration_m_s2=1.0,
         boundary_rotating_energy_change_j=0.0,
         topology=topology() if topology_value is None else topology_value,
+    )
+
+
+def small_runtime_config(*, initial_rpm: float = 0.0) -> SimulationConfig:
+    base = SimulationConfig()
+    return replace(
+        base,
+        backend=BackendMode.HIGH_FIDELITY,
+        drive=DriveConfig(
+            initial_rpm=initial_rpm,
+            target_rpm=max(initial_rpm, 100.0),
+            ramp_duration_s=0.0,
+            rotation_direction=1,
+        ),
+        run=RunConfig(duration_s=2.0e-4, output_interval_s=2.0e-4),
+        forward=replace(base.forward, integration_time_step_s=1.0e-4),
+        high_fidelity=replace(
+            base.high_fidelity,
+            radial_cells=8,
+            azimuthal_cells=8,
+            axial_cells=10,
+            time_step_s=1.0e-4,
+            pressure_solver_device="cpu",
+            pressure_relative_tolerance=1.0e-7,
+            pressure_max_iterations=800,
+            interface_compression_interval=0,
+        ),
     )
 
 
@@ -203,6 +239,44 @@ class HF3DRefactorCompatibilityTests(unittest.TestCase):
             connected.minimum_throat_radius_m,
         )
         self.assertEqual(events[-1].data["required_hold_time_s"], 0.5)
+
+    def test_nonzero_initial_speed_performs_the_initial_projection(self) -> None:
+        result = HighFidelityBackend().run(
+            small_runtime_config(initial_rpm=100.0)
+        )
+        diagnostics_record = result.metadata["diagnostics"]
+        self.assertEqual(
+            diagnostics_record["pressure_solves"],
+            diagnostics_record["completed_steps"] + 1,
+        )
+        self.assertEqual(
+            diagnostics_record["pressure_accelerator"]["selected"],
+            "cpu",
+        )
+
+    def test_soft_stop_keeps_one_committed_step_and_event_contract(self) -> None:
+        class StopAfterOneAcceptedStep(Control):
+            def __init__(self) -> None:
+                super().__init__()
+                self.calls = 0
+
+            def checkpoint(self) -> bool:
+                self.calls += 1
+                if self.calls == 2:
+                    self.request_stop("refactor characterization stop")
+                return super().checkpoint()
+
+        result = HighFidelityBackend().run(
+            small_runtime_config(),
+            control=StopAfterOneAcceptedStep(),
+        )
+        self.assertIs(result.status, RunStatus.STOPPED)
+        self.assertEqual(result.metadata["diagnostics"]["completed_steps"], 1)
+        self.assertEqual([event.kind for event in result.events], ["soft_stop"])
+        self.assertEqual(
+            result.events[0].message,
+            "refactor characterization stop",
+        )
 
 
 if __name__ == "__main__":
