@@ -1,0 +1,67 @@
+{
+  "captures": {
+    "cpu": {
+      "array_archive": "evidence/pre_cpu.npz",
+      "array_archive_sha256": "0fd77a759b064d16cb229b437568e3a669a3fd5383b88812fa2bd24a6da90baf",
+      "array_count": 88,
+      "completed_steps": 20,
+      "frame_count": 3,
+      "manifest": "evidence/pre_cpu.json",
+      "manifest_sha256": "64f3cf692cef2c2f8e77c7e05e83a9873d50c558254a163a1dc89aabc57d9dbc",
+      "selected_device": "cpu",
+      "self_comparison": "PASS_STRICT_ELEMENTWISE_EQUIVALENCE"
+    },
+    "cuda": {
+      "array_archive": "evidence/pre_cuda.npz",
+      "array_archive_sha256": "3902967478be3e2586b386fe6d92db2887d5b6c323f54575781d0328f78e1250",
+      "array_count": 88,
+      "completed_steps": 20,
+      "frame_count": 3,
+      "manifest": "evidence/pre_cuda.json",
+      "manifest_sha256": "81b279a3eea37727ff16b71a9603d15058bfe735b4cea6c03a99df2e7e4a138a",
+      "selected_device": "cuda",
+      "self_comparison": "PASS_STRICT_ELEMENTWISE_EQUIVALENCE"
+    }
+  },
+  "environment": {
+    "cupy": "14.2.0",
+    "cuda_device": "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "cuda_device_count": 1,
+    "cuda_driver": "580.173.02",
+    "cuda_memory_mib": 8151,
+    "numpy": "2.5.2",
+    "python": "3.12.3",
+    "scipy": "1.17.1"
+  },
+  "formal_source_tree_sha256": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
+  "git_head": "ce96932b5a122fa284922bebc84db9df92ef6c36",
+  "status": "PASS_BASELINE_READY_FOR_REFACTOR",
+  "tests": [
+    {
+      "command": "cd 02_模拟程序 && PYTHONPATH=src .venv-gpu/bin/python -Werror -m unittest discover -s tests -v",
+      "exit_code": 0,
+      "result": "181/181 passed including 5 CUDA tests"
+    },
+    {
+      "command": "cd 02_模拟程序 && PYTHONPATH=src .venv-gpu/bin/python -m airvortex.cli self-check --pretty",
+      "exit_code": 0,
+      "result": "6/6 passed"
+    },
+    {
+      "command": "cd 02_模拟程序 && .venv-gpu/bin/python -m compileall -q src tests",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "cd 90_候选工作区/current/01_HF3D数值资格 && .venv-gpu/bin/python -Werror -m unittest discover -s tests -v",
+      "exit_code": 0,
+      "result": "35/35 passed"
+    },
+    {
+      "command": "cd 90_候选工作区/current/02_HF3D纯结构限界重构 && .venv-gpu/bin/python -Werror -m unittest discover -s tests -v",
+      "exit_code": 0,
+      "result": "5/5 comparator failure-closure tests passed"
+    }
+  ],
+  "tooling_note": "The first CPU capture calculation completed but its draft manifest serializer rejected MappingProxyType. The evidence tool was corrected to use the formal json_ready normalizer and both final captures were regenerated. This did not modify formal source or indicate a solver baseline failure."
+}
