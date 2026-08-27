@@ -1,0 +1,146 @@
+{
+  "claim_boundary": {
+    "apparatus_prediction_allowed": false,
+    "experimental_validation_performed": false,
+    "full_q1r4_run_allowed": false,
+    "physical_validation_performed": false,
+    "q1r4_frozen": false,
+    "spatial_convergence_demonstrated": false,
+    "temporal_convergence_demonstrated": false
+  },
+  "decision": {
+    "apparatus_prediction_allowed": false,
+    "campaign_q1r4_creation_allowed": false,
+    "d0_complete": false,
+    "full_q1r4_frozen": false,
+    "full_q1r4_run_allowed": false,
+    "new_preregistration_draft_allowed": false,
+    "requires_human_or_pro_ruling": true,
+    "status": "STOP_FULL_Q1R4__DEFINE_INTENDED_ASYMPTOTIC_MODEL_BEFORE_REFINEMENT"
+  },
+  "diagnostic_protocol_id": "Q1R4_D0_SOURCE_SEPARATION_AND_RESOURCE_PROBE_V1",
+  "gate_pass": false,
+  "identity": {
+    "complete": true,
+    "geometry_execution_identity": {
+      "formal_source_tree_end": {
+        "absolute_root_stored": false,
+        "algorithm": "sha256",
+        "available": true,
+        "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+        "file_count": 58,
+        "reason": null,
+        "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+        "total_bytes": 1004894,
+        "unit": null,
+        "value": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8"
+      },
+      "formal_source_tree_start": {
+        "absolute_root_stored": false,
+        "algorithm": "sha256",
+        "available": true,
+        "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+        "file_count": 58,
+        "reason": null,
+        "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+        "total_bytes": 1004894,
+        "unit": null,
+        "value": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8"
+      },
+      "gates": {
+        "formal_source_tree_available": true,
+        "formal_source_tree_stable": true,
+        "git_head_stable": true,
+        "main_branch": true,
+        "worktree_clean_start_and_end": true
+      },
+      "git_end": {
+        "branch": "main",
+        "head": "73d3b6cf485b969c2531966a29922a6f5029fe90",
+        "porcelain": [],
+        "worktree_clean": true
+      },
+      "git_start": {
+        "branch": "main",
+        "head": "73d3b6cf485b969c2531966a29922a6f5029fe90",
+        "porcelain": [],
+        "worktree_clean": true
+      }
+    }
+  },
+  "inputs": {
+    "geometry_report_sha256": "f2096182271fdd09c6c686de31106427b54d685f0f4db80720f4853c6cd3df48",
+    "preregistration_sha256": "4caa382d3c06da2d59ff5d8a114340a133cf5248f6022b88d69f5e3b2952711e"
+  },
+  "interpretation": {
+    "geometry_attribution_bounded": false,
+    "geometry_proven_as_cause_of_q1r3_failure": false,
+    "posthoc_threshold_change_allowed": false
+  },
+  "resource_probe": {
+    "executed": false,
+    "reason": "D0-A preregistered geometry gate failed first"
+  },
+  "schema_version": 1,
+  "source_separation": {
+    "executed": false,
+    "reason": "D0-A preregistered geometry gate failed first"
+  },
+  "static_geometry": {
+    "assessment": {
+      "gates": {
+        "individual_geometry_errors_bounded": false,
+        "pairwise_geometry_error_jumps_bounded": true
+      },
+      "individual_level_checks": {
+        "13.5": {
+          "bar_volume": true,
+          "centroid": true,
+          "second_moment": true
+        },
+        "6.0": {
+          "bar_volume": true,
+          "centroid": false,
+          "second_moment": true
+        },
+        "9.0": {
+          "bar_volume": true,
+          "centroid": true,
+          "second_moment": true
+        }
+      },
+      "pairwise_checks": {
+        "6_to_9": {
+          "maximum_jump": 0.04330885863902173,
+          "normalized_error_jumps": {
+            "bar_volume_relative": 0.0002753545728235685,
+            "centroid_over_bar_radius": 0.04330885863902173,
+            "second_moment_relative_frobenius": 0.008090183700188994
+          },
+          "pass": true
+        },
+        "9_to_13.5": {
+          "maximum_jump": 0.008265718392463643,
+          "normalized_error_jumps": {
+            "bar_volume_relative": 0.0001092676876282049,
+            "centroid_over_bar_radius": 0.005162719361953411,
+            "second_moment_relative_frobenius": 0.008265718392463643
+          },
+          "pass": true
+        }
+      },
+      "pass": false,
+      "thresholds": {
+        "bar_centroid_error_over_radius_max": 0.05,
+        "bar_second_moment_relative_frobenius_error_max": 0.05,
+        "rasterized_bar_volume_relative_error_max": 0.01,
+        "six_to_nine_or_nine_to_13p5_normalized_error_jump_max": 0.05
+      }
+    },
+    "dynamic_solver_steps": 0,
+    "executed": true,
+    "gate_pass": false,
+    "status": "Q1R4_D0_STATIC_GEOMETRY_MATERIAL_OR_UNRESOLVED"
+  },
+  "status": "Q1R4_D0_FAIL_CLOSED_AT_STATIC_GEOMETRY"
+}

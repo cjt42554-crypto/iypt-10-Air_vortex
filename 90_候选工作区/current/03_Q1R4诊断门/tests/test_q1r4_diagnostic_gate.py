@@ -17,6 +17,7 @@ if str(DIAGNOSTIC_ROOT) not in sys.path:
 from analyse_q1r4_diagnostics import (
     decide_d0,
     effect_ratio,
+    geometry_early_stop_report,
     prepare_cases,
     validate_generated_manifest,
 )
@@ -303,6 +304,40 @@ class Q1R4DiagnosticGateTests(unittest.TestCase):
 
     def test_no_campaign_q1r4_exists(self) -> None:
         self.assertFalse((DIAGNOSTIC_ROOT / "campaign_q1r4.json").exists())
+
+    def test_geometry_early_stop_never_invents_resource_or_dynamic_runs(self) -> None:
+        geometry = {
+            "gate_pass": False,
+            "status": "Q1R4_D0_STATIC_GEOMETRY_MATERIAL_OR_UNRESOLVED",
+            "dynamic_solver_steps": 0,
+            "identity": {
+                "gates": {
+                    "main_branch": True,
+                    "worktree_clean_start_and_end": True,
+                    "git_head_stable": True,
+                    "formal_source_tree_available": True,
+                    "formal_source_tree_stable": True,
+                }
+            },
+            "assessment": {
+                "pass": False,
+                "gates": {
+                    "individual_geometry_errors_bounded": False,
+                    "pairwise_geometry_error_jumps_bounded": True,
+                },
+                "individual_level_checks": {},
+                "pairwise_checks": {},
+            },
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "geometry.json"
+            path.write_text(json.dumps(geometry), encoding="utf-8")
+            report = geometry_early_stop_report(PREREGISTRATION, path)
+        self.assertEqual(report["status"], "Q1R4_D0_FAIL_CLOSED_AT_STATIC_GEOMETRY")
+        self.assertFalse(report["resource_probe"]["executed"])
+        self.assertFalse(report["source_separation"]["executed"])
+        self.assertTrue(report["decision"]["requires_human_or_pro_ruling"])
+        self.assertFalse(report["decision"]["full_q1r4_run_allowed"])
 
 
 if __name__ == "__main__":

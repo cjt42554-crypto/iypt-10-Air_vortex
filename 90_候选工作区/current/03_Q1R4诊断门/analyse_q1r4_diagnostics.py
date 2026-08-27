@@ -529,6 +529,116 @@ def decide_d0(
     }
 
 
+def geometry_early_stop_report(
+    preregistration_path: Path,
+    geometry_path: Path,
+) -> dict[str, object]:
+    """Close D0 at A without inventing absent resource or dynamic evidence."""
+
+    preregistration = _load_mapping(preregistration_path)
+    geometry = _load_mapping(geometry_path)
+    identity_gates = geometry.get("identity", {}).get("gates", {})
+    identity_complete = bool(
+        isinstance(identity_gates, Mapping)
+        and all(identity_gates.values())
+    )
+    geometry_failed = geometry.get("gate_pass") is False
+    if not geometry_failed:
+        raise ValueError("geometry early-stop report requires a failed D0-A gate")
+    return {
+        "schema_version": 1,
+        "diagnostic_protocol_id": preregistration["diagnostic_protocol_id"],
+        "status": "Q1R4_D0_FAIL_CLOSED_AT_STATIC_GEOMETRY",
+        "gate_pass": False,
+        "inputs": {
+            "preregistration_sha256": _sha256(preregistration_path),
+            "geometry_report_sha256": _sha256(geometry_path),
+        },
+        "identity": {
+            "complete": identity_complete,
+            "geometry_execution_identity": geometry.get("identity"),
+        },
+        "static_geometry": {
+            "executed": True,
+            "dynamic_solver_steps": geometry.get("dynamic_solver_steps"),
+            "gate_pass": False,
+            "status": geometry.get("status"),
+            "assessment": geometry.get("assessment"),
+        },
+        "resource_probe": {
+            "executed": False,
+            "reason": "D0-A preregistered geometry gate failed first",
+        },
+        "source_separation": {
+            "executed": False,
+            "reason": "D0-A preregistered geometry gate failed first",
+        },
+        "decision": {
+            "status": (
+                "STOP_FULL_Q1R4__DEFINE_INTENDED_ASYMPTOTIC_MODEL_BEFORE_REFINEMENT"
+            ),
+            "d0_complete": False,
+            "new_preregistration_draft_allowed": False,
+            "full_q1r4_frozen": False,
+            "full_q1r4_run_allowed": False,
+            "campaign_q1r4_creation_allowed": False,
+            "requires_human_or_pro_ruling": True,
+            "apparatus_prediction_allowed": False,
+        },
+        "interpretation": {
+            "geometry_proven_as_cause_of_q1r3_failure": False,
+            "geometry_attribution_bounded": False,
+            "posthoc_threshold_change_allowed": False,
+        },
+        "claim_boundary": {
+            "q1r4_frozen": False,
+            "full_q1r4_run_allowed": False,
+            "spatial_convergence_demonstrated": False,
+            "temporal_convergence_demonstrated": False,
+            "physical_validation_performed": False,
+            "experimental_validation_performed": False,
+            "apparatus_prediction_allowed": False,
+        },
+    }
+
+
+def geometry_early_stop_markdown(report: Mapping[str, Any]) -> str:
+    assessment = report["static_geometry"]["assessment"]
+    level_checks = assessment["individual_level_checks"]
+    pairwise = assessment["pairwise_checks"]
+    failed: list[str] = []
+    for level, checks in level_checks.items():
+        for name, passed in checks.items():
+            if not passed:
+                failed.append(f"`{level}` 层 `{name}`")
+    return f"""# Q1R4 D0 诊断门早停裁决
+
+状态：`{report['status']}`。
+
+D0-A 静态几何审计在清洁 `main` 和稳定正式源码身份下完成，动态求解步数为 `0`。预注册几何门未通过，因此按失败闭锁顺序停止；D0-B `13.5` 格 CUDA 八步资源探针和 D0-C 来源解耦均未运行。
+
+## 触发项
+
+- 未通过的单层门：{', '.join(failed)}。
+- `6→9` 最大归一化误差跳变：`{pairwise['6_to_9']['maximum_jump']:.8g}`；通过=`{pairwise['6_to_9']['pass']}`。
+- `9→13.5` 最大归一化误差跳变：`{pairwise['9_to_13.5']['maximum_jump']:.8g}`；通过=`{pairwise['9_to_13.5']['pass']}`。
+- 单层几何误差总门：`{assessment['gates']['individual_geometry_errors_bounded']}`。
+- 层间跳变总门：`{assessment['gates']['pairwise_geometry_error_jumps_bounded']}`。
+
+这只能说明预注册协议尚未把体素几何归因限制住，不能声称体素几何已经被证明是 Q1R3 空间失败的原因。阈值不能在看到结果后放宽；是否重新定义几何诊断门、采用更可控几何离散，或终止当前 HF3D 加密路径，需要人工或 Pro 另行裁决。
+
+## 未执行与结论上限
+
+- D0-B 资源探针：未执行；
+- D0-C 两个零驱动算例和固定物理宽度对照：未执行；
+- `campaign_q1r4.json`：未建立；
+- 完整 Q1R4：未冻结、未运行；
+- Q1R3 时间组：未继续；
+- 数值资格、物理验证、实验验证：均未建立；
+- 装置级预测：继续禁止。
+"""
+
+
 def _zero_drive_metrics(archive: Any) -> dict[str, object]:
     fields = archive.result.fields
     active = np.asarray(fields["active_fluid_mask_3d"], dtype=bool)
@@ -871,6 +981,23 @@ def publish_reports(
     )
 
 
+def publish_geometry_early_stop(
+    report_dir: Path,
+    geometry_path: Path,
+    report: Mapping[str, Any],
+) -> None:
+    geometry = _load_mapping(geometry_path)
+    report_dir.mkdir(parents=True, exist_ok=True)
+    _write_json(report_dir / "static_geometry_audit.json", geometry)
+    (report_dir / "static_geometry_audit.md").write_text(
+        geometry_markdown(geometry), encoding="utf-8"
+    )
+    _write_json(report_dir / "d0_diagnostic_decision.json", report)
+    (report_dir / "d0_diagnostic_decision.md").write_text(
+        geometry_early_stop_markdown(report), encoding="utf-8"
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -909,6 +1036,15 @@ def main() -> int:
     analyse_parser.add_argument("--resource-probe", type=Path, required=True)
     analyse_parser.add_argument("--runs", type=Path, required=True)
     analyse_parser.add_argument("--report-dir", type=Path, default=HERE / "reports")
+
+    stop_parser = subparsers.add_parser("finalize-geometry-stop")
+    stop_parser.add_argument(
+        "--preregistration",
+        type=Path,
+        default=HERE / "q1r4_diagnostic_preregistration.json",
+    )
+    stop_parser.add_argument("--geometry", type=Path, required=True)
+    stop_parser.add_argument("--report-dir", type=Path, default=HERE / "reports")
 
     args = parser.parse_args()
     if args.command == "prepare":
@@ -955,6 +1091,24 @@ def main() -> int:
             )
         )
         return 0 if combined["gate_pass"] else 1
+    if args.command == "finalize-geometry-stop":
+        report = geometry_early_stop_report(
+            args.preregistration.resolve(),
+            args.geometry.resolve(),
+        )
+        publish_geometry_early_stop(
+            args.report_dir.resolve(),
+            args.geometry.resolve(),
+            report,
+        )
+        print(
+            json.dumps(
+                {"status": report["status"], "gate_pass": report["gate_pass"]},
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+        )
+        return 1
     raise AssertionError(args.command)
 
 

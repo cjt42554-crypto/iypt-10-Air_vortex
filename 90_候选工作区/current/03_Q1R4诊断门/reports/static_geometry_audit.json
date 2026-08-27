@@ -1,0 +1,433 @@
+{
+  "assessment": {
+    "gates": {
+      "individual_geometry_errors_bounded": false,
+      "pairwise_geometry_error_jumps_bounded": true
+    },
+    "individual_level_checks": {
+      "13.5": {
+        "bar_volume": true,
+        "centroid": true,
+        "second_moment": true
+      },
+      "6.0": {
+        "bar_volume": true,
+        "centroid": false,
+        "second_moment": true
+      },
+      "9.0": {
+        "bar_volume": true,
+        "centroid": true,
+        "second_moment": true
+      }
+    },
+    "pairwise_checks": {
+      "6_to_9": {
+        "maximum_jump": 0.04330885863902173,
+        "normalized_error_jumps": {
+          "bar_volume_relative": 0.0002753545728235685,
+          "centroid_over_bar_radius": 0.04330885863902173,
+          "second_moment_relative_frobenius": 0.008090183700188994
+        },
+        "pass": true
+      },
+      "9_to_13.5": {
+        "maximum_jump": 0.008265718392463643,
+        "normalized_error_jumps": {
+          "bar_volume_relative": 0.0001092676876282049,
+          "centroid_over_bar_radius": 0.005162719361953411,
+          "second_moment_relative_frobenius": 0.008265718392463643
+        },
+        "pass": true
+      }
+    },
+    "pass": false,
+    "thresholds": {
+      "bar_centroid_error_over_radius_max": 0.05,
+      "bar_second_moment_relative_frobenius_error_max": 0.05,
+      "rasterized_bar_volume_relative_error_max": 0.01,
+      "six_to_nine_or_nine_to_13p5_normalized_error_jump_max": 0.05
+    }
+  },
+  "claim_boundary": {
+    "geometry_audit_allows_apparatus_prediction": false,
+    "geometry_audit_establishes_numerical_convergence": false,
+    "geometry_audit_validates_physics": false
+  },
+  "diagnostic_protocol_id": "Q1R4_D0_SOURCE_SEPARATION_AND_RESOURCE_PROBE_V1",
+  "dynamic_solver_steps": 0,
+  "gate_pass": false,
+  "identity": {
+    "formal_source_tree_end": {
+      "absolute_root_stored": false,
+      "algorithm": "sha256",
+      "available": true,
+      "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+      "file_count": 58,
+      "reason": null,
+      "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+      "total_bytes": 1004894,
+      "unit": null,
+      "value": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8"
+    },
+    "formal_source_tree_start": {
+      "absolute_root_stored": false,
+      "algorithm": "sha256",
+      "available": true,
+      "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+      "file_count": 58,
+      "reason": null,
+      "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+      "total_bytes": 1004894,
+      "unit": null,
+      "value": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8"
+    },
+    "gates": {
+      "formal_source_tree_available": true,
+      "formal_source_tree_stable": true,
+      "git_head_stable": true,
+      "main_branch": true,
+      "worktree_clean_start_and_end": true
+    },
+    "git_end": {
+      "branch": "main",
+      "head": "73d3b6cf485b969c2531966a29922a6f5029fe90",
+      "porcelain": [],
+      "worktree_clean": true
+    },
+    "git_start": {
+      "branch": "main",
+      "head": "73d3b6cf485b969c2531966a29922a6f5029fe90",
+      "porcelain": [],
+      "worktree_clean": true
+    }
+  },
+  "inputs": {
+    "base_config": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/01_HF3D数值资格/generated_q1r3/space_L2_9cells.json",
+    "preregistration": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/03_Q1R4诊断门/q1r4_diagnostic_preregistration.json"
+  },
+  "levels": [
+    {
+      "active_cell_count": 152474,
+      "active_fluid_volume_error_m3": 1.003381338249244e-07,
+      "active_fluid_volume_relative_error": 0.00019745913369998794,
+      "bar_cell_count": 238,
+      "bar_mask_centroid_error_norm_m": 0.00017593267084070342,
+      "bar_mask_centroid_error_xyz_m": [
+        -8.823529411764559e-05,
+        -0.00013235294117646925,
+        7.516339869280755e-05
+      ],
+      "bar_mask_centroid_xyz_m": [
+        -8.823529411764559e-05,
+        -0.00013235294117646925,
+        0.004575163398692808
+      ],
+      "bar_mask_second_moment_tensor_m5": [
+        [
+          5.0831249999999947e-11,
+          1.5749999999999933e-13,
+          -1.5166666666666643e-13
+        ],
+        [
+          1.5749999999999933e-13,
+          1.736250000000002e-12,
+          -2.2749999999999923e-13
+        ],
+        [
+          -1.5166666666666643e-13,
+          -2.2749999999999923e-13,
+          1.684570187471427e-12
+        ]
+      ],
+      "bar_second_moment_relative_frobenius_error": 0.026069582186057975,
+      "cells_per_bar_diameter": 4.0,
+      "exact_active_fluid_volume_m3": 0.0005081463285328418,
+      "exact_bar_second_moment_tensor_m5": [
+        [
+          5.2115252211870355e-11,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.730389233597258e-12,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.730389233597258e-12
+        ]
+      ],
+      "exact_bar_volume_m3": 7.916813487046278e-07,
+      "grid": [
+        60,
+        60,
+        54
+      ],
+      "grid_spacing_xyz_m": [
+        0.0015,
+        0.0015,
+        0.0014814814814814814
+      ],
+      "maximum_spacing_m": 0.0015,
+      "minimum_spacing_m": 0.0014814814814814814,
+      "normalized_geometry_errors": {
+        "bar_volume_relative": 0.002086678726748568,
+        "centroid_over_bar_radius": 0.0586442236135678,
+        "second_moment_relative_frobenius": 0.026069582186057975
+      },
+      "rasterized_active_fluid_volume_m3": 0.0005082466666666667,
+      "rasterized_bar_volume_m3": 7.933333333333334e-07,
+      "rasterized_bar_volume_relative_error": 0.002086678726748568,
+      "true_bar_centroid_xyz_m": [
+        0.0,
+        0.0,
+        0.0045000000000000005
+      ]
+    },
+    {
+      "active_cell_count": 509288,
+      "active_fluid_volume_error_m3": 1.14167146715821e-06,
+      "active_fluid_volume_relative_error": 0.0022467376089374286,
+      "bar_cell_count": 792,
+      "bar_mask_centroid_error_norm_m": 0.00018209854926584966,
+      "bar_mask_centroid_error_xyz_m": [
+        -0.00010101010101010005,
+        1.94499298821642e-18,
+        0.00015151515151514208
+      ],
+      "bar_mask_centroid_xyz_m": [
+        -0.00010101010101010005,
+        1.94499298821642e-18,
+        0.004651515151515143
+      ],
+      "bar_mask_second_moment_tensor_m5": [
+        [
+          5.251799999999992e-11,
+          1.5246593050577408e-29,
+          2.4000000000000044e-13
+        ],
+        [
+          1.5246593050577408e-29,
+          1.7259999999999967e-12,
+          -1.2705494208814507e-30
+        ],
+        [
+          2.4000000000000044e-13,
+          -1.2705494208814507e-30,
+          1.7360000000000041e-12
+        ]
+      ],
+      "bar_second_moment_relative_frobenius_error": 0.01009611686851437,
+      "cells_per_bar_diameter": 6.0,
+      "exact_active_fluid_volume_m3": 0.0005081463285328418,
+      "exact_bar_second_moment_tensor_m5": [
+        [
+          5.2115252211870355e-11,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.730389233597258e-12,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.730389233597258e-12
+        ]
+      ],
+      "exact_bar_volume_m3": 7.916813487046278e-07,
+      "grid": [
+        90,
+        90,
+        80
+      ],
+      "grid_spacing_xyz_m": [
+        0.001,
+        0.001,
+        0.001
+      ],
+      "maximum_spacing_m": 0.001,
+      "minimum_spacing_m": 0.001,
+      "normalized_geometry_errors": {
+        "bar_volume_relative": 0.0004024994347707572,
+        "centroid_over_bar_radius": 0.06069951642194989,
+        "second_moment_relative_frobenius": 0.01009611686851437
+      },
+      "rasterized_active_fluid_volume_m3": 0.000509288,
+      "rasterized_bar_volume_m3": 7.92e-07,
+      "rasterized_bar_volume_relative_error": 0.0004024994347707572,
+      "true_bar_centroid_xyz_m": [
+        0.0,
+        0.0,
+        0.0045000000000000005
+      ]
+    },
+    {
+      "active_cell_count": 1741608,
+      "active_fluid_volume_error_m3": 3.248652387844884e-07,
+      "active_fluid_volume_relative_error": 0.0006393143481375999,
+      "bar_cell_count": 2712,
+      "bar_mask_centroid_error_norm_m": 5.2171973348784485e-05,
+      "bar_mask_centroid_error_xyz_m": [
+        -3.1233732431025224e-05,
+        0.0,
+        4.178957718777975e-05
+      ],
+      "bar_mask_centroid_xyz_m": [
+        -3.1233732431025224e-05,
+        0.0,
+        0.00454178957718778
+      ],
+      "bar_mask_second_moment_tensor_m5": [
+        [
+          5.2104888034334403e-11,
+          1.5826913201291423e-29,
+          7.006920415224914e-14
+        ],
+        [
+          1.5826913201291423e-29,
+          1.7201826720600163e-12,
+          2.571873395209856e-29
+        ],
+        [
+          7.006920415224914e-14,
+          2.571873395209856e-29,
+          1.7607482698961974e-12
+        ]
+      ],
+      "bar_second_moment_relative_frobenius_error": 0.002005933168325375,
+      "cells_per_bar_diameter": 9.0,
+      "exact_active_fluid_volume_m3": 0.0005081463285328418,
+      "exact_bar_second_moment_tensor_m5": [
+        [
+          5.2115252211870355e-11,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.730389233597258e-12,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.730389233597258e-12
+        ]
+      ],
+      "exact_bar_volume_m3": 7.916813487046278e-07,
+      "grid": [
+        136,
+        136,
+        120
+      ],
+      "grid_spacing_xyz_m": [
+        0.0006617647058823529,
+        0.0006617647058823529,
+        0.0006666666666666666
+      ],
+      "maximum_spacing_m": 0.0006666666666666666,
+      "minimum_spacing_m": 0.0006617647058823529,
+      "normalized_geometry_errors": {
+        "bar_volume_relative": 0.00012714486194718874,
+        "centroid_over_bar_radius": 0.01739065778292816,
+        "second_moment_relative_frobenius": 0.002005933168325375
+      },
+      "rasterized_active_fluid_volume_m3": 0.0005084711937716263,
+      "rasterized_bar_volume_m3": 7.91782006920415e-07,
+      "rasterized_bar_volume_relative_error": 0.00012714486194718874,
+      "true_bar_centroid_xyz_m": [
+        0.0,
+        0.0,
+        0.0045000000000000005
+      ]
+    },
+    {
+      "active_cell_count": 5874688,
+      "active_fluid_volume_error_m3": 4.4674927365774206e-08,
+      "active_fluid_volume_relative_error": 8.791744593484126e-05,
+      "bar_cell_count": 9152,
+      "bar_mask_centroid_error_norm_m": 3.668381526292425e-05,
+      "bar_mask_centroid_error_xyz_m": [
+        -3.5093582887698135e-05,
+        -2.4117811962771954e-18,
+        -1.0683760683795514e-05
+      ],
+      "bar_mask_centroid_xyz_m": [
+        -3.5093582887698135e-05,
+        -2.4117811962771954e-18,
+        0.004489316239316205
+      ],
+      "bar_mask_second_moment_tensor_m5": [
+        [
+          5.158033608314084e-11,
+          -6.752816299217673e-28,
+          2.006581179184481e-14
+        ],
+        [
+          -6.752816299217673e-28,
+          1.7458034506291874e-12,
+          3.2972735836023795e-30
+        ],
+        [
+          2.006581179184481e-14,
+          3.2972735836023795e-30,
+          1.7271989405784118e-12
+        ]
+      ],
+      "bar_second_moment_relative_frobenius_error": 0.010271651560789017,
+      "cells_per_bar_diameter": 13.5,
+      "exact_active_fluid_volume_m3": 0.0005081463285328418,
+      "exact_bar_second_moment_tensor_m5": [
+        [
+          5.2115252211870355e-11,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.730389233597258e-12,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.730389233597258e-12
+        ]
+      ],
+      "exact_bar_volume_m3": 7.916813487046278e-07,
+      "grid": [
+        204,
+        204,
+        180
+      ],
+      "grid_spacing_xyz_m": [
+        0.00044117647058823526,
+        0.00044117647058823526,
+        0.00044444444444444447
+      ],
+      "maximum_spacing_m": 0.00044444444444444447,
+      "minimum_spacing_m": 0.00044117647058823526,
+      "normalized_geometry_errors": {
+        "bar_volume_relative": 1.787717431898384e-05,
+        "centroid_over_bar_radius": 0.012227938420974749,
+        "second_moment_relative_frobenius": 0.010271651560789017
+      },
+      "rasterized_active_fluid_volume_m3": 0.0005081910034602076,
+      "rasterized_bar_volume_m3": 7.916955017301037e-07,
+      "rasterized_bar_volume_relative_error": 1.787717431898384e-05,
+      "true_bar_centroid_xyz_m": [
+        0.0,
+        0.0,
+        0.0045000000000000005
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "status": "Q1R4_D0_STATIC_GEOMETRY_MATERIAL_OR_UNRESOLVED"
+}
