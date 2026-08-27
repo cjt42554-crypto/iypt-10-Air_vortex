@@ -1,0 +1,157 @@
+{
+  "architecture": {
+    "compatibility_entry": "02_模拟程序/src/airvortex/backends/high_fidelity_3d.py",
+    "compatibility_entry_lines_after": 657,
+    "compatibility_entry_lines_before": 2054,
+    "internal_modules": [
+      "02_模拟程序/src/airvortex/hf3d/types.py",
+      "02_模拟程序/src/airvortex/hf3d/drive.py",
+      "02_模拟程序/src/airvortex/hf3d/pressure.py",
+      "02_模拟程序/src/airvortex/hf3d/timestep.py",
+      "02_模拟程序/src/airvortex/hf3d/stepper.py",
+      "02_模拟程序/src/airvortex/hf3d/events.py",
+      "02_模拟程序/src/airvortex/hf3d/recording.py"
+    ],
+    "legacy_and_new_dual_active_implementation": false,
+    "runtime_fallback_or_feature_switch": false
+  },
+  "commits": [
+    {
+      "message": "test: freeze HF3D refactor characterization baseline",
+      "sha": "3f09a4bac440687bc9f6f8585c3a922f60de8c9d"
+    },
+    {
+      "message": "refactor: extract HF3D types drive and pressure selection",
+      "sha": "4f7f69f81263815bbcdc25215a963ab2e646de3b"
+    },
+    {
+      "message": "refactor: extract HF3D timestep controller and transactional stepper",
+      "sha": "3327d3c858092a1de6150b35a7f73d9a612a9d26"
+    },
+    {
+      "message": "refactor: extract HF3D events recording and result assembly",
+      "sha": "f9ba2fc648b3495c8144ec292ecf35e18d36201b"
+    },
+    {
+      "message": "test: verify strict pre-post HF3D equivalence",
+      "sha": "492780ddb520ba9f35dd589c7a122f2c20adeb96"
+    }
+  ],
+  "environment": {
+    "cupy": "14.2.0",
+    "cuda_device": "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "cuda_driver": "580.173.02",
+    "cuda_memory_mib": 8151,
+    "numpy": "2.5.2",
+    "python": "3.12.3",
+    "scipy": "1.17.1"
+  },
+  "equivalence": {
+    "allowed_difference_whitelist": [
+      "capture_label",
+      "array_archive",
+      "provenance.git_head",
+      "provenance.source_tree"
+    ],
+    "cpu": {
+      "arrays_compared": 88,
+      "before_array_archive_sha256": "0fd77a759b064d16cb229b437568e3a669a3fd5383b88812fa2bd24a6da90baf",
+      "first_difference": null,
+      "report": "evidence/equivalence_cpu.json",
+      "after_array_archive_sha256": "0fd77a759b064d16cb229b437568e3a669a3fd5383b88812fa2bd24a6da90baf",
+      "status": "PASS_STRICT_ELEMENTWISE_EQUIVALENCE"
+    },
+    "cuda": {
+      "arrays_compared": 88,
+      "before_array_archive_sha256": "3902967478be3e2586b386fe6d92db2887d5b6c323f54575781d0328f78e1250",
+      "first_difference": null,
+      "report": "evidence/equivalence_cuda.json",
+      "after_array_archive_sha256": "3902967478be3e2586b386fe6d92db2887d5b6c323f54575781d0328f78e1250",
+      "status": "PASS_STRICT_ELEMENTWISE_EQUIVALENCE"
+    },
+    "compared_contract": [
+      "time_s",
+      "status",
+      "events and payloads",
+      "ordered observable and field keys",
+      "array shape and dtype",
+      "all observable and field array values",
+      "units and numerical metadata",
+      "Progress sequence",
+      "per-step diagnostics",
+      "final full three-dimensional fields and masks"
+    ]
+  },
+  "formal_source": {
+    "after_file_count": 58,
+    "after_sha256": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8",
+    "before_file_count": 50,
+    "before_sha256": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
+    "identity_change_reason": "authorized structural module extraction"
+  },
+  "protected_scope": {
+    "formal_theory_changed": false,
+    "q1_to_q1r3_frozen_evidence_changed": false,
+    "q1r3_archives_recomputed": false,
+    "q1r4_frozen_or_run": false
+  },
+  "remote_pre_push_check": {
+    "concurrent_remote_commits_detected": false,
+    "local_ahead_count_before_completion_docs": 5,
+    "origin_main": "ce96932b5a122fa284922bebc84db9df92ef6c36",
+    "status": "READY_FOR_FAST_FORWARD_PUSH"
+  },
+  "scientific_status": {
+    "apparatus_prediction": "NO-GO",
+    "complete_numerical_qualification": "NO-GO",
+    "physical_or_experimental_validation": "NOT_EXECUTED",
+    "q1r3": "Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED",
+    "q1r4": "NOT_FROZEN_NOT_RUN"
+  },
+  "status": "PASS_HF3D_BOUNDED_STRUCTURAL_REFACTOR__CPU_CUDA_STRICT_EQUIVALENCE",
+  "tests": [
+    {
+      "command": "cd 02_模拟程序 && PYTHONPATH=src ../90_候选工作区/current/01_HF3D数值资格/.venv-gpu/bin/python -Werror -m unittest discover -s tests -v",
+      "exit_code": 0,
+      "result": "187/187 passed including 5 CUDA tests"
+    },
+    {
+      "command": "cd 02_模拟程序 && PYTHONPATH=src ../90_候选工作区/current/01_HF3D数值资格/.venv-gpu/bin/python -m airvortex.cli self-check --pretty",
+      "exit_code": 0,
+      "result": "6/6 passed"
+    },
+    {
+      "command": "cd 02_模拟程序 && ../90_候选工作区/current/01_HF3D数值资格/.venv-gpu/bin/python -m compileall -q src tests",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "cd 90_候选工作区/current/01_HF3D数值资格 && .venv-gpu/bin/python -Werror -m unittest discover -s tests -v",
+      "exit_code": 0,
+      "result": "35/35 passed"
+    },
+    {
+      "command": "cd 90_候选工作区/current/02_HF3D纯结构限界重构 && ../01_HF3D数值资格/.venv-gpu/bin/python -Werror -m unittest discover -s tests -v",
+      "exit_code": 0,
+      "result": "5/5 comparator failure-closure tests passed"
+    },
+    {
+      "command": "ruff check --select F src/airvortex/backends/high_fidelity_3d.py src/airvortex/hf3d tests/test_hf3d_refactor.py",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "compare_baseline.py pre_cpu post_cpu and pre_cuda post_cuda",
+      "exit_code": 0,
+      "result": "CPU and CUDA each PASS with 88 arrays compared"
+    }
+  ],
+  "unexecuted": [
+    "Q1R3 large-archive recomputation",
+    "Q1R4 resource probe, freeze, or run",
+    "new grid or time convergence campaign",
+    "physical calibration",
+    "experimental validation",
+    "apparatus-level prediction"
+  ]
+}

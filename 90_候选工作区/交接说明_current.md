@@ -2,43 +2,62 @@
 
 ## 当前唯一待续任务
 
-用户已裁决：在冻结或运行 Q1R4 之前，先完成一次 HF3D 纯结构限界重构。
+HF3D 纯结构限界重构已经完成并通过 CPU/CUDA 严格等价验收。当前没有待续的重构实现工作。
 
-执行入口：
+下一项仍是 Q1R4 的人工科学与资源裁决；在当前用户明确选择路径并批准新预注册前，不得自动冻结、启动、补跑或拼接任何 Q1R4 算例。较低成本且保持当前模型身份的优先候选仍是整组重跑 6/9/13.5 格/磁子直径，但必须先独立完成资源探针和更小共同登记步长设计，旧 Q1R3 的 6/9 层不得复用为新三层中的前两层。
 
-`90_候选工作区/current/02_HF3D纯结构限界重构规划.md`
+## 本轮完成状态
 
-Codex 应先读取顶层 `AGENTS.md`，再完整读取上述规划，并按规划连续执行、验证、提交和推送，不需要另行等待科学路径裁决。
+结论为：
 
-本交接记录用户于 2026-08-27 作出的明确授权：允许为本次限界重构修改 `02_模拟程序/**`，在 `90_候选工作区/current/02_HF3D纯结构限界重构/**` 保存基线、比较器、测试和报告，并在完成后更新 current/history。全部工作只在 `main`；本地完成全部验收门后推送远程 `main`。不得修改 `01_最终理论/**`。
+`PASS_HF3D_BOUNDED_STRUCTURAL_REFACTOR__CPU_CUDA_STRICT_EQUIVALENCE`
 
-## 必须保持不变的科学与证据边界
+正式兼容入口 `02_模拟程序/src/airvortex/backends/high_fidelity_3d.py` 从 2054 行降为 657 行，继续保留旧导入和 `HighFidelityBackend`。唯一活动实现按职责拆入 `02_模拟程序/src/airvortex/hf3d/`：
 
-Q1R3 当前状态仍为：
+- `types.py`：状态、诊断、异常和 limiter 编码；
+- `drive.py`：实际转速、右斜率和角度积分；
+- `pressure.py`：CPU/CUDA 选择和禁止中途静默回退；
+- `timestep.py`：有类型的时间步提案和 retry；
+- `stepper.py`：事务式 trial step；
+- `events.py`：拓扑事件状态机；
+- `recording.py`：帧、逐步诊断、alias、单位和结果组装。
+
+没有保留旧、新两套活动 stepper、recorder 或 event tracker；没有 monkey patch、运行时 fallback 或临时功能开关。
+
+## 身份与等价证据
+
+- 重构前捕获 HEAD：`ce96932b5a122fa284922bebc84db9df92ef6c36`；
+- 重构前正式源码树：`03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010`；
+- 重构实现捕获 HEAD：`f9ba2fc648b3495c8144ec292ecf35e18d36201b`；
+- 重构后正式源码树：`dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8`；
+- CPU 严格比较：88/88 数组逐元素相同；
+- CUDA 严格比较：88/88 数组逐元素相同；
+- CPU 重构前后 NPZ SHA-256 同为 `0fd77a759b064d16cb229b437568e3a669a3fd5383b88812fa2bd24a6da90baf`；
+- CUDA 重构前后 NPZ SHA-256 同为 `3902967478be3e2586b386fe6d92db2887d5b6c323f54575781d0328f78e1250`。
+
+允许差异只有捕获标签、数组归档文件名、Git HEAD 和正式源码树身份。status、事件及 payload、键与顺序、shape、dtype、全部数组、单位、数值 metadata、Progress、逐步诊断和最终完整三维场均相同。
+
+必要入口：
+
+- `90_候选工作区/current/02_HF3D纯结构限界重构/completion_report.json`；
+- `90_候选工作区/current/02_HF3D纯结构限界重构/completion_report.md`；
+- `90_候选工作区/current/02_HF3D纯结构限界重构/evidence/equivalence_cpu.*`；
+- `90_候选工作区/current/02_HF3D纯结构限界重构/evidence/equivalence_cuda.*`。
+
+## 最终验证
+
+- 正式完整测试 187/187 通过，其中 5 项 CUDA 测试实际执行；
+- 正式 self-check 6/6 通过；
+- Q1 至 Q1R3 候选资格测试 35/35 通过；
+- 比较器失败闭锁测试 5/5 通过；
+- `compileall`、严格 JSON、Pandoc Markdown、未用导入和 Git 空白检查通过。
+
+## 科学与保护边界
+
+`01_最终理论/**` 未修改。Q1、Q1R、Q1R2、Q1R3 的冻结配置、报告、裁决器、历史补丁、证据身份和本地大型归档均未修改。旧 Q1R3 证据继续绑定重构前源码树，不能改绑到新源码。
+
+Q1R3 仍为：
 
 `Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED`
 
-- 六个必需平滑量均未通过空间收敛门；
-- Q1R3 时间中层和细层未启动，时间收敛为 `NOT_EVALUATED`；
-- 完整数值资格和装置级预测均为 `NO-GO`；
-- 本次重构不是对不收敛的数值或物理修复，不得改变、覆盖或重新绑定 Q1/Q1R/Q1R2/Q1R3 的冻结配置、报告、裁决器、归档身份和历史结论；
-- 旧 Q1R3 证据继续绑定正式源码树 SHA-256 `03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010`。
-
-## 核心验收边界
-
-1. 先建立重构前 characterization baseline，再移动正式源码；当前基线测试若失败则失败闭锁，不得把既有失败混入重构。
-2. 连续/离散模型、算子顺序、配置 schema、时间步控制、CPU/CUDA 选择、事件、输出键、单位、alias、质量门和异常载荷均不得改变。
-3. `high_fidelity_3d.py` 应成为兼容入口和运行编排层；状态类型、drive、pressure、timestep、transactional stepper、events、recording/result assembly 按规划拆分到内部模块。
-4. 不得保留旧、新两套活动实现，不得使用 monkey patch、运行时 fallback 或临时开关绕过等价性。
-5. CPU 固定基线的全部数值数组和结构必须严格等价；同一 CUDA 环境可用时 CUDA 路径也优先要求逐元素等价。仅 Git/source identity、时间戳和墙钟等明确白名单字段允许不同。
-6. 非白名单差异必须定位首个差异步并修正或回退；不得自行放宽容差、门槛或比较标准。
-7. 完成后更新交接并停止；不得自动冻结、启动或补跑 Q1R4。
-
-## 完成后应留下的证据
-
-- 重构前后 HEAD 与正式源码树身份；
-- characterization baseline、严格比较器和等价性报告；
-- 正式完整测试、self-check、编译、候选资格测试、新增测试及 CUDA 可用时相关测试的实际命令和结果；
-- 所有修改路径与提交 SHA；
-- 允许差异白名单、未执行验证和剩余限制；
-- 远程 `main` 已包含最终提交且未覆盖并发修改的确认。
+完整数值资格、物理校准、实验验证和装置级预测仍为 `NO-GO` 或 `NOT_EXECUTED`。本轮没有冻结或运行 Q1R4。

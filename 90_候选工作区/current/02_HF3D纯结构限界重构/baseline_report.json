@@ -38,17 +38,17 @@
   "status": "PASS_BASELINE_READY_FOR_REFACTOR",
   "tests": [
     {
-      "command": "cd 02_模拟程序 && PYTHONPATH=src .venv-gpu/bin/python -Werror -m unittest discover -s tests -v",
+      "command": "cd 02_模拟程序 && PYTHONPATH=src ../90_候选工作区/current/01_HF3D数值资格/.venv-gpu/bin/python -Werror -m unittest discover -s tests -v",
       "exit_code": 0,
       "result": "181/181 passed including 5 CUDA tests"
     },
     {
-      "command": "cd 02_模拟程序 && PYTHONPATH=src .venv-gpu/bin/python -m airvortex.cli self-check --pretty",
+      "command": "cd 02_模拟程序 && PYTHONPATH=src ../90_候选工作区/current/01_HF3D数值资格/.venv-gpu/bin/python -m airvortex.cli self-check --pretty",
       "exit_code": 0,
       "result": "6/6 passed"
     },
     {
-      "command": "cd 02_模拟程序 && .venv-gpu/bin/python -m compileall -q src tests",
+      "command": "cd 02_模拟程序 && ../90_候选工作区/current/01_HF3D数值资格/.venv-gpu/bin/python -m compileall -q src tests",
       "exit_code": 0,
       "result": "PASS"
     },
@@ -58,7 +58,7 @@
       "result": "35/35 passed"
     },
     {
-      "command": "cd 90_候选工作区/current/02_HF3D纯结构限界重构 && .venv-gpu/bin/python -Werror -m unittest discover -s tests -v",
+      "command": "cd 90_候选工作区/current/02_HF3D纯结构限界重构 && ../01_HF3D数值资格/.venv-gpu/bin/python -Werror -m unittest discover -s tests -v",
       "exit_code": 0,
       "result": "5/5 comparator failure-closure tests passed"
     }
