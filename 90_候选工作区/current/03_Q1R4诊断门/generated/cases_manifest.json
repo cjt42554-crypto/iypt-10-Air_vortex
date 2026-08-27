@@ -1,0 +1,93 @@
+{
+  "cases": {
+    "fixed_physical_9cells": {
+      "config_canonical_sha256": "f014947189447ffc917b1216253861b3e8bfd6d5a920349bfd58aa0bfa68dd54",
+      "config_file": "fixed_physical_9cells.json",
+      "config_file_sha256": "c0ba491da45120a334ee62f120e6ce4144ec2ea7709f1164f029905711f1acd6",
+      "diagnostic_only": true,
+      "duration_s": 0.005,
+      "grid": [
+        136,
+        136,
+        120
+      ],
+      "output_interval_s": 0.001,
+      "pressure_solver_device": "cuda"
+    },
+    "resource_probe_13p5": {
+      "config_canonical_sha256": "348bf42a2420fdee90a7595f41dac1331a7e8b91516945f60ef1ff9d64858cbf",
+      "config_file": "resource_probe_13p5.json",
+      "config_file_sha256": "a2f1c065983af37d962d6e5efdbbfaf3185a85ac6e90c4a60d422af2b92e2c09",
+      "diagnostic_only": true,
+      "duration_s": 0.005,
+      "grid": [
+        204,
+        204,
+        180
+      ],
+      "output_interval_s": 0.001,
+      "pressure_solver_device": "cuda"
+    },
+    "zero_drive_6cells": {
+      "config_canonical_sha256": "efc4a557a00e1b9fc3ce7235e00c516c1b94cfed27ec062944f29c7034a4b58b",
+      "config_file": "zero_drive_6cells.json",
+      "config_file_sha256": "c6d5962be6adf5128f9e78ee8e0c8c79ea4e2076af94d1b9518d4e40d70fec94",
+      "diagnostic_only": true,
+      "duration_s": 0.005,
+      "grid": [
+        90,
+        90,
+        80
+      ],
+      "output_interval_s": 0.001,
+      "pressure_solver_device": "cuda"
+    },
+    "zero_drive_9cells": {
+      "config_canonical_sha256": "dfbb3b7e94494e92a75391120032dda6db3fdd07d9128922fb37793c5754dc27",
+      "config_file": "zero_drive_9cells.json",
+      "config_file_sha256": "ba8d6f31dd943bf15cb8d1b0454c9035e7a84fc9ad38c27e5d2e8007df8b568d",
+      "diagnostic_only": true,
+      "duration_s": 0.005,
+      "grid": [
+        136,
+        136,
+        120
+      ],
+      "output_interval_s": 0.001,
+      "pressure_solver_device": "cuda"
+    }
+  },
+  "claim_boundary": {
+    "allows_apparatus_prediction": false,
+    "allows_full_q1r4_run": false,
+    "freezes_q1r4": false,
+    "is_campaign_q1r4": false
+  },
+  "decision_id": "Q1R4_NOT_FROZEN__D0_DIAGNOSTIC_GATE_SELECTED",
+  "diagnostic_protocol_id": "Q1R4_D0_SOURCE_SEPARATION_AND_RESOURCE_PROBE_V1",
+  "formal_source_tree_at_generation": {
+    "absolute_root_stored": false,
+    "algorithm": "sha256",
+    "available": true,
+    "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+    "file_count": 58,
+    "reason": null,
+    "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+    "total_bytes": 1004894,
+    "unit": null,
+    "value": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8"
+  },
+  "preregistration_file_sha256": "4caa382d3c06da2d59ff5d8a114340a133cf5248f6022b88d69f5e3b2952711e",
+  "q1r3_forced_diagnostic_references": {
+    "nine_cells": {
+      "manifest_sha256": "99b7cf26cd5e2c50959e09af1fcfa998a34df63778297e78ee6e27d9abd78b4d",
+      "path": "90_候选工作区/current/01_HF3D数值资格/runs/q1r3/space_L2_9cells"
+    },
+    "qualification_evidence_reuse_allowed": false,
+    "six_cells": {
+      "manifest_sha256": "794b0bc63f9bec688f32f0bc71e4ca05160d3b4ffce9d0af90636ef87f6705ae",
+      "path": "90_候选工作区/current/01_HF3D数值资格/runs/q1r3/space_L1_6cells"
+    }
+  },
+  "schema_version": 1
+}

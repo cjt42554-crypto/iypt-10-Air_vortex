@@ -17,6 +17,12 @@
   },
   "d0_scope": {
     "A_static_geometry_audit": {
+      "diagnostic_boundedness_thresholds": {
+        "bar_centroid_error_over_radius_max": 0.05,
+        "bar_second_moment_relative_frobenius_error_max": 0.05,
+        "rasterized_bar_volume_relative_error_max": 0.01,
+        "six_to_nine_or_nine_to_13p5_normalized_error_jump_max": 0.05
+      },
       "dynamic_solver_run": false,
       "levels_cells_per_bar_diameter": [
         4.0,
@@ -51,6 +57,11 @@
         180
       ],
       "maximum_accepted_steps": 8,
+      "numerical_quality_thresholds": {
+        "advective_cfl_max": 0.35,
+        "pressure_relative_residual_factor_over_configured_tolerance_max": 1.05,
+        "projected_divergence_max_s_inv": 0.0001
+      },
       "required_measurements": [
         "host_rss_baseline_and_peak",
         "host_available_memory_baseline_and_minimum",
@@ -66,6 +77,31 @@
       ]
     },
     "C_source_separation": {
+      "analysis_protocol": {
+        "common_output_interval_s": 0.001,
+        "common_window_s": [
+          0.0,
+          0.005
+        ],
+        "core_smooth_observables": [
+          "funnel_depth_m",
+          "min_gap_to_bar_m",
+          "kinetic_energy_lab_j",
+          "angular_momentum_z_kg_m2_s",
+          "axisymmetry_error",
+          "liquid_mass_error_relative"
+        ],
+        "eta_denominator_epsilon_native_units": 1e-30,
+        "eta_reg_material_threshold": 0.5,
+        "eta_zero_drive_material_threshold": 0.5,
+        "material_core_observable_count_min": 2,
+        "q1r3_forced_reference_archives": {
+          "qualification_evidence_reuse_allowed": false,
+          "six_cells": "90_候选工作区/current/01_HF3D数值资格/runs/q1r3/space_L1_6cells",
+          "nine_cells": "90_候选工作区/current/01_HF3D数值资格/runs/q1r3/space_L2_9cells",
+          "role": "DIAGNOSTIC_ONLY_FORCED_CELL_PATH_REFERENCE"
+        }
+      },
       "diagnostic_only": true,
       "diagnostics": [
         "zero-drive 6/9 relevant-resolution hydrostatic/open-boundary sweep",
@@ -79,6 +115,35 @@
         "boundary_layer_cells": 2.2666666666666666,
         "interface_thickness_cells": 3.7777777777777777,
         "surface_tension_smoothing_cells": 1.1333333333333333
+      },
+      "registered_new_cases": {
+        "nine_cell_fixed_physical": {
+          "drive": "Q1R3_FORCED_DRIVE_UNCHANGED",
+          "grid": [
+            136,
+            136,
+            120
+          ],
+          "regularization_identity": "DIAGNOSTIC_ONLY_FIXED_PHYSICAL_WIDTH"
+        },
+        "nine_cell_zero_drive": {
+          "drive_initial_rpm": 0.0,
+          "drive_target_rpm": 0.0,
+          "grid": [
+            136,
+            136,
+            120
+          ]
+        },
+        "six_cell_zero_drive": {
+          "drive_initial_rpm": 0.0,
+          "drive_target_rpm": 0.0,
+          "grid": [
+            90,
+            90,
+            80
+          ]
+        }
       }
     },
     "D_conditional_decision": {
@@ -99,6 +164,7 @@
     "selected_path": "D0_SOURCE_SEPARATION_AND_RESOURCE_PROBE"
   },
   "decision_id": "Q1R4_NOT_FROZEN__D0_DIAGNOSTIC_GATE_SELECTED",
+  "diagnostic_protocol_id": "Q1R4_D0_SOURCE_SEPARATION_AND_RESOURCE_PROBE_V1",
   "evidence": {
     "extrapolation_warning": "The same-order extrapolation is a resource-decision diagnostic, not a proof of future error or convergence.",
     "next_13p5_cell_count": 7490880,
@@ -161,5 +227,5 @@
   },
   "repository": "cjt42554-crypto/iypt-10-Air_vortex",
   "reviewed_head": "9e39944c1e12052dafcfc6a2c48f2034ef37e576",
-  "schema_version": 1
+  "schema_version": 2
 }
