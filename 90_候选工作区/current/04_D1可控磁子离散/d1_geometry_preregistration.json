@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "date": "2026-08-28",
+  "repository": "cjt42554-crypto/iypt-10-Air_vortex",
+  "branch": "main",
+  "reviewed_head": "0553ba0bafbf12b6aa081885fa8b498fe40f8ad1",
+  "decision_id": "Q1R4_D0_V1_FAIL_UPHELD__D1_CONTROLLED_BAR_DISCRETISATION_SELECTED",
+  "current_status": {
+    "q1r3": "Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED",
+    "q1r4_d0_v1": "Q1R4_D0_FAIL_CLOSED_AT_STATIC_GEOMETRY",
+    "numerical_qualification": false,
+    "physical_validation": false,
+    "experimental_validation": false,
+    "apparatus_prediction_allowed": false
+  },
+  "decision": {
+    "uphold_d0_v1_failure": true,
+    "retroactive_threshold_relaxation_allowed": false,
+    "continue_d0_b_or_d0_c_under_v1_allowed": false,
+    "full_q1r4_freeze_or_run_allowed": false,
+    "formal_theory_change_allowed": false,
+    "formal_solver_change_allowed": false,
+    "selected_path": "D1_CANDIDATE_ONLY_CONTROLLED_BAR_GEOMETRY_DISCRETISATION",
+    "cut_cell_implementation_authorized_now": false,
+    "dynamic_shadow_runs_authorized_now": false
+  },
+  "source_level_finding": {
+    "current_rasterizer": "ROUND_EXACT_VOLUME_THEN_SELECT_GLOBAL_NEAREST_CELL_CENTRES_BY_STABLE_SIGNED_DISTANCE_SORT",
+    "guarantees": [
+      "bar cell count is the closest integer to exact capsule volume divided by cell volume",
+      "volume error is at most one half cell volume"
+    ],
+    "does_not_guarantee": [
+      "reflection symmetry",
+      "centroid control",
+      "tie-order invariance",
+      "floating-representation invariance",
+      "monotone geometry error with refinement"
+    ],
+    "independent_recalculation_to_reproduce_before_changes": {
+      "grid": [90, 90, 80],
+      "bar_cell_count": 792,
+      "reported_centroid_error_xyz_m": [-0.00010101010101010005, 0.0, 0.00015151515151514208],
+      "cutoff_exact_tie_cell_count": 48,
+      "cutoff_slots_selected_from_exact_tie": 8,
+      "one_ulp_down_bar_centre_z_expected_z_centroid_error_m": -0.0001515151515151515,
+      "one_ulp_down_expected_mask_symmetric_difference_cells": 80,
+      "reversed_equal_distance_enumeration_expected_x_centroid_error_m": 0.000101010101010101,
+      "reversed_equal_distance_enumeration_expected_mask_symmetric_difference_cells": 16,
+      "claim_boundary": "Static source-derived conditioning checks only; they do not prove that the rasterizer caused the Q1R3 dynamic convergence failure."
+    }
+  },
+  "d1_scope": {
+    "A0_reproduce_current_conditioning": {
+      "required": true,
+      "formal_source_import_required": true,
+      "dynamic_solver_steps": 0,
+      "stop_on_mismatch": true,
+      "required_variants": [
+        "nominal bar centre",
+        "bar centre z moved by one IEEE-754 ULP downward",
+        "bar centre z moved by one IEEE-754 ULP upward",
+        "canonical, reversed and seeded-permuted candidate enumeration"
+      ]
+    },
+    "A1_boolean_candidate": {
+      "candidate_id": "G1_SYMMETRY_MOMENT_CONSTRAINED_BOOLEAN_MASK",
+      "location": "90_候选工作区/current/04_D1可控磁子离散/",
+      "formal_source_edit": false,
+      "analytic_target": "the frozen x-aligned capsule defined by the continuum model",
+      "cell_classification": {
+        "cell_half_diagonal_m": "0.5*sqrt(dx^2+dy^2+dz^2)",
+        "mandatory_solid": "signed_distance <= -cell_half_diagonal",
+        "mandatory_fluid": "signed_distance >= +cell_half_diagonal",
+        "optimisation_band": "remaining cells only"
+      },
+      "symmetry_constraints": [
+        "for the nominal centred apparatus, x-reflected cells share one selection variable",
+        "for the nominal centred apparatus, y-reflected cells share one selection variable"
+      ],
+      "hard_gates": {
+        "rasterized_bar_volume_relative_error_max": 0.01,
+        "bar_centroid_error_over_radius_max": 0.05,
+        "bar_second_moment_relative_frobenius_error_max": 0.05,
+        "six_to_nine_or_nine_to_13p5_normalized_error_jump_max": 0.05,
+        "solid_six_connected_component_count": 1,
+        "ulp_and_enumeration_mask_hash_changes_allowed": 0
+      },
+      "lexicographic_objective": [
+        "minimise absolute bar-volume error",
+        "minimise signed-distance misclassification quadratic cost inside the optimisation band",
+        "minimise centroid error norm",
+        "minimise second-moment Frobenius error",
+        "select the lexicographically smallest canonical cell-index tuple"
+      ],
+      "forbidden": [
+        "hard-coded masks or special cases for 6, 9 or 13.5 cells per bar diameter",
+        "result-dependent threshold tuning",
+        "changing the analytic bar dimensions or centre",
+        "using dynamic observables to choose the static mask"
+      ]
+    },
+    "A2_subcell_reference": {
+      "candidate_id": "G2_ADAPTIVE_SUBCELL_CAPSULE_REFERENCE",
+      "diagnostic_only": true,
+      "formal_solver_integration_allowed": false,
+      "method": "adaptive cell subdivision with signed-distance Lipschitz inside/outside bounds",
+      "required_uncertainty_bounds": {
+        "global_bar_volume_relative_interval_width_max": 1e-05,
+        "centroid_over_radius_interval_width_max": 1e-05,
+        "second_moment_relative_interval_width_max": 0.0001
+      }
+    },
+    "A3_static_robustness": {
+      "nominal_levels_cells_per_bar_diameter": [4.0, 6.0, 9.0, 13.5],
+      "hard_gate_levels_cells_per_bar_diameter": [6.0, 9.0, 13.5],
+      "phase_sweep_levels_cells_per_bar_diameter": [6.0, 9.0],
+      "phase_offsets_in_cell_units_each_axis": [-0.49, 0.0, 0.49],
+      "required_outputs": [
+        "strict JSON and Markdown reports",
+        "mask SHA-256",
+        "cell count and volume error",
+        "centroid vector and normalized norm",
+        "second-moment tensor and relative Frobenius error",
+        "six-connectivity component count",
+        "G1 versus G2 weighted symmetric-difference volume",
+        "nominal and phase-sweep gate tables"
+      ]
+    },
+    "A4_stop_point": {
+      "after_static_report": "STOP_FOR_PRO_REVIEW",
+      "static_pass_does_not_authorize": [
+        "formal solver promotion",
+        "D0-B CUDA resource probe",
+        "D0-C dynamic source separation",
+        "full Q1R4",
+        "reuse of Q1R3 archives as evidence for the new geometry identity"
+      ]
+    }
+  },
+  "conditional_next_step": {
+    "if_g1_static_passes": "REQUEST_PRO_REVIEW_FOR_CANDIDATE_ONLY_G0_VS_G1_DYNAMIC_SHADOW",
+    "if_g1_static_fails": "STOP_MINIMAL_BOOLEAN_PATH_AND_PREPARE_CUT_CELL_OR_IMMERSED_BOUNDARY_ARCHITECTURE_DECISION",
+    "if_a0_does_not_reproduce": "STOP_AND_RESOLVE_SOURCE_OR_PLATFORM_IDENTITY"
+  },
+  "claim_boundary": {
+    "d1_is_numerical_geometry_design_only": true,
+    "d1_establishes_spatial_convergence": false,
+    "d1_validates_physics": false,
+    "d1_validates_experiment": false,
+    "d1_allows_apparatus_prediction": false
+  }
+}
