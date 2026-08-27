@@ -1,0 +1,1168 @@
+{
+  "campaign_manifest_sha256": "8502bf3bb42b963b3204c99385c486f1ed412d20d4237b4da6502aa7c77d779c",
+  "claim_boundary": {
+    "absolute_critical_rpm_validated": false,
+    "apparatus_prediction_allowed": false,
+    "experimental_validation": "NOT_PERFORMED",
+    "stable_channel_radius_validated": false
+  },
+  "execution_identity_coverage": {
+    "complete": false,
+    "loaded_logical_case_count": 4,
+    "manifest_logical_case_count": 6
+  },
+  "execution_requirements": {
+    "pressure_accelerator_selected": "cuda"
+  },
+  "execution_runtime_consistent_across_runs": true,
+  "execution_runtime_identity_sha256": "99e0ba9422696189c04d26b587fcf6361222f4e0beda38f77e6bc5e34c2a26b9",
+  "groups": {
+    "spatial": {
+      "binary_observables": {
+        "connection_candidate": {
+          "coarse": {
+            "duty_fraction": 0.0,
+            "first_on_s": null,
+            "occurred": false,
+            "transition_count": 0
+          },
+          "fine": {
+            "duty_fraction": 0.0,
+            "first_on_s": null,
+            "occurred": false,
+            "transition_count": 0
+          },
+          "medium": {
+            "duty_fraction": 0.0,
+            "first_on_s": null,
+            "occurred": false,
+            "transition_count": 0
+          },
+          "pass": true,
+          "status": "NOT_EXERCISED"
+        },
+        "finite_channel_candidate": {
+          "coarse": {
+            "duty_fraction": 0.0,
+            "first_on_s": null,
+            "occurred": false,
+            "transition_count": 0
+          },
+          "fine": {
+            "duty_fraction": 0.0,
+            "first_on_s": null,
+            "occurred": false,
+            "transition_count": 0
+          },
+          "medium": {
+            "duty_fraction": 0.0,
+            "first_on_s": null,
+            "occurred": false,
+            "transition_count": 0
+          },
+          "pass": true,
+          "status": "NOT_EXERCISED"
+        },
+        "first_contact_proxy": {
+          "coarse": {
+            "duty_fraction": 0.0,
+            "first_on_s": null,
+            "occurred": false,
+            "transition_count": 0
+          },
+          "fine": {
+            "duty_fraction": 0.0,
+            "first_on_s": null,
+            "occurred": false,
+            "transition_count": 0
+          },
+          "medium": {
+            "duty_fraction": 0.0,
+            "first_on_s": null,
+            "occurred": false,
+            "transition_count": 0
+          },
+          "pass": true,
+          "status": "NOT_EXERCISED"
+        }
+      },
+      "configuration_gate": {
+        "checks": {
+          "coarsest_bar_diameter_cells_worst_axis": {
+            "minimum": 4.0,
+            "pass": true,
+            "value": 4.0
+          },
+          "finest_bar_diameter_cells_worst_axis": {
+            "minimum": 8.0,
+            "pass": true,
+            "value": 9.0
+          },
+          "finest_nominal_bar_voxel_count": {
+            "minimum": 500.0,
+            "pass": true,
+            "value": 2711.6552269705185
+          },
+          "maximum_grid_aspect_ratio": {
+            "maximum": 1.25,
+            "pass": true,
+            "value": 1.0125000000000002
+          },
+          "minimum_interface_width_cells_worst_axis": {
+            "minimum": 2.0,
+            "pass": true,
+            "value": 2.4691358024691357
+          }
+        },
+        "pass": true
+      },
+      "effective_time_step_gate": {
+        "cases": [
+          {
+            "configured_maximum_time_step_s": 5.5e-06,
+            "configured_step_active_fraction": 0.9945054945054945,
+            "id": "space_L0_4cells",
+            "maximum_actual_matches_configured": true,
+            "maximum_actual_time_step_s": 5.5e-06,
+            "minimum_configured_step_active_fraction": 0.95,
+            "pass": true,
+            "step_count": 3640
+          },
+          {
+            "configured_maximum_time_step_s": 5.5e-06,
+            "configured_step_active_fraction": 0.9945054945054945,
+            "id": "space_L1_6cells",
+            "maximum_actual_matches_configured": true,
+            "maximum_actual_time_step_s": 5.5e-06,
+            "minimum_configured_step_active_fraction": 0.95,
+            "pass": true,
+            "step_count": 3640
+          },
+          {
+            "configured_maximum_time_step_s": 5.5e-06,
+            "configured_step_active_fraction": 0.9578082191780822,
+            "id": "space_L2_9cells",
+            "maximum_actual_matches_configured": true,
+            "maximum_actual_time_step_s": 5.5e-06,
+            "minimum_configured_step_active_fraction": 0.95,
+            "pass": true,
+            "step_count": 3650
+          }
+        ],
+        "effective_structure_valid": true,
+        "group": "spatial",
+        "pass": true,
+        "registered_structure_valid": true
+      },
+      "prerequisite_pass": true,
+      "refinement_coordinate_coarse_medium_fine": [
+        0.0015,
+        0.001,
+        0.0006666666666666666
+      ],
+      "selected_case_ids_coarse_medium_fine": [
+        "space_L0_4cells",
+        "space_L1_6cells",
+        "space_L2_9cells"
+      ],
+      "smooth_observables": {
+        "angular_momentum_z_kg_m2_s": {
+          "estimate": {
+            "asymptotic_trend": false,
+            "exact_agreement": false,
+            "fine_grid_gci_l2": null,
+            "observed_order": null,
+            "pair_fine_medium": {
+              "absolute_l2": 0.001926707631371432,
+              "absolute_linf": 0.00229649428617891,
+              "common_end_s": 0.02,
+              "common_start_s": 0.0,
+              "reference_l2": 0.005848709108636894,
+              "reference_linf": 0.00829963267079301,
+              "relative_l2": 0.32942442436164726,
+              "relative_linf": 0.27669830428284314,
+              "sample_count": 21
+            },
+            "pair_medium_coarse": {
+              "absolute_l2": 0.0017014271496536794,
+              "absolute_linf": 0.0021671398462130313,
+              "common_end_s": 0.02,
+              "common_start_s": 0.0,
+              "reference_l2": 0.007762566521434512,
+              "reference_linf": 0.010567459510125657,
+              "relative_l2": 0.21918358379996952,
+              "relative_linf": 0.20507671159151308,
+              "sample_count": 21
+            },
+            "reason": "No positive observed order could be established from the three-level L2 differences.",
+            "refinement_ratio_fine_medium": 1.5,
+            "refinement_ratio_medium_coarse": 1.5
+          },
+          "pass": false,
+          "thresholds": {
+            "gci_l2_max": 0.05,
+            "observed_order_min": 0.5,
+            "relative_l2_max": 0.05,
+            "relative_linf_max": 0.1
+          }
+        },
+        "axisymmetry_error": {
+          "estimate": {
+            "asymptotic_trend": true,
+            "exact_agreement": false,
+            "fine_grid_gci_l2": 5.4877758300550425,
+            "observed_order": 0.21581240145105518,
+            "pair_fine_medium": {
+              "absolute_l2": 0.83009816582839,
+              "absolute_linf": 1.6316692777589947,
+              "common_end_s": 0.02,
+              "common_start_s": 0.0,
+              "reference_l2": 2.067632412547676,
+              "reference_linf": 3.2664991852328815,
+              "relative_l2": 0.4014727960302999,
+              "relative_linf": 0.4995162053416115,
+              "sample_count": 21
+            },
+            "pair_medium_coarse": {
+              "absolute_l2": 0.9060082070586515,
+              "absolute_linf": 1.5331011017165743,
+              "common_end_s": 0.02,
+              "common_start_s": 0.0,
+              "reference_l2": 1.2714764225085387,
+              "reference_linf": 1.9488617565691178,
+              "relative_l2": 0.712563906825073,
+              "relative_linf": 0.7866648809485229,
+              "sample_count": 21
+            },
+            "reason": "Three-level differences support a positive convergence trend.",
+            "refinement_ratio_fine_medium": 1.5,
+            "refinement_ratio_medium_coarse": 1.5
+          },
+          "pass": false,
+          "thresholds": {
+            "gci_l2_max": 0.05,
+            "observed_order_min": 0.5,
+            "relative_l2_max": 0.05,
+            "relative_linf_max": 0.1
+          }
+        },
+        "funnel_depth_m": {
+          "estimate": {
+            "asymptotic_trend": true,
+            "exact_agreement": false,
+            "fine_grid_gci_l2": 5.534213557257202,
+            "observed_order": 0.7129276796704513,
+            "pair_fine_medium": {
+              "absolute_l2": 0.0003245380413886671,
+              "absolute_linf": 0.0007744273291331039,
+              "common_end_s": 0.02,
+              "common_start_s": 0.0,
+              "reference_l2": 0.0002186953576375084,
+              "reference_linf": 0.0007205081697073124,
+              "relative_l2": 1.4839731620028025,
+              "relative_linf": 1.0748349036037923,
+              "sample_count": 21
+            },
+            "pair_medium_coarse": {
+              "absolute_l2": 0.0004333172153594951,
+              "absolute_linf": 0.0008713241110609588,
+              "common_end_s": 0.02,
+              "common_start_s": 0.0,
+              "reference_l2": 0.000535082435480563,
+              "reference_linf": 0.0014949354988404162,
+              "relative_l2": 0.8098139401087394,
+              "relative_linf": 0.5828506391993654,
+              "sample_count": 21
+            },
+            "reason": "Three-level differences support a positive convergence trend.",
+            "refinement_ratio_fine_medium": 1.5,
+            "refinement_ratio_medium_coarse": 1.5
+          },
+          "pass": false,
+          "thresholds": {
+            "gci_l2_max": 0.05,
+            "observed_order_min": 0.5,
+            "relative_l2_max": 0.05,
+            "relative_linf_max": 0.1
+          }
+        },
+        "kinetic_energy_lab_j": {
+          "estimate": {
+            "asymptotic_trend": true,
+            "exact_agreement": false,
+            "fine_grid_gci_l2": 6.939972391778307,
+            "observed_order": 0.19059245965263388,
+            "pair_fine_medium": {
+              "absolute_l2": 0.0309524910425716,
+              "absolute_linf": 0.042945183906009154,
+              "common_end_s": 0.02,
+              "common_start_s": 0.0,
+              "reference_l2": 0.06939046221058807,
+              "reference_linf": 0.10726628344334954,
+              "relative_l2": 0.44606261518529927,
+              "relative_linf": 0.40036050963478903,
+              "sample_count": 21
+            },
+            "pair_medium_coarse": {
+              "absolute_l2": 0.033439307329695876,
+              "absolute_linf": 0.04201002173383914,
+              "common_end_s": 0.02,
+              "common_start_s": 0.0,
+              "reference_l2": 0.1002726599136269,
+              "reference_linf": 0.149355559554499,
+              "relative_l2": 0.33348379666501227,
+              "relative_linf": 0.2812752458572519,
+              "sample_count": 21
+            },
+            "reason": "Three-level differences support a positive convergence trend.",
+            "refinement_ratio_fine_medium": 1.5,
+            "refinement_ratio_medium_coarse": 1.5
+          },
+          "pass": false,
+          "thresholds": {
+            "gci_l2_max": 0.05,
+            "observed_order_min": 0.5,
+            "relative_l2_max": 0.05,
+            "relative_linf_max": 0.1
+          }
+        },
+        "liquid_mass_error_relative": {
+          "estimate": {
+            "asymptotic_trend": false,
+            "exact_agreement": false,
+            "fine_grid_gci_l2": null,
+            "observed_order": null,
+            "pair_fine_medium": {
+              "absolute_l2": 0.0002788840274061413,
+              "absolute_linf": 0.000966397864169006,
+              "common_end_s": 0.02,
+              "common_start_s": 0.0,
+              "reference_l2": 0.0004261821104899864,
+              "reference_linf": 0.0014092711345654134,
+              "relative_l2": 0.6543776018320083,
+              "relative_linf": 0.6857430344424252,
+              "sample_count": 21
+            },
+            "pair_medium_coarse": {
+              "absolute_l2": 0.00014919688600102972,
+              "absolute_linf": 0.00044287326935137604,
+              "common_end_s": 0.02,
+              "common_start_s": 0.0,
+              "reference_l2": 0.0001491968865638036,
+              "reference_linf": 0.00044287327039640745,
+              "relative_l2": 0.9999999962279783,
+              "relative_linf": 0.9999999976403375,
+              "sample_count": 21
+            },
+            "reason": "No positive observed order could be established from the three-level L2 differences.",
+            "refinement_ratio_fine_medium": 1.5,
+            "refinement_ratio_medium_coarse": 1.5
+          },
+          "pass": false,
+          "thresholds": {
+            "gci_l2_max": 0.05,
+            "observed_order_min": 0.5,
+            "relative_l2_max": 0.05,
+            "relative_linf_max": 0.1
+          }
+        },
+        "min_gap_to_bar_m": {
+          "estimate": {
+            "asymptotic_trend": false,
+            "exact_agreement": false,
+            "fine_grid_gci_l2": null,
+            "observed_order": null,
+            "pair_fine_medium": {
+              "absolute_l2": 0.0002200242911595284,
+              "absolute_linf": 0.00047486031012181074,
+              "common_end_s": 0.02,
+              "common_start_s": 0.0,
+              "reference_l2": 0.05244323158142381,
+              "reference_linf": 0.05247705537029094,
+              "relative_l2": 0.004195475460315919,
+              "relative_linf": 0.00904891303010583,
+              "sample_count": 21
+            },
+            "pair_medium_coarse": {
+              "absolute_l2": 0.00019234715974192815,
+              "absolute_linf": 0.00041266054001172503,
+              "common_end_s": 0.02,
+              "common_start_s": 0.0,
+              "reference_l2": 0.0522617802359932,
+              "reference_linf": 0.05238104134178883,
+              "relative_l2": 0.0036804555618535316,
+              "relative_linf": 0.007878051475133818,
+              "sample_count": 21
+            },
+            "reason": "No positive observed order could be established from the three-level L2 differences.",
+            "refinement_ratio_fine_medium": 1.5,
+            "refinement_ratio_medium_coarse": 1.5
+          },
+          "pass": false,
+          "thresholds": {
+            "gci_l2_max": 0.05,
+            "observed_order_min": 0.5,
+            "relative_l2_max": 0.05,
+            "relative_linf_max": 0.1
+          }
+        }
+      },
+      "status": "FAIL",
+      "topology_regime_exercised": false
+    },
+    "temporal": {
+      "reason": "fewer than three completed levels",
+      "status": "INCOMPLETE"
+    }
+  },
+  "load_errors": {},
+  "missing_cases": [
+    "time_L1_2.750e-06s",
+    "time_L2_1.375e-06s"
+  ],
+  "numerical_quality": {
+    "space_L0_4cells": {
+      "backend_fail_closed_gate_pass": true,
+      "checks": {
+        "advective_cfl": {
+          "maximum": 0.35,
+          "pass": true,
+          "value": 0.00419879440665161
+        },
+        "cumulative_phase_clip_relative": {
+          "maximum": 0.001,
+          "pass": true,
+          "value": 1.0406603758093172e-12
+        },
+        "cumulative_phase_repair_relative": {
+          "maximum": 0.001,
+          "pass": true,
+          "value": 0.0
+        },
+        "liquid_volume_balance_error_relative": {
+          "maximum": 0.001,
+          "pass": true,
+          "value": 1.045031423001252e-12
+        },
+        "pressure_residual": {
+          "maximum": 1e-07,
+          "pass": true,
+          "value": 9.999744923845984e-08
+        },
+        "projected_divergence_s_inv": {
+          "maximum": 0.0001,
+          "pass": true,
+          "value": 6.866666352710327e-07
+        }
+      },
+      "inventory_observation": {
+        "absolute_gate_enabled": false,
+        "archive_observable": "liquid_mass_error_relative",
+        "available": true,
+        "canonical_name": "liquid_inventory_change_relative",
+        "required_smooth_observable": true,
+        "role": "MODEL_DOMAIN_AND_BOUNDARY_INVENTORY_OBSERVABLE",
+        "value": 1.045031423001252e-12
+      },
+      "pass": true,
+      "quality_contract": {
+        "contract_id": "OPEN_BOUNDARY_INVENTORY_CONSERVATION_SPLIT_V1",
+        "inventory_observation": {
+          "absolute_gate_enabled": false,
+          "absolute_gate_reason": "NO_CALIBRATED_PHYSICAL_OR_DOMAIN_ADEQUACY_THRESHOLD",
+          "archive_observable": "liquid_mass_error_relative",
+          "canonical_name": "liquid_inventory_change_relative",
+          "required_smooth_observable": true,
+          "role": "MODEL_DOMAIN_AND_BOUNDARY_INVENTORY_OBSERVABLE",
+          "smooth_observable_registered": null
+        },
+        "legacy_mass_error_gate_forbidden": true,
+        "numerical_conservation": {
+          "absolute_gate_enabled": true,
+          "archive_observable": "liquid_volume_balance_error_relative",
+          "maximum_gate_key": "liquid_volume_balance_error_relative_max",
+          "role": "OPEN_BOUNDARY_FLUX_CORRECTED_NUMERICAL_CONSERVATION_GATE"
+        },
+        "pass": true,
+        "schema_version": 1
+      }
+    },
+    "space_L1_6cells": {
+      "backend_fail_closed_gate_pass": true,
+      "checks": {
+        "advective_cfl": {
+          "maximum": 0.35,
+          "pass": true,
+          "value": 0.2613175009202133
+        },
+        "cumulative_phase_clip_relative": {
+          "maximum": 0.001,
+          "pass": true,
+          "value": 6.403771004975079e-12
+        },
+        "cumulative_phase_repair_relative": {
+          "maximum": 0.001,
+          "pass": true,
+          "value": 0.0
+        },
+        "liquid_volume_balance_error_relative": {
+          "maximum": 0.001,
+          "pass": true,
+          "value": 6.4012622055254415e-12
+        },
+        "pressure_residual": {
+          "maximum": 1e-07,
+          "pass": true,
+          "value": 9.99995423909517e-08
+        },
+        "projected_divergence_s_inv": {
+          "maximum": 0.0001,
+          "pass": true,
+          "value": 6.567799847712052e-05
+        }
+      },
+      "inventory_observation": {
+        "absolute_gate_enabled": false,
+        "archive_observable": "liquid_mass_error_relative",
+        "available": true,
+        "canonical_name": "liquid_inventory_change_relative",
+        "required_smooth_observable": true,
+        "role": "MODEL_DOMAIN_AND_BOUNDARY_INVENTORY_OBSERVABLE",
+        "value": 0.00044287327039640745
+      },
+      "pass": true,
+      "quality_contract": {
+        "contract_id": "OPEN_BOUNDARY_INVENTORY_CONSERVATION_SPLIT_V1",
+        "inventory_observation": {
+          "absolute_gate_enabled": false,
+          "absolute_gate_reason": "NO_CALIBRATED_PHYSICAL_OR_DOMAIN_ADEQUACY_THRESHOLD",
+          "archive_observable": "liquid_mass_error_relative",
+          "canonical_name": "liquid_inventory_change_relative",
+          "required_smooth_observable": true,
+          "role": "MODEL_DOMAIN_AND_BOUNDARY_INVENTORY_OBSERVABLE",
+          "smooth_observable_registered": null
+        },
+        "legacy_mass_error_gate_forbidden": true,
+        "numerical_conservation": {
+          "absolute_gate_enabled": true,
+          "archive_observable": "liquid_volume_balance_error_relative",
+          "maximum_gate_key": "liquid_volume_balance_error_relative_max",
+          "role": "OPEN_BOUNDARY_FLUX_CORRECTED_NUMERICAL_CONSERVATION_GATE"
+        },
+        "pass": true,
+        "schema_version": 1
+      }
+    },
+    "space_L2_9cells": {
+      "backend_fail_closed_gate_pass": true,
+      "checks": {
+        "advective_cfl": {
+          "maximum": 0.35,
+          "pass": true,
+          "value": 0.33669736551695634
+        },
+        "cumulative_phase_clip_relative": {
+          "maximum": 0.001,
+          "pass": true,
+          "value": 1.3042564754986872e-11
+        },
+        "cumulative_phase_repair_relative": {
+          "maximum": 0.001,
+          "pass": true,
+          "value": 3.375193013898574e-12
+        },
+        "liquid_volume_balance_error_relative": {
+          "maximum": 0.001,
+          "pass": true,
+          "value": 9.668568675532624e-12
+        },
+        "pressure_residual": {
+          "maximum": 1e-07,
+          "pass": true,
+          "value": 9.999897504895926e-08
+        },
+        "projected_divergence_s_inv": {
+          "maximum": 0.0001,
+          "pass": true,
+          "value": 3.663630011629948e-05
+        }
+      },
+      "inventory_observation": {
+        "absolute_gate_enabled": false,
+        "archive_observable": "liquid_mass_error_relative",
+        "available": true,
+        "canonical_name": "liquid_inventory_change_relative",
+        "required_smooth_observable": true,
+        "role": "MODEL_DOMAIN_AND_BOUNDARY_INVENTORY_OBSERVABLE",
+        "value": 0.0014092711345654134
+      },
+      "pass": true,
+      "quality_contract": {
+        "contract_id": "OPEN_BOUNDARY_INVENTORY_CONSERVATION_SPLIT_V1",
+        "inventory_observation": {
+          "absolute_gate_enabled": false,
+          "absolute_gate_reason": "NO_CALIBRATED_PHYSICAL_OR_DOMAIN_ADEQUACY_THRESHOLD",
+          "archive_observable": "liquid_mass_error_relative",
+          "canonical_name": "liquid_inventory_change_relative",
+          "required_smooth_observable": true,
+          "role": "MODEL_DOMAIN_AND_BOUNDARY_INVENTORY_OBSERVABLE",
+          "smooth_observable_registered": null
+        },
+        "legacy_mass_error_gate_forbidden": true,
+        "numerical_conservation": {
+          "absolute_gate_enabled": true,
+          "archive_observable": "liquid_volume_balance_error_relative",
+          "maximum_gate_key": "liquid_volume_balance_error_relative_max",
+          "role": "OPEN_BOUNDARY_FLUX_CORRECTED_NUMERICAL_CONSERVATION_GATE"
+        },
+        "pass": true,
+        "schema_version": 1
+      }
+    },
+    "time_L0_5.500e-06s": {
+      "backend_fail_closed_gate_pass": true,
+      "checks": {
+        "advective_cfl": {
+          "maximum": 0.35,
+          "pass": true,
+          "value": 0.33669736551695634
+        },
+        "cumulative_phase_clip_relative": {
+          "maximum": 0.001,
+          "pass": true,
+          "value": 1.3042564754986872e-11
+        },
+        "cumulative_phase_repair_relative": {
+          "maximum": 0.001,
+          "pass": true,
+          "value": 3.375193013898574e-12
+        },
+        "liquid_volume_balance_error_relative": {
+          "maximum": 0.001,
+          "pass": true,
+          "value": 9.668568675532624e-12
+        },
+        "pressure_residual": {
+          "maximum": 1e-07,
+          "pass": true,
+          "value": 9.999897504895926e-08
+        },
+        "projected_divergence_s_inv": {
+          "maximum": 0.0001,
+          "pass": true,
+          "value": 3.663630011629948e-05
+        }
+      },
+      "inventory_observation": {
+        "absolute_gate_enabled": false,
+        "archive_observable": "liquid_mass_error_relative",
+        "available": true,
+        "canonical_name": "liquid_inventory_change_relative",
+        "required_smooth_observable": true,
+        "role": "MODEL_DOMAIN_AND_BOUNDARY_INVENTORY_OBSERVABLE",
+        "value": 0.0014092711345654134
+      },
+      "pass": true,
+      "quality_contract": {
+        "contract_id": "OPEN_BOUNDARY_INVENTORY_CONSERVATION_SPLIT_V1",
+        "inventory_observation": {
+          "absolute_gate_enabled": false,
+          "absolute_gate_reason": "NO_CALIBRATED_PHYSICAL_OR_DOMAIN_ADEQUACY_THRESHOLD",
+          "archive_observable": "liquid_mass_error_relative",
+          "canonical_name": "liquid_inventory_change_relative",
+          "required_smooth_observable": true,
+          "role": "MODEL_DOMAIN_AND_BOUNDARY_INVENTORY_OBSERVABLE",
+          "smooth_observable_registered": null
+        },
+        "legacy_mass_error_gate_forbidden": true,
+        "numerical_conservation": {
+          "absolute_gate_enabled": true,
+          "archive_observable": "liquid_volume_balance_error_relative",
+          "maximum_gate_key": "liquid_volume_balance_error_relative_max",
+          "role": "OPEN_BOUNDARY_FLUX_CORRECTED_NUMERICAL_CONSERVATION_GATE"
+        },
+        "pass": true,
+        "schema_version": 1
+      }
+    }
+  },
+  "pressure_accelerator_requirement_met": false,
+  "pressure_accelerator_requirement_met_for_loaded_runs": true,
+  "quality_contract_audit": {
+    "contract_id": "OPEN_BOUNDARY_INVENTORY_CONSERVATION_SPLIT_V1",
+    "inventory_observation": {
+      "absolute_gate_enabled": false,
+      "absolute_gate_reason": "NO_CALIBRATED_PHYSICAL_OR_DOMAIN_ADEQUACY_THRESHOLD",
+      "archive_observable": "liquid_mass_error_relative",
+      "canonical_name": "liquid_inventory_change_relative",
+      "required_smooth_observable": true,
+      "role": "MODEL_DOMAIN_AND_BOUNDARY_INVENTORY_OBSERVABLE",
+      "smooth_observable_registered": true
+    },
+    "legacy_mass_error_gate_forbidden": true,
+    "numerical_conservation": {
+      "absolute_gate_enabled": true,
+      "archive_observable": "liquid_volume_balance_error_relative",
+      "maximum_gate_key": "liquid_volume_balance_error_relative_max",
+      "role": "OPEN_BOUNDARY_FLUX_CORRECTED_NUMERICAL_CONSERVATION_GATE"
+    },
+    "pass": true,
+    "schema_version": 1
+  },
+  "refinement_design_audit": {
+    "capillary_limiter": {
+      "coefficient": 0.2,
+      "formula": "coefficient*sqrt(rho_g*h_min^3/(pi*sigma))",
+      "scope": "necessary static preflight only; completed runs still require an effective-step audit for dynamic limiters"
+    },
+    "cases": [
+      {
+        "configured_maximum_time_step_s": 5.5e-06,
+        "configured_step_active_under_static_capillary_bound": true,
+        "group": "spatial",
+        "id": "space_L0_4cells",
+        "level": 0,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 5.5e-06,
+        "static_capillary_time_step_ceiling_s": 2.631154772261131e-05,
+        "static_effective_maximum_time_step_s": 5.5e-06
+      },
+      {
+        "configured_maximum_time_step_s": 5.5e-06,
+        "configured_step_active_under_static_capillary_bound": true,
+        "group": "spatial",
+        "id": "space_L1_6cells",
+        "level": 1,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 5.5e-06,
+        "static_capillary_time_step_ceiling_s": 1.4591571063179744e-05,
+        "static_effective_maximum_time_step_s": 5.5e-06
+      },
+      {
+        "configured_maximum_time_step_s": 5.5e-06,
+        "configured_step_active_under_static_capillary_bound": true,
+        "group": "spatial",
+        "id": "space_L2_9cells",
+        "level": 2,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 5.5e-06,
+        "static_capillary_time_step_ceiling_s": 7.85520378288456e-06,
+        "static_effective_maximum_time_step_s": 5.5e-06
+      },
+      {
+        "configured_maximum_time_step_s": 5.5e-06,
+        "configured_step_active_under_static_capillary_bound": true,
+        "group": "temporal",
+        "id": "time_L0_5.500e-06s",
+        "level": 0,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 5.5e-06,
+        "static_capillary_time_step_ceiling_s": 7.85520378288456e-06,
+        "static_effective_maximum_time_step_s": 5.5e-06
+      },
+      {
+        "configured_maximum_time_step_s": 2.75e-06,
+        "configured_step_active_under_static_capillary_bound": true,
+        "group": "temporal",
+        "id": "time_L1_2.750e-06s",
+        "level": 1,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 2.75e-06,
+        "static_capillary_time_step_ceiling_s": 7.85520378288456e-06,
+        "static_effective_maximum_time_step_s": 2.75e-06
+      },
+      {
+        "configured_maximum_time_step_s": 1.375e-06,
+        "configured_step_active_under_static_capillary_bound": true,
+        "group": "temporal",
+        "id": "time_L2_1.375e-06s",
+        "level": 2,
+        "manifest_matches_config": true,
+        "manifest_maximum_time_step_s": 1.375e-06,
+        "static_capillary_time_step_ceiling_s": 7.85520378288456e-06,
+        "static_effective_maximum_time_step_s": 1.375e-06
+      }
+    ],
+    "gate_identity": "HF3D_STATIC_TIME_STEP_IDENTIFIABILITY_V1",
+    "groups": {
+      "spatial": {
+        "all_registered_steps_active": true,
+        "case_ids_in_level_order": [
+          "space_L0_4cells",
+          "space_L1_6cells",
+          "space_L2_9cells"
+        ],
+        "configured_maximum_time_step_s": [
+          5.5e-06,
+          5.5e-06,
+          5.5e-06
+        ],
+        "effective_structure_valid": true,
+        "pass": true,
+        "registered_structure_valid": true,
+        "static_capillary_time_step_ceiling_s": [
+          2.631154772261131e-05,
+          1.4591571063179744e-05,
+          7.85520378288456e-06
+        ],
+        "static_effective_maximum_time_step_s": [
+          5.5e-06,
+          5.5e-06,
+          5.5e-06
+        ]
+      },
+      "temporal": {
+        "all_registered_steps_active": true,
+        "case_ids_in_level_order": [
+          "time_L0_5.500e-06s",
+          "time_L1_2.750e-06s",
+          "time_L2_1.375e-06s"
+        ],
+        "configured_maximum_time_step_s": [
+          5.5e-06,
+          2.75e-06,
+          1.375e-06
+        ],
+        "effective_structure_valid": true,
+        "pass": true,
+        "registered_structure_valid": true,
+        "static_capillary_time_step_ceiling_s": [
+          7.85520378288456e-06,
+          7.85520378288456e-06,
+          7.85520378288456e-06
+        ],
+        "static_effective_maximum_time_step_s": [
+          5.5e-06,
+          2.75e-06,
+          1.375e-06
+        ]
+      }
+    },
+    "pass": true,
+    "reasons": []
+  },
+  "run_audits": {
+    "space_L0_4cells": {
+      "actual_end_s": 0.02,
+      "archived_config_sha256": "8700eacf384fc1a2dac0451ecf45a83247518ce345ea0ce76573483e5eba6935",
+      "completed": true,
+      "diagnostics": {
+        "cumulative_phase_clip_relative": 1.0406603758093172e-12,
+        "cumulative_phase_repair_relative": 0.0,
+        "liquid_open_boundary_balance_error_relative": -1.045031423001252e-12,
+        "maximum_advective_cfl": 0.00419879440665161,
+        "maximum_pressure_relative_residual": 9.999744923845984e-08,
+        "maximum_projected_divergence_s_inv": 6.866666352710327e-07,
+        "maximum_single_step_phase_clip_relative": 1.432817686057489e-14,
+        "maximum_single_step_phase_repair_relative": 0.0,
+        "numerical_quality_gate_pass": true,
+        "physical_prediction_gate_pass": false,
+        "pressure_accelerator_fallback": false,
+        "pressure_accelerator_selected": "cuda"
+      },
+      "execution_metrics": {
+        "configured_maximum_time_step_s": 5.5e-06,
+        "configured_step_active_fraction": 0.9945054945054945,
+        "diagnostic_time_step_count": 3640,
+        "maximum_actual_time_step_s": 5.5e-06,
+        "minimum_actual_time_step_s": 4.499999999946387e-06,
+        "peak_resident_set_size_bytes": 680452096,
+        "wall_clock_duration_s": 388.6449051100062
+      },
+      "execution_runtime_identity": {
+        "dependencies": {
+          "numpy": "2.5.2",
+          "scipy": "1.17.1"
+        },
+        "numerical_thread_policy": {
+          "requested": "auto",
+          "selected_threads": 2
+        },
+        "pressure_accelerator": {
+          "compute_capability": "12.0",
+          "device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+          "fallback": false,
+          "requested": "cuda",
+          "selected": "cuda"
+        },
+        "python": {
+          "implementation": "CPython",
+          "version": "3.12.3"
+        }
+      },
+      "execution_runtime_identity_sha256": "99e0ba9422696189c04d26b587fcf6361222f4e0beda38f77e6bc5e34c2a26b9",
+      "execution_source_identity_valid": true,
+      "generated_config_sha256": "8700eacf384fc1a2dac0451ecf45a83247518ce345ea0ce76573483e5eba6935",
+      "grid": {
+        "aspect_ratio": 1.0125000000000002,
+        "bar_diameter_cells_best_axis": 4.050000000000001,
+        "bar_diameter_cells_worst_axis": 4.0,
+        "bar_diameter_m": 0.006,
+        "boundary_layer_width_cells_worst_axis": 1.4814814814814814,
+        "boundary_layer_width_m": 0.0022222222222222222,
+        "box_cell_count": 194400,
+        "dx_m": 0.0015,
+        "dy_m": 0.0015,
+        "dz_m": 0.0014814814814814814,
+        "exact_bar_volume_m3": 7.916813487046278e-07,
+        "h_geometric_m": 0.001493801582185722,
+        "h_max_m": 0.0015,
+        "h_min_m": 0.0014814814814814814,
+        "interface_width_cells_worst_axis": 2.4691358024691357,
+        "interface_width_m": 0.0037037037037037034,
+        "nominal_bar_voxel_count": 237.50440461138834,
+        "nx": 60,
+        "ny": 60,
+        "nz": 54
+      },
+      "physical_signature_match": true,
+      "physical_signature_sha256": "fb4e3a3b993fa5e569aed09d062239b0895f2fcaf40f642405edd502d6ad1059",
+      "requested_end_s": 0.02,
+      "result_status": "completed",
+      "source_tree_sha256_start": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010"
+    },
+    "space_L1_6cells": {
+      "actual_end_s": 0.02,
+      "archived_config_sha256": "e1579506c9a7b61e165182e00d0e16d7b6ab332041693be3e36b2726416b1323",
+      "completed": true,
+      "diagnostics": {
+        "cumulative_phase_clip_relative": 6.403771004975079e-12,
+        "cumulative_phase_repair_relative": 0.0,
+        "liquid_open_boundary_balance_error_relative": -6.4012622055254415e-12,
+        "maximum_advective_cfl": 0.2613175009202133,
+        "maximum_pressure_relative_residual": 9.99995423909517e-08,
+        "maximum_projected_divergence_s_inv": 6.567799847712052e-05,
+        "maximum_single_step_phase_clip_relative": 1.7408336570114006e-14,
+        "maximum_single_step_phase_repair_relative": 0.0,
+        "numerical_quality_gate_pass": true,
+        "physical_prediction_gate_pass": false,
+        "pressure_accelerator_fallback": false,
+        "pressure_accelerator_selected": "cuda"
+      },
+      "execution_metrics": {
+        "configured_maximum_time_step_s": 5.5e-06,
+        "configured_step_active_fraction": 0.9945054945054945,
+        "diagnostic_time_step_count": 3640,
+        "maximum_actual_time_step_s": 5.5e-06,
+        "minimum_actual_time_step_s": 4.499999999946387e-06,
+        "peak_resident_set_size_bytes": 1025081344,
+        "wall_clock_duration_s": 1995.8168121609924
+      },
+      "execution_runtime_identity": {
+        "dependencies": {
+          "numpy": "2.5.2",
+          "scipy": "1.17.1"
+        },
+        "numerical_thread_policy": {
+          "requested": "auto",
+          "selected_threads": 2
+        },
+        "pressure_accelerator": {
+          "compute_capability": "12.0",
+          "device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+          "fallback": false,
+          "requested": "cuda",
+          "selected": "cuda"
+        },
+        "python": {
+          "implementation": "CPython",
+          "version": "3.12.3"
+        }
+      },
+      "execution_runtime_identity_sha256": "99e0ba9422696189c04d26b587fcf6361222f4e0beda38f77e6bc5e34c2a26b9",
+      "execution_source_identity_valid": true,
+      "generated_config_sha256": "e1579506c9a7b61e165182e00d0e16d7b6ab332041693be3e36b2726416b1323",
+      "grid": {
+        "aspect_ratio": 1.0,
+        "bar_diameter_cells_best_axis": 6.0,
+        "bar_diameter_cells_worst_axis": 6.0,
+        "bar_diameter_m": 0.006,
+        "boundary_layer_width_cells_worst_axis": 1.5,
+        "boundary_layer_width_m": 0.0015,
+        "box_cell_count": 648000,
+        "dx_m": 0.001,
+        "dy_m": 0.001,
+        "dz_m": 0.001,
+        "exact_bar_volume_m3": 7.916813487046278e-07,
+        "h_geometric_m": 0.0010000000000000005,
+        "h_max_m": 0.001,
+        "h_min_m": 0.001,
+        "interface_width_cells_worst_axis": 2.5,
+        "interface_width_m": 0.0025,
+        "nominal_bar_voxel_count": 791.6813487046278,
+        "nx": 90,
+        "ny": 90,
+        "nz": 80
+      },
+      "physical_signature_match": true,
+      "physical_signature_sha256": "fb4e3a3b993fa5e569aed09d062239b0895f2fcaf40f642405edd502d6ad1059",
+      "requested_end_s": 0.02,
+      "result_status": "completed",
+      "source_tree_sha256_start": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010"
+    },
+    "space_L2_9cells": {
+      "actual_end_s": 0.02,
+      "archived_config_sha256": "43b86ff35a16d5b4f6d71d203982fffa80d68db15edc03bdbd25db76241d5a32",
+      "completed": true,
+      "diagnostics": {
+        "cumulative_phase_clip_relative": 1.3042564754986872e-11,
+        "cumulative_phase_repair_relative": 3.375193013898574e-12,
+        "liquid_open_boundary_balance_error_relative": -9.668568675532624e-12,
+        "maximum_advective_cfl": 0.33669736551695634,
+        "maximum_pressure_relative_residual": 9.999897504895926e-08,
+        "maximum_projected_divergence_s_inv": 3.663630011629948e-05,
+        "maximum_single_step_phase_clip_relative": 6.289620806607336e-14,
+        "maximum_single_step_phase_repair_relative": 6.217255814274839e-14,
+        "numerical_quality_gate_pass": true,
+        "physical_prediction_gate_pass": false,
+        "pressure_accelerator_fallback": false,
+        "pressure_accelerator_selected": "cuda"
+      },
+      "execution_metrics": {
+        "configured_maximum_time_step_s": 5.5e-06,
+        "configured_step_active_fraction": 0.9578082191780822,
+        "diagnostic_time_step_count": 3650,
+        "maximum_actual_time_step_s": 5.5e-06,
+        "minimum_actual_time_step_s": 1.1470730439996218e-06,
+        "peak_resident_set_size_bytes": 2208030720,
+        "wall_clock_duration_s": 7707.020274442999
+      },
+      "execution_runtime_identity": {
+        "dependencies": {
+          "numpy": "2.5.2",
+          "scipy": "1.17.1"
+        },
+        "numerical_thread_policy": {
+          "requested": "auto",
+          "selected_threads": 2
+        },
+        "pressure_accelerator": {
+          "compute_capability": "12.0",
+          "device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+          "fallback": false,
+          "requested": "cuda",
+          "selected": "cuda"
+        },
+        "python": {
+          "implementation": "CPython",
+          "version": "3.12.3"
+        }
+      },
+      "execution_runtime_identity_sha256": "99e0ba9422696189c04d26b587fcf6361222f4e0beda38f77e6bc5e34c2a26b9",
+      "execution_source_identity_valid": true,
+      "generated_config_sha256": "43b86ff35a16d5b4f6d71d203982fffa80d68db15edc03bdbd25db76241d5a32",
+      "grid": {
+        "aspect_ratio": 1.0074074074074075,
+        "bar_diameter_cells_best_axis": 9.066666666666666,
+        "bar_diameter_cells_worst_axis": 9.0,
+        "bar_diameter_m": 0.006,
+        "boundary_layer_width_cells_worst_axis": 1.488970588235294,
+        "boundary_layer_width_m": 0.0009926470588235293,
+        "box_cell_count": 2219520,
+        "dx_m": 0.0006617647058823529,
+        "dy_m": 0.0006617647058823529,
+        "dz_m": 0.0006666666666666666,
+        "exact_bar_volume_m3": 7.916813487046278e-07,
+        "h_geometric_m": 0.0006633946747963127,
+        "h_max_m": 0.0006666666666666666,
+        "h_min_m": 0.0006617647058823529,
+        "interface_width_cells_worst_axis": 2.4816176470588234,
+        "interface_width_m": 0.0016544117647058823,
+        "nominal_bar_voxel_count": 2711.6552269705185,
+        "nx": 136,
+        "ny": 136,
+        "nz": 120
+      },
+      "physical_signature_match": true,
+      "physical_signature_sha256": "fb4e3a3b993fa5e569aed09d062239b0895f2fcaf40f642405edd502d6ad1059",
+      "requested_end_s": 0.02,
+      "result_status": "completed",
+      "source_tree_sha256_start": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010"
+    },
+    "time_L0_5.500e-06s": {
+      "actual_end_s": 0.02,
+      "archived_config_sha256": "43b86ff35a16d5b4f6d71d203982fffa80d68db15edc03bdbd25db76241d5a32",
+      "completed": true,
+      "diagnostics": {
+        "cumulative_phase_clip_relative": 1.3042564754986872e-11,
+        "cumulative_phase_repair_relative": 3.375193013898574e-12,
+        "liquid_open_boundary_balance_error_relative": -9.668568675532624e-12,
+        "maximum_advective_cfl": 0.33669736551695634,
+        "maximum_pressure_relative_residual": 9.999897504895926e-08,
+        "maximum_projected_divergence_s_inv": 3.663630011629948e-05,
+        "maximum_single_step_phase_clip_relative": 6.289620806607336e-14,
+        "maximum_single_step_phase_repair_relative": 6.217255814274839e-14,
+        "numerical_quality_gate_pass": true,
+        "physical_prediction_gate_pass": false,
+        "pressure_accelerator_fallback": false,
+        "pressure_accelerator_selected": "cuda"
+      },
+      "execution_metrics": {
+        "configured_maximum_time_step_s": 5.5e-06,
+        "configured_step_active_fraction": 0.9578082191780822,
+        "diagnostic_time_step_count": 3650,
+        "maximum_actual_time_step_s": 5.5e-06,
+        "minimum_actual_time_step_s": 1.1470730439996218e-06,
+        "peak_resident_set_size_bytes": 2208030720,
+        "wall_clock_duration_s": 7707.020274442999
+      },
+      "execution_runtime_identity": {
+        "dependencies": {
+          "numpy": "2.5.2",
+          "scipy": "1.17.1"
+        },
+        "numerical_thread_policy": {
+          "requested": "auto",
+          "selected_threads": 2
+        },
+        "pressure_accelerator": {
+          "compute_capability": "12.0",
+          "device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+          "fallback": false,
+          "requested": "cuda",
+          "selected": "cuda"
+        },
+        "python": {
+          "implementation": "CPython",
+          "version": "3.12.3"
+        }
+      },
+      "execution_runtime_identity_sha256": "99e0ba9422696189c04d26b587fcf6361222f4e0beda38f77e6bc5e34c2a26b9",
+      "execution_source_identity_valid": true,
+      "generated_config_sha256": "43b86ff35a16d5b4f6d71d203982fffa80d68db15edc03bdbd25db76241d5a32",
+      "grid": {
+        "aspect_ratio": 1.0074074074074075,
+        "bar_diameter_cells_best_axis": 9.066666666666666,
+        "bar_diameter_cells_worst_axis": 9.0,
+        "bar_diameter_m": 0.006,
+        "boundary_layer_width_cells_worst_axis": 1.488970588235294,
+        "boundary_layer_width_m": 0.0009926470588235293,
+        "box_cell_count": 2219520,
+        "dx_m": 0.0006617647058823529,
+        "dy_m": 0.0006617647058823529,
+        "dz_m": 0.0006666666666666666,
+        "exact_bar_volume_m3": 7.916813487046278e-07,
+        "h_geometric_m": 0.0006633946747963127,
+        "h_max_m": 0.0006666666666666666,
+        "h_min_m": 0.0006617647058823529,
+        "interface_width_cells_worst_axis": 2.4816176470588234,
+        "interface_width_m": 0.0016544117647058823,
+        "nominal_bar_voxel_count": 2711.6552269705185,
+        "nx": 136,
+        "ny": 136,
+        "nz": 120
+      },
+      "physical_signature_match": true,
+      "physical_signature_sha256": "fb4e3a3b993fa5e569aed09d062239b0895f2fcaf40f642405edd502d6ad1059",
+      "requested_end_s": 0.02,
+      "result_status": "completed",
+      "source_tree_sha256_start": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010"
+    }
+  },
+  "schema_version": 1,
+  "source_identity_evidence_logical_case_count": 4,
+  "source_tree_consistent_across_runs": true,
+  "source_tree_sha256": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
+  "status": "INCOMPLETE_MISSING_OR_UNREADABLE_RUNS",
+  "terminal_failures": {}
+}

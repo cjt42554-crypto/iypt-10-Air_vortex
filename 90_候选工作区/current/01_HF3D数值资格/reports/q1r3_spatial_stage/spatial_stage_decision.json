@@ -1,0 +1,780 @@
+{
+  "binary_observables": {
+    "connection_candidate": {
+      "pass": true,
+      "status": "NOT_EXERCISED"
+    },
+    "finite_channel_candidate": {
+      "pass": true,
+      "status": "NOT_EXERCISED"
+    },
+    "first_contact_proxy": {
+      "pass": true,
+      "status": "NOT_EXERCISED"
+    }
+  },
+  "claim_boundary": {
+    "apparatus_prediction_allowed": false,
+    "experimental_validation_performed": false,
+    "numerical_qualification_demonstrated": false,
+    "physical_validation_performed": false,
+    "q1r3_numerical_screening_passed": false,
+    "spatial_convergence_demonstrated": false,
+    "temporal_convergence_evaluated": false
+  },
+  "configuration_gate": {
+    "checks": {
+      "coarsest_bar_diameter_cells_worst_axis": {
+        "minimum": 4.0,
+        "pass": true,
+        "value": 4.0
+      },
+      "finest_bar_diameter_cells_worst_axis": {
+        "minimum": 8.0,
+        "pass": true,
+        "value": 9.0
+      },
+      "finest_nominal_bar_voxel_count": {
+        "minimum": 500.0,
+        "pass": true,
+        "value": 2711.6552269705185
+      },
+      "maximum_grid_aspect_ratio": {
+        "maximum": 1.25,
+        "pass": true,
+        "value": 1.0125000000000002
+      },
+      "minimum_interface_width_cells_worst_axis": {
+        "minimum": 2.0,
+        "pass": true,
+        "value": 2.4691358024691357
+      }
+    },
+    "pass": true
+  },
+  "decision_established": true,
+  "effective_time_step_gate": {
+    "cases": [
+      {
+        "configured_maximum_time_step_s": 5.5e-06,
+        "configured_step_active_fraction": 0.9945054945054945,
+        "id": "space_L0_4cells",
+        "maximum_actual_matches_configured": true,
+        "maximum_actual_time_step_s": 5.5e-06,
+        "minimum_configured_step_active_fraction": 0.95,
+        "pass": true,
+        "step_count": 3640
+      },
+      {
+        "configured_maximum_time_step_s": 5.5e-06,
+        "configured_step_active_fraction": 0.9945054945054945,
+        "id": "space_L1_6cells",
+        "maximum_actual_matches_configured": true,
+        "maximum_actual_time_step_s": 5.5e-06,
+        "minimum_configured_step_active_fraction": 0.95,
+        "pass": true,
+        "step_count": 3640
+      },
+      {
+        "configured_maximum_time_step_s": 5.5e-06,
+        "configured_step_active_fraction": 0.9578082191780822,
+        "id": "space_L2_9cells",
+        "maximum_actual_matches_configured": true,
+        "maximum_actual_time_step_s": 5.5e-06,
+        "minimum_configured_step_active_fraction": 0.95,
+        "pass": true,
+        "step_count": 3650
+      }
+    ],
+    "effective_structure_valid": true,
+    "group": "spatial",
+    "pass": true,
+    "registered_structure_valid": true
+  },
+  "evidence_gates": {
+    "apparatus_prediction_remains_disallowed": true,
+    "campaign_manifest_byte_identity_matches_freeze": true,
+    "campaign_manifest_case_inventory_exact": true,
+    "formal_source_and_runtime_identity_consistent": true,
+    "freeze_report_authorizes_staged_spatial_screening": true,
+    "frozen_physical_and_quality_contract_identity": true,
+    "only_expected_logical_runs_loaded": true,
+    "qualification_report_bound_to_campaign_manifest": true,
+    "qualification_report_is_expected_spatial_stage_partial": true,
+    "spatial_group_result_consistent_with_component_gates": true,
+    "temporal_new_case_paths_absent": true,
+    "three_spatial_archives_payload_complete_and_bound": true
+  },
+  "execution_decision": {
+    "action": "DO_NOT_EXECUTE_TEMPORAL_NEW_CASES",
+    "remaining_temporal_runs_required_to_establish_q1r3_failure": false,
+    "spatial_failure_established_before_temporal_execution": true,
+    "temporal_convergence_status": "NOT_EVALUATED",
+    "temporal_new_case_paths_absent": {
+      "time_L1_2.750e-06s": true,
+      "time_L2_1.375e-06s": true
+    },
+    "temporal_new_cases_authorized": false
+  },
+  "failed_smooth_observables": [
+    "funnel_depth_m",
+    "min_gap_to_bar_m",
+    "kinetic_energy_lab_j",
+    "angular_momentum_z_kg_m2_s",
+    "axisymmetry_error",
+    "liquid_mass_error_relative"
+  ],
+  "failed_spatial_gates": [
+    "smooth_observable_convergence"
+  ],
+  "frozen_identity": {
+    "formal_source_tree_sha256": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
+    "physical_signature_sha256": "fb4e3a3b993fa5e569aed09d062239b0895f2fcaf40f642405edd502d6ad1059",
+    "quality_contract_id": "OPEN_BOUNDARY_INVENTORY_CONSERVATION_SPLIT_V1",
+    "spatial_case_ids": [
+      "space_L0_4cells",
+      "space_L1_6cells",
+      "space_L2_9cells"
+    ],
+    "temporal_new_case_ids": [
+      "time_L1_2.750e-06s",
+      "time_L2_1.375e-06s"
+    ],
+    "temporal_reuse_case_id": "space_L2_9cells"
+  },
+  "gate_pass": true,
+  "inputs": {
+    "campaign_manifest_canonical_sha256": "8502bf3bb42b963b3204c99385c486f1ed412d20d4237b4da6502aa7c77d779c",
+    "campaign_manifest_file_sha256": "d2d95a599b831e1741f0df38be6069a8ebd93301d981726429bf632cdb823da6",
+    "freeze_report_sha256": "76df3985b63badd43f8517548c17f195e7388b2fcc6e197ec551ba60413829ef",
+    "qualification_report_sha256": "c975dc332018553037c2e6c81b8c6fbbacc1a9347bafe01b656184760d859c3c",
+    "qualification_report_status": "INCOMPLETE_MISSING_OR_UNREADABLE_RUNS",
+    "spatial_archive_inventory": {
+      "space_L0_4cells": {
+        "archive_path": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/01_HF3D数值资格/runs/q1r3/space_L0_4cells",
+        "config_canonical_sha256": "8700eacf384fc1a2dac0451ecf45a83247518ce345ea0ce76573483e5eba6935",
+        "config_payload_sha256": "0de19a3d081e9236d6a4908f3c428c83e40c20721c9db83ddae8af50b920b2b5",
+        "manifest_sha256": "44faf36211d88a6569daaf6e4285151ab52f7e604f8063b7fbf257b50a827d56",
+        "payload_integrity_valid": true,
+        "payloads": {
+          "arrays.npz": {
+            "actual_sha256": "9b261e376ad565a9649667b651540ce5899ad2aa838bbb86d533c44e0c59f487",
+            "actual_size_bytes": 10328765,
+            "expected_sha256": "9b261e376ad565a9649667b651540ce5899ad2aa838bbb86d533c44e0c59f487",
+            "expected_size_bytes": 10328765,
+            "pass": true
+          },
+          "config.json": {
+            "actual_sha256": "0de19a3d081e9236d6a4908f3c428c83e40c20721c9db83ddae8af50b920b2b5",
+            "actual_size_bytes": 3528,
+            "expected_sha256": "0de19a3d081e9236d6a4908f3c428c83e40c20721c9db83ddae8af50b920b2b5",
+            "expected_size_bytes": 3528,
+            "pass": true
+          },
+          "provenance.json": {
+            "actual_sha256": "95ef3e43fc9edbed8f1883650873d90a41271d1bedeb5f8899684a1e500640b2",
+            "actual_size_bytes": 6899,
+            "expected_sha256": "95ef3e43fc9edbed8f1883650873d90a41271d1bedeb5f8899684a1e500640b2",
+            "expected_size_bytes": 6899,
+            "pass": true
+          },
+          "result.json": {
+            "actual_sha256": "dd97371ac8f9b35566ffa7fd2fca9caa6513b10a1f77b8df765c68a1693914b6",
+            "actual_size_bytes": 26810,
+            "expected_sha256": "dd97371ac8f9b35566ffa7fd2fca9caa6513b10a1f77b8df765c68a1693914b6",
+            "expected_size_bytes": 26810,
+            "pass": true
+          },
+          "timeseries.csv": {
+            "actual_sha256": "6e1af0e9494d2f81deb891d1d9800fd843fee8e088326b281cd96b0bb8709232",
+            "actual_size_bytes": 14523,
+            "expected_sha256": "6e1af0e9494d2f81deb891d1d9800fd843fee8e088326b281cd96b0bb8709232",
+            "expected_size_bytes": 14523,
+            "pass": true
+          }
+        }
+      },
+      "space_L1_6cells": {
+        "archive_path": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/01_HF3D数值资格/runs/q1r3/space_L1_6cells",
+        "config_canonical_sha256": "e1579506c9a7b61e165182e00d0e16d7b6ab332041693be3e36b2726416b1323",
+        "config_payload_sha256": "8a1df1f50418094176b4226cd37e526bd034bd44b5697fc607be1302f7c74595",
+        "manifest_sha256": "794b0bc63f9bec688f32f0bc71e4ca05160d3b4ffce9d0af90636ef87f6705ae",
+        "payload_integrity_valid": true,
+        "payloads": {
+          "arrays.npz": {
+            "actual_sha256": "19e9a901255a26ee6180f27a133626893aa7e4ddc70f409eddb8d96cc60fc375",
+            "actual_size_bytes": 32326477,
+            "expected_sha256": "19e9a901255a26ee6180f27a133626893aa7e4ddc70f409eddb8d96cc60fc375",
+            "expected_size_bytes": 32326477,
+            "pass": true
+          },
+          "config.json": {
+            "actual_sha256": "8a1df1f50418094176b4226cd37e526bd034bd44b5697fc607be1302f7c74595",
+            "actual_size_bytes": 3528,
+            "expected_sha256": "8a1df1f50418094176b4226cd37e526bd034bd44b5697fc607be1302f7c74595",
+            "expected_size_bytes": 3528,
+            "pass": true
+          },
+          "provenance.json": {
+            "actual_sha256": "13214fcd0c85e1deef9daf11c308198e6d8a33b69bde312a69dabf46b8dadf4f",
+            "actual_size_bytes": 6902,
+            "expected_sha256": "13214fcd0c85e1deef9daf11c308198e6d8a33b69bde312a69dabf46b8dadf4f",
+            "expected_size_bytes": 6902,
+            "pass": true
+          },
+          "result.json": {
+            "actual_sha256": "453d69db5b0eb7eca8a087338f4272363a60afb8695b61fd06e409cff7a3301b",
+            "actual_size_bytes": 26731,
+            "expected_sha256": "453d69db5b0eb7eca8a087338f4272363a60afb8695b61fd06e409cff7a3301b",
+            "expected_size_bytes": 26731,
+            "pass": true
+          },
+          "timeseries.csv": {
+            "actual_sha256": "b0d796c44093bac7a8fa9515779e7fda30fac9f77157a1eda568764c39ec041e",
+            "actual_size_bytes": 14194,
+            "expected_sha256": "b0d796c44093bac7a8fa9515779e7fda30fac9f77157a1eda568764c39ec041e",
+            "expected_size_bytes": 14194,
+            "pass": true
+          }
+        }
+      },
+      "space_L2_9cells": {
+        "archive_path": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/01_HF3D数值资格/runs/q1r3/space_L2_9cells",
+        "config_canonical_sha256": "43b86ff35a16d5b4f6d71d203982fffa80d68db15edc03bdbd25db76241d5a32",
+        "config_payload_sha256": "2fdb7504e62560963734343b7bda9091164868985c521a17f22574e74ee6a594",
+        "manifest_sha256": "99b7cf26cd5e2c50959e09af1fcfa998a34df63778297e78ee6e27d9abd78b4d",
+        "payload_integrity_valid": true,
+        "payloads": {
+          "arrays.npz": {
+            "actual_sha256": "8f942910632dd1c11e5bc005c43805c2561f0e4b5004b370a30ff8b22eaff4a6",
+            "actual_size_bytes": 106395981,
+            "expected_sha256": "8f942910632dd1c11e5bc005c43805c2561f0e4b5004b370a30ff8b22eaff4a6",
+            "expected_size_bytes": 106395981,
+            "pass": true
+          },
+          "config.json": {
+            "actual_sha256": "2fdb7504e62560963734343b7bda9091164868985c521a17f22574e74ee6a594",
+            "actual_size_bytes": 3531,
+            "expected_sha256": "2fdb7504e62560963734343b7bda9091164868985c521a17f22574e74ee6a594",
+            "expected_size_bytes": 3531,
+            "pass": true
+          },
+          "provenance.json": {
+            "actual_sha256": "5ad516d2a59ff4f1ef4555b35be110492d9bc43590653bfa1523706e7b96849a",
+            "actual_size_bytes": 6897,
+            "expected_sha256": "5ad516d2a59ff4f1ef4555b35be110492d9bc43590653bfa1523706e7b96849a",
+            "expected_size_bytes": 6897,
+            "pass": true
+          },
+          "result.json": {
+            "actual_sha256": "cfe53ea81cbe172047ad830dd903593ee4864cd5ee0585d0722398b0df60ceaa",
+            "actual_size_bytes": 26937,
+            "expected_sha256": "cfe53ea81cbe172047ad830dd903593ee4864cd5ee0585d0722398b0df60ceaa",
+            "expected_size_bytes": 26937,
+            "pass": true
+          },
+          "timeseries.csv": {
+            "actual_sha256": "c1651c20bcd24f34190a4f6cd55d3557afbe8bfe55f76d4bde56c3db68114eaf",
+            "actual_size_bytes": 13901,
+            "expected_sha256": "c1651c20bcd24f34190a4f6cd55d3557afbe8bfe55f76d4bde56c3db68114eaf",
+            "expected_size_bytes": 13901,
+            "pass": true
+          }
+        }
+      }
+    }
+  },
+  "posthoc_failure_diagnostic": {
+    "cause_assessment": {
+      "archive_or_source_identity_failure_supported": false,
+      "failure_confined_to_acceleration_ramp_supported": false,
+      "grid_dependent_open_boundary_inventory_response_supported": true,
+      "non_asymptotic_grid_response_supported": true,
+      "numerical_nonconservation_supported": false,
+      "registered_single_case_quality_failure_supported": false,
+      "topology_event_trigger_supported": false,
+      "unique_dominant_mechanism_identified": false
+    },
+    "common_output_time_grid": true,
+    "constant_rpm_windows_verified": true,
+    "diagnostic_only_not_a_frozen_gate": true,
+    "endpoint_values": {
+      "space_L0_4cells": {
+        "at_ramp_end": {
+          "angular_momentum_z_kg_m2_s": 0.006924952471805372,
+          "axisymmetry_error": 0.23372297062395547,
+          "funnel_depth_m": 1.577464913359722e-05,
+          "kinetic_energy_lab_j": 0.07503248898580983,
+          "liquid_mass_error_relative": -7.747720368812224e-13,
+          "min_gap_to_bar_m": 0.05247751893705881
+        },
+        "at_run_end": {
+          "angular_momentum_z_kg_m2_s": 0.011865645490344376,
+          "axisymmetry_error": 0.3994189879221023,
+          "funnel_depth_m": 0.002366259609901375,
+          "kinetic_energy_lab_j": 0.1820502092642142,
+          "liquid_mass_error_relative": -1.045031423001252e-12,
+          "min_gap_to_bar_m": 0.05132463464584429
+        }
+      },
+      "space_L1_6cells": {
+        "at_ramp_end": {
+          "angular_momentum_z_kg_m2_s": 0.005094049350633367,
+          "axisymmetry_error": 0.4016417832769643,
+          "funnel_depth_m": 0.0,
+          "kinetic_energy_lab_j": 0.050636538576010186,
+          "liquid_mass_error_relative": -9.10684471712517e-13,
+          "min_gap_to_bar_m": 0.05237919284544271
+        },
+        "at_run_end": {
+          "angular_momentum_z_kg_m2_s": 0.010567459510125657,
+          "axisymmetry_error": 1.8655408524114736,
+          "funnel_depth_m": 0.0014949354988404162,
+          "kinetic_energy_lab_j": 0.149355559554499,
+          "liquid_mass_error_relative": -0.00044287327039640745,
+          "min_gap_to_bar_m": 0.051737295185856014
+        }
+      },
+      "space_L2_9cells": {
+        "at_ramp_end": {
+          "angular_momentum_z_kg_m2_s": 0.003551054001688213,
+          "axisymmetry_error": 0.5613775612002518,
+          "funnel_depth_m": 0.0,
+          "kinetic_energy_lab_j": 0.03298252987559919,
+          "liquid_mass_error_relative": -1.3690865163110507e-12,
+          "min_gap_to_bar_m": 0.05246635256861558
+        },
+        "at_run_end": {
+          "angular_momentum_z_kg_m2_s": 0.00829963267079301,
+          "axisymmetry_error": 2.379776335367809,
+          "funnel_depth_m": 0.0007205081697073124,
+          "kinetic_energy_lab_j": 0.10726628344334954,
+          "liquid_mass_error_relative": -0.0014092711345654134,
+          "min_gap_to_bar_m": 0.052212155495977824
+        }
+      }
+    },
+    "inventory_change_onset_s": {
+      "space_L0_4cells": {
+        "absolute_1e-03": null,
+        "absolute_1e-04": null,
+        "absolute_1e-06": null
+      },
+      "space_L1_6cells": {
+        "absolute_1e-03": null,
+        "absolute_1e-04": 0.015000000000000006,
+        "absolute_1e-06": 0.011000000000000003
+      },
+      "space_L2_9cells": {
+        "absolute_1e-03": 0.01900000000000001,
+        "absolute_1e-04": 0.014000000000000005,
+        "absolute_1e-06": 0.009000000000000001
+      }
+    },
+    "late_constant_rpm_failed_smooth_observables": [
+      "funnel_depth_m",
+      "min_gap_to_bar_m",
+      "kinetic_energy_lab_j",
+      "angular_momentum_z_kg_m2_s",
+      "axisymmetry_error",
+      "liquid_mass_error_relative"
+    ],
+    "next_decision_boundary": {
+      "all_paths_require_new_preregistration": true,
+      "automatic_q1r4_freeze_allowed": false,
+      "human_choice_required_between": [
+        "same_model_shifted_6_9_13_5_path_with_new_common_step_and_all_runs",
+        "same_model_finer_9_13_5_20_25_path_with_resource_preflight",
+        "changed_startup_or_observation_protocol",
+        "changed_numerical_regularization_boundary_or_model_identity"
+      ]
+    },
+    "next_equal_ratio_resource_indicators": [
+      {
+        "box_cell_count": 7490880,
+        "cell_ratio_relative_to_q1r3_fine": 3.375,
+        "grid_nx_ny_nz": [
+          204,
+          204,
+          180
+        ],
+        "linear_cpu_rss_indicator_bytes": 7452103680.0,
+        "linear_wall_clock_indicator_s": 26011.19342624512,
+        "q1r3_common_time_step_statically_active": false,
+        "static_capillary_time_step_ceiling_s": 4.275831354143855e-06,
+        "static_step_adjusted_linear_wall_clock_indicator_s": 33458.18672331459,
+        "target_bar_diameter_cells_worst_axis": 13.5
+      },
+      {
+        "box_cell_count": 24952320,
+        "cell_ratio_relative_to_q1r3_fine": 11.242214532871973,
+        "grid_nx_ny_nz": [
+          304,
+          304,
+          270
+        ],
+        "linear_cpu_rss_indicator_bytes": 24823155049.411766,
+        "linear_wall_clock_indicator_s": 86643.97533448202,
+        "q1r3_common_time_step_statically_active": false,
+        "static_capillary_time_step_ceiling_s": 2.350473955341231e-06,
+        "static_step_adjusted_linear_wall_clock_indicator_s": 202742.88224158133,
+        "target_bar_diameter_cells_worst_axis": 20.25
+      }
+    ],
+    "ramp_end_s": 0.005,
+    "resource_indicator_boundary": "Cell-count-linear CPU RSS and static-capillary-step-adjusted wall-clock indicators only; they are not GPU-memory measurements, dynamic-limiter predictions, or feasibility guarantees.",
+    "run_end_s": 0.02,
+    "status": "Q1R3_SPATIAL_FAILURE_MECHANISM_NOT_UNIQUELY_IDENTIFIED__HUMAN_SCIENTIFIC_AND_RESOURCE_DECISION_REQUIRED",
+    "target_rpm": 300.0,
+    "unresolved_mechanism_candidates": [
+      "bar_and_brinkman_forcing_resolution",
+      "diffuse_interface_and_boundary_layer_regularization",
+      "open_boundary_domain_response",
+      "short_transient_observation_protocol",
+      "continuous_model_inadequacy"
+    ],
+    "window_results": {
+      "acceleration_ramp": {
+        "all_smooth_observables_pass": false,
+        "end_s": 0.005,
+        "observable_count": 6,
+        "observables": {
+          "angular_momentum_z_kg_m2_s": {
+            "fine_grid_gci_l2": 2.5678600690779674,
+            "observed_order": 0.48536040396820535,
+            "pass_against_frozen_thresholds": false,
+            "reason": "Three-level differences support a positive convergence trend.",
+            "relative_l2_fine_medium": 0.4468004806175744,
+            "relative_linf_fine_medium": 0.43451756808305236
+          },
+          "axisymmetry_error": {
+            "fine_grid_gci_l2": 15.737698216704635,
+            "observed_order": 0.05245758653767717,
+            "pass_against_frozen_thresholds": false,
+            "reason": "Three-level differences support a positive convergence trend.",
+            "relative_l2_fine_medium": 0.27065735969269017,
+            "relative_linf_fine_medium": 0.28454250572781153
+          },
+          "funnel_depth_m": {
+            "fine_grid_gci_l2": null,
+            "observed_order": null,
+            "pass_against_frozen_thresholds": false,
+            "reason": "No positive observed order could be established from the three-level L2 differences.",
+            "relative_l2_fine_medium": 2.194270917860438e-13,
+            "relative_linf_fine_medium": 6.938893903907227e-13
+          },
+          "kinetic_energy_lab_j": {
+            "fine_grid_gci_l2": 1.7229071949414034,
+            "observed_order": 0.8126306357977626,
+            "pass_against_frozen_thresholds": false,
+            "reason": "Three-level differences support a positive convergence trend.",
+            "relative_l2_fine_medium": 0.5379103698522648,
+            "relative_linf_fine_medium": 0.5352533225012438
+          },
+          "liquid_mass_error_relative": {
+            "fine_grid_gci_l2": null,
+            "observed_order": null,
+            "pass_against_frozen_thresholds": false,
+            "reason": "No positive observed order could be established from the three-level L2 differences.",
+            "relative_l2_fine_medium": 2.0969054156059327e-07,
+            "relative_linf_fine_medium": 4.584020445985338e-07
+          },
+          "min_gap_to_bar_m": {
+            "fine_grid_gci_l2": 0.010171768856996144,
+            "observed_order": 0.4555335257437174,
+            "pass_against_frozen_thresholds": false,
+            "reason": "Three-level differences support a positive convergence trend.",
+            "relative_l2_fine_medium": 0.0016507647922138107,
+            "relative_linf_fine_medium": 0.0016612499040958584
+          }
+        },
+        "pass_count": 0,
+        "start_s": 0.0
+      },
+      "constant_rpm_early": {
+        "all_smooth_observables_pass": false,
+        "end_s": 0.01,
+        "observable_count": 6,
+        "observables": {
+          "angular_momentum_z_kg_m2_s": {
+            "fine_grid_gci_l2": 7.097336603887097,
+            "observed_order": 0.16372969522019604,
+            "pass_against_frozen_thresholds": false,
+            "reason": "Three-level differences support a positive convergence trend.",
+            "relative_l2_fine_medium": 0.3897281380403049,
+            "relative_linf_fine_medium": 0.3610790845376747
+          },
+          "axisymmetry_error": {
+            "fine_grid_gci_l2": 314.09004242836517,
+            "observed_order": 0.003487514619494021,
+            "pass_against_frozen_thresholds": false,
+            "reason": "Three-level differences support a positive convergence trend.",
+            "relative_l2_fine_medium": 0.35556645023382555,
+            "relative_linf_fine_medium": 0.38896495601090647
+          },
+          "funnel_depth_m": {
+            "fine_grid_gci_l2": 1.0778787305902402,
+            "observed_order": 3.690387576824472,
+            "pass_against_frozen_thresholds": false,
+            "reason": "Three-level differences support a positive convergence trend.",
+            "relative_l2_fine_medium": 2.988088463112495,
+            "relative_linf_fine_medium": 7.954131718453799
+          },
+          "kinetic_energy_lab_j": {
+            "fine_grid_gci_l2": 1.941559489776967,
+            "observed_order": 0.6938170122221512,
+            "pass_against_frozen_thresholds": false,
+            "reason": "Three-level differences support a positive convergence trend.",
+            "relative_l2_fine_medium": 0.5046122878527809,
+            "relative_linf_fine_medium": 0.4899419079935787
+          },
+          "liquid_mass_error_relative": {
+            "fine_grid_gci_l2": null,
+            "observed_order": null,
+            "pass_against_frozen_thresholds": false,
+            "reason": "No positive observed order could be established from the three-level L2 differences.",
+            "relative_l2_fine_medium": 0.9857427641439928,
+            "relative_linf_fine_medium": 0.9836898163861442
+          },
+          "min_gap_to_bar_m": {
+            "fine_grid_gci_l2": null,
+            "observed_order": null,
+            "pass_against_frozen_thresholds": false,
+            "reason": "No positive observed order could be established from the three-level L2 differences.",
+            "relative_l2_fine_medium": 0.0017881425087209165,
+            "relative_linf_fine_medium": 0.002069035169030175
+          }
+        },
+        "pass_count": 0,
+        "start_s": 0.005
+      },
+      "constant_rpm_late": {
+        "all_smooth_observables_pass": false,
+        "end_s": 0.02,
+        "observable_count": 6,
+        "observables": {
+          "angular_momentum_z_kg_m2_s": {
+            "fine_grid_gci_l2": null,
+            "observed_order": null,
+            "pass_against_frozen_thresholds": false,
+            "reason": "No positive observed order could be established from the three-level L2 differences.",
+            "relative_l2_fine_medium": 0.29030891086251126,
+            "relative_linf_fine_medium": 0.27669830428284314
+          },
+          "axisymmetry_error": {
+            "fine_grid_gci_l2": 0.8320139646615712,
+            "observed_order": 1.0208713561536422,
+            "pass_against_frozen_thresholds": false,
+            "reason": "Three-level differences support a positive convergence trend.",
+            "relative_l2_fine_medium": 0.34129064641252416,
+            "relative_linf_fine_medium": 0.4718801066884607
+          },
+          "funnel_depth_m": {
+            "fine_grid_gci_l2": 7.594352427117562,
+            "observed_order": 0.5057081924839735,
+            "pass_against_frozen_thresholds": false,
+            "reason": "Three-level differences support a positive convergence trend.",
+            "relative_l2_fine_medium": 1.3826751495011183,
+            "relative_linf_fine_medium": 1.0748349036037923
+          },
+          "kinetic_energy_lab_j": {
+            "fine_grid_gci_l2": null,
+            "observed_order": null,
+            "pass_against_frozen_thresholds": false,
+            "reason": "No positive observed order could be established from the three-level L2 differences.",
+            "relative_l2_fine_medium": 0.41999428145121065,
+            "relative_linf_fine_medium": 0.40036050963478903
+          },
+          "liquid_mass_error_relative": {
+            "fine_grid_gci_l2": null,
+            "observed_order": null,
+            "pass_against_frozen_thresholds": false,
+            "reason": "No positive observed order could be established from the three-level L2 differences.",
+            "relative_l2_fine_medium": 0.6574673018801811,
+            "relative_linf_fine_medium": 0.6857430344424252
+          },
+          "min_gap_to_bar_m": {
+            "fine_grid_gci_l2": null,
+            "observed_order": null,
+            "pass_against_frozen_thresholds": false,
+            "reason": "No positive observed order could be established from the three-level L2 differences.",
+            "relative_l2_fine_medium": 0.007298827897260127,
+            "relative_linf_fine_medium": 0.009051713804622812
+          }
+        },
+        "pass_count": 0,
+        "start_s": 0.015
+      },
+      "constant_rpm_middle": {
+        "all_smooth_observables_pass": false,
+        "end_s": 0.015,
+        "observable_count": 6,
+        "observables": {
+          "angular_momentum_z_kg_m2_s": {
+            "fine_grid_gci_l2": null,
+            "observed_order": null,
+            "pass_against_frozen_thresholds": false,
+            "reason": "No positive observed order could be established from the three-level L2 differences.",
+            "relative_l2_fine_medium": 0.3326024153175244,
+            "relative_linf_fine_medium": 0.3101143833272054
+          },
+          "axisymmetry_error": {
+            "fine_grid_gci_l2": null,
+            "observed_order": null,
+            "pass_against_frozen_thresholds": false,
+            "reason": "No positive observed order could be established from the three-level L2 differences.",
+            "relative_l2_fine_medium": 0.46289211390252255,
+            "relative_linf_fine_medium": 0.4995162053416115
+          },
+          "funnel_depth_m": {
+            "fine_grid_gci_l2": 6.484214620161551,
+            "observed_order": 1.3983691175897395,
+            "pass_against_frozen_thresholds": false,
+            "reason": "Three-level differences support a positive convergence trend.",
+            "relative_l2_fine_medium": 3.9577175189978453,
+            "relative_linf_fine_medium": 2.656170517497507
+          },
+          "kinetic_energy_lab_j": {
+            "fine_grid_gci_l2": 3.888453372454015,
+            "observed_order": 0.3356308712547734,
+            "pass_against_frozen_thresholds": false,
+            "reason": "Three-level differences support a positive convergence trend.",
+            "relative_l2_fine_medium": 0.4534904780453843,
+            "relative_linf_fine_medium": 0.4281710797797209
+          },
+          "liquid_mass_error_relative": {
+            "fine_grid_gci_l2": 1.688936769375834,
+            "observed_order": 0.6929105901236743,
+            "pass_against_frozen_thresholds": false,
+            "reason": "Three-level differences support a positive convergence trend.",
+            "relative_l2_fine_medium": 0.4382977327518315,
+            "relative_linf_fine_medium": 0.49199562155468796
+          },
+          "min_gap_to_bar_m": {
+            "fine_grid_gci_l2": null,
+            "observed_order": null,
+            "pass_against_frozen_thresholds": false,
+            "reason": "No positive observed order could be established from the three-level L2 differences.",
+            "relative_l2_fine_medium": 0.00337019585573472,
+            "relative_linf_fine_medium": 0.005018767193716999
+          }
+        },
+        "pass_count": 0,
+        "start_s": 0.01
+      }
+    }
+  },
+  "quality_pass_by_case": {
+    "space_L0_4cells": true,
+    "space_L1_6cells": true,
+    "space_L2_9cells": true
+  },
+  "schema_version": 1,
+  "smooth_observables": {
+    "angular_momentum_z_kg_m2_s": {
+      "asymptotic_trend": false,
+      "fine_grid_gci_l2": null,
+      "observed_order": null,
+      "pass": false,
+      "reason": "No positive observed order could be established from the three-level L2 differences.",
+      "relative_l2_fine_medium": 0.32942442436164726,
+      "relative_linf_fine_medium": 0.27669830428284314,
+      "thresholds": {
+        "gci_l2_max": 0.05,
+        "observed_order_min": 0.5,
+        "relative_l2_max": 0.05,
+        "relative_linf_max": 0.1
+      }
+    },
+    "axisymmetry_error": {
+      "asymptotic_trend": true,
+      "fine_grid_gci_l2": 5.4877758300550425,
+      "observed_order": 0.21581240145105518,
+      "pass": false,
+      "reason": "Three-level differences support a positive convergence trend.",
+      "relative_l2_fine_medium": 0.4014727960302999,
+      "relative_linf_fine_medium": 0.4995162053416115,
+      "thresholds": {
+        "gci_l2_max": 0.05,
+        "observed_order_min": 0.5,
+        "relative_l2_max": 0.05,
+        "relative_linf_max": 0.1
+      }
+    },
+    "funnel_depth_m": {
+      "asymptotic_trend": true,
+      "fine_grid_gci_l2": 5.534213557257202,
+      "observed_order": 0.7129276796704513,
+      "pass": false,
+      "reason": "Three-level differences support a positive convergence trend.",
+      "relative_l2_fine_medium": 1.4839731620028025,
+      "relative_linf_fine_medium": 1.0748349036037923,
+      "thresholds": {
+        "gci_l2_max": 0.05,
+        "observed_order_min": 0.5,
+        "relative_l2_max": 0.05,
+        "relative_linf_max": 0.1
+      }
+    },
+    "kinetic_energy_lab_j": {
+      "asymptotic_trend": true,
+      "fine_grid_gci_l2": 6.939972391778307,
+      "observed_order": 0.19059245965263388,
+      "pass": false,
+      "reason": "Three-level differences support a positive convergence trend.",
+      "relative_l2_fine_medium": 0.44606261518529927,
+      "relative_linf_fine_medium": 0.40036050963478903,
+      "thresholds": {
+        "gci_l2_max": 0.05,
+        "observed_order_min": 0.5,
+        "relative_l2_max": 0.05,
+        "relative_linf_max": 0.1
+      }
+    },
+    "liquid_mass_error_relative": {
+      "asymptotic_trend": false,
+      "fine_grid_gci_l2": null,
+      "observed_order": null,
+      "pass": false,
+      "reason": "No positive observed order could be established from the three-level L2 differences.",
+      "relative_l2_fine_medium": 0.6543776018320083,
+      "relative_linf_fine_medium": 0.6857430344424252,
+      "thresholds": {
+        "gci_l2_max": 0.05,
+        "observed_order_min": 0.5,
+        "relative_l2_max": 0.05,
+        "relative_linf_max": 0.1
+      }
+    },
+    "min_gap_to_bar_m": {
+      "asymptotic_trend": false,
+      "fine_grid_gci_l2": null,
+      "observed_order": null,
+      "pass": false,
+      "reason": "No positive observed order could be established from the three-level L2 differences.",
+      "relative_l2_fine_medium": 0.004195475460315919,
+      "relative_linf_fine_medium": 0.00904891303010583,
+      "thresholds": {
+        "gci_l2_max": 0.05,
+        "observed_order_min": 0.5,
+        "relative_l2_max": 0.05,
+        "relative_linf_max": 0.1
+      }
+    }
+  },
+  "spatial_gate_results": {
+    "binary_event_consistency": true,
+    "configuration": true,
+    "effective_time_step_identity": true,
+    "per_case_numerical_quality": true,
+    "smooth_observable_convergence": false
+  },
+  "spatial_identity_by_case": {
+    "space_L0_4cells": true,
+    "space_L1_6cells": true,
+    "space_L2_9cells": true
+  },
+  "spatial_stage_pass": false,
+  "status": "Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED",
+  "topology_regime_exercised": false
+}

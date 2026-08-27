@@ -20,6 +20,9 @@
 - `reports/q1r2/`：Q1R2 原始资格报告与空间门失败闭锁裁决；三层空间完整，时间中层主动停止，时间细层未启动。
 - `analyse_q1r2_dt_pilot.py`：从三层稠密步长轨迹选择带设计余量的量化共同登记步长。
 - `analyse_q1r2_early_stop.py`：验证完成的空间证据是否已足以失败闭锁，并区分主动停止与数值故障。
+- `campaign_q1r3.json`、`generated_q1r3/` 与 `reports/q1r3_freeze/`：开边界质量语义拆分后冻结的 Q1R3 输入、冻结身份和“空间先裁决”的早停协议。
+- `reports/q1r3_spatial_stage/`：Q1R3 三层空间归档的原始通用分析与绑定冻结身份的空间阶段失败闭锁裁决；时间中、细层未启动。
+- `analyse_q1r3_spatial_stage.py`：核验冻结报告、生成清单、空间归档载荷和原始资格报告，形成空间阶段 PASS/FAIL，并在失败后执行不改变冻结结论的窗口与资源诊断。
 - `evidence/hf_preview_quick_resolution_audit.*`：对正式快速配置的配置级审计。
 - `tests/`：资格算法、归档失败诊断和候选数值控制的短时单元测试。
 
@@ -161,7 +164,35 @@ python3 \
   "90_候选工作区/current/01_HF3D数值资格/reports/q1r2/early_stop_decision.md"
 ```
 
-## Q1/Q1R/Q1R2 的严格边界
+Q1R3 已按冻结协议先完成三层空间运行。以下第一条通用分析命令会因为时间中、细层按协议尚未运行而返回非零，并写出顶层 `INCOMPLETE_MISSING_OR_UNREADABLE_RUNS`；这不等于空间组尚未形成结果。第二条命令只读取已完整形成的空间组并核验全部绑定证据，最终状态为 `Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED`。
+
+```bash
+"90_候选工作区/current/01_HF3D数值资格/.venv-gpu/bin/python" \
+  "90_候选工作区/current/01_HF3D数值资格/hfq.py" \
+  analyse \
+  "90_候选工作区/current/01_HF3D数值资格/generated_q1r3/cases_manifest.json" \
+  "90_候选工作区/current/01_HF3D数值资格/runs/q1r3" \
+  "90_候选工作区/current/01_HF3D数值资格/reports/q1r3_spatial_stage"
+
+"90_候选工作区/current/01_HF3D数值资格/.venv-gpu/bin/python" \
+  "90_候选工作区/current/01_HF3D数值资格/analyse_q1r3_spatial_stage.py" \
+  --freeze-report \
+  "90_候选工作区/current/01_HF3D数值资格/reports/q1r3_freeze/freeze_manifest.json" \
+  --campaign-manifest \
+  "90_候选工作区/current/01_HF3D数值资格/generated_q1r3/cases_manifest.json" \
+  --qualification-report \
+  "90_候选工作区/current/01_HF3D数值资格/reports/q1r3_spatial_stage/qualification_report.json" \
+  --run-root \
+  "90_候选工作区/current/01_HF3D数值资格/runs/q1r3" \
+  --expected-source-sha256 \
+  03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010 \
+  --json-output \
+  "90_候选工作区/current/01_HF3D数值资格/reports/q1r3_spatial_stage/spatial_stage_decision.json" \
+  --markdown-output \
+  "90_候选工作区/current/01_HF3D数值资格/reports/q1r3_spatial_stage/spatial_stage_decision.md"
+```
+
+## Q1/Q1R/Q1R2/Q1R3 的严格边界
 
 原 Q1 已因细化设计门失败而作废，不能把其中任何层间差异解释为空间或时间收敛。Q1R 的静态设计门通过，但真实运行没有通过：粗层完整结束且单例质量门通过；中层完整结束但最大投影散度为 $5.807218\times10^{-4}\ \mathrm{s}^{-1}$，超过候选上限 $1.0\times10^{-4}\ \mathrm{s}^{-1}$；细层在约 60.7% 处因源项后对流 CFL 为 0.3504、超过冻结上限 0.3500 而失败闭锁；两个更细时间层未运行。因此 Q1R 当前状态是 `FAIL_PROVENANCE_INPUT_OR_COMPLETION_GATE`，并同时存在独立数值质量失败，不能据此声称空间或时间收敛。
 
@@ -175,6 +206,14 @@ Q1R2 三层空间算例均已完整执行。粗、中层登记步长命中率均
 
 在上述两个空间门已经不可补救地失败后，时间中层在 110 步主动中断并留下 `state=cancelling`、非完整但载荷哈希和配置身份有效的诊断目录，时间细层未启动。冻结分析器原始顶层状态为 `FAIL_PROVENANCE_INPUT_OR_COMPLETION_GATE`；补充裁决状态为 `Q1R2_FAIL_CLOSED_AFTER_COMPLETED_SPATIAL_GATES__TEMPORAL_NOT_COMPLETED`。完整 `0.02 s` 轨迹对下一轮步长的只读投影暂给 `5.5e-6 s`，相邻 `5.6e-6 s` 未达到 0.97 设计比例；该结果不是 Q1R3 冻结值，改变步长后的真实轨迹与质量门语义仍须另行预注册和验证。
 
+Q1R3 先把 `liquid_volume_balance_error_relative` 保留为开边界通量修正后的数值守恒硬门，并把旧归档名 `liquid_mass_error_relative` 明确重分类为规范语义 `liquid_inventory_change_relative`：后者没有未经物理标定的绝对硬门，但仍是必需空间/时间平滑量。冻结前细网格 CUDA 探针通过后，Q1R3 绑定共同空间登记步长 `5.5e-6 s` 和 `4/6/9` 格/磁子直径路径，并规定空间任一门失败即不得运行时间新增算例。
+
+冻结后三层空间归档的配置门、实际时间步身份门、逐算例数值质量门和二值事件一致性门均通过；登记步长命中率依次为 0.994505、0.994505 和 0.957808，三个二值事件均为 `NOT_EXERCISED`。但六个必需平滑量全部未通过空间收敛门：两最细层相对 $L^2$ 误差从 `min_gap_to_bar_m` 的 0.00420 到 `funnel_depth_m` 的 1.48397 不等，多项没有正观测阶，其余 GCI 远超 0.05。空间阶段因而失败闭锁，时间中层 `2.75e-6 s` 和细层 `1.375e-6 s` 均未启动，时间收敛状态为 `NOT_EVALUATED`。
+
+失败后的只读窗口诊断把加速段和三个恒定 `300 rpm` 子窗分别重算，四个窗口均为 0/6 平滑量达到冻结阈值，因此失败并不只来自加速启动段。液体净存量变化在粗层未达到 $10^{-6}$，在中、细层分别于 `0.011 s` 和 `0.009 s` 达到该量级，而三层通量修正守恒残差仍约为 $10^{-11}$；这支持开边界存量响应存在强网格依赖，不支持数值不守恒。现有三层仍不能唯一分离磁子/Brinkman 分辨率、弥散界面与边界层正则化、开边界域响应、短时协议或连续模型缺项。
+
+若延续 1.5 细化比，向上平移一级的 `6/9/13.5` 路径至少要运行 7490880 单元的 `13.5` 格层，完全更细的 `9/13.5/20.25` 路径还要运行 24952320 单元的 `20.25` 格层。两层的静态毛细步上限都低于 Q1R3 的共同 `5.5e-6 s`，所以旧 `6/9` 归档不能与新增 `13.5` 层直接组成有效空间组；选择同模型路径也必须冻结更小共同步长并整组重跑。资源可行性和科学路径必须先由人工裁决，再另行预注册 Q1R4。
+
 Q1R、Q1R2 的时长和分辨率都只用于早期瞬态筛查，不覆盖统计稳态，不足以给出漏斗稳态深度、首次触杆转速、稳定气道半径或结构性分岔。只有后续早期筛查先通过，才可另行冻结平滑区 Q2 和近拓扑区 Q2；不得把任何数值状态直接升级为物理预测通过。
 
 ## 测试
@@ -184,4 +223,4 @@ cd "90_候选工作区/current/01_HF3D数值资格"
 python3 -Werror -m unittest discover -s tests -v
 ```
 
-当前候选测试共 29 项；本机 CUDA 环境的正式全量测试为 181/181 通过，正式 self-check 为 6/6 通过。候选测试只验证资格算法、归档诊断、步长设计和失败闭锁关系；CUDA 终态单步重放也只验证压力容差机制。正式路径窗口与三层空间运行提供了更强的实现级和单例证据，但 Q1R2 已失败，仍未取得多网格、多时间步收敛或数值资格。
+当前候选测试共 35 项；本机 CUDA 环境的正式全量测试为 181/181 通过，正式 self-check 为 6/6 通过。候选测试只验证资格算法、归档诊断、步长设计和失败闭锁关系；CUDA 终态单步重放也只验证压力容差机制。正式路径窗口与 Q1R3 三层空间运行提供了更强的实现级和单例证据，但 Q1R3 已因六个平滑量空间不收敛而失败，仍未取得多网格、多时间步收敛或数值资格。
