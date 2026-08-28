@@ -1,0 +1,180 @@
+{
+  "authenticity_limit": "SHA-256 detects accidental mutation against this tracked manifest; it is not an external signature.",
+  "file_count": 34,
+  "files": [
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/g0_g1_smoke/g0.npz",
+      "sha256": "e5ffda5c867094513a1158c17cd0a8534894a9ebbb927111532701590268a080",
+      "size_bytes": 5531918
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/g0_g1_smoke/g1.npz",
+      "sha256": "26b85b269f094458c8f3e14c92b3f7003dbb3028313b3cfd753b46508648b131",
+      "size_bytes": 5491354
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/g0_g1_smoke.json",
+      "sha256": "fe01826caf19adaaf3ac15d32188bf706190ca1e9b65cabefec2c67a656026e1",
+      "size_bytes": 17873
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/g0_replay/cpu/formal_g0.npz",
+      "sha256": "1f262f1956d64e914ec611be22cac89900571a601e4c9d4efa248da4b041fdd7",
+      "size_bytes": 5531892
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/g0_replay/cpu/rebuilt_g0.npz",
+      "sha256": "1f262f1956d64e914ec611be22cac89900571a601e4c9d4efa248da4b041fdd7",
+      "size_bytes": 5531892
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/g0_replay/cuda/formal_g0.npz",
+      "sha256": "e5ffda5c867094513a1158c17cd0a8534894a9ebbb927111532701590268a080",
+      "size_bytes": 5531918
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/g0_replay/cuda/rebuilt_g0.npz",
+      "sha256": "e5ffda5c867094513a1158c17cd0a8534894a9ebbb927111532701590268a080",
+      "size_bytes": 5531918
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/g0_self_identity.json",
+      "sha256": "cd6f65d7c790433be115891d593acacf9c4128624e65c35c5a71d93f05bc2df9",
+      "size_bytes": 110320
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_6/g0/arrays.npz",
+      "sha256": "4823765a547d83d209b8b7eb547ff9903141683903aa470a10a43447ad9338d3",
+      "size_bytes": 30874304
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_6/g0/config.json",
+      "sha256": "602dead5fa6b8b4485103bf91adb53b1bb17b6b3e3f9c8f7c0578be4242d0cd0",
+      "size_bytes": 3528
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_6/g0/manifest.json",
+      "sha256": "6875c9e9dad1e6cdbd8fba0b96b56b6b88fbc47307751ca91be90997eae629c7",
+      "size_bytes": 2728
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_6/g0/provenance.json",
+      "sha256": "75728de2baa4535e6b2cc0ffd6b08791a56b7299f61695d5d018aaa0cef88894",
+      "size_bytes": 5676
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_6/g0/result.json",
+      "sha256": "3c6efe7d3c0f4d98589e1ffca633487628457d54421b3b0531da3f862c860051",
+      "size_bytes": 26725
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_6/g0/timeseries.csv",
+      "sha256": "33113831ff5bcb47397d50d05ba54e979de3205001ebc3c5994a1dd27ec4ca05",
+      "size_bytes": 7433
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_6/g1/arrays.npz",
+      "sha256": "d07e1181207ad1bca4eb8b50f25d467bedfa0c3879540714e9b22bb8b5757c4c",
+      "size_bytes": 30864596
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_6/g1/config.json",
+      "sha256": "602dead5fa6b8b4485103bf91adb53b1bb17b6b3e3f9c8f7c0578be4242d0cd0",
+      "size_bytes": 3528
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_6/g1/manifest.json",
+      "sha256": "879877a103bb69fa2d6f0c53a3f09292fbbb3a1d94333260d3b6a42d673fe675",
+      "size_bytes": 2728
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_6/g1/provenance.json",
+      "sha256": "f97ee1945db0d20f02932e1f8f14033261af81655e263090830093f23ba8548d",
+      "size_bytes": 5676
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_6/g1/result.json",
+      "sha256": "f0105ba7cd7d10d3d9915d911c1af77a6a4e0697f5fd2cc2119c9ca0ce919dc8",
+      "size_bytes": 26729
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_6/g1/timeseries.csv",
+      "sha256": "55a018c4c06c90720c13801ea77bd15401c95f5fb891b6ef0dc91fa8ad283d2e",
+      "size_bytes": 7440
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_6/pair_summary.json",
+      "sha256": "37327ea135d367a7a0a5189f6e2f154c8bd37ffd96e907c6d3c6b55f3477a1af",
+      "size_bytes": 69301
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_9/g0/arrays.npz",
+      "sha256": "0a6a58cd7fc6c04acd4fd6293eb52fa7f78d74f73f40c4e26c80d440035ae29e",
+      "size_bytes": 102536665
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_9/g0/config.json",
+      "sha256": "64bf8553b88e546b3bd18a8867fd9ed5455be475bb77f467f8c45c157353b86d",
+      "size_bytes": 3531
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_9/g0/manifest.json",
+      "sha256": "59123199192ff8cdc9dced7ad368c151a2f83d75d3be5e997764521559cce8c3",
+      "size_bytes": 2729
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_9/g0/provenance.json",
+      "sha256": "e1c11b821195e3156895311658b776efee419414165257734fee7c1db37992bf",
+      "size_bytes": 5680
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_9/g0/result.json",
+      "sha256": "4fdfb5a52db93431df8fce1475b42c588d0868ba2dd207b9f33ae578592f29dd",
+      "size_bytes": 26929
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_9/g0/timeseries.csv",
+      "sha256": "f8a1c9163d095cc51d4236809fd9a26d536f4f87ea4218709c6b830461a9c3d1",
+      "size_bytes": 7264
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_9/g1/arrays.npz",
+      "sha256": "456d61d8a14feecd4b039822639e4d0c0f59841e7d96b9cc78f799f817fc9b06",
+      "size_bytes": 102582618
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_9/g1/config.json",
+      "sha256": "64bf8553b88e546b3bd18a8867fd9ed5455be475bb77f467f8c45c157353b86d",
+      "size_bytes": 3531
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_9/g1/manifest.json",
+      "sha256": "ec6806b22231d7a7691313166dcd709c5e6cd6e0fb5d8959971d5366945a26d9",
+      "size_bytes": 2729
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_9/g1/provenance.json",
+      "sha256": "2b5904e0d6532c74aaa013f2c64504f00b5b816012f196aa29f9d456361dd771",
+      "size_bytes": 5680
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_9/g1/result.json",
+      "sha256": "e5113de652362b9f2c33b947bf8d8380cc06df87eb10f34069e77926c552eef1",
+      "size_bytes": 26931
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_9/g1/timeseries.csv",
+      "sha256": "274e1dac16a6935d5554d4057fa5f0c03f1a49e648cbc171d0c7298a755982ed",
+      "size_bytes": 7185
+    },
+    {
+      "path": "90_候选工作区/current/05_D1动态影子对照/artifacts/runs/level_9/pair_summary.json",
+      "sha256": "0a5151196ffc58c783d32135571c0b7bdf9c93bfb3394a96e82c075ac170ea99",
+      "size_bytes": 69414
+    }
+  ],
+  "integrity_scope": "local ignored raw D1 products available at analysis time",
+  "protocol_id": "D1_G0_G1_LOCKSTEP_DYNAMIC_SHADOW_V1",
+  "schema_version": 1,
+  "total_size_bytes": 300460363
+}

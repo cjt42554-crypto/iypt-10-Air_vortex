@@ -2,75 +2,73 @@
 
 ## 当前状态
 
-Pro 已完成对 D1 静态证据、正式网格构造和 HF3D 运行路径的独立复核，裁决为：
+D1 候选区 G0/G1 成对锁步动态影子对照已经按 Pro 预注册完成，冻结状态为：
 
 ```text
-D1_CANDIDATE_ONLY_LOCKSTEP_DYNAMIC_SHADOW_AUTHORIZED__NOT_EXECUTED
+D1_DYNAMIC_SHADOW_COMPLETE__GEOMETRY_EFFECT_SMALL_IN_REGISTERED_WINDOW__STOP_FOR_PRO_REVIEW
 ```
 
-授权的是候选区内的故障归因实验，不是数值资格或正式提升。动态步数仍为 `0`。
+当前等待 Pro 复核。报告后停止点已经到达，不得自行继续动态算例、改变协议或正式提升 G1。
 
-## 任务入口
+## 复核入口
 
-下一任务由具备本地仓库和实际 CUDA 环境的执行者完成，入口为：
-
-- 科学裁决与完整边界：`90_候选工作区/current/05_D1动态影子对照科学裁决与预注册.md`；
-- 执行说明：`90_候选工作区/current/05_D1动态影子对照/README.md`；
+- 人类可读报告：`90_候选工作区/current/05_D1动态影子对照/reports/d1_dynamic_shadow_report.md`；
+- 机器可读报告：`90_候选工作区/current/05_D1动态影子对照/reports/d1_dynamic_shadow_report.json`；
+- 本地原始证据清单：`90_候选工作区/current/05_D1动态影子对照/artifacts/d1_dynamic_shadow_manifest.json`；
+- 冻结科学裁决：`90_候选工作区/current/05_D1动态影子对照科学裁决与预注册.md`；
 - 机器可读合同：`90_候选工作区/current/05_D1动态影子对照/d1_dynamic_shadow_preregistration.json`。
 
-## 关键复核结论
+## 执行身份与阶段门
 
-- D1 静态 PASS 与源码实现相符，未发现报告逻辑伪造；
-- G1–G2 加权对称差仍未被阈值化接受；名义 `4/6/9/13.5` 层相对区间上界约为 `0.1910331/0.1684747/0.1304297/0.0811327`，全部相位最大值为 `0.214969991`；
-- `6→13.5` 的缩放指标约 `0.90`，只支持“值得做动态诊断”，不支持 G1 正确或收敛；
-- 禁止只在正式网格构造后替换 `bar_mask`。必须在投影与初态创建前重建 `active_mask`、开面、索引、最近固体距离/类型和壁面法向；
-- G0 往返自同一性是任何 G1 动态步之前的硬门；
-- G0/G1 必须由同一个成对锁步驱动器推进，禁止分别自适应运行后插值。
+- Pro 裁决由远端提交 `8829b5f` 拉入；候选实现和所有结果承载运行绑定提交 `68ef0dcef63a652eda348b8439ef62c13a812642`；
+- 正式源码树在各完整窗口前后均为 `dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8`；
+- S0/S1：名义 `4/6/9` 层 G0 静态往返、初态及 `4` 格层 CPU/CUDA 八步同一性通过；
+- S2：`4` 格层 G0/G1 CUDA 八步烟雾测试通过；
+- S3：`6` 格层 G0/G1 完成 `0.010 s`、`1820` 个共同接受步、`0` 次重试，两侧全部质量门通过；
+- S4：`9` 格层 G0/G1 完成 `0.010 s`、`1820` 个共同接受步、`0` 次重试，两侧全部质量门通过；
+- `6/9` 两层的共同接受时间 SHA-256 均为 `469efa2a729a3cfeda808f1aed082b7e17f3b33d4c43b0cbf87551f8a23b931a`；
+- CUDA 设备为 NVIDIA GeForce RTX 5060 Laptop GPU，未回退到 CPU；
+- S5 独立分析器重新加载并校验归档后，全部九项阶段门通过。
 
-## 已授权工作
+第一次 `9` 格层尝试在 `t=0.007 s` 被外部会话中断，没有生成 `level_9` 结果文件，也未进入分析。随后以相同提交和配置从零完整重跑；清单只纳入完整重跑产物。
 
-仅允许在新候选目录中：
+## 冻结几何归因结论
 
-1. 实现候选网格安装器、锁步驱动器、分析器和测试；
-2. 完成名义 `4/6/9` 层 G0 静态自同一性；
-3. 完成 `4` 格层 CPU/CUDA G0 八步同一性及 G0/G1 CUDA 八步烟雾测试；
-4. 以 Q1R3 `6/9` 配置为基线，只把时长改为 `0.010 s`，依次运行锁步 G0/G1 对照；
-5. 使用预注册四分类生成报告后停止，交 Pro 复核。
+四个主要观测量的直接物质性、极端变化和误差削减信号计数均为 `0`，全部满足预注册的小窗口效应判据。全窗口主要指标为：
 
-正式 `01_最终理论/**` 与 `02_模拟程序/**` 不得修改。
+| 观测量 | max D | max eta | rho |
+|---|---:|---:|---:|
+| funnel_depth_m | 0.0258418 | 0.0258418 | 0.976337 |
+| kinetic_energy_lab_j | 5.16091e-05 | 0.000153855 | 0.999846 |
+| angular_momentum_z_kg_m2_s | 2.04859e-05 | 7.25894e-05 | 0.999931 |
+| axisymmetry_error | 1.17405e-05 | 2.0974e-05 | 1.00002 |
 
-## 失败闭锁
-
-以下任一情况发生即停止，不作几何物质性裁决：
-
-- G0 自同一性失败；
-- 证据、配置、掩膜或正式源码身份不匹配；
-- CUDA 回退；
-- 两侧接受时间不完全相同；
-- 任一算例不完整或数值质量门失败；
-- 使用未登记配置覆盖；
-- 在 `6` 格层未通过全部门时启动 `9` 格层。
-
-失败状态为：
+因此冻结标签为：
 
 ```text
-D1_DYNAMIC_SHADOW_INCONCLUSIVE_FAIL_CLOSED
+GEOMETRY_EFFECT_SMALL_IN_REGISTERED_WINDOW
 ```
+
+它只支持“在登记短窗口内，G0/G1 布尔几何差异对既有失败形态的影响较小”。它不证明 G1 正确、收敛或更接近实验，也不证明 Q1R3 失败的唯一原因。
+
+## 原始证据边界
+
+本地忽略的原始产物共 `34` 个文件、`300460363` 字节；跟踪清单记录路径、大小和 SHA-256。该清单只能检测相对当前清单的意外变更，不是外部签名。原始大文件未纳入 Git。
 
 ## 禁止越过的边界
 
 - 不得继续 `13.5/20.25` 格、D0-B、D0-C、Q1R3 时间组或完整 Q1R4；
 - 不得撤销 Q1R3 既有失败闭锁；
-- 不得把影子对照写成空间/时间收敛；
+- 不得把影子对照写成空间或时间收敛；
 - 不得把 G1 提升到正式求解器；
-- 不得宣称物理验证、实验验证、临界转速或装置预测。
+- 不得宣称物理验证、实验验证、临界转速、长期稳态或装置预测。
 
-当前结论上限仍为：
+当前结论上限为：
 
 ```text
 Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED
 Q1R4_D0_FAIL_CLOSED_AT_STATIC_GEOMETRY
-D1_CANDIDATE_ONLY_LOCKSTEP_DYNAMIC_SHADOW_AUTHORIZED__NOT_EXECUTED
+D1_DYNAMIC_SHADOW_COMPLETE__GEOMETRY_EFFECT_SMALL_IN_REGISTERED_WINDOW__STOP_FOR_PRO_REVIEW
 NUMERICAL_QUALIFICATION = NOT_DEMONSTRATED
 PHYSICAL_VALIDATION = NOT_PERFORMED
 EXPERIMENTAL_VALIDATION = NOT_PERFORMED
