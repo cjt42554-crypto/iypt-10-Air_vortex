@@ -2,75 +2,104 @@
 
 ## 当前状态
 
-D1 候选区 G0/G1 成对锁步动态影子对照已经按 Pro 预注册完成，冻结状态为：
-
-```text
-D1_DYNAMIC_SHADOW_COMPLETE__GEOMETRY_EFFECT_SMALL_IN_REGISTERED_WINDOW__STOP_FOR_PRO_REVIEW
-```
-
-当前等待 Pro 复核。报告后停止点已经到达，不得自行继续动态算例、改变协议或正式提升 G1。
-
-## 复核入口
-
-- 人类可读报告：`90_候选工作区/current/05_D1动态影子对照/reports/d1_dynamic_shadow_report.md`；
-- 机器可读报告：`90_候选工作区/current/05_D1动态影子对照/reports/d1_dynamic_shadow_report.json`；
-- 本地原始证据清单：`90_候选工作区/current/05_D1动态影子对照/artifacts/d1_dynamic_shadow_manifest.json`；
-- 冻结科学裁决：`90_候选工作区/current/05_D1动态影子对照科学裁决与预注册.md`；
-- 机器可读合同：`90_候选工作区/current/05_D1动态影子对照/d1_dynamic_shadow_preregistration.json`。
-
-## 执行身份与阶段门
-
-- Pro 裁决由远端提交 `8829b5f` 拉入；候选实现和所有结果承载运行绑定提交 `68ef0dcef63a652eda348b8439ef62c13a812642`；
-- 正式源码树在各完整窗口前后均为 `dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8`；
-- S0/S1：名义 `4/6/9` 层 G0 静态往返、初态及 `4` 格层 CPU/CUDA 八步同一性通过；
-- S2：`4` 格层 G0/G1 CUDA 八步烟雾测试通过；
-- S3：`6` 格层 G0/G1 完成 `0.010 s`、`1820` 个共同接受步、`0` 次重试，两侧全部质量门通过；
-- S4：`9` 格层 G0/G1 完成 `0.010 s`、`1820` 个共同接受步、`0` 次重试，两侧全部质量门通过；
-- `6/9` 两层的共同接受时间 SHA-256 均为 `469efa2a729a3cfeda808f1aed082b7e17f3b33d4c43b0cbf87551f8a23b931a`；
-- CUDA 设备为 NVIDIA GeForce RTX 5060 Laptop GPU，未回退到 CPU；
-- S5 独立分析器重新加载并校验归档后，全部九项阶段门通过。
-
-第一次 `9` 格层尝试在 `t=0.007 s` 被外部会话中断，没有生成 `level_9` 结果文件，也未进入分析。随后以相同提交和配置从零完整重跑；清单只纳入完整重跑产物。
-
-## 冻结几何归因结论
-
-四个主要观测量的直接物质性、极端变化和误差削减信号计数均为 `0`，全部满足预注册的小窗口效应判据。全窗口主要指标为：
-
-| 观测量 | max D | max eta | rho |
-|---|---:|---:|---:|
-| funnel_depth_m | 0.0258418 | 0.0258418 | 0.976337 |
-| kinetic_energy_lab_j | 5.16091e-05 | 0.000153855 | 0.999846 |
-| angular_momentum_z_kg_m2_s | 2.04859e-05 | 7.25894e-05 | 0.999931 |
-| axisymmetry_error | 1.17405e-05 | 2.0974e-05 | 1.00002 |
-
-因此冻结标签为：
+Pro 已完成对 D1 G0/G1 动态影子对照的独立复核。未发现足以推翻冻结分类的实现级或分析级错误，继续接受：
 
 ```text
 GEOMETRY_EFFECT_SMALL_IN_REGISTERED_WINDOW
 ```
 
-它只支持“在登记短窗口内，G0/G1 布尔几何差异对既有失败形态的影响较小”。它不证明 G1 正确、收敛或更接近实验，也不证明 Q1R3 失败的唯一原因。
+当前状态更新为：
 
-## 原始证据边界
+```text
+D1_DYNAMIC_SHADOW_REVIEW_ACCEPTED__D2_SOURCE_ATTRIBUTION_V2_AUTHORIZED_NOT_EXECUTED
+```
 
-本地忽略的原始产物共 `34` 个文件、`300460363` 字节；跟踪清单记录路径、大小和 SHA-256。该清单只能检测相对当前清单的意外变更，不是外部签名。原始大文件未纳入 Git。
+D1 结论只适用于名义中心位置、`6/9` 格层和 `0–0.010 s`。它削弱了“正式 G0 布尔磁子掩膜是 Q1R3 空间失败主因”的假设，但不证明 G1 正确、长期几何效应很小、HF3D 已收敛或可以预测实验。
 
-## 禁止越过的边界
+## Codex 唯一任务入口
 
-- 不得继续 `13.5/20.25` 格、D0-B、D0-C、Q1R3 时间组或完整 Q1R4；
-- 不得撤销 Q1R3 既有失败闭锁；
-- 不得把影子对照写成空间或时间收敛；
-- 不得把 G1 提升到正式求解器；
-- 不得宣称物理验证、实验验证、临界转速、长期稳态或装置预测。
+依次读取：
 
-当前结论上限为：
+1. 顶层 `AGENTS.md`；
+2. 本文件；
+3. `90_候选工作区/current/06_D2数值误差来源归因科学裁决与执行规划.md`；
+4. `90_候选工作区/current/06_D2数值误差来源归因/d2_source_attribution_preregistration_v2.json`；
+5. `90_候选工作区/current/06_D2数值误差来源归因/README.md`。
+
+随后只在以下候选目录实现并执行 D2：
+
+```text
+90_候选工作区/current/06_D2数值误差来源归因/
+```
+
+D2 尚未实现或执行。不要从未被 `main` 引用的草稿提交中推断额外授权。
+
+## D2 要回答的问题
+
+D2 重新执行 `F6/F9`、`0–0.010 s` 强迫基线，依次量化：
+
+- `Z`：零驱动背景、静止两相寄生流和开放顶边界存量响应；
+- `T`：九格层把时间步从 `5.5e-6 s` 减半到 `2.75e-6 s` 的影响；
+- `R`：三项显式正则化控制保持六格相同物理宽度的影响。
+
+九格层正确目标值：
+
+```text
+interface_thickness_cells = 3.7777777777777777
+boundary_layer_cells = 2.25
+surface_tension_smoothing_cells = 1.125
+```
+
+其中界面厚度按 `minimum_spacing_m` 缩放；壁层和平滑宽度按 `maximum_spacing_m` 缩放。硬编码 `1.5 * maximum_spacing_m` 接触角作用带不在 R 覆盖范围内。
+
+每项必须同时报告：
+
+```text
+eta：效应大小
+rho：是否沿缩小 F6–F9 差异的方向
+```
+
+`MATERIAL` 而没有缩差方向，只能称为敏感性，不得称为失败来源。
+
+`R` 不是 `SMALL` 时，必须运行：
+
+```text
+R9-BASE / R9-ALL / R9-IF / R9-BL / R9-ST
+```
+
+五变体共同锁步组，使用同一条基线和共同试步序列后再计算交互残差。
+
+## 关键执行边界
+
+- 正式 G0 几何保持不变，D2 不再使用 G1；
+- 不修改 `01_最终理论/**` 或 `02_模拟程序/**`；
+- 不继续 Q1R3 时间中、细层；
+- 不把 D1 延长到 `0.020 s`；
+- 不运行 `13.5/20.25` 格动态算例；
+- 不建立或运行完整 Q1R4；
+- 任一身份、配置、CUDA、数值质量或锁步硬门失败，D2 失败闭锁；
+- 总报告必须跟踪完整分类轨迹和小型配置、来源、结果、时序、锁步摘要；
+- 总报告后更新交接、提交并推送 `main`，然后停止等待 Pro 复核。
+
+## 当前证据与结论上限
+
+D1 两层均达到 `0.010 s`，各 `1820` 个共同接受步、`0` 次重试，质量门通过，实际 CUDA 无回退，正式源码树前后保持：
+
+```text
+dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
+```
+
+当前结论上限：
 
 ```text
 Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED
 Q1R4_D0_FAIL_CLOSED_AT_STATIC_GEOMETRY
-D1_DYNAMIC_SHADOW_COMPLETE__GEOMETRY_EFFECT_SMALL_IN_REGISTERED_WINDOW__STOP_FOR_PRO_REVIEW
+D1_DYNAMIC_SHADOW_COMPLETE__GEOMETRY_EFFECT_SMALL_IN_REGISTERED_WINDOW
+D2_SOURCE_ATTRIBUTION_V2_AUTHORIZED_NOT_EXECUTED
 NUMERICAL_QUALIFICATION = NOT_DEMONSTRATED
 PHYSICAL_VALIDATION = NOT_PERFORMED
 EXPERIMENTAL_VALIDATION = NOT_PERFORMED
 APPARATUS_PREDICTION = DISALLOWED
 ```
+
+本次只完成 D1 Pro 复核并写入 D2 V2 科学规划、机器合同和交接。正式理论与正式程序未变化，D2 动态步数为零。
