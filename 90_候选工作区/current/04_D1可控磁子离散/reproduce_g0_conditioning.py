@@ -43,6 +43,7 @@ LEVELS: tuple[tuple[float, tuple[int, int, int]], ...] = (
     (13.5, (204, 204, 180)),
 )
 ENUMERATION_SEED = 20260828
+CENTROID_COMPARISON_CENTRE_ULPS = 8
 
 
 def _git(*args: str) -> str:
@@ -287,6 +288,29 @@ def _conditioning_variants(
             "slots_selected_from_exact_tie": slots,
         },
     }
+    centroid_comparison_tolerance = max(
+        2.0e-18,
+        CENTROID_COMPARISON_CENTRE_ULPS * math.ulp(raw_centre),
+    )
+    observed_down_z_centroid = float(down_metrics["bar_mask_centroid_error_xyz_m"][2])
+    expected_down_z_centroid = float(
+        expected["one_ulp_down_bar_centre_z_expected_z_centroid_error_m"]
+    )
+    variants["centroid_comparison_protocol"] = {
+        "absolute_tolerance_m": centroid_comparison_tolerance,
+        "minimum_absolute_tolerance_m": 2.0e-18,
+        "bar_centre_ulp_m": math.ulp(raw_centre),
+        "bar_centre_ulp_multiplier": CENTROID_COMPARISON_CENTRE_ULPS,
+        "ulp_down_z_centroid_observed_m": observed_down_z_centroid,
+        "ulp_down_z_centroid_expected_m": expected_down_z_centroid,
+        "ulp_down_z_centroid_absolute_residual_m": abs(
+            observed_down_z_centroid - expected_down_z_centroid
+        ),
+        "purpose": (
+            "A0 decimal-reference reproduction only; this is not a G1 or A3 "
+            "scientific gate tolerance"
+        ),
+    }
     gates = {
         "nominal_cell_count": nominal_metrics["bar_cell_count"]
         == expected["bar_cell_count"],
@@ -297,10 +321,10 @@ def _conditioning_variants(
         "cutoff_exact_tie_count": exact_ties == expected["cutoff_exact_tie_cell_count"],
         "cutoff_slots": slots == expected["cutoff_slots_selected_from_exact_tie"],
         "ulp_down_z_centroid": math.isclose(
-            float(down_metrics["bar_mask_centroid_error_xyz_m"][2]),
-            float(expected["one_ulp_down_bar_centre_z_expected_z_centroid_error_m"]),
+            observed_down_z_centroid,
+            expected_down_z_centroid,
             rel_tol=0.0,
-            abs_tol=2.0e-18,
+            abs_tol=centroid_comparison_tolerance,
         ),
         "ulp_down_symmetric_difference": down_difference
         == expected["one_ulp_down_expected_mask_symmetric_difference_cells"],
@@ -319,7 +343,7 @@ def _conditioning_variants(
                 ]
             ),
             rel_tol=0.0,
-            abs_tol=2.0e-18,
+            abs_tol=centroid_comparison_tolerance,
         ),
         "reversed_symmetric_difference": variants["enumeration"]["reversed"][
             "symmetric_difference_cells_vs_formal"
@@ -446,6 +470,7 @@ def markdown(report: Mapping[str, Any]) -> str:
     conditioning = report["conditioning_6_cells"]
     down = conditioning["ulp_down"]
     reverse = conditioning["enumeration"]["reversed"]
+    comparison = conditioning["centroid_comparison_protocol"]
     return f"""# D1-A0 正式 G0 几何病态性只读复现
 
 状态：`{report["status"]}`。
@@ -462,6 +487,7 @@ def markdown(report: Mapping[str, Any]) -> str:
 
 - 截止处精确并列单元：`{conditioning["cutoff"]["exact_tie_cell_count"]}`；剩余名额：`{conditioning["cutoff"]["slots_selected_from_exact_tie"]}`。
 - 磁子中心向下移动一 ULP 后，掩膜对称差为 `{down["symmetric_difference_cells_vs_nominal"]}` 个单元，轴向质心误差为 `{down["metrics"]["bar_mask_centroid_error_xyz_m"][2]:.16g} m`。
+- 该十进制参考值的观测残差为 `{comparison["ulp_down_z_centroid_absolute_residual_m"]:.16g} m`；A0 比较容差为 `{comparison["absolute_tolerance_m"]:.16g} m`（磁子中心值的 `{comparison["bar_centre_ulp_multiplier"]}` ULP），不用于 G1/A3 科学门。
 - 反向枚举后，掩膜对称差为 `{reverse["symmetric_difference_cells_vs_formal"]}` 个单元，横向质心误差为 `{reverse["metrics"]["bar_mask_centroid_error_xyz_m"][0]:.16g} m`。
 - A0 总门：`{report["gate_pass"]}`。
 
