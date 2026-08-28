@@ -1,0 +1,595 @@
+{
+  "archived_report_comparisons": {
+    "13.5": {
+      "bar_cell_count": true,
+      "centroid_error": true,
+      "grid": true,
+      "normalized_errors": true,
+      "second_moment_tensor": true
+    },
+    "4.0": {
+      "bar_cell_count": true,
+      "centroid_error": true,
+      "grid": true,
+      "normalized_errors": true,
+      "second_moment_tensor": true
+    },
+    "6.0": {
+      "bar_cell_count": true,
+      "centroid_error": true,
+      "grid": true,
+      "normalized_errors": true,
+      "second_moment_tensor": true
+    },
+    "9.0": {
+      "bar_cell_count": true,
+      "centroid_error": true,
+      "grid": true,
+      "normalized_errors": true,
+      "second_moment_tensor": true
+    }
+  },
+  "archived_report_level_gates": {
+    "13.5": true,
+    "4.0": true,
+    "6.0": true,
+    "9.0": true
+  },
+  "claim_boundary": {
+    "allows_apparatus_prediction": false,
+    "establishes_numerical_convergence": false,
+    "proves_g0_caused_q1r3_dynamic_failure": false,
+    "static_source_conditioning_only": true,
+    "validates_experiment": false,
+    "validates_physics": false
+  },
+  "conditioning_6_cells": {
+    "centroid_comparison_protocol": {
+      "absolute_tolerance_m": 6.938893903907228e-18,
+      "bar_centre_ulp_m": 8.673617379884035e-19,
+      "bar_centre_ulp_multiplier": 8,
+      "minimum_absolute_tolerance_m": 2e-18,
+      "purpose": "A0 decimal-reference reproduction only; this is not a G1 or A3 scientific gate tolerance",
+      "ulp_down_z_centroid_absolute_residual_m": 3.604972223514302e-18,
+      "ulp_down_z_centroid_expected_m": -0.0001515151515151515,
+      "ulp_down_z_centroid_observed_m": -0.0001515151515151551
+    },
+    "cutoff": {
+      "exact_tie_cell_count": 48,
+      "signed_distance_m": 4.1381265149110624e-05,
+      "slots_selected_from_exact_tie": 8
+    },
+    "enumeration": {
+      "c": {
+        "metrics": {
+          "bar_cell_count": 792,
+          "bar_centre_z_m": 0.0045000000000000005,
+          "bar_mask_centroid_error_xyz_m": [
+            -0.00010101010101010005,
+            1.94499298821642e-18,
+            0.00015151515151514208
+          ],
+          "bar_mask_centroid_xyz_m": [
+            -0.00010101010101010005,
+            1.94499298821642e-18,
+            0.004651515151515143
+          ],
+          "bar_mask_second_moment_tensor_m5": [
+            [
+              5.251799999999993e-11,
+              -4.065758146820642e-29,
+              2.4e-13
+            ],
+            [
+              -4.065758146820642e-29,
+              1.7259999999999955e-12,
+              7.84596454646291e-31
+            ],
+            [
+              2.4e-13,
+              7.84596454646291e-31,
+              1.7360000000000031e-12
+            ]
+          ],
+          "exact_bar_volume_m3": 7.916813487046278e-07,
+          "grid": [
+            90,
+            90,
+            80
+          ],
+          "mask_sha256": "628c163c4dbc92c85741c6b716e77fc90797969d32460b5641f625986565b4ec",
+          "normalized_geometry_errors": {
+            "bar_volume_relative": 0.0004024994347707572,
+            "centroid_over_bar_radius": 0.06069951642194989,
+            "second_moment_relative_frobenius": 0.010096116868514455
+          },
+          "rasterized_bar_volume_m3": 7.92e-07
+        },
+        "symmetric_difference_cells_vs_formal": 0
+      },
+      "reversed": {
+        "metrics": {
+          "bar_cell_count": 792,
+          "bar_centre_z_m": 0.0045000000000000005,
+          "bar_mask_centroid_error_xyz_m": [
+            0.00010101010101010102,
+            1.94499298821642e-18,
+            0.00015151515151514295
+          ],
+          "bar_mask_centroid_xyz_m": [
+            0.00010101010101010102,
+            1.94499298821642e-18,
+            0.0046515151515151435
+          ],
+          "bar_mask_second_moment_tensor_m5": [
+            [
+              5.251799999999993e-11,
+              -1.5098762084359387e-29,
+              -2.3999999999999973e-13
+            ],
+            [
+              -1.5098762084359387e-29,
+              1.725999999999996e-12,
+              5.171915413298952e-31
+            ],
+            [
+              -2.3999999999999973e-13,
+              5.171915413298952e-31,
+              1.7360000000000027e-12
+            ]
+          ],
+          "exact_bar_volume_m3": 7.916813487046278e-07,
+          "grid": [
+            90,
+            90,
+            80
+          ],
+          "mask_sha256": "bf3bb6fab60dd413aa0b31e75adc542ba47ac7f198a9b71c601544b9be9405f3",
+          "normalized_geometry_errors": {
+            "bar_volume_relative": 0.0004024994347707572,
+            "centroid_over_bar_radius": 0.06069951642195031,
+            "second_moment_relative_frobenius": 0.010096116868514454
+          },
+          "rasterized_bar_volume_m3": 7.92e-07
+        },
+        "symmetric_difference_cells_vs_formal": 16
+      },
+      "seeded": {
+        "metrics": {
+          "bar_cell_count": 792,
+          "bar_centre_z_m": 0.0045000000000000005,
+          "bar_mask_centroid_error_xyz_m": [
+            -7.575757575756566e-06,
+            -1.2626262626243187e-06,
+            0.00015151515151514208
+          ],
+          "bar_mask_centroid_xyz_m": [
+            -7.575757575756566e-06,
+            -1.2626262626243187e-06,
+            0.004651515151515143
+          ],
+          "bar_mask_second_moment_tensor_m5": [
+            [
+              5.229199999999993e-11,
+              -8.5000000000001e-15,
+              1.800000000000033e-14
+            ],
+            [
+              -8.5000000000001e-15,
+              1.7259999999999959e-12,
+              3.000000000000019e-15
+            ],
+            [
+              1.800000000000033e-14,
+              3.000000000000019e-15,
+              1.736000000000003e-12
+            ]
+          ],
+          "exact_bar_volume_m3": 7.916813487046278e-07,
+          "grid": [
+            90,
+            90,
+            80
+          ],
+          "mask_sha256": "3a8d2cc09d5412e7eb8a46636114fa460468f9b7b9b022818efcb3c44c844c7f",
+          "normalized_geometry_errors": {
+            "bar_volume_relative": 0.0004024994347707572,
+            "centroid_over_bar_radius": 0.05056989383965101,
+            "second_moment_relative_frobenius": 0.003434127043587934
+          },
+          "rasterized_bar_volume_m3": 7.92e-07
+        },
+        "seed": 20260828,
+        "symmetric_difference_cells_vs_formal": 10
+      }
+    },
+    "gates": {
+      "cutoff_exact_tie_count": true,
+      "cutoff_slots": true,
+      "formal_c_enumeration_identity": true,
+      "nominal_cell_count": true,
+      "nominal_centroid_error": true,
+      "reversed_symmetric_difference": true,
+      "reversed_x_centroid": true,
+      "ulp_down_symmetric_difference": true,
+      "ulp_down_z_centroid": true
+    },
+    "nominal": {
+      "bar_cell_count": 792,
+      "bar_centre_z_m": 0.0045000000000000005,
+      "bar_mask_centroid_error_xyz_m": [
+        -0.00010101010101010005,
+        1.94499298821642e-18,
+        0.00015151515151514208
+      ],
+      "bar_mask_centroid_xyz_m": [
+        -0.00010101010101010005,
+        1.94499298821642e-18,
+        0.004651515151515143
+      ],
+      "bar_mask_second_moment_tensor_m5": [
+        [
+          5.251799999999993e-11,
+          -4.065758146820642e-29,
+          2.4e-13
+        ],
+        [
+          -4.065758146820642e-29,
+          1.7259999999999955e-12,
+          7.84596454646291e-31
+        ],
+        [
+          2.4e-13,
+          7.84596454646291e-31,
+          1.7360000000000031e-12
+        ]
+      ],
+      "exact_bar_volume_m3": 7.916813487046278e-07,
+      "grid": [
+        90,
+        90,
+        80
+      ],
+      "mask_sha256": "628c163c4dbc92c85741c6b716e77fc90797969d32460b5641f625986565b4ec",
+      "normalized_geometry_errors": {
+        "bar_volume_relative": 0.0004024994347707572,
+        "centroid_over_bar_radius": 0.06069951642194989,
+        "second_moment_relative_frobenius": 0.010096116868514455
+      },
+      "rasterized_bar_volume_m3": 7.92e-07
+    },
+    "pass": true,
+    "ulp_down": {
+      "centre_delta_m": -8.673617379884035e-19,
+      "centre_z_m": 0.0045,
+      "metrics": {
+        "bar_cell_count": 792,
+        "bar_centre_z_m": 0.0045,
+        "bar_mask_centroid_error_xyz_m": [
+          -0.00010101010101010005,
+          1.94499298821642e-18,
+          -0.0001515151515151551
+        ],
+        "bar_mask_centroid_xyz_m": [
+          -0.00010101010101010005,
+          1.94499298821642e-18,
+          0.004348484848484845
+        ],
+        "bar_mask_second_moment_tensor_m5": [
+          [
+            5.251799999999993e-11,
+            -4.065758146820642e-29,
+            -2.400000000000007e-13
+          ],
+          [
+            -4.065758146820642e-29,
+            1.7259999999999955e-12,
+            1.0777891166352529e-29
+          ],
+          [
+            -2.400000000000007e-13,
+            1.0777891166352529e-29,
+            1.7360000000000033e-12
+          ]
+        ],
+        "exact_bar_volume_m3": 7.916813487046278e-07,
+        "grid": [
+          90,
+          90,
+          80
+        ],
+        "mask_sha256": "ccee2668cf6e2f5703d629dbf742c0329d76908b288ef5e341de215dbcab32e0",
+        "normalized_geometry_errors": {
+          "bar_volume_relative": 0.0004024994347707572,
+          "centroid_over_bar_radius": 0.06069951642195349,
+          "second_moment_relative_frobenius": 0.01009611686851447
+        },
+        "rasterized_bar_volume_m3": 7.92e-07
+      },
+      "symmetric_difference_cells_vs_nominal": 80
+    },
+    "ulp_up": {
+      "centre_delta_m": 8.673617379884035e-19,
+      "centre_z_m": 0.004500000000000001,
+      "metrics": {
+        "bar_cell_count": 792,
+        "bar_centre_z_m": 0.004500000000000001,
+        "bar_mask_centroid_error_xyz_m": [
+          -0.00010101010101010005,
+          1.94499298821642e-18,
+          0.00015151515151514122
+        ],
+        "bar_mask_centroid_xyz_m": [
+          -0.00010101010101010005,
+          1.94499298821642e-18,
+          0.004651515151515143
+        ],
+        "bar_mask_second_moment_tensor_m5": [
+          [
+            5.251799999999993e-11,
+            -4.065758146820642e-29,
+            2.400000000000015e-13
+          ],
+          [
+            -4.065758146820642e-29,
+            1.7259999999999955e-12,
+            -1.7996665084823312e-29
+          ],
+          [
+            2.400000000000015e-13,
+            -1.7996665084823312e-29,
+            1.736e-12
+          ]
+        ],
+        "exact_bar_volume_m3": 7.916813487046278e-07,
+        "grid": [
+          90,
+          90,
+          80
+        ],
+        "mask_sha256": "628c163c4dbc92c85741c6b716e77fc90797969d32460b5641f625986565b4ec",
+        "normalized_geometry_errors": {
+          "bar_volume_relative": 0.0004024994347707572,
+          "centroid_over_bar_radius": 0.06069951642194965,
+          "second_moment_relative_frobenius": 0.010096116868514481
+        },
+        "rasterized_bar_volume_m3": 7.92e-07
+      },
+      "symmetric_difference_cells_vs_nominal": 0
+    }
+  },
+  "dynamic_solver_steps": 0,
+  "gate_pass": true,
+  "identity": {
+    "formal_source_end": {
+      "absolute_root_stored": false,
+      "algorithm": "sha256",
+      "available": true,
+      "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+      "file_count": 58,
+      "reason": null,
+      "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+      "total_bytes": 1004894,
+      "unit": null,
+      "value": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8"
+    },
+    "formal_source_start": {
+      "absolute_root_stored": false,
+      "algorithm": "sha256",
+      "available": true,
+      "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+      "file_count": 58,
+      "reason": null,
+      "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+      "total_bytes": 1004894,
+      "unit": null,
+      "value": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8"
+    },
+    "gates": {
+      "clean_worktree_at_start": true,
+      "direct_formal_class_import": true,
+      "formal_source_available": true,
+      "formal_source_stable": true,
+      "main_branch": true
+    },
+    "git": {
+      "branch": "main",
+      "head": "ca94ee16e039d4d6f2ae1b932140f7e9ef330e1c",
+      "porcelain_at_start": [],
+      "worktree_clean_at_start": true
+    }
+  },
+  "inputs": {
+    "archived_d0_a_report": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/03_Q1R4诊断门/reports/static_geometry_audit.json",
+    "archived_d0_a_report_sha256": "f2096182271fdd09c6c686de31106427b54d685f0f4db80720f4853c6cd3df48",
+    "base_config": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/01_HF3D数值资格/generated_q1r3/space_L2_9cells.json",
+    "base_config_sha256": "2fdb7504e62560963734343b7bda9091164868985c521a17f22574e74ee6a594",
+    "preregistration": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/04_D1可控磁子离散/d1_geometry_preregistration.json",
+    "preregistration_sha256": "eaacea87432177cbebefd0ee3ef9ef3d10290a547f0479532912f5451399bbf6"
+  },
+  "levels": [
+    {
+      "bar_cell_count": 238,
+      "bar_centre_z_m": 0.0045000000000000005,
+      "bar_mask_centroid_error_xyz_m": [
+        -8.823529411764559e-05,
+        -0.00013235294117646925,
+        7.516339869280755e-05
+      ],
+      "bar_mask_centroid_xyz_m": [
+        -8.823529411764559e-05,
+        -0.00013235294117646925,
+        0.004575163398692808
+      ],
+      "bar_mask_second_moment_tensor_m5": [
+        [
+          5.0831249999999947e-11,
+          1.5749999999999933e-13,
+          -1.5166666666666643e-13
+        ],
+        [
+          1.5749999999999933e-13,
+          1.736250000000002e-12,
+          -2.2749999999999923e-13
+        ],
+        [
+          -1.5166666666666643e-13,
+          -2.2749999999999923e-13,
+          1.684570187471427e-12
+        ]
+      ],
+      "cells_per_bar_diameter": 4.0,
+      "exact_bar_volume_m3": 7.916813487046278e-07,
+      "grid": [
+        60,
+        60,
+        54
+      ],
+      "mask_sha256": "e9298b580808c46a64cd9bf4889812be98fed588e358e59f6e915b53173729d5",
+      "normalized_geometry_errors": {
+        "bar_volume_relative": 0.002086678726748568,
+        "centroid_over_bar_radius": 0.0586442236135678,
+        "second_moment_relative_frobenius": 0.026069582186057975
+      },
+      "rasterized_bar_volume_m3": 7.933333333333334e-07
+    },
+    {
+      "bar_cell_count": 792,
+      "bar_centre_z_m": 0.0045000000000000005,
+      "bar_mask_centroid_error_xyz_m": [
+        -0.00010101010101010005,
+        1.94499298821642e-18,
+        0.00015151515151514208
+      ],
+      "bar_mask_centroid_xyz_m": [
+        -0.00010101010101010005,
+        1.94499298821642e-18,
+        0.004651515151515143
+      ],
+      "bar_mask_second_moment_tensor_m5": [
+        [
+          5.251799999999993e-11,
+          -4.065758146820642e-29,
+          2.4e-13
+        ],
+        [
+          -4.065758146820642e-29,
+          1.7259999999999955e-12,
+          7.84596454646291e-31
+        ],
+        [
+          2.4e-13,
+          7.84596454646291e-31,
+          1.7360000000000031e-12
+        ]
+      ],
+      "cells_per_bar_diameter": 6.0,
+      "exact_bar_volume_m3": 7.916813487046278e-07,
+      "grid": [
+        90,
+        90,
+        80
+      ],
+      "mask_sha256": "628c163c4dbc92c85741c6b716e77fc90797969d32460b5641f625986565b4ec",
+      "normalized_geometry_errors": {
+        "bar_volume_relative": 0.0004024994347707572,
+        "centroid_over_bar_radius": 0.06069951642194989,
+        "second_moment_relative_frobenius": 0.010096116868514455
+      },
+      "rasterized_bar_volume_m3": 7.92e-07
+    },
+    {
+      "bar_cell_count": 2712,
+      "bar_centre_z_m": 0.0045000000000000005,
+      "bar_mask_centroid_error_xyz_m": [
+        -3.1233732431025224e-05,
+        0.0,
+        4.178957718777975e-05
+      ],
+      "bar_mask_centroid_xyz_m": [
+        -3.1233732431025224e-05,
+        0.0,
+        0.00454178957718778
+      ],
+      "bar_mask_second_moment_tensor_m5": [
+        [
+          5.210488803433425e-11,
+          6.330765280516569e-29,
+          7.006920415224912e-14
+        ],
+        [
+          6.330765280516569e-29,
+          1.7201826720600183e-12,
+          3.3137599515203913e-29
+        ],
+        [
+          7.006920415224912e-14,
+          3.3137599515203913e-29,
+          1.7607482698961954e-12
+        ]
+      ],
+      "cells_per_bar_diameter": 9.0,
+      "exact_bar_volume_m3": 7.916813487046278e-07,
+      "grid": [
+        136,
+        136,
+        120
+      ],
+      "mask_sha256": "c37343e1a62ef8c83ad625b57220f14cdaf208b7e658da21ef42ba71470bbc56",
+      "normalized_geometry_errors": {
+        "bar_volume_relative": 0.00012714486194718874,
+        "centroid_over_bar_radius": 0.01739065778292816,
+        "second_moment_relative_frobenius": 0.0020059331683256543
+      },
+      "rasterized_bar_volume_m3": 7.91782006920415e-07
+    },
+    {
+      "bar_cell_count": 9152,
+      "bar_centre_z_m": 0.0045000000000000005,
+      "bar_mask_centroid_error_xyz_m": [
+        -3.5093582887698135e-05,
+        -2.4117811962771954e-18,
+        -1.0683760683795514e-05
+      ],
+      "bar_mask_centroid_xyz_m": [
+        -3.5093582887698135e-05,
+        -2.4117811962771954e-18,
+        0.004489316239316205
+      ],
+      "bar_mask_second_moment_tensor_m5": [
+        [
+          5.1580336083140755e-11,
+          3.9391428412103097e-28,
+          2.006581179184478e-14
+        ],
+        [
+          3.9391428412103097e-28,
+          1.7458034506291883e-12,
+          -3.370546329904655e-30
+        ],
+        [
+          2.006581179184478e-14,
+          -3.370546329904655e-30,
+          1.7271989405784091e-12
+        ]
+      ],
+      "cells_per_bar_diameter": 13.5,
+      "exact_bar_volume_m3": 7.916813487046278e-07,
+      "grid": [
+        204,
+        204,
+        180
+      ],
+      "mask_sha256": "228ce2be59a0d6db49c15607e7f56478203958d81ef738d9d32a1e322e3a7ee8",
+      "normalized_geometry_errors": {
+        "bar_volume_relative": 1.787717431898384e-05,
+        "centroid_over_bar_radius": 0.012227938420974749,
+        "second_moment_relative_frobenius": 0.010271651560790627
+      },
+      "rasterized_bar_volume_m3": 7.916955017301037e-07
+    }
+  ],
+  "schema_version": 1,
+  "stage": "D1_A0",
+  "status": "D1_A0_REPRODUCED"
+}
