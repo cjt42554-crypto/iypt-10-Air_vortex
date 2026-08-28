@@ -1,0 +1,309 @@
+{
+  "schema_version": 1,
+  "date": "2026-08-28",
+  "repository": "cjt42554-crypto/iypt-10-Air_vortex",
+  "branch": "main",
+  "reviewed_head": "09aa3bc782da4c291864c2824a5990007dcb1b7c",
+  "decision_id": "D1_CANDIDATE_ONLY_LOCKSTEP_DYNAMIC_SHADOW_AUTHORIZED__NOT_EXECUTED",
+  "protocol_id": "D1_G0_G1_LOCKSTEP_DYNAMIC_SHADOW_V1",
+  "decision": {
+    "candidate_workspace_implementation_allowed": true,
+    "candidate_dynamic_execution_allowed": true,
+    "formal_theory_or_solver_change_allowed": false,
+    "formal_promotion_allowed": false,
+    "q1r3_temporal_continuation_allowed": false,
+    "full_q1r4_allowed": false,
+    "d0_b_or_d0_c_allowed": false,
+    "13p5_or_20p25_dynamic_path_allowed": false
+  },
+  "claim_boundary": {
+    "purpose": "FAILURE_MECHANISM_ATTRIBUTION_ONLY",
+    "establishes_numerical_convergence": false,
+    "establishes_temporal_convergence": false,
+    "validates_physics": false,
+    "validates_experiment": false,
+    "allows_apparatus_prediction": false,
+    "can_overturn_q1r3_failure": false,
+    "can_promote_g1": false
+  },
+  "evidence_bindings": {
+    "formal_source_tree_sha256": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8",
+    "d1_geometry_preregistration": {
+      "path": "90_候选工作区/current/04_D1可控磁子离散/d1_geometry_preregistration.json",
+      "git_blob_sha": "4a081e1e185c13a240f4c5ded5ac9fd30f27a1dc",
+      "content_sha256_from_static_audit": "eaacea87432177cbebefd0ee3ef9ef3d10290a547f0479532912f5451399bbf6"
+    },
+    "controlled_bar_geometry": {
+      "path": "90_候选工作区/current/04_D1可控磁子离散/controlled_bar_geometry.py",
+      "git_blob_sha": "2e54a419aa2931908bd8ca17458bd2241aaf1f7d",
+      "content_sha256_from_static_audit": "8051404a3e1a8ce337804ccf633e0dcd59d3d837fb398de794a38ae319942f99"
+    },
+    "static_audit": {
+      "path": "90_候选工作区/current/04_D1可控磁子离散/reports/d1_static_audit.json",
+      "git_blob_sha": "f490b50290ccb620d2b70f5ad8070afd2c627a89",
+      "gate_pass_required": true
+    },
+    "static_analysis": {
+      "path": "90_候选工作区/current/04_D1可控磁子离散/reports/d1_static_analysis.json",
+      "git_blob_sha": "3eccbf7c4813a05dc5408eeb0548c71b4481d5bd",
+      "decision_required": "D1_STATIC_G1_PASS_CONFIRMED__STOP_FOR_PRO_REVIEW"
+    },
+    "q1r3_campaign": {
+      "path": "90_候选工作区/current/01_HF3D数值资格/campaign_q1r3.json",
+      "git_blob_sha": "64067685a56b0942c99b9bc560df74e79d01d0f8"
+    },
+    "q1r3_spatial_decision": {
+      "path": "90_候选工作区/current/01_HF3D数值资格/reports/q1r3_spatial_stage/spatial_stage_decision.json",
+      "git_blob_sha": "125339c9a7852b0cf7eb451538e5a5bc01664fc3",
+      "decision_required": "Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED"
+    },
+    "baseline_configs": {
+      "4_cells_smoke_only": {
+        "path": "90_候选工作区/current/01_HF3D数值资格/generated_q1r3/space_L0_4cells.json",
+        "git_blob_sha": "a26a924a17627ef9462f2276eef5d362ccfa26b8"
+      },
+      "6_cells": {
+        "path": "90_候选工作区/current/01_HF3D数值资格/generated_q1r3/space_L1_6cells.json",
+        "git_blob_sha": "381c8301e70ba81434a0831f38963f03caf1180a"
+      },
+      "9_cells": {
+        "path": "90_候选工作区/current/01_HF3D数值资格/generated_q1r3/space_L2_9cells.json",
+        "git_blob_sha": "270027484e5ea531a25fc7f582027dab25bd6893"
+      }
+    }
+  },
+  "static_review": {
+    "g1_static_gate_pass_required": true,
+    "g1_g2_weighted_symmetric_difference_relative_upper": {
+      "nominal": {
+        "4_cells": 0.1910331,
+        "6_cells": 0.1684747,
+        "9_cells": 0.1304297,
+        "13p5_cells": 0.0811327
+      },
+      "all_registered_phases_maximum": 0.214969991
+    },
+    "six_to_13p5_log_slope_diagnostic": 0.9015,
+    "new_pass_threshold_added": false,
+    "interpretation": "APPROPRIATE_FOR_BOUNDED_DYNAMIC_DIAGNOSIS_ONLY",
+    "dynamic_scope_nominal_centred_geometry_only": true
+  },
+  "workspace": {
+    "root": "90_候选工作区/current/05_D1动态影子对照",
+    "required_single_active_implementation": [
+      "controlled_shadow_grid.py",
+      "run_d1_dynamic_shadow.py",
+      "analyse_d1_dynamic_shadow.py",
+      "tests/test_d1_dynamic_shadow.py"
+    ],
+    "output_directories": [
+      "reports",
+      "artifacts"
+    ],
+    "formal_solver_copy_allowed": false,
+    "formal_solver_imports_allowed": true
+  },
+  "grid_installation_contract": {
+    "forbidden_shortcut": "ASSIGN_BAR_MASK_ONLY_AFTER_FORMAL_GRID_CONSTRUCTION",
+    "installation_must_precede": [
+      "pressure_projection_construction",
+      "state_initialisation",
+      "frame_recorder_construction"
+    ],
+    "required_rebuilt_fields": [
+      "bar_mask",
+      "active_mask",
+      "open_x",
+      "open_y",
+      "open_z",
+      "index",
+      "nearest_solid_distance_m",
+      "nearest_solid_kind",
+      "wall_normal_x",
+      "wall_normal_y",
+      "wall_normal_z"
+    ],
+    "analytic_geometry_must_be_recomputed_for_g0_solid_to_g1_fluid_cells": true,
+    "special_case_noop_for_g0_identity_test_allowed": false
+  },
+  "g0_self_identity_gates": {
+    "static_levels_cells_per_bar_diameter": [
+      4.0,
+      6.0,
+      9.0
+    ],
+    "all_rebuilt_arrays_bitwise_equal": true,
+    "dtype_and_shape_equal": true,
+    "perturb_then_restore_round_trip_required": true,
+    "initial_state_arrays_bitwise_equal": true,
+    "short_replay": {
+      "level_cells_per_bar_diameter": 4.0,
+      "accepted_steps": 8,
+      "cpu_required": true,
+      "cuda_required_without_fallback": true,
+      "all_comparable_archive_arrays_bitwise_equal": true
+    },
+    "failure_status": "D1_DYNAMIC_SHADOW_FAIL_CLOSED_AT_G0_SELF_IDENTITY"
+  },
+  "execution_protocol": {
+    "allowed_config_overrides": {
+      "run.duration_s": 0.01
+    },
+    "required_unchanged_values": {
+      "drive.ramp_duration_s": 0.005,
+      "run.output_interval_s": 0.001,
+      "high_fidelity.time_step_s": 5.5e-06,
+      "high_fidelity.pressure_relative_tolerance": 1e-07,
+      "high_fidelity.cfl_controller_target_fraction": 0.95,
+      "high_fidelity.maximum_cfl_step_retries": 4,
+      "high_fidelity.pressure_solver_device": "cuda"
+    },
+    "registered_windows_s": {
+      "full": [
+        0.0,
+        0.01
+      ],
+      "ramp": [
+        0.0,
+        0.005
+      ],
+      "early_constant_speed": [
+        0.005,
+        0.01
+      ]
+    },
+    "stages": [
+      {
+        "stage": "S0",
+        "action": "EVIDENCE_AND_SOURCE_IDENTITY_AUDIT"
+      },
+      {
+        "stage": "S1",
+        "action": "G0_SELF_IDENTITY_ALL_GATES"
+      },
+      {
+        "stage": "S2",
+        "action": "G0_G1_CUDA_SMOKE",
+        "level_cells_per_bar_diameter": 4.0,
+        "accepted_steps": 8
+      },
+      {
+        "stage": "S3",
+        "action": "G0_G1_LOCKSTEP_FULL_WINDOW",
+        "level_cells_per_bar_diameter": 6.0,
+        "duration_s": 0.01
+      },
+      {
+        "stage": "S4",
+        "action": "G0_G1_LOCKSTEP_FULL_WINDOW",
+        "level_cells_per_bar_diameter": 9.0,
+        "duration_s": 0.01,
+        "requires_all_prior_gates": true
+      },
+      {
+        "stage": "S5",
+        "action": "ANALYSE_REPORT_STOP_FOR_PRO_REVIEW"
+      }
+    ],
+    "lockstep_pair_driver": {
+      "independent_backend_run_then_interpolate_allowed": false,
+      "stable_dt_rule": "MIN_OF_G0_G1_OUTPUT_REMAINDER_AND_CURRENT_RETRY_LIMIT",
+      "trial_states_are_temporary_copies": true,
+      "either_rejection_discards_both_trials": true,
+      "retry_uses_most_restrictive_pair_dt": true,
+      "commit_only_when_both_accept": true,
+      "accepted_time_arrays_bitwise_equal": true
+    }
+  },
+  "hard_gates": {
+    "clean_main_worktree": true,
+    "execution_commit_recorded": true,
+    "formal_source_identity_matches_binding": true,
+    "static_evidence_blobs_match": true,
+    "g1_nominal_mask_hash_and_cell_count_match_static_audit": true,
+    "cuda_selected_without_fallback": true,
+    "both_variants_complete": true,
+    "accepted_time_arrays_bitwise_equal": true,
+    "all_state_and_diagnostics_finite": true,
+    "configured_time_step_active_fraction_min": 0.95,
+    "pressure_relative_residual_max": 1e-07,
+    "projected_divergence_max_s_inv": 0.0001,
+    "advective_cfl_max": 0.35,
+    "cumulative_phase_clip_relative_max": 0.001,
+    "cumulative_phase_repair_relative_max": 0.001,
+    "liquid_volume_balance_error_relative_max": 0.001
+  },
+  "observables": {
+    "primary_dynamic": [
+      "funnel_depth_m",
+      "kinetic_energy_lab_j",
+      "angular_momentum_z_kg_m2_s",
+      "axisymmetry_error"
+    ],
+    "secondary": [
+      "min_gap_to_bar_m",
+      "liquid_inventory_change_relative"
+    ],
+    "archive_aliases": {
+      "liquid_inventory_change_relative": "liquid_mass_error_relative"
+    },
+    "binary_record_only": [
+      "first_contact_proxy",
+      "connection_candidate",
+      "finite_channel_candidate"
+    ],
+    "primary_comparison_uses_initial_value_removed_trajectory": true,
+    "initial_value_removed_definition": "delta_Q(t)=Q(t)-Q(0)",
+    "absolute_scale_floors": {
+      "funnel_depth_m": 1e-05,
+      "min_gap_to_bar_m": 1e-05,
+      "kinetic_energy_lab_j": 1e-08,
+      "angular_momentum_z_kg_m2_s": 1e-09,
+      "axisymmetry_error": 0.001,
+      "liquid_inventory_change_relative": 1e-06
+    }
+  },
+  "materiality_analysis": {
+    "metrics": {
+      "N_L": "NATIVE_RMS_OF_DELTA_Q_G1_L_MINUS_DELTA_Q_G0_L",
+      "D_L": "N_L/MAX(RMS_DELTA_Q_G0_L,RMS_DELTA_Q_G1_L,EPSILON_Q)",
+      "E_0": "NATIVE_RMS_OF_DELTA_Q_G0_9_MINUS_DELTA_Q_G0_6",
+      "E_1": "NATIVE_RMS_OF_DELTA_Q_G1_9_MINUS_DELTA_Q_G1_6",
+      "eta_L": "N_L/MAX(E_0,EPSILON_Q)",
+      "rho": "E_1/MAX(E_0,EPSILON_Q)"
+    },
+    "thresholds": {
+      "direct_relative_l2_material": 0.05,
+      "eta_material": 0.5,
+      "rho_reduction_max": 0.5,
+      "rho_increase_min": 1.5,
+      "material_primary_observable_count_min": 2,
+      "small_eta_max": 0.1,
+      "small_rho_interval": [
+        0.8,
+        1.25
+      ]
+    },
+    "fixed_labels": {
+      "GEOMETRY_CONTRIBUTOR_WITH_REDUCTION_SIGNAL": "AT_LEAST_TWO_PRIMARY_OBSERVABLES_HAVE_MAX_D_L_GE_0P05_AND_MAX_ETA_L_GE_0P5_AND_RHO_LE_0P5",
+      "GEOMETRY_CONTRIBUTOR_SIGNAL_WITHOUT_REDUCTION": "AT_LEAST_TWO_PRIMARY_OBSERVABLES_HAVE_MAX_D_L_GE_0P05_AND_MAX_ETA_L_GE_0P5_AND_RHO_OUTSIDE_0P5_TO_1P5_BUT_FEWER_THAN_TWO_HAVE_RHO_LE_0P5",
+      "GEOMETRY_EFFECT_SMALL_IN_REGISTERED_WINDOW": "ALL_PRIMARY_MAX_D_L_LT_0P05_AND_MAX_ETA_L_LT_0P1_AND_RHO_IN_0P8_TO_1P25",
+      "MIXED_OR_INDETERMINATE_GEOMETRY_EFFECT": "ALL_OTHER_GATE_PASSING_CASES"
+    },
+    "stronger_accuracy_claim_allowed": false
+  },
+  "fail_closed": {
+    "gate_failure_status": "D1_DYNAMIC_SHADOW_INCONCLUSIVE_FAIL_CLOSED",
+    "retain_raw_diagnostics": true,
+    "materiality_label_on_gate_failure_allowed": false,
+    "continue_to_next_stage_on_gate_failure_allowed": false
+  },
+  "stop_point": "REPORT_THEN_STOP_FOR_PRO_REVIEW",
+  "conclusion_ceiling": [
+    "Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED",
+    "NUMERICAL_QUALIFICATION_NOT_DEMONSTRATED",
+    "PHYSICAL_VALIDATION_NOT_PERFORMED",
+    "EXPERIMENTAL_VALIDATION_NOT_PERFORMED",
+    "APPARATUS_PREDICTION_DISALLOWED"
+  ]
+}
