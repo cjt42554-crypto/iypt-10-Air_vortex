@@ -1225,6 +1225,21 @@ def _group_summary(
         )
         for runtime in outcome.variants
     }
+    accepted_time_evidence = {
+        runtime.label: {
+            "accepted_time_count": int(
+                np.asarray(runtime.accepted_times_s, dtype=np.float64).size
+            ),
+            "accepted_time_sha256": _array_sha256(
+                np.asarray(runtime.accepted_times_s, dtype=np.float64)
+            ),
+            "accepted_times_s": np.asarray(
+                runtime.accepted_times_s,
+                dtype=np.float64,
+            ).tolist(),
+        }
+        for runtime in outcome.variants
+    }
     first_times = np.asarray(outcome.variants[0].accepted_times_s, dtype=np.float64)
     gates = {
         "group_completed": outcome.completed,
@@ -1263,6 +1278,7 @@ def _group_summary(
         "accepted_time_count": int(first_times.size),
         "accepted_time_sha256": _array_sha256(first_times),
         "accepted_times_s": first_times.tolist(),
+        "accepted_time_evidence": accepted_time_evidence,
         "retry_attempts": outcome.retry_attempts,
         "wall_time_s": outcome.wall_time_s,
         "process_cpu_time_s": outcome.process_cpu_time_s,

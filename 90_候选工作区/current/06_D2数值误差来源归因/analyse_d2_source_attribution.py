@@ -35,10 +35,13 @@ REPORT_MD = HERE / "reports" / "d2_source_attribution_report.md"
 ARTIFACT_MANIFEST = HERE / "artifacts" / "d2_source_attribution_manifest.json"
 EVIDENCE_ROOT = HERE / "artifacts" / "evidence"
 TRACKED_LEDGER = EVIDENCE_ROOT / "stage_ledger.json"
+TRACKED_S0 = EVIDENCE_ROOT / "s0_identity_implementation.json"
+TRACKED_PRELIMINARY_R = EVIDENCE_ROOT / "preliminary_r.json"
 
 if str(FORMAL_SOURCE) not in sys.path:
     sys.path.insert(0, str(FORMAL_SOURCE))
 
+from airvortex.backends.high_fidelity_3d import HighFidelityBackend
 from airvortex.core import RunStatus
 from airvortex.io import load_run_archive
 from airvortex.io.archive import source_tree_identity
@@ -95,6 +98,7 @@ class RunEvidence:
     manifest: dict[str, Any]
     provenance: dict[str, Any]
     fields_all_finite: bool
+    formal_g0_geometry: dict[str, Any]
 
 
 def _git(*args: str) -> str:
@@ -118,6 +122,224 @@ def _sha256(path: Path) -> str:
 
 def _canonical_sha256(value: object) -> str:
     return hashlib.sha256(canonical_json_bytes(value)).hexdigest()
+
+
+def _array_sha256(value: NDArray[Any]) -> str:
+    array = np.ascontiguousarray(value)
+    digest = hashlib.sha256()
+    digest.update(str(array.dtype).encode("ascii"))
+    digest.update(b"\0")
+    digest.update(json.dumps(list(array.shape)).encode("ascii"))
+    digest.update(b"\0")
+    digest.update(array.view(np.uint8))
+    return digest.hexdigest()
+
+
+def audit_zero_drive_trajectory(
+    actual_bar_rpm: NDArray[np.floating[Any]],
+    bar_angle_rad: NDArray[np.floating[Any]],
+) -> dict[str, Any]:
+    """Independently require exact zero drive and angle trajectories."""
+
+    rpm = np.asarray(actual_bar_rpm, dtype=np.float64).reshape(-1)
+    angle = np.asarray(bar_angle_rad, dtype=np.float64).reshape(-1)
+    gates = {
+        "trajectory_shapes_match": rpm.shape == angle.shape,
+        "actual_bar_rpm_finite": bool(np.isfinite(rpm).all()),
+        "bar_angle_rad_finite": bool(np.isfinite(angle).all()),
+        "actual_bar_rpm_exact_zero": bool(np.array_equal(rpm, np.zeros_like(rpm))),
+        "bar_angle_rad_exact_zero": bool(np.array_equal(angle, np.zeros_like(angle))),
+    }
+    return {
+        "gate_pass": all(gates.values()),
+        "gates": gates,
+        "actual_bar_rpm_sha256": _array_sha256(rpm),
+        "bar_angle_rad_sha256": _array_sha256(angle),
+    }
+
+
+def audit_accepted_time_evidence(
+    summary: Mapping[str, Any],
+    labels: Sequence[str],
+) -> dict[str, Any]:
+    """Re-encode every variant as float64 and compare the resulting bytes."""
+
+    evidence = summary.get("accepted_time_evidence")
+    expected_labels = list(labels)
+    mapping_ok = isinstance(evidence, Mapping)
+    exact_labels = mapping_ok and set(evidence) == set(expected_labels)
+    per_variant: dict[str, Any] = {}
+    payloads: list[bytes] = []
+    for label in expected_labels:
+        record = evidence.get(label) if isinstance(evidence, Mapping) else None
+        record_gates = {
+            "record_is_mapping": isinstance(record, Mapping),
+            "times_are_float64_vector": False,
+            "times_are_finite": False,
+            "accepted_time_count_recomputed": False,
+            "accepted_time_sha256_recomputed": False,
+        }
+        recomputed_count: int | None = None
+        recomputed_sha256: str | None = None
+        if isinstance(record, Mapping):
+            try:
+                values = np.asarray(record.get("accepted_times_s"), dtype=np.float64)
+            except (TypeError, ValueError):
+                values = np.asarray([], dtype=np.float64).reshape(0, 0)
+            if values.ndim == 1:
+                values = np.ascontiguousarray(values, dtype=np.float64)
+                recomputed_count = int(values.size)
+                recomputed_sha256 = _array_sha256(values)
+                record_gates.update(
+                    {
+                        "times_are_float64_vector": values.dtype == np.float64,
+                        "times_are_finite": bool(np.isfinite(values).all()),
+                        "accepted_time_count_recomputed": (
+                            record.get("accepted_time_count") == recomputed_count
+                        ),
+                        "accepted_time_sha256_recomputed": (
+                            record.get("accepted_time_sha256") == recomputed_sha256
+                        ),
+                    }
+                )
+                payloads.append(values.tobytes(order="C"))
+        per_variant[label] = {
+            "gate_pass": all(record_gates.values()),
+            "gates": record_gates,
+            "recomputed_count": recomputed_count,
+            "recomputed_sha256": recomputed_sha256,
+        }
+    all_records_valid = len(per_variant) == len(expected_labels) and all(
+        item["gate_pass"] for item in per_variant.values()
+    )
+    bitwise_equal = (
+        len(payloads) == len(expected_labels)
+        and bool(payloads)
+        and all(payload == payloads[0] for payload in payloads[1:])
+    )
+    gates = {
+        "summary_variants_exact": summary.get("variants") == expected_labels,
+        "per_variant_evidence_is_mapping": mapping_ok,
+        "per_variant_labels_exact": bool(exact_labels),
+        "all_variant_records_recomputed": all_records_valid,
+        "float64_bytes_bitwise_equal": bitwise_equal,
+    }
+    return {
+        "gate_pass": all(gates.values()),
+        "gates": gates,
+        "per_variant": per_variant,
+        "runner_boolean_claim": summary.get("gates", {}).get(
+            "accepted_time_arrays_bitwise_equal"
+        ),
+    }
+
+
+def audit_execution_revision_binding(
+    summary: Mapping[str, Any],
+    execution_commit: str,
+) -> dict[str, Any]:
+    """Require the declared commit and both sampled Git revisions to agree."""
+
+    identity = summary.get("identity")
+    revision_start = summary.get("git_revision_execution_start")
+    revision_end = summary.get("git_revision_execution_end")
+    gates = {
+        "identity_execution_commit": (
+            isinstance(identity, Mapping)
+            and identity.get("execution_commit") == execution_commit
+        ),
+        "git_revision_execution_start": (
+            isinstance(revision_start, Mapping)
+            and revision_start.get("value") == execution_commit
+        ),
+        "git_revision_execution_end": (
+            isinstance(revision_end, Mapping)
+            and revision_end.get("value") == execution_commit
+        ),
+    }
+    return {"gate_pass": all(gates.values()), "gates": gates}
+
+
+def audit_formal_g0_mask(
+    rebuilt_bar_mask: NDArray[Any],
+    archived_bar_mask: NDArray[Any],
+) -> dict[str, Any]:
+    """Compare rebuilt formal G0 geometry with the archived mask cell by cell."""
+
+    rebuilt = np.ascontiguousarray(np.asarray(rebuilt_bar_mask, dtype=np.uint8))
+    archived = np.ascontiguousarray(np.asarray(archived_bar_mask))
+    shape_matches = rebuilt.shape == archived.shape
+    archived_binary = bool(np.all((archived == 0) | (archived == 1)))
+    elementwise_equal = bool(
+        shape_matches and archived_binary and np.array_equal(rebuilt, archived)
+    )
+    archived_for_hash = np.ascontiguousarray(archived.astype(np.uint8, copy=False))
+    gates = {
+        "shape_matches": shape_matches,
+        "archived_mask_binary": archived_binary,
+        "elementwise_equal": elementwise_equal,
+    }
+    return {
+        "gate_pass": all(gates.values()),
+        "gates": gates,
+        "rebuilt_bar_mask_sha256": _array_sha256(rebuilt),
+        "archived_bar_mask_sha256": _array_sha256(archived_for_hash),
+        "rebuilt_bar_cell_count": int(np.sum(rebuilt)),
+        "archived_bar_cell_count": int(np.sum(archived_for_hash)),
+    }
+
+
+def audit_preliminary_r_consistency(
+    preliminary: Mapping[str, Any],
+    final_r: Mapping[str, Any],
+) -> dict[str, Any]:
+    gates = {
+        "preliminary_gate_pass": preliminary.get("gate_pass") is True,
+        "R_magnitude_label_matches": (
+            preliminary.get("R_magnitude_label") == final_r.get("magnitude_label")
+        ),
+        "R_direction_label_matches": (
+            preliminary.get("R_direction_label") == final_r.get("direction_label")
+        ),
+    }
+    return {"gate_pass": all(gates.values()), "gates": gates}
+
+
+def audit_compact_control_evidence(
+    s0_source: Path,
+    preliminary_source: Path,
+    tracked_s0: Path,
+    tracked_preliminary: Path,
+) -> dict[str, Any]:
+    source_and_target = {
+        "s0": (s0_source, tracked_s0),
+        "preliminary_r": (preliminary_source, tracked_preliminary),
+    }
+    gates: dict[str, bool] = {}
+    files: dict[str, Any] = {}
+    for name, (source, target) in source_and_target.items():
+        source_exists = source.is_file()
+        target_exists = target.is_file()
+        gates[f"{name}_source_exists"] = source_exists
+        gates[f"{name}_tracked_copy_exists"] = target_exists
+        byte_identical = (
+            source_exists and target_exists and _sha256(source) == _sha256(target)
+        )
+        gates[f"{name}_tracked_copy_byte_identical"] = byte_identical
+        try:
+            source_display = _relative(source)
+        except ValueError:
+            source_display = source.as_posix()
+        try:
+            target_display = _relative(target)
+        except ValueError:
+            target_display = target.as_posix()
+        files[name] = {
+            "source": source_display,
+            "tracked_copy": target_display,
+            "byte_identical": byte_identical,
+        }
+    return {"gate_pass": all(gates.values()), "gates": gates, "files": files}
 
 
 def _json_object(path: Path) -> dict[str, Any]:
@@ -431,6 +653,13 @@ def _load_run_evidence(
         np.isfinite(np.asarray(value)).all()
         for value in archived.result.fields.values()
     )
+    if "stir_bar_mask_3d" not in archived.result.fields:
+        raise D2AnalysisError(f"{label} archived formal G0 bar mask is missing")
+    rebuilt_grid = HighFidelityBackend().make_grid(archived.config)
+    formal_g0_geometry = audit_formal_g0_mask(
+        rebuilt_grid.bar_mask,
+        archived.result.fields["stir_bar_mask_3d"],
+    )
     metadata = dict(archived.result.metadata)
     manifest = dict(archived.manifest)
     provenance = dict(archived.provenance)
@@ -445,6 +674,7 @@ def _load_run_evidence(
         manifest=manifest,
         provenance=provenance,
         fields_all_finite=fields_all_finite,
+        formal_g0_geometry=formal_g0_geometry,
     )
 
 
@@ -575,20 +805,20 @@ def _summary_hard_gate_audit(
     execution_commit: str,
     bound_source: str,
 ) -> dict[str, Any]:
+    revision_audit = audit_execution_revision_binding(summary, execution_commit)
+    accepted_time_audit = audit_accepted_time_evidence(summary, labels)
     gates: dict[str, bool] = {
         "runner_summary_gate": summary.get("gate_pass") is True,
-        "summary_execution_commit": (
-            summary.get("identity", {}).get("execution_commit") == execution_commit
-        ),
+        "execution_revision_binding": revision_audit["gate_pass"],
         "summary_source_start_bound": (
             summary.get("source_tree_execution_start", {}).get("value") == bound_source
         ),
         "summary_source_end_bound": (
             summary.get("source_tree_execution_end", {}).get("value") == bound_source
         ),
-        "summary_accepted_times_bitwise_equal": (
-            summary.get("gates", {}).get("accepted_time_arrays_bitwise_equal") is True
-        ),
+        "accepted_time_evidence_independently_recomputed": accepted_time_audit[
+            "gate_pass"
+        ],
     }
     per_run: dict[str, Any] = {}
     for label in labels:
@@ -612,6 +842,7 @@ def _summary_hard_gate_audit(
             "archived_observables_finite": all(
                 np.isfinite(value).all() for value in run.observables.values()
             ),
+            "formal_g0_bar_mask_elementwise_equal": run.formal_g0_geometry["gate_pass"],
             "provenance_source_start_bound": (
                 source_identity.get("source_tree_sha256_start") == bound_source
             ),
@@ -695,6 +926,7 @@ def _summary_hard_gate_audit(
             },
             "pressure_accelerator": dict(accelerator),
             "config_canonical_sha256": run.config_canonical_sha256,
+            "formal_g0_geometry": run.formal_g0_geometry,
         }
     gates["all_archive_hard_gates"] = all(
         item["gate_pass"] for item in per_run.values()
@@ -702,6 +934,8 @@ def _summary_hard_gate_audit(
     return {
         "gate_pass": all(gates.values()),
         "gates": gates,
+        "execution_revision_audit": revision_audit,
+        "accepted_time_audit": accepted_time_audit,
         "per_run": per_run,
     }
 
@@ -845,16 +1079,15 @@ def _zero_drive_diagnostics(
     runs: Mapping[str, RunEvidence],
     hard_gates: Mapping[str, Any],
 ) -> dict[str, Any]:
-    result: dict[str, Any] = {}
+    cases: dict[str, Any] = {}
     for label in ("Z6", "Z9"):
         run = runs[label]
         rpm = run.observables["actual_bar_rpm"]
         angle = run.observables["bar_angle_rad"]
-        result[label] = {
-            "prescribed_speed_and_bar_angle_remain_zero": bool(
-                np.array_equal(rpm, np.zeros_like(rpm))
-                and np.array_equal(angle, np.zeros_like(angle))
-            ),
+        trajectory_audit = audit_zero_drive_trajectory(rpm, angle)
+        cases[label] = {
+            "gate_pass": trajectory_audit["gate_pass"],
+            "trajectory_audit": trajectory_audit,
             "output_time_s": run.time_s.tolist(),
             "maximum_laboratory_speed_m_s": run.observables[
                 "maximum_laboratory_speed_m_s"
@@ -870,7 +1103,10 @@ def _zero_drive_diagnostics(
             ].tolist(),
             "dense_accepted_step_maxima": hard_gates[label]["raw_extrema"],
         }
-    return result
+    return {
+        "gate_pass": all(item["gate_pass"] for item in cases.values()),
+        "cases": cases,
+    }
 
 
 def _inventory_analysis(
@@ -964,6 +1200,18 @@ def _publish_compact_evidence(
     if EVIDENCE_ROOT.exists():
         raise FileExistsError(EVIDENCE_ROOT)
     copied: list[dict[str, Any]] = []
+    for source, target in (
+        (S0_PATH, TRACKED_S0),
+        (PRELIMINARY_R_PATH, TRACKED_PRELIMINARY_R),
+    ):
+        _copy_compact_file(source, target)
+        copied.append(
+            {
+                "path": _relative(target),
+                "sha256": _sha256(target),
+                "size_bytes": target.stat().st_size,
+            }
+        )
     for label, run in sorted(runs.items()):
         target_root = EVIDENCE_ROOT / "runs" / label
         for name in (
@@ -1019,10 +1267,19 @@ def _publish_compact_evidence(
             "size_bytes": TRACKED_LEDGER.stat().st_size,
         }
     )
+    control_evidence_audit = audit_compact_control_evidence(
+        S0_PATH,
+        PRELIMINARY_R_PATH,
+        TRACKED_S0,
+        TRACKED_PRELIMINARY_R,
+    )
+    if not control_evidence_audit["gate_pass"]:
+        raise D2AnalysisError("tracked S0 or preliminary R evidence audit failed")
     return {
         "file_count": len(copied),
         "total_size_bytes": sum(item["size_bytes"] for item in copied),
         "files": copied,
+        "control_evidence_audit": control_evidence_audit,
     }
 
 
@@ -1060,6 +1317,10 @@ def _normalized_stage_ledger(
     s5_required: bool,
     s5_executed: bool,
 ) -> dict[str, Any]:
+    summary_evidence = {
+        name: _relative(EVIDENCE_ROOT / "summaries" / f"{name}.json")
+        for name in (*SINGLE_CASES, "r_pair", "r_multiway")
+    }
     return {
         "schema_version": 1,
         "protocol_id": PROTOCOL_ID,
@@ -1069,31 +1330,38 @@ def _normalized_stage_ledger(
                 "stage": "S0",
                 "disposition": "EXECUTED",
                 "status": "PASS",
-                "evidence": _relative(S0_PATH),
+                "evidence": [_relative(TRACKED_S0)],
             },
             {
                 "stage": "S1",
                 "disposition": "EXECUTED",
                 "status": "PASS",
                 "cases": ["F6", "F9"],
+                "evidence": [summary_evidence["F6"], summary_evidence["F9"]],
             },
             {
                 "stage": "S2",
                 "disposition": "EXECUTED",
                 "status": "PASS",
                 "cases": ["Z6", "Z9"],
+                "evidence": [summary_evidence["Z6"], summary_evidence["Z9"]],
             },
             {
                 "stage": "S3",
                 "disposition": "EXECUTED",
                 "status": "PASS",
                 "cases": ["T9"],
+                "evidence": [summary_evidence["T9"]],
             },
             {
                 "stage": "S4",
                 "disposition": "EXECUTED",
                 "status": "PASS",
                 "cases": list(R_PAIR_CASES),
+                "evidence": [
+                    summary_evidence["r_pair"],
+                    _relative(TRACKED_PRELIMINARY_R),
+                ],
             },
             {
                 "stage": "S5",
@@ -1101,16 +1369,22 @@ def _normalized_stage_ledger(
                 "status": "PASS" if s5_executed else "SKIPPED_BY_FROZEN_RULE",
                 "condition_required": s5_required,
                 "cases": list(R_MULTIWAY_CASES) if s5_executed else [],
+                "evidence": [
+                    _relative(TRACKED_PRELIMINARY_R),
+                    *([summary_evidence["r_multiway"]] if s5_executed else []),
+                ],
             },
             {
                 "stage": "S6",
                 "disposition": "EXECUTED_IN_FINAL_ANALYSIS",
                 "status": "PASS",
+                "evidence": [_relative(REPORT_JSON)],
             },
             {
                 "stage": "S7",
                 "disposition": "EXECUTED",
                 "status": "PASS",
+                "evidence": [_relative(ARTIFACT_MANIFEST)],
             },
         ],
         "failed_stages": [],
@@ -1252,6 +1526,15 @@ def analyse_final() -> dict[str, Any]:
     if not all(item["gate_pass"] for item in hard_gate_audits.values()):
         raise D2AnalysisError("at least one core archive hard-gate audit failed")
 
+    core_hard_gates: dict[str, Any] = {}
+    for audit in hard_gate_audits.values():
+        core_hard_gates.update(audit["per_run"])
+    zero = _zero_drive_diagnostics(runs, core_hard_gates)
+    if not zero["gate_pass"]:
+        raise D2AnalysisError(
+            "Z6/Z9 exact-zero drive audit failed before Z classification"
+        )
+
     factors = {
         "Z": _factor_analysis(
             "Z",
@@ -1280,11 +1563,11 @@ def analyse_final() -> dict[str, Any]:
         ),
     }
     preliminary = _json_object(PRELIMINARY_R_PATH)
-    if (
-        preliminary.get("gate_pass") is not True
-        or preliminary.get("R_magnitude_label") != factors["R"]["magnitude_label"]
-        or preliminary.get("R_direction_label") != factors["R"]["direction_label"]
-    ):
+    preliminary_r_audit = audit_preliminary_r_consistency(
+        preliminary,
+        factors["R"],
+    )
+    if not preliminary_r_audit["gate_pass"]:
         raise D2AnalysisError("final R classification differs from S5 decision input")
     s5_required = should_run_s5(factors["R"]["magnitude_label"])
     s5_summary_path = _group_summary_path("r_multiway")
@@ -1315,7 +1598,6 @@ def analyse_final() -> dict[str, Any]:
     for audit in hard_gate_audits.values():
         flattened_hard_gates.update(audit["per_run"])
     inventory = _inventory_analysis(runs, flattened_hard_gates)
-    zero = _zero_drive_diagnostics(runs, flattened_hard_gates)
     normalized_ledger = _normalized_stage_ledger(
         s5_required=s5_required,
         s5_executed=s5_executed,
@@ -1365,6 +1647,8 @@ def analyse_final() -> dict[str, Any]:
             "interaction_analysis": interaction,
         },
         "zero_drive_diagnostics": zero,
+        "preliminary_r_consistency_audit": preliminary_r_audit,
+        "compact_control_evidence_audit": compact["control_evidence_audit"],
         "inventory_boundary_analysis": inventory,
         "classification_trajectories": _trajectory_bundle(runs),
         "config_differences": config_differences,

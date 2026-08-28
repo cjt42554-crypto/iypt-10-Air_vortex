@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 import sys
+import tempfile
 import unittest
 from dataclasses import dataclass
 from pathlib import Path
@@ -18,6 +19,13 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
 from analyse_d2_source_attribution import (
+    _array_sha256,
+    audit_accepted_time_evidence,
+    audit_compact_control_evidence,
+    audit_execution_revision_binding,
+    audit_formal_g0_mask,
+    audit_preliminary_r_consistency,
+    audit_zero_drive_trajectory,
     classify_direction,
     classify_magnitude,
     compute_effect_metrics,
@@ -226,6 +234,153 @@ class TransactionProtocolTests(unittest.TestCase):
         shifted = SimpleNamespace(accepted_times_s=[0.0, 0.1, np.nextafter(0.2, 1.0)])
         self.assertTrue(accepted_times_bitwise_equal((left, right)))
         self.assertFalse(accepted_times_bitwise_equal((left, shifted)))
+
+
+class IndependentEvidencePatchTests(unittest.TestCase):
+    @staticmethod
+    def _accepted_record(values: list[float]) -> dict[str, object]:
+        array = np.asarray(values, dtype=np.float64)
+        return {
+            "accepted_time_count": int(array.size),
+            "accepted_time_sha256": _array_sha256(array),
+            "accepted_times_s": array.tolist(),
+        }
+
+    def test_zero_drive_rejects_nonzero_actual_rpm(self) -> None:
+        audit = audit_zero_drive_trajectory(
+            np.asarray([0.0, np.nextafter(0.0, 1.0)]),
+            np.zeros(2),
+        )
+        self.assertFalse(audit["gate_pass"])
+        self.assertFalse(audit["gates"]["actual_bar_rpm_exact_zero"])
+
+    def test_zero_drive_rejects_nonzero_bar_angle(self) -> None:
+        audit = audit_zero_drive_trajectory(
+            np.zeros(2),
+            np.asarray([0.0, -np.nextafter(0.0, 1.0)]),
+        )
+        self.assertFalse(audit["gate_pass"])
+        self.assertFalse(audit["gates"]["bar_angle_rad_exact_zero"])
+
+    def test_accepted_time_audit_rejects_nextafter_last_time(self) -> None:
+        left = [0.0, 0.1, 0.2]
+        right = [0.0, 0.1, float(np.nextafter(0.2, 1.0))]
+        summary = {
+            "variants": ["left", "right"],
+            "gates": {"accepted_time_arrays_bitwise_equal": True},
+            "accepted_time_evidence": {
+                "left": self._accepted_record(left),
+                "right": self._accepted_record(right),
+            },
+        }
+        audit = audit_accepted_time_evidence(summary, ("left", "right"))
+        self.assertFalse(audit["gate_pass"])
+        self.assertTrue(audit["per_variant"]["right"]["gate_pass"])
+        self.assertFalse(audit["gates"]["float64_bytes_bitwise_equal"])
+
+    def test_accepted_time_audit_rejects_same_count_different_bytes(self) -> None:
+        positive_zero = self._accepted_record([0.0, 0.1, 0.2])
+        negative_zero = self._accepted_record([-0.0, 0.1, 0.2])
+        negative_zero["accepted_time_sha256"] = positive_zero["accepted_time_sha256"]
+        summary = {
+            "variants": ["left", "right"],
+            "gates": {"accepted_time_arrays_bitwise_equal": True},
+            "accepted_time_evidence": {
+                "left": positive_zero,
+                "right": negative_zero,
+            },
+        }
+        audit = audit_accepted_time_evidence(summary, ("left", "right"))
+        self.assertFalse(audit["gate_pass"])
+        right_gates = audit["per_variant"]["right"]["gates"]
+        self.assertTrue(right_gates["accepted_time_count_recomputed"])
+        self.assertFalse(right_gates["accepted_time_sha256_recomputed"])
+
+    def test_revision_audit_rejects_wrong_execution_commit(self) -> None:
+        expected = "a" * 40
+        summary = {
+            "identity": {"execution_commit": "b" * 40},
+            "git_revision_execution_start": {"value": expected},
+            "git_revision_execution_end": {"value": expected},
+        }
+        audit = audit_execution_revision_binding(summary, expected)
+        self.assertFalse(audit["gate_pass"])
+        self.assertFalse(audit["gates"]["identity_execution_commit"])
+
+    def test_revision_audit_rejects_boundary_revision_mismatch(self) -> None:
+        expected = "a" * 40
+        summary = {
+            "identity": {"execution_commit": expected},
+            "git_revision_execution_start": {"value": expected},
+            "git_revision_execution_end": {"value": "b" * 40},
+        }
+        audit = audit_execution_revision_binding(summary, expected)
+        self.assertFalse(audit["gate_pass"])
+        self.assertFalse(audit["gates"]["git_revision_execution_end"])
+
+    def test_formal_g0_audit_rejects_one_flipped_archive_cell(self) -> None:
+        rebuilt = np.asarray([[0, 1], [1, 0]], dtype=np.uint8)
+        archived = rebuilt.copy()
+        archived[0, 0] = 1
+        audit = audit_formal_g0_mask(rebuilt, archived)
+        self.assertFalse(audit["gate_pass"])
+        self.assertFalse(audit["gates"]["elementwise_equal"])
+
+    def test_compact_evidence_rejects_missing_tracked_s0_copy(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            raw_s0 = root / "raw" / "s0.json"
+            raw_preliminary = root / "raw" / "preliminary.json"
+            tracked_s0 = root / "tracked" / "s0.json"
+            tracked_preliminary = root / "tracked" / "preliminary.json"
+            raw_s0.parent.mkdir(parents=True)
+            tracked_preliminary.parent.mkdir(parents=True)
+            raw_s0.write_bytes(b"s0\n")
+            raw_preliminary.write_bytes(b"preliminary\n")
+            tracked_preliminary.write_bytes(raw_preliminary.read_bytes())
+            audit = audit_compact_control_evidence(
+                raw_s0,
+                raw_preliminary,
+                tracked_s0,
+                tracked_preliminary,
+            )
+            self.assertFalse(audit["gate_pass"])
+            self.assertFalse(audit["gates"]["s0_tracked_copy_exists"])
+
+    def test_compact_evidence_rejects_missing_preliminary_copy(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            raw_s0 = root / "raw" / "s0.json"
+            raw_preliminary = root / "raw" / "preliminary.json"
+            tracked_s0 = root / "tracked" / "s0.json"
+            tracked_preliminary = root / "tracked" / "preliminary.json"
+            raw_s0.parent.mkdir(parents=True)
+            tracked_s0.parent.mkdir(parents=True)
+            raw_s0.write_bytes(b"s0\n")
+            raw_preliminary.write_bytes(b"preliminary\n")
+            tracked_s0.write_bytes(raw_s0.read_bytes())
+            audit = audit_compact_control_evidence(
+                raw_s0,
+                raw_preliminary,
+                tracked_s0,
+                tracked_preliminary,
+            )
+            self.assertFalse(audit["gate_pass"])
+            self.assertFalse(audit["gates"]["preliminary_r_tracked_copy_exists"])
+
+    def test_preliminary_and_final_r_labels_must_match(self) -> None:
+        preliminary = {
+            "gate_pass": True,
+            "R_magnitude_label": "SMALL",
+            "R_direction_label": "NO_CLEAR_DIRECTION",
+        }
+        final_r = {
+            "magnitude_label": "MATERIAL",
+            "direction_label": "NO_CLEAR_DIRECTION",
+        }
+        audit = audit_preliminary_r_consistency(preliminary, final_r)
+        self.assertFalse(audit["gate_pass"])
+        self.assertFalse(audit["gates"]["R_magnitude_label_matches"])
 
 
 if __name__ == "__main__":
