@@ -513,8 +513,55 @@ def markdown(report: Mapping[str, Any]) -> str:
                 passed=all(case.get("individual_gate_pass") is True for case in cases),
             )
         )
+    case_rows: list[str] = []
+    trace_rows: list[str] = []
+    g2_diagnostics: list[tuple[float, str]] = []
+    all_cases = [
+        *(("名义", case) for case in report["nominal_cases"]),
+        *(("相位", case) for case in report["phase_sweep_cases"]),
+    ]
+    for case_kind, case in all_cases:
+        case_id = str(case["case_id"])
+        phase = ", ".join(
+            f"{float(value):g}" for value in case["phase_offsets_in_cell_units_xyz"]
+        )
+        if case.get("execution_pass") is not True:
+            error = str(case.get("error", "UNKNOWN")).replace("|", "\\|")
+            case_rows.append(
+                f"| {case_kind} | `{case_id}` | `({phase})` | ERROR | — | — | — | — | False |"
+            )
+            trace_rows.append(
+                f"| {case_kind} | `{case_id}` | ERROR | — | — | — | `{error}` | False |"
+            )
+            continue
+        g1 = case["g1"]
+        errors = g1["normalized_geometry_errors"]
+        comparison = case["g2_mask_comparison"]
+        difference = comparison["weighted_symmetric_difference_volume_interval_m3"]
+        relative_upper = float(difference[1]) / float(g1["exact_bar_volume_m3"])
+        g2_diagnostics.append((relative_upper, case_id))
+        case_rows.append(
+            f"| {case_kind} | `{case_id}` | `({phase})` | "
+            f"{int(g1['bar_cell_count'])} | "
+            f"{float(errors['bar_volume_relative']):.7g} | "
+            f"{float(errors['centroid_over_bar_radius']):.7g} | "
+            f"{float(errors['second_moment_relative_frobenius']):.7g} | "
+            f"{int(g1['solid_six_connected_component_count'])} | "
+            f"{case['individual_gate_pass']} |"
+        )
+        trace_rows.append(
+            f"| {case_kind} | `{case_id}` | `{g1['mask_sha256']}` | "
+            f"`[{float(difference[0]):.9g}, {float(difference[1]):.9g}]` | "
+            f"{relative_upper:.7g} | "
+            f"{int(case['invariance']['mask_hash_change_count'])} | "
+            f"{int(case['invariance']['selection_problem_change_count'])} | "
+            f"{case['invariance']['pass']} |"
+        )
+    maximum_g2_relative, maximum_g2_case = (
+        max(g2_diagnostics) if g2_diagnostics else (math.inf, "NONE")
+    )
     reference = report["g2_shape_reference"]
-    return f"""# D1 可控磁子几何静态审计
+    return rf"""# D1 可控磁子几何静态审计
 
 状态：`{report["status"]}`。
 
@@ -532,11 +579,28 @@ def markdown(report: Mapping[str, Any]) -> str:
 |---:|---:|---:|---:|---:|:---:|
 {chr(10).join(phase_rows)}
 
+## 逐例几何记录
+
+下表列出 4 个名义例和 54 个相位例。相位按 $(\delta_x/\Delta x,\delta_y/\Delta y,\delta_z/\Delta z)$ 记录。
+
+| 类型 | 算例 | 相位 | 单元数 | 体积误差 | 质心误差 | 二阶矩误差 | 六连通分量 | 逐例门 |
+|:---:|:---|:---:|---:|---:|---:|---:|---:|:---:|
+{chr(10).join(case_rows)}
+
+## 逐例身份、G2 对称差与不变性
+
+G2 列是加权对称差体积区间，单位为 $\mathrm{{m}}^3$。“相对上界”以解析磁子体积归一化；本合同要求记录该诊断，但没有为它登记 PASS 阈值。
+
+| 类型 | 算例 | 掩膜 SHA-256 | G1–G2 对称差区间 | 相对上界 | 掩膜哈希变化数 | 选择问题变化数 | 不变性门 |
+|:---:|:---|:---|:---|---:|---:|---:|:---:|
+{chr(10).join(trace_rows)}
+
 ## G2 区间与总门
 
 - 全局体积相对区间宽度：`{reference["volume_relative_interval_width"]:.9g}`。
 - 质心/半径区间宽度：`{reference["centroid_over_radius_interval_width"]:.9g}`。
 - 二阶矩相对区间宽度：`{reference["second_moment_relative_interval_width"]:.9g}`。
+- G1–G2 加权对称差的最大相对上界：`{maximum_g2_relative:.9g}`（`{maximum_g2_case}`）；该项未登记 PASS 阈值。
 - 名义硬层门：`{report["gates"]["nominal_hard_levels"]}`。
 - 54 个相位算例门：`{report["gates"]["phase_sweep_6_and_9"]}`。
 - 层间误差跳变门：`{report["gates"]["pairwise_error_jumps"]}`。

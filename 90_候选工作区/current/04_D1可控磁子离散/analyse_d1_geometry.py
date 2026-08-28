@@ -112,6 +112,62 @@ def _pairwise(
     return result
 
 
+def _g2_diagnostics(
+    nominal_cases: Sequence[Mapping[str, Any]],
+    phase_cases: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    records: list[dict[str, Any]] = []
+    nominal_records: list[dict[str, Any]] = []
+    tagged_cases = [
+        *((True, case) for case in nominal_cases),
+        *((False, case) for case in phase_cases),
+    ]
+    for is_nominal, case in tagged_cases:
+        if case.get("execution_pass") is not True:
+            continue
+        interval = case["g2_mask_comparison"][
+            "weighted_symmetric_difference_volume_interval_m3"
+        ]
+        exact_volume = float(case["g1"]["exact_bar_volume_m3"])
+        record = {
+            "case_id": str(case["case_id"]),
+            "cells_per_bar_diameter": float(case["cells_per_bar_diameter"]),
+            "weighted_symmetric_difference_volume_interval_m3": [
+                float(interval[0]),
+                float(interval[1]),
+            ],
+            "relative_to_exact_volume_interval": [
+                float(interval[0]) / exact_volume,
+                float(interval[1]) / exact_volume,
+            ],
+        }
+        records.append(record)
+        if is_nominal:
+            nominal_records.append(record)
+    if not records:
+        return {
+            "registered_as_gate": False,
+            "maximum_relative_upper_bound": None,
+            "maximum_case_id": "NONE",
+            "nominal_by_level": [],
+        }
+    worst = max(
+        records,
+        key=lambda item: float(item["relative_to_exact_volume_interval"][1]),
+    )
+    return {
+        "registered_as_gate": False,
+        "maximum_relative_upper_bound": float(
+            worst["relative_to_exact_volume_interval"][1]
+        ),
+        "maximum_case_id": worst["case_id"],
+        "nominal_by_level": sorted(
+            nominal_records,
+            key=lambda item: float(item["cells_per_bar_diameter"]),
+        ),
+    }
+
+
 def analyse(
     audit_path: Path,
     preregistration_path: Path,
@@ -149,6 +205,7 @@ def analyse(
         nominal,
         float(thresholds["six_to_nine_or_nine_to_13p5_normalized_error_jump_max"]),
     )
+    g2_diagnostics = _g2_diagnostics(nominal, phases)
     hard_nominal_pass = all(
         all(nominal_checks[str(level)].values())
         for level in (6.0, 9.0, 13.5)
@@ -210,6 +267,7 @@ def analyse(
         "nominal_checks": nominal_checks,
         "phase_checks": phase_checks,
         "pairwise_checks": pairwise,
+        "g2_weighted_symmetric_difference_diagnostics": g2_diagnostics,
         "gates": gates,
         "conditional_next_request": (
             "REQUEST_PRO_REVIEW_FOR_CANDIDATE_ONLY_G0_VS_G1_DYNAMIC_SHADOW"
@@ -273,7 +331,24 @@ def markdown(decision: Mapping[str, Any], audit: Mapping[str, Any]) -> str:
             f"| {level:g} | {volume:.7g} (`{volume_case}`) | {centroid:.7g} "
             f"(`{centroid_case}`) | {moment:.7g} (`{moment_case}`) |"
         )
-    return f"""# D1 静态几何独立合同复核与停止裁决
+    g2 = decision["g2_weighted_symmetric_difference_diagnostics"]
+    g2_rows = [
+        "| {level:g} | `[{lower:.9g}, {upper:.9g}]` | "
+        "`[{lower_relative:.7g}, {upper_relative:.7g}]` |".format(
+            level=float(item["cells_per_bar_diameter"]),
+            lower=float(item["weighted_symmetric_difference_volume_interval_m3"][0]),
+            upper=float(item["weighted_symmetric_difference_volume_interval_m3"][1]),
+            lower_relative=float(item["relative_to_exact_volume_interval"][0]),
+            upper_relative=float(item["relative_to_exact_volume_interval"][1]),
+        )
+        for item in g2["nominal_by_level"]
+    ]
+    g2_maximum = (
+        "NONE"
+        if g2["maximum_relative_upper_bound"] is None
+        else f"{float(g2['maximum_relative_upper_bound']):.9g}"
+    )
+    return rf"""# D1 静态几何独立合同复核与停止裁决
 
 状态：`{decision["status"]}`。
 
@@ -284,6 +359,16 @@ def markdown(decision: Mapping[str, Any], audit: Mapping[str, Any]) -> str:
 | 格/磁子直径 | 最大体积误差（算例） | 最大质心误差（算例） | 最大二阶矩误差（算例） |
 |---:|---:|---:|---:|
 {chr(10).join(rows)}
+
+## G1–G2 加权对称差诊断
+
+该项在机器合同中要求记录，但没有登记 PASS 阈值，因此不参与上述静态总门。它仍是后续 Pro 复核必须查看的几何差异量。
+
+| 名义格/磁子直径 | 对称差体积区间 ($\mathrm{{m}}^3$) | 相对解析体积区间 |
+|---:|:---|:---|
+{chr(10).join(g2_rows)}
+
+全部 58 个静态算例中的最大相对上界为 `{g2_maximum}`，出现于 `{g2["maximum_case_id"]}`。
 
 ## 复核门
 
