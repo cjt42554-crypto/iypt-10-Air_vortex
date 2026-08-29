@@ -1,0 +1,374 @@
+{
+  "schema_version": 1,
+  "protocol_id": "D3_HF3D_CROSS_GRID_TEMPORAL_RESPONSE_V1",
+  "status": "PREREGISTERED_IMPLEMENTATION_ONLY__EXECUTION_NOT_AUTHORIZED",
+  "created_at": "2026-08-29T15:04:42+09:00",
+  "scientific_question": "在正式 G0、6/9 格、0–0.010 s 和三个共同时间步层级下，原 6→9 差异有多少来自两个网格之间不同的时间步响应；共同减半和再次减半后，空间差是否持续缩小，时间步增量是否收缩并保持方向一致。",
+  "review_basis": {
+    "d2_delivery_commit": "9cb1d2172f9e8992561a18efa498705d689048fc",
+    "d2_execution_commit": "0f7f720b0494c9976d6dbc1c594e24f4a9cc1f5a",
+    "formal_source_tree_sha256": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8",
+    "accepted_d2_classifications": {
+      "Z": [
+        "SMALL",
+        "NO_CLEAR_DIRECTION"
+      ],
+      "T": [
+        "MATERIAL",
+        "REDUCTION_SIGNAL"
+      ],
+      "R": [
+        "MIXED_OR_INDETERMINATE",
+        "NO_CLEAR_DIRECTION"
+      ]
+    },
+    "selection_reason": "D2 的九格半时间步在三个主要观测量上给出物质且稳定的减弱信号，但没有测量六格在相同时间步减半下的响应，也只有一次减半。"
+  },
+  "claim_limits": [
+    "D3 是短窗差分时间步响应诊断，不是数值资格 campaign。",
+    "不得用 D3 撤销或覆盖 Q1R3 空间阶段失败闭锁。",
+    "不得把 COMMON_DT_REDUCTION 写成严格时间收敛、空间收敛、连续方程正确或实验正确。",
+    "不得外推到长期稳态、临界转速、空气通道稳定性或装置预测。",
+    "不得自动修改正式理论或正式 HF3D。"
+  ],
+  "workspace": {
+    "root": "90_候选工作区/current/07_D3跨网格时间步响应诊断",
+    "required_future_files": [
+      "README.md",
+      "run_d3_cross_grid_temporal.py",
+      "analyse_d3_cross_grid_temporal.py",
+      "tests/test_d3_cross_grid_temporal.py",
+      "reports/d3_cross_grid_temporal_report.json",
+      "reports/d3_cross_grid_temporal_report.md",
+      "artifacts/d3_cross_grid_temporal_manifest.json"
+    ],
+    "formal_theory_read_only": "01_最终理论/**",
+    "formal_solver_read_only": "02_模拟程序/**"
+  },
+  "authorization": {
+    "candidate_implementation": true,
+    "static_tests_and_nonstepping_audits": true,
+    "real_cuda_dynamic_execution": false,
+    "execution_requires_new_pro_review": true,
+    "automatic_follow_on": "PROHIBITED"
+  },
+  "fresh_evidence_policy": {
+    "classification_requires_six_new_runs_after_preregistration": true,
+    "d2_dynamic_outputs_allowed_as_classification_inputs": false,
+    "d2_dynamic_outputs_allowed_as_design_context_only": true,
+    "all_six_runs_same_clean_execution_commit": true,
+    "commits_during_execution": "PROHIBITED",
+    "cross_commit_trajectory_mixing": "PROHIBITED",
+    "reason": "D3 是在观察到 D2 T9 方向后选择的自适应后续；全新六算例队列避免把已观察轨迹与新阈值拼接成伪确认性结果。"
+  },
+  "formal_source_contract": {
+    "import_directly_from": "02_模拟程序/src/airvortex/**",
+    "required_tree_sha256": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8",
+    "solver_copy_or_fork": "PROHIBITED",
+    "formal_source_modification": "PROHIBITED",
+    "geometry_identity": "FORMAL_G0_ONLY",
+    "grid_and_initial_state_rebuild_from_archived_config": true
+  },
+  "baseline_configs": {
+    "G6": {
+      "path": "90_候选工作区/current/01_HF3D数值资格/generated_q1r3/space_L1_6cells.json",
+      "git_blob_sha": "381c8301e70ba81434a0831f38963f03caf1180a",
+      "nominal_bar_diameter_cells_worst_axis": 6.0
+    },
+    "G9": {
+      "path": "90_候选工作区/current/01_HF3D数值资格/generated_q1r3/space_L2_9cells.json",
+      "git_blob_sha": "270027484e5ea531a25fc7f582027dab25bd6893",
+      "nominal_bar_diameter_cells_worst_axis": 9.0
+    }
+  },
+  "frozen_run_fields": {
+    "run.duration_s": 0.01,
+    "run.output_interval_s": 0.001,
+    "drive.ramp_duration_s": 0.005,
+    "high_fidelity.pressure_solver_device": "cuda",
+    "high_fidelity.pressure_relative_tolerance": 1e-07,
+    "high_fidelity.cfl_controller_target_fraction": 0.95,
+    "high_fidelity.maximum_cfl_step_retries": 4
+  },
+  "allowed_case_override_paths": [
+    "run.duration_s",
+    "run.output_interval_s",
+    "high_fidelity.time_step_s"
+  ],
+  "forbidden_case_changes": [
+    "任何物理输入",
+    "网格之外的几何身份",
+    "界面、壁层、表面张力或接触角正则化",
+    "压力容差、CFL 目标、重试上限或 CUDA 设备要求",
+    "输出时刻",
+    "正式 G0 磁子掩膜规则"
+  ],
+  "time_step_levels_s": {
+    "DT0": 5.5e-06,
+    "DT1": 2.75e-06,
+    "DT2": 1.375e-06,
+    "refinement_ratio": 2.0
+  },
+  "case_matrix": [
+    {
+      "case_id": "G6_DT0",
+      "grid": "G6",
+      "time_step_level": "DT0",
+      "time_step_s": 5.5e-06
+    },
+    {
+      "case_id": "G6_DT1",
+      "grid": "G6",
+      "time_step_level": "DT1",
+      "time_step_s": 2.75e-06
+    },
+    {
+      "case_id": "G6_DT2",
+      "grid": "G6",
+      "time_step_level": "DT2",
+      "time_step_s": 1.375e-06
+    },
+    {
+      "case_id": "G9_DT0",
+      "grid": "G9",
+      "time_step_level": "DT0",
+      "time_step_s": 5.5e-06
+    },
+    {
+      "case_id": "G9_DT1",
+      "grid": "G9",
+      "time_step_level": "DT1",
+      "time_step_s": 2.75e-06
+    },
+    {
+      "case_id": "G9_DT2",
+      "grid": "G9",
+      "time_step_level": "DT2",
+      "time_step_s": 1.375e-06
+    }
+  ],
+  "native_output_times_s": [
+    0.0,
+    0.001,
+    0.002,
+    0.003,
+    0.004,
+    0.005,
+    0.006,
+    0.007,
+    0.008,
+    0.009,
+    0.01
+  ],
+  "comparison_policy": {
+    "native_output_times_only": true,
+    "interpolation": "PROHIBITED",
+    "primary_classification_window_s": [
+      0.0,
+      0.01
+    ],
+    "diagnostic_windows_s": [
+      [
+        0.0,
+        0.005
+      ],
+      [
+        0.005,
+        0.01
+      ]
+    ],
+    "diagnostic_windows_can_change_top_level_label": false,
+    "remove_initial_value": true,
+    "include_t0_zero_sample_in_rms": true,
+    "rms_definition": "sqrt(mean(x**2))"
+  },
+  "observables": {
+    "primary": [
+      "funnel_depth_m",
+      "kinetic_energy_lab_j",
+      "angular_momentum_z_kg_m2_s",
+      "axisymmetry_error"
+    ],
+    "secondary": [
+      "min_gap_to_bar_m",
+      "liquid_inventory_change_relative"
+    ],
+    "binary_events": [
+      "first_contact_proxy",
+      "connection_candidate",
+      "finite_channel_candidate"
+    ],
+    "binary_events_role": "RECORD_ONLY_UNLESS_ACTUALLY_TRIGGERED__NOT_A_PASS_GATE"
+  },
+  "absolute_scale_floors": {
+    "funnel_depth_m": 1e-05,
+    "min_gap_to_bar_m": 1e-05,
+    "kinetic_energy_lab_j": 1e-08,
+    "angular_momentum_z_kg_m2_s": 1e-09,
+    "axisymmetry_error": 0.001,
+    "liquid_inventory_change_relative": 1e-06
+  },
+  "registered_vectors": {
+    "q_L_k": "Q_L_k(t) - Q_L_k(0)",
+    "s_k": "q_9_k - q_6_k",
+    "u_L_1": "q_L_1 - q_L_0",
+    "u_L_2": "q_L_2 - q_L_1",
+    "c_1": "s_1 - s_0 = u_9_1 - u_6_1",
+    "c_2": "s_2 - s_1 = u_9_2 - u_6_2",
+    "E_0": "rms(s_0)"
+  },
+  "registered_metrics": {
+    "eta_delta_1": "rms(c_1) / max(E_0, epsilon_Q)",
+    "rho_common_1": "rms(s_1) / max(E_0, epsilon_Q)",
+    "rho_common_2": "rms(s_2) / max(E_0, epsilon_Q)",
+    "gamma_G6": "rms(u_6_2) / max(rms(u_6_1), epsilon_Q)",
+    "gamma_G9": "rms(u_9_2) / max(rms(u_9_1), epsilon_Q)",
+    "gamma_delta": "rms(c_2) / max(rms(c_1), epsilon_Q)",
+    "cosine_G6": "dot(u_6_1,u_6_2)/(norm(u_6_1)*norm(u_6_2)) when direction gate is active",
+    "cosine_G9": "dot(u_9_1,u_9_2)/(norm(u_9_1)*norm(u_9_2)) when direction gate is active",
+    "cosine_delta": "dot(c_1,c_2)/(norm(c_1)*norm(c_2)) when direction gate is active",
+    "observed_order_G6": "-log2(gamma_G6) when 0 < gamma_G6 and the first increment is above scale",
+    "observed_order_G9": "-log2(gamma_G9) when 0 < gamma_G9 and the first increment is above scale",
+    "observed_order_delta": "-log2(gamma_delta) when 0 < gamma_delta and c_1 is above scale"
+  },
+  "thresholds": {
+    "material_differential_temporal_correction_eta_min": 0.5,
+    "small_differential_temporal_correction_eta_max_exclusive": 0.1,
+    "common_dt_reduction_rho_max": 0.8,
+    "common_dt_increase_rho_min": 1.25,
+    "contraction_gamma_max": 0.7071067811865476,
+    "direction_cosine_min": 0.5,
+    "second_increment_negligible_fraction_of_first_max": 0.1,
+    "increment_below_spatial_scale_fraction_max": 0.1,
+    "minimum_primary_count": 2
+  },
+  "derived_boolean_rules": {
+    "increment_below_scale_L": "rms(u_L_1) < 0.1*max(E_0,epsilon_Q) AND rms(u_L_2) < 0.1*max(E_0,epsilon_Q)",
+    "direction_consistent_L": "rms(u_L_2) <= 0.1*max(rms(u_L_1),epsilon_Q) OR cosine_L >= 0.5",
+    "contracting_or_below_scale_L": "increment_below_scale_L OR (gamma_L <= 0.7071067811865476 AND direction_consistent_L)",
+    "direction_consistent_delta": "rms(c_2) <= 0.1*max(rms(c_1),epsilon_Q) OR cosine_delta >= 0.5",
+    "differential_contracting": "gamma_delta <= 0.7071067811865476 AND direction_consistent_delta",
+    "common_reduction_primary": "eta_delta_1 >= 0.5 AND rho_common_1 <= 0.8 AND rho_common_2 <= 0.8",
+    "positive_primary": "common_reduction_primary AND differential_contracting AND contracting_or_below_scale_G6 AND contracting_or_below_scale_G9",
+    "increase_primary": "eta_delta_1 >= 0.5 AND rho_common_1 >= 1.25 AND rho_common_2 >= 1.25",
+    "small_primary": "eta_delta_1 < 0.1 AND 0.8 <= rho_common_1 <= 1.25 AND 0.8 <= rho_common_2 <= 1.25"
+  },
+  "top_level_classification_precedence": [
+    {
+      "label": "D3_INCONCLUSIVE_FAIL_CLOSED",
+      "condition": "任一身份、配置、完成性、CUDA、数值质量或证据硬门失败"
+    },
+    {
+      "label": "COMMON_DT_REDUCTION_WITH_CONTRACTING_TEMPORAL_RESPONSE",
+      "condition": "至少 2/4 个主要观测量满足 positive_primary"
+    },
+    {
+      "label": "COMMON_DT_REDUCTION_WITHOUT_REGISTERED_CONTRACTION",
+      "condition": "至少 2/4 个主要观测量满足 common_reduction_primary，但满足 positive_primary 的主要观测量不足 2 个，且上一标签不成立"
+    },
+    {
+      "label": "COMMON_DT_INCREASE_SIGNAL",
+      "condition": "至少 2/4 个主要观测量满足 increase_primary，且前述标签不成立"
+    },
+    {
+      "label": "DIFFERENTIAL_TEMPORAL_EFFECT_SMALL_RELATIVE_TO_SPATIAL_GAP",
+      "condition": "4/4 个主要观测量满足 small_primary，且前述标签不成立"
+    },
+    {
+      "label": "MIXED_OR_INDETERMINATE_CROSS_GRID_TEMPORAL_RESPONSE",
+      "condition": "其余所有完整且质量门通过的结果"
+    }
+  ],
+  "label_interpretation_limits": {
+    "COMMON_DT_REDUCTION_WITH_CONTRACTING_TEMPORAL_RESPONSE": "只支持原共同 DT0 的 6→9 差异受到实质差分时间步响应污染；不等于严格时间或空间收敛。",
+    "COMMON_DT_REDUCTION_WITHOUT_REGISTERED_CONTRACTION": "共同减小时间步会缩小空间差，但三层时间步增量没有形成登记的收缩/方向一致证据；不得作时间收敛解释。",
+    "COMMON_DT_INCREASE_SIGNAL": "共同减小时间步会放大登记空间差；不得把 D2 的单侧靠近解释为一般时间改进。",
+    "DIFFERENTIAL_TEMPORAL_EFFECT_SMALL_RELATIVE_TO_SPATIAL_GAP": "两个网格的差分时间步响应相对原空间差很小；不证明每个网格自身时间误差都小。",
+    "MIXED_OR_INDETERMINATE_CROSS_GRID_TEMPORAL_RESPONSE": "登记指标不能给出统一归因；不得选择性引用单个量升级结论。"
+  },
+  "identity_and_configuration_hard_gates": [
+    "执行工作树清洁且 main HEAD 在六个动态算例期间不变。",
+    "正式源码树 SHA-256 与 required_tree_sha256 完全一致。",
+    "六个算例均由绑定基线配置和 allowlist 生成；任何未登记字段差异失败闭锁。",
+    "同一网格三个时间步层级的网格、正式 G0 掩膜、初态数组逐 dtype、shape 和 SHA-256 相同。",
+    "实际 CUDA 被选中且无 CPU 回退。",
+    "六个算例都从零开始，禁止 checkpoint、D2 raw 或旧运行目录复用。",
+    "六个算例原生输出时间逐位等于 native_output_times_s。"
+  ],
+  "numerical_quality_hard_gates": {
+    "complete_to_registered_end_time": true,
+    "all_state_and_diagnostic_values_finite": true,
+    "pressure_relative_residual_max": 1e-07,
+    "projected_divergence_max_s_inv": 0.0001,
+    "accepted_advective_cfl_max": 0.35,
+    "cumulative_phase_clip_relative_max": 0.001,
+    "cumulative_phase_repair_relative_max": 0.001,
+    "liquid_volume_balance_error_relative_max": 0.001,
+    "configured_time_step_active_fraction_min": 0.95,
+    "maximum_cfl_step_retries": 4
+  },
+  "implementation_static_review_requirements": [
+    "配置生成器只允许登记 override，且能逐字段证明六算例物理身份一致。",
+    "运行器在真实推进前完成 clean HEAD、正式源码树、CUDA、初态/网格身份和旧 raw 卫生门。",
+    "分析器独立重载六份归档，不信任运行器提供的分类布尔值。",
+    "分析器独立核对原生输出时间，不允许插值。",
+    "测试覆盖所有公式、尺度下限、零范数、余弦未定义、标签优先级和失败闭锁。",
+    "测试明确拒绝任何 D2 轨迹、D2 raw 路径或跨提交证据进入 D3 分类。",
+    "阶段台账的编号、动作名、证据路径和说明必须逐项同义。",
+    "静态复核前不得创建真实 D3 动态报告或标记任何动态阶段已执行。"
+  ],
+  "execution_stages": [
+    {
+      "stage": "S0",
+      "action": "IDENTITY_CONFIG_IMPLEMENTATION_AND_FRESH_EVIDENCE_GATE",
+      "dynamic_steps_allowed_under_current_authorization": false,
+      "stop_on_failure": true
+    },
+    {
+      "stage": "S1",
+      "action": "FRESH_G6_DT0_DT1_DT2_SEQUENCE",
+      "currently_authorized": false,
+      "future_order": [
+        "G6_DT0",
+        "G6_DT1",
+        "G6_DT2"
+      ],
+      "stop_on_failure": true
+    },
+    {
+      "stage": "S2",
+      "action": "FRESH_G9_DT0_DT1_DT2_SEQUENCE",
+      "currently_authorized": false,
+      "future_order": [
+        "G9_DT0",
+        "G9_DT1",
+        "G9_DT2"
+      ],
+      "requires": "S1_COMPLETE_AND_ALL_HARD_GATES_PASS",
+      "stop_on_failure": true
+    },
+    {
+      "stage": "S3",
+      "action": "INDEPENDENT_ANALYSIS_TRACKED_EVIDENCE_REPORT_AND_STOP_FOR_PRO_REVIEW",
+      "currently_authorized": false,
+      "requires": "S1_AND_S2_COMPLETE_AND_ALL_HARD_GATES_PASS",
+      "automatic_follow_on": "PROHIBITED"
+    }
+  ],
+  "tracked_evidence_requirements": [
+    "预注册 JSON、生成配置和 allowlist 差异报告。",
+    "执行提交、正式源码树、环境、CUDA 设备和依赖身份。",
+    "每算例配置、manifest、provenance、结果摘要、原生 timeseries.csv 和接受时间摘要。",
+    "同网格三层网格/掩膜/初态身份复核。",
+    "全部硬门逐算例结果。",
+    "每个主要与次要观测量的 q、s、u、c、eta、rho、gamma、cosine 和 observed order。",
+    "完整窗口顶层分类与两个诊断分窗。",
+    "所有本地 ignored raw 文件的逐文件 SHA-256、大小和复核状态。",
+    "机器可读阶段台账；未执行阶段必须显式标记 NOT_EXECUTED。"
+  ],
+  "stop_conditions": [
+    "任一硬门失败立即保留诊断并输出 D3_INCONCLUSIVE_FAIL_CLOSED，不得运行后续阶段。",
+    "六算例完成并生成报告后必须停止交 Pro 复核。",
+    "不得在同一授权下进入更小时间步、更细网格、长期窗口、D4、Q1R4 或正式代码修改。"
+  ]
+}
