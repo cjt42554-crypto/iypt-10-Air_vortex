@@ -1,0 +1,101 @@
+{
+  "automatic_follow_on": "PROHIBITED",
+  "execution_commit": "0f7f720b0494c9976d6dbc1c594e24f4a9cc1f5a",
+  "failed_stages": [],
+  "protocol_id": "D2_HF3D_NUMERICAL_SOURCE_ATTRIBUTION_V2",
+  "schema_version": 1,
+  "stages": [
+    {
+      "disposition": "EXECUTED",
+      "evidence": [
+        "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/s0_identity_implementation.json"
+      ],
+      "stage": "S0",
+      "status": "PASS"
+    },
+    {
+      "cases": [
+        "F6",
+        "F9"
+      ],
+      "disposition": "EXECUTED",
+      "evidence": [
+        "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/summaries/F6.json",
+        "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/summaries/F9.json"
+      ],
+      "stage": "S1",
+      "status": "PASS"
+    },
+    {
+      "cases": [
+        "Z6",
+        "Z9"
+      ],
+      "disposition": "EXECUTED",
+      "evidence": [
+        "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/summaries/Z6.json",
+        "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/summaries/Z9.json"
+      ],
+      "stage": "S2",
+      "status": "PASS"
+    },
+    {
+      "cases": [
+        "T9"
+      ],
+      "disposition": "EXECUTED",
+      "evidence": [
+        "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/summaries/T9.json"
+      ],
+      "stage": "S3",
+      "status": "PASS"
+    },
+    {
+      "cases": [
+        "R9_BASE",
+        "R9_ALL"
+      ],
+      "disposition": "EXECUTED",
+      "evidence": [
+        "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/summaries/r_pair.json",
+        "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/preliminary_r.json"
+      ],
+      "stage": "S4",
+      "status": "PASS"
+    },
+    {
+      "cases": [
+        "R9_BASE",
+        "R9_ALL",
+        "R9_IF",
+        "R9_BL",
+        "R9_ST"
+      ],
+      "condition_required": true,
+      "disposition": "EXECUTED",
+      "evidence": [
+        "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/preliminary_r.json",
+        "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/summaries/r_multiway.json"
+      ],
+      "stage": "S5",
+      "status": "PASS"
+    },
+    {
+      "disposition": "EXECUTED_IN_FINAL_ANALYSIS",
+      "evidence": [
+        "90_候选工作区/current/06_D2数值误差来源归因/reports/d2_source_attribution_report.json"
+      ],
+      "stage": "S6",
+      "status": "PASS"
+    },
+    {
+      "disposition": "EXECUTED",
+      "evidence": [
+        "90_候选工作区/current/06_D2数值误差来源归因/artifacts/d2_source_attribution_manifest.json"
+      ],
+      "stage": "S7",
+      "status": "PASS"
+    }
+  ],
+  "unexecuted_stages": []
+}

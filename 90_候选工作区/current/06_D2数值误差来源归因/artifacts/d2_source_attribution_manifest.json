@@ -1,0 +1,898 @@
+{
+  "authenticity_limit": "SHA-256 detects mutation against this manifest but is not an external signature or an independent rerun.",
+  "compact_tracked_evidence": {
+    "control_evidence_audit": {
+      "files": {
+        "preliminary_r": {
+          "byte_identical": true,
+          "source": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/preliminary_r.json",
+          "tracked_copy": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/preliminary_r.json"
+        },
+        "s0": {
+          "byte_identical": true,
+          "source": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/s0_identity_implementation.json",
+          "tracked_copy": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/s0_identity_implementation.json"
+        }
+      },
+      "gate_pass": true,
+      "gates": {
+        "preliminary_r_source_exists": true,
+        "preliminary_r_tracked_copy_byte_identical": true,
+        "preliminary_r_tracked_copy_exists": true,
+        "s0_source_exists": true,
+        "s0_tracked_copy_byte_identical": true,
+        "s0_tracked_copy_exists": true
+      }
+    },
+    "file_count": 71,
+    "files": [
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/s0_identity_implementation.json",
+        "sha256": "0aff92945eae2df3916ffcf50df6c1417d27ca3f9951e09f362f4aa98972be86",
+        "size_bytes": 73918
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/preliminary_r.json",
+        "sha256": "e380e02e9957e37bc3ec003357d52d20e36624c8111bd9f205bbc672191e257c",
+        "size_bytes": 90910
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/F6/config.json",
+        "sha256": "602dead5fa6b8b4485103bf91adb53b1bb17b6b3e3f9c8f7c0578be4242d0cd0",
+        "size_bytes": 3528
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/F6/provenance.json",
+        "sha256": "f28d88d0ba7db4edd86b14e0649d6ba9dec98a3aec2f0b87ecb4218afa86a2ec",
+        "size_bytes": 5648
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/F6/result.json",
+        "sha256": "6b16cd0ba20373cc65f716fa376f4c0ad690ccb6942de5c63bc7c7a4d81ced15",
+        "size_bytes": 27849
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/F6/timeseries.csv",
+        "sha256": "0621fa634435aa07647be4bcfe9440ff1366e61441aff194bb8be156df1c86b6",
+        "size_bytes": 8994
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/F6/manifest.json",
+        "sha256": "a574543e3ff1248022e0eab1ea838b5b8a976dc43b87fa3637ab3115050aaefa",
+        "size_bytes": 3001
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/F9/config.json",
+        "sha256": "64bf8553b88e546b3bd18a8867fd9ed5455be475bb77f467f8c45c157353b86d",
+        "size_bytes": 3531
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/F9/provenance.json",
+        "sha256": "2e38b5e385d5a4406e795f232512e58da2a325774e69896e98d775a5ca15e70d",
+        "size_bytes": 5649
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/F9/result.json",
+        "sha256": "4cd5e31e812c67afafc32e7c1335e8be0998e77eae2e858e06118c3a73243416",
+        "size_bytes": 28053
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/F9/timeseries.csv",
+        "sha256": "22b1299d391ed74ee6d947eebdfc380b73e9e0fe6424b6aeae22863a2268034a",
+        "size_bytes": 8847
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/F9/manifest.json",
+        "sha256": "06d5aec29c5bc503f2e928e011f9e6f6d08f2fa2385becf8cb7d8a36e665b94f",
+        "size_bytes": 3002
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/R9_ALL/config.json",
+        "sha256": "9e37499edafdea2fb3a35bc0b2c3ffd86381408a7b703587913f902f6004e504",
+        "size_bytes": 3548
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/R9_ALL/provenance.json",
+        "sha256": "b5055a69dbb3680494084561a3a26d6b4eac59bbc9384e7988f73622801e6fff",
+        "size_bytes": 5636
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/R9_ALL/result.json",
+        "sha256": "9cb6667e78f7f05b5ce830916d0e7fc28f817466e937cd3084dcb38f336c3211",
+        "size_bytes": 28073
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/R9_ALL/timeseries.csv",
+        "sha256": "b441b47037f65095d4219c930d41c950462de7b3f9b0a5fd8e4278c5d4d2414d",
+        "size_bytes": 8760
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/R9_ALL/manifest.json",
+        "sha256": "dd54da6bf14aa1b403e84157c95f3429735059691e604a255ce1c2a28e837902",
+        "size_bytes": 3002
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/R9_BASE/config.json",
+        "sha256": "64bf8553b88e546b3bd18a8867fd9ed5455be475bb77f467f8c45c157353b86d",
+        "size_bytes": 3531
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/R9_BASE/provenance.json",
+        "sha256": "3a7c5c1da87770b0272790b84d29e3d404e949d934081ac6faebe915111d0aea",
+        "size_bytes": 5638
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/R9_BASE/result.json",
+        "sha256": "649d932b104346fced945941d5583ff7910065be24e928fd7adde1c764ee2d0c",
+        "size_bytes": 28058
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/R9_BASE/timeseries.csv",
+        "sha256": "22b1299d391ed74ee6d947eebdfc380b73e9e0fe6424b6aeae22863a2268034a",
+        "size_bytes": 8847
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/R9_BASE/manifest.json",
+        "sha256": "597e4bb6d4f977b729539edc3bda6f81754725586e0f275a3456c2e07989dcef",
+        "size_bytes": 3002
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_ALL/config.json",
+        "sha256": "9e37499edafdea2fb3a35bc0b2c3ffd86381408a7b703587913f902f6004e504",
+        "size_bytes": 3548
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_ALL/provenance.json",
+        "sha256": "3578426d1a1a753403a43de5b926bcef463311544a5d17d7e89724e29d840cfe",
+        "size_bytes": 5650
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_ALL/result.json",
+        "sha256": "9cb6667e78f7f05b5ce830916d0e7fc28f817466e937cd3084dcb38f336c3211",
+        "size_bytes": 28073
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_ALL/timeseries.csv",
+        "sha256": "b441b47037f65095d4219c930d41c950462de7b3f9b0a5fd8e4278c5d4d2414d",
+        "size_bytes": 8760
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_ALL/manifest.json",
+        "sha256": "b3af65d8ff4cd74a25df6c1b872998d7aa773285cb228dcfd1902b448505be59",
+        "size_bytes": 3002
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_BASE/config.json",
+        "sha256": "64bf8553b88e546b3bd18a8867fd9ed5455be475bb77f467f8c45c157353b86d",
+        "size_bytes": 3531
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_BASE/provenance.json",
+        "sha256": "c19c1d9ff6da0165210817f896f956a1bf449f6bbb474af4d6fbe4fa983b9cac",
+        "size_bytes": 5652
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_BASE/result.json",
+        "sha256": "649d932b104346fced945941d5583ff7910065be24e928fd7adde1c764ee2d0c",
+        "size_bytes": 28058
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_BASE/timeseries.csv",
+        "sha256": "22b1299d391ed74ee6d947eebdfc380b73e9e0fe6424b6aeae22863a2268034a",
+        "size_bytes": 8847
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_BASE/manifest.json",
+        "sha256": "868ab87a33b7e8877b7594e4018e6405d3f4d824f13d280ed5d26658e9fb4848",
+        "size_bytes": 3002
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_BL/config.json",
+        "sha256": "cf257bec4c44e74f86976d977789b08c71b904cf3989606322220f1d3f4e61e1",
+        "size_bytes": 3532
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_BL/provenance.json",
+        "sha256": "5c2c6f4bae7392508e9d0c3e3e0a1e5cd9b98b81abdde147e6730a73475b3d68",
+        "size_bytes": 5648
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_BL/result.json",
+        "sha256": "cc8baf048a73ce3237f35d88e90aa845d99098caa0efd4a552268e899368b237",
+        "size_bytes": 28051
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_BL/timeseries.csv",
+        "sha256": "325fdcf53bb859e26252faf3bebe6e5521c0f75fed35feb303e77ed8d8fa6903",
+        "size_bytes": 8860
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_BL/manifest.json",
+        "sha256": "a337eefb59349f4dbd726b9f3ce9142ccb3ad2415b8c59fd5073564b5df7aa0e",
+        "size_bytes": 3002
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_IF/config.json",
+        "sha256": "60f9c8b3bcaa5b89da7b110b6c9cb21ba247d4661aef882ba7263c9d32bbb6eb",
+        "size_bytes": 3546
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_IF/provenance.json",
+        "sha256": "1f66bb046a4767c9613f86a7fd6e1f380757e6e5c1e2cae8143770afa2f43fd5",
+        "size_bytes": 5648
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_IF/result.json",
+        "sha256": "65ce16411cbade3ba1d5ae45393c36f8b60fce84e186079ba84f5898d6308cd6",
+        "size_bytes": 28065
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_IF/timeseries.csv",
+        "sha256": "b856e0e3a2b5fda302b994c16d59a4af44fb68450ba2952233cb15f2c4d4ad81",
+        "size_bytes": 8741
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_IF/manifest.json",
+        "sha256": "29b55aaf6c883a13a6229582041574cdd5e35c6707e43310f11523648397fa45",
+        "size_bytes": 3002
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_ST/config.json",
+        "sha256": "b8464dbb4da6dd74485d0a85f0dad411483c16a20302acbadb2488aa56f9f168",
+        "size_bytes": 3532
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_ST/provenance.json",
+        "sha256": "1c52e69988e40733b5b95560ace4112d97c8b393abf684eb54ff42c547233ac0",
+        "size_bytes": 5648
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_ST/result.json",
+        "sha256": "80c5734abf55b5266f29455346a6a75d989bfc89efcd9061859f7069ff774ac9",
+        "size_bytes": 28054
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_ST/timeseries.csv",
+        "sha256": "08943759f0d3a00339b0bec9d679fe623c4773cb829e1d4a3fb9db3dbfc4d652",
+        "size_bytes": 8856
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/S5_R9_ST/manifest.json",
+        "sha256": "1be213a98c95e96a581826a7e527db3fea74f191c181709115d759ca052309ae",
+        "size_bytes": 3002
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/T9/config.json",
+        "sha256": "c5fb44e90f6f3e2f2bc0a2c13d46969e3be861219ad44f1259afaadbd11c28db",
+        "size_bytes": 3532
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/T9/provenance.json",
+        "sha256": "dae33798a89e69953716ce2122e37a09b56e1e720fe57ccfb983151f41f2e016",
+        "size_bytes": 5645
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/T9/result.json",
+        "sha256": "07c058a119393842c8d9baa30a2da46321745f9b0b2783132142ee6659f51901",
+        "size_bytes": 28015
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/T9/timeseries.csv",
+        "sha256": "d1a145e8e44915d2927925d52f08c3d71b8f9dd1b5cc05fe3f94016f4577d318",
+        "size_bytes": 9027
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/T9/manifest.json",
+        "sha256": "c1aa3b26b1046e500f6e8070677845b86de2ca364e077b94b4733d6f57ee54e1",
+        "size_bytes": 3002
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/Z6/config.json",
+        "sha256": "aa621502829c2e94d0fd9f4edad1ad2b1ac4e62eca543237522411144dfd6dfc",
+        "size_bytes": 3526
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/Z6/provenance.json",
+        "sha256": "aa7c5d8da55c1ad1171e45ef65f4a4f859579738555afdd67056c1b18fe6045f",
+        "size_bytes": 5644
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/Z6/result.json",
+        "sha256": "df68ff5005049baae62842855732dc89f94271e851550df1757461148c1f7c3a",
+        "size_bytes": 27869
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/Z6/timeseries.csv",
+        "sha256": "c4f474b0da8198e0f59575bfa41e5cc8eb4b9de85dafd8c9ab2a10a57b53369b",
+        "size_bytes": 8877
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/Z6/manifest.json",
+        "sha256": "d7e08dcb005e875002df7151ac9f3daf3ef0bb10993d086ab373fe49f2218420",
+        "size_bytes": 3001
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/Z9/config.json",
+        "sha256": "d27727475ca6c2746c6779dadc2b5dfdcea57fa62bb86973e403e03802a9f79c",
+        "size_bytes": 3529
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/Z9/provenance.json",
+        "sha256": "3cb9c8e92ab12df134ced1cf5bf76c4755f3b72910399643454bc547541a75c1",
+        "size_bytes": 5644
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/Z9/result.json",
+        "sha256": "2f100aff4b59ffaf3586d0806c3f624e04f6d57d76d1ddc01c1bbc90781700c2",
+        "size_bytes": 28038
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/Z9/timeseries.csv",
+        "sha256": "84b5bd97235e86923ed898a00aa366e708bf26603d39abac2f3330a16be3bff9",
+        "size_bytes": 9115
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/runs/Z9/manifest.json",
+        "sha256": "3555e0f29c0d74ecb6ce0fb579a38403ca1fc85814baf91405c19be9b247f5da",
+        "size_bytes": 3001
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/summaries/F6.json",
+        "sha256": "2ce1e18f8c489e87805ade241b68ab6e118148ef41aa69dcc8743d3e3793d1ed",
+        "size_bytes": 115382
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/summaries/F9.json",
+        "sha256": "38caf3435633938e8cef4eec53aea00f34ec6be079aea9df19831a9d8ecaef06",
+        "size_bytes": 115404
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/summaries/T9.json",
+        "sha256": "9be1865d0733f908e4683b3486d4e3dd07c5280d7f32ae0449a5b3f7bba8e6ed",
+        "size_bytes": 218263
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/summaries/Z6.json",
+        "sha256": "fdb1829849934aadb46ed47bbc5b7696c9fe04108034661a76a833711b7bb471",
+        "size_bytes": 115517
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/summaries/Z9.json",
+        "sha256": "da17d20615261e4f110124dc0a4e758156aaf69eca9fb4bcdfc60b24c08be3a5",
+        "size_bytes": 115521
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/summaries/r_multiway.json",
+        "sha256": "c53c197f5ff88909e273bed78203f2ed3839d73dade65c1157c2008122bc45e4",
+        "size_bytes": 354301
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/summaries/r_pair.json",
+        "sha256": "2b82c4fa5e47d3696160e17d866deeb75a58a329425d5c053da4ab19d0540c1a",
+        "size_bytes": 177541
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/raw_stage_ledger.json",
+        "sha256": "202980f2083caa65ef74f0e8dd3f2305a655cb224e63517e89f79d7dd455259c",
+        "size_bytes": 2108
+      },
+      {
+        "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/evidence/stage_ledger.json",
+        "sha256": "b9d39f55c7bd587cd63eb3791124cfdc3f762a2af43b4522bce214849bc88b3c",
+        "size_bytes": 2877
+      }
+    ],
+    "total_size_bytes": 1970714
+  },
+  "integrity_scope": "Ignored raw D2 products and tracked compact evidence available at final analysis time.",
+  "protocol_id": "D2_HF3D_NUMERICAL_SOURCE_ATTRIBUTION_V2",
+  "raw_file_count": 84,
+  "raw_files": [
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/F6/archive/arrays.npz",
+      "sha256": "630a4a46f7792d83932693b9f7b172c401b6f385e4a77dcf1857ac9f7641a910",
+      "size_bytes": 30876210,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/F6/archive/config.json",
+      "sha256": "602dead5fa6b8b4485103bf91adb53b1bb17b6b3e3f9c8f7c0578be4242d0cd0",
+      "size_bytes": 3528,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/F6/archive/manifest.json",
+      "sha256": "a574543e3ff1248022e0eab1ea838b5b8a976dc43b87fa3637ab3115050aaefa",
+      "size_bytes": 3001,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/F6/archive/provenance.json",
+      "sha256": "f28d88d0ba7db4edd86b14e0649d6ba9dec98a3aec2f0b87ecb4218afa86a2ec",
+      "size_bytes": 5648,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/F6/archive/result.json",
+      "sha256": "6b16cd0ba20373cc65f716fa376f4c0ad690ccb6942de5c63bc7c7a4d81ced15",
+      "size_bytes": 27849,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/F6/archive/timeseries.csv",
+      "sha256": "0621fa634435aa07647be4bcfe9440ff1366e61441aff194bb8be156df1c86b6",
+      "size_bytes": 8994,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/F6/case_summary.json",
+      "sha256": "2ce1e18f8c489e87805ade241b68ab6e118148ef41aa69dcc8743d3e3793d1ed",
+      "size_bytes": 115382,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/F9/archive/arrays.npz",
+      "sha256": "a637761f6f09be97eb9dcf83b1040df1e48aedcae33779db6cd220819425be78",
+      "size_bytes": 102538592,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/F9/archive/config.json",
+      "sha256": "64bf8553b88e546b3bd18a8867fd9ed5455be475bb77f467f8c45c157353b86d",
+      "size_bytes": 3531,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/F9/archive/manifest.json",
+      "sha256": "06d5aec29c5bc503f2e928e011f9e6f6d08f2fa2385becf8cb7d8a36e665b94f",
+      "size_bytes": 3002,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/F9/archive/provenance.json",
+      "sha256": "2e38b5e385d5a4406e795f232512e58da2a325774e69896e98d775a5ca15e70d",
+      "size_bytes": 5649,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/F9/archive/result.json",
+      "sha256": "4cd5e31e812c67afafc32e7c1335e8be0998e77eae2e858e06118c3a73243416",
+      "size_bytes": 28053,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/F9/archive/timeseries.csv",
+      "sha256": "22b1299d391ed74ee6d947eebdfc380b73e9e0fe6424b6aeae22863a2268034a",
+      "size_bytes": 8847,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/F9/case_summary.json",
+      "sha256": "38caf3435633938e8cef4eec53aea00f34ec6be079aea9df19831a9d8ecaef06",
+      "size_bytes": 115404,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/T9/archive/arrays.npz",
+      "sha256": "ea00e2f38f61bc1a26407cff25c4d64e4ec2d5fc06c12f062a17cc05c500d500",
+      "size_bytes": 102697887,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/T9/archive/config.json",
+      "sha256": "c5fb44e90f6f3e2f2bc0a2c13d46969e3be861219ad44f1259afaadbd11c28db",
+      "size_bytes": 3532,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/T9/archive/manifest.json",
+      "sha256": "c1aa3b26b1046e500f6e8070677845b86de2ca364e077b94b4733d6f57ee54e1",
+      "size_bytes": 3002,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/T9/archive/provenance.json",
+      "sha256": "dae33798a89e69953716ce2122e37a09b56e1e720fe57ccfb983151f41f2e016",
+      "size_bytes": 5645,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/T9/archive/result.json",
+      "sha256": "07c058a119393842c8d9baa30a2da46321745f9b0b2783132142ee6659f51901",
+      "size_bytes": 28015,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/T9/archive/timeseries.csv",
+      "sha256": "d1a145e8e44915d2927925d52f08c3d71b8f9dd1b5cc05fe3f94016f4577d318",
+      "size_bytes": 9027,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/T9/case_summary.json",
+      "sha256": "9be1865d0733f908e4683b3486d4e3dd07c5280d7f32ae0449a5b3f7bba8e6ed",
+      "size_bytes": 218263,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/Z6/archive/arrays.npz",
+      "sha256": "4a9021d2bf64221c067c45cbc004a66d7ef03ee72edc74761c768bd507ee2d93",
+      "size_bytes": 23893402,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/Z6/archive/config.json",
+      "sha256": "aa621502829c2e94d0fd9f4edad1ad2b1ac4e62eca543237522411144dfd6dfc",
+      "size_bytes": 3526,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/Z6/archive/manifest.json",
+      "sha256": "d7e08dcb005e875002df7151ac9f3daf3ef0bb10993d086ab373fe49f2218420",
+      "size_bytes": 3001,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/Z6/archive/provenance.json",
+      "sha256": "aa7c5d8da55c1ad1171e45ef65f4a4f859579738555afdd67056c1b18fe6045f",
+      "size_bytes": 5644,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/Z6/archive/result.json",
+      "sha256": "df68ff5005049baae62842855732dc89f94271e851550df1757461148c1f7c3a",
+      "size_bytes": 27869,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/Z6/archive/timeseries.csv",
+      "sha256": "c4f474b0da8198e0f59575bfa41e5cc8eb4b9de85dafd8c9ab2a10a57b53369b",
+      "size_bytes": 8877,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/Z6/case_summary.json",
+      "sha256": "fdb1829849934aadb46ed47bbc5b7696c9fe04108034661a76a833711b7bb471",
+      "size_bytes": 115517,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/Z9/archive/arrays.npz",
+      "sha256": "3e6d38fe7a9feaaa92dc953a706b52b12f0ad19c61a84064adf649144926d5cb",
+      "size_bytes": 80592680,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/Z9/archive/config.json",
+      "sha256": "d27727475ca6c2746c6779dadc2b5dfdcea57fa62bb86973e403e03802a9f79c",
+      "size_bytes": 3529,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/Z9/archive/manifest.json",
+      "sha256": "3555e0f29c0d74ecb6ce0fb579a38403ca1fc85814baf91405c19be9b247f5da",
+      "size_bytes": 3001,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/Z9/archive/provenance.json",
+      "sha256": "3cb9c8e92ab12df134ced1cf5bf76c4755f3b72910399643454bc547541a75c1",
+      "size_bytes": 5644,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/Z9/archive/result.json",
+      "sha256": "2f100aff4b59ffaf3586d0806c3f624e04f6d57d76d1ddc01c1bbc90781700c2",
+      "size_bytes": 28038,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/Z9/archive/timeseries.csv",
+      "sha256": "84b5bd97235e86923ed898a00aa366e708bf26603d39abac2f3330a16be3bff9",
+      "size_bytes": 9115,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/cases/Z9/case_summary.json",
+      "sha256": "da17d20615261e4f110124dc0a4e758156aaf69eca9fb4bcdfc60b24c08be3a5",
+      "size_bytes": 115521,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/preliminary_r.json",
+      "sha256": "e380e02e9957e37bc3ec003357d52d20e36624c8111bd9f205bbc672191e257c",
+      "size_bytes": 90910,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_ALL/arrays.npz",
+      "sha256": "de2dce9fcc11210992d027da794696665ae0c03c30f188d91190c450ea940b8d",
+      "size_bytes": 102921509,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_ALL/config.json",
+      "sha256": "9e37499edafdea2fb3a35bc0b2c3ffd86381408a7b703587913f902f6004e504",
+      "size_bytes": 3548,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_ALL/manifest.json",
+      "sha256": "b3af65d8ff4cd74a25df6c1b872998d7aa773285cb228dcfd1902b448505be59",
+      "size_bytes": 3002,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_ALL/provenance.json",
+      "sha256": "3578426d1a1a753403a43de5b926bcef463311544a5d17d7e89724e29d840cfe",
+      "size_bytes": 5650,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_ALL/result.json",
+      "sha256": "9cb6667e78f7f05b5ce830916d0e7fc28f817466e937cd3084dcb38f336c3211",
+      "size_bytes": 28073,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_ALL/timeseries.csv",
+      "sha256": "b441b47037f65095d4219c930d41c950462de7b3f9b0a5fd8e4278c5d4d2414d",
+      "size_bytes": 8760,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_BASE/arrays.npz",
+      "sha256": "a637761f6f09be97eb9dcf83b1040df1e48aedcae33779db6cd220819425be78",
+      "size_bytes": 102538592,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_BASE/config.json",
+      "sha256": "64bf8553b88e546b3bd18a8867fd9ed5455be475bb77f467f8c45c157353b86d",
+      "size_bytes": 3531,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_BASE/manifest.json",
+      "sha256": "868ab87a33b7e8877b7594e4018e6405d3f4d824f13d280ed5d26658e9fb4848",
+      "size_bytes": 3002,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_BASE/provenance.json",
+      "sha256": "c19c1d9ff6da0165210817f896f956a1bf449f6bbb474af4d6fbe4fa983b9cac",
+      "size_bytes": 5652,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_BASE/result.json",
+      "sha256": "649d932b104346fced945941d5583ff7910065be24e928fd7adde1c764ee2d0c",
+      "size_bytes": 28058,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_BASE/timeseries.csv",
+      "sha256": "22b1299d391ed74ee6d947eebdfc380b73e9e0fe6424b6aeae22863a2268034a",
+      "size_bytes": 8847,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_BL/arrays.npz",
+      "sha256": "765fe047dab3cd62c59db019728deccdf3b02bedc7db2aaccce041cd98d4286e",
+      "size_bytes": 102673925,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_BL/config.json",
+      "sha256": "cf257bec4c44e74f86976d977789b08c71b904cf3989606322220f1d3f4e61e1",
+      "size_bytes": 3532,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_BL/manifest.json",
+      "sha256": "a337eefb59349f4dbd726b9f3ce9142ccb3ad2415b8c59fd5073564b5df7aa0e",
+      "size_bytes": 3002,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_BL/provenance.json",
+      "sha256": "5c2c6f4bae7392508e9d0c3e3e0a1e5cd9b98b81abdde147e6730a73475b3d68",
+      "size_bytes": 5648,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_BL/result.json",
+      "sha256": "cc8baf048a73ce3237f35d88e90aa845d99098caa0efd4a552268e899368b237",
+      "size_bytes": 28051,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_BL/timeseries.csv",
+      "sha256": "325fdcf53bb859e26252faf3bebe6e5521c0f75fed35feb303e77ed8d8fa6903",
+      "size_bytes": 8860,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_IF/arrays.npz",
+      "sha256": "a92bc3278016871c150ecc01efbcfb54c8d16c5b5f6d6996b861ab408300909c",
+      "size_bytes": 102914151,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_IF/config.json",
+      "sha256": "60f9c8b3bcaa5b89da7b110b6c9cb21ba247d4661aef882ba7263c9d32bbb6eb",
+      "size_bytes": 3546,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_IF/manifest.json",
+      "sha256": "29b55aaf6c883a13a6229582041574cdd5e35c6707e43310f11523648397fa45",
+      "size_bytes": 3002,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_IF/provenance.json",
+      "sha256": "1f66bb046a4767c9613f86a7fd6e1f380757e6e5c1e2cae8143770afa2f43fd5",
+      "size_bytes": 5648,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_IF/result.json",
+      "sha256": "65ce16411cbade3ba1d5ae45393c36f8b60fce84e186079ba84f5898d6308cd6",
+      "size_bytes": 28065,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_IF/timeseries.csv",
+      "sha256": "b856e0e3a2b5fda302b994c16d59a4af44fb68450ba2952233cb15f2c4d4ad81",
+      "size_bytes": 8741,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_ST/arrays.npz",
+      "sha256": "5ad64a4254b61586e0dc4c0de9c284999c0dab89616cf2720e7842284d1209d5",
+      "size_bytes": 102582060,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_ST/config.json",
+      "sha256": "b8464dbb4da6dd74485d0a85f0dad411483c16a20302acbadb2488aa56f9f168",
+      "size_bytes": 3532,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_ST/manifest.json",
+      "sha256": "1be213a98c95e96a581826a7e527db3fea74f191c181709115d759ca052309ae",
+      "size_bytes": 3002,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_ST/provenance.json",
+      "sha256": "1c52e69988e40733b5b95560ace4112d97c8b393abf684eb54ff42c547233ac0",
+      "size_bytes": 5648,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_ST/result.json",
+      "sha256": "80c5734abf55b5266f29455346a6a75d989bfc89efcd9061859f7069ff774ac9",
+      "size_bytes": 28054,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/R9_ST/timeseries.csv",
+      "sha256": "08943759f0d3a00339b0bec9d679fe623c4773cb829e1d4a3fb9db3dbfc4d652",
+      "size_bytes": 8856,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_multiway/group_summary.json",
+      "sha256": "c53c197f5ff88909e273bed78203f2ed3839d73dade65c1157c2008122bc45e4",
+      "size_bytes": 354301,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_pair/R9_ALL/arrays.npz",
+      "sha256": "de2dce9fcc11210992d027da794696665ae0c03c30f188d91190c450ea940b8d",
+      "size_bytes": 102921509,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_pair/R9_ALL/config.json",
+      "sha256": "9e37499edafdea2fb3a35bc0b2c3ffd86381408a7b703587913f902f6004e504",
+      "size_bytes": 3548,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_pair/R9_ALL/manifest.json",
+      "sha256": "dd54da6bf14aa1b403e84157c95f3429735059691e604a255ce1c2a28e837902",
+      "size_bytes": 3002,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_pair/R9_ALL/provenance.json",
+      "sha256": "b5055a69dbb3680494084561a3a26d6b4eac59bbc9384e7988f73622801e6fff",
+      "size_bytes": 5636,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_pair/R9_ALL/result.json",
+      "sha256": "9cb6667e78f7f05b5ce830916d0e7fc28f817466e937cd3084dcb38f336c3211",
+      "size_bytes": 28073,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_pair/R9_ALL/timeseries.csv",
+      "sha256": "b441b47037f65095d4219c930d41c950462de7b3f9b0a5fd8e4278c5d4d2414d",
+      "size_bytes": 8760,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_pair/R9_BASE/arrays.npz",
+      "sha256": "a637761f6f09be97eb9dcf83b1040df1e48aedcae33779db6cd220819425be78",
+      "size_bytes": 102538592,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_pair/R9_BASE/config.json",
+      "sha256": "64bf8553b88e546b3bd18a8867fd9ed5455be475bb77f467f8c45c157353b86d",
+      "size_bytes": 3531,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_pair/R9_BASE/manifest.json",
+      "sha256": "597e4bb6d4f977b729539edc3bda6f81754725586e0f275a3456c2e07989dcef",
+      "size_bytes": 3002,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_pair/R9_BASE/provenance.json",
+      "sha256": "3a7c5c1da87770b0272790b84d29e3d404e949d934081ac6faebe915111d0aea",
+      "size_bytes": 5638,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_pair/R9_BASE/result.json",
+      "sha256": "649d932b104346fced945941d5583ff7910065be24e928fd7adde1c764ee2d0c",
+      "size_bytes": 28058,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_pair/R9_BASE/timeseries.csv",
+      "sha256": "22b1299d391ed74ee6d947eebdfc380b73e9e0fe6424b6aeae22863a2268034a",
+      "size_bytes": 8847,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/r_pair/group_summary.json",
+      "sha256": "2b82c4fa5e47d3696160e17d866deeb75a58a329425d5c053da4ab19d0540c1a",
+      "size_bytes": 177541,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/s0_identity_implementation.json",
+      "sha256": "0aff92945eae2df3916ffcf50df6c1417d27ca3f9951e09f362f4aa98972be86",
+      "size_bytes": 73918,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/s0_replay/left.npz",
+      "sha256": "42e32d7e26f63dde860bb5637e61588f378c2083a47257e49cc08469aa92b646",
+      "size_bytes": 16743145,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/s0_replay/right.npz",
+      "sha256": "42e32d7e26f63dde860bb5637e61588f378c2083a47257e49cc08469aa92b646",
+      "size_bytes": 16743145,
+      "tracked": false
+    },
+    {
+      "path": "90_候选工作区/current/06_D2数值误差来源归因/artifacts/runs/stage_ledger.json",
+      "sha256": "202980f2083caa65ef74f0e8dd3f2305a655cb224e63517e89f79d7dd455259c",
+      "size_bytes": 2108,
+      "tracked": false
+    }
+  ],
+  "raw_total_size_bytes": 1095143236,
+  "schema_version": 1
+}

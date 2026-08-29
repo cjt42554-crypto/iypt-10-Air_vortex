@@ -3,45 +3,66 @@
 当前状态：
 
 ```text
-D2_V2_EVIDENCE_PATCH_REVIEW_ACCEPTED
-D2_PRE_REVIEW_RAW_QUARANTINE_REQUIRED
-D2_FRESH_EXECUTION_AUTHORIZED_AFTER_SANITATION_COMMIT
+D2_SOURCE_ATTRIBUTION_COMPLETE__Z_SMALL_NO_CLEAR_DIRECTION__T_MATERIAL_REDUCTION_SIGNAL__R_MIXED_OR_INDETERMINATE_NO_CLEAR_DIRECTION__STOP_FOR_PRO_REVIEW
 ```
 
-唯一任务依据：
+## 执行身份与旧证据隔离
 
-1. `../08_D2V2证据补丁复核与全新执行授权.md`
-2. `../07_D2V2实现静态复核与证据补丁裁决.md`
-3. `../06_D2数值误差来源归因科学裁决与执行规划.md`
-4. `d2_source_attribution_preregistration_v2.json`
-5. 顶层 `AGENTS.md`
-6. `../../交接说明_current.md`
+旧提交 `75a34f9bab660d692b60e4d1e51cb1160d90d14d` 产生的预复核 raw 已按
+`artifacts/pre_review_raw_quarantine_manifest.json` 完整移至仓库同级
+`../iypt10_d2_quarantine_75a34f9_pre_review_20260829/`，未被本轮执行复用。
 
-P1–P5 证据补丁已经通过 Pro 静态复核。正式 G0 重建、逐变体接受时间、零驱动、执行提交绑定及 S0/preliminary-R 跟踪证据主链可用于全新 D2 执行。
+全新 D2 从 S0 到最终分析均绑定同一执行提交
+`0f7f720b0494c9976d6dbc1c594e24f4a9cc1f5a`。正式源码树起止哈希均为
+`dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8`。
 
-旧提交 `75a34f9` 产生的 S0、F6、F9 和未完成 Z6 raw 输出仍为不可采信证据，禁止复用。任何新执行前必须：
+## 阶段结果
 
-1. 确认服务与 D2 进程全部停止；
-2. 生成并提交 `artifacts/pre_review_raw_quarantine_manifest.json`；
-3. 把整个旧 `artifacts/runs` 移到仓库同级 `../iypt10_d2_quarantine_75a34f9_pre_review_20260829/`；
-4. 核验活动 raw、报告、evidence、manifest 和 failure 路径均不存在；
-5. 保持 `main`、清洁工作树和单一卫生提交 HEAD。
+S0–S7 全部执行并通过；没有失败阶段或未执行阶段。条件阶段 S5 因 preliminary-R
+给出 `MIXED_OR_INDETERMINATE` 而按冻结合同执行，五个变体共同锁步完成。
 
-卫生提交之后不得再提交代码或文档，直至最终分析完成。必须在同一 HEAD 上顺序运行：
+| 阶段 | 内容 | 结果 |
+|---|---|---|
+| S0 | 身份与实现验证 | PASS |
+| S1 | F6、F9 | PASS |
+| S2 | Z6、Z9 | PASS |
+| S3 | T9 | PASS |
+| S4 | R9_BASE、R9_ALL 与 preliminary-R | PASS |
+| S5 | R9_BASE、R9_ALL、R9_IF、R9_BL、R9_ST | PASS |
+| S6 | 最终独立分析 | PASS |
+| S7 | 证据清单 | PASS |
 
-```text
-run_d2_source_attribution.py verify
-F6
-F9
-Z6
-Z9
-T9
-R9_BASE/R9_ALL
-analyse_d2_source_attribution.py preliminary-r
-条件性 R9 multiway
-analyse_d2_source_attribution.py final
-```
+F6、F9、Z6、Z9、R 双路组和 R 五路组均有 1820 个接受步、0 次重试；T9
+有 3640 个接受步、0 次重试。最终分析器独立复核了逐变体接受时间、CUDA
+无回退、归档完整性、正式 G0 掩膜、零驱动门及 execution commit 绑定。
 
-任一阶段失败立即停止，不得形成部分分类。旧 raw 隔离目录不得被任何新命令读取。
+## 因素分类
 
-禁止修改 `01_最终理论/**` 或 `02_模拟程序/**`。最终报告、compact evidence、阶段台账和交接提交并推送后停止，等待 Pro 复核。
+| 因素 | 大小标签 | 方向标签 | 来源语言 |
+|---|---|---|---|
+| Z | SMALL | NO_CLEAR_DIRECTION | 不允许 |
+| T | MATERIAL | REDUCTION_SIGNAL | 仅允许受限机制筛查语言 |
+| R | MIXED_OR_INDETERMINATE | NO_CLEAR_DIRECTION | 不允许 |
+
+开放顶边界存量预算标签为 `INVENTORY_DIFFERENCE_TOP_BOUNDARY_MEDIATED`；它不证明
+开放边界条件错误，也不证明数值不守恒。正式接触角作用带仍是 R 未覆盖的混杂路径。
+
+## 证据入口
+
+1. `reports/d2_source_attribution_report.json`
+2. `reports/d2_source_attribution_report.md`
+3. `artifacts/evidence/stage_ledger.json`
+4. `artifacts/d2_source_attribution_manifest.json`
+5. `artifacts/pre_review_raw_quarantine_manifest.json`
+
+最终清单记录 71 个跟踪紧凑证据文件，共 1,970,714 字节；另记录 84 个本地
+ignored raw 文件，共 1,095,143,236 字节。清单提供完整性核对，不是外部签名或独立重跑。
+
+## 结论上限与停止点
+
+D2 只支持当前正式源码、正式 G0、6/9 格层及 0–0.010 s 窗口内的数值失败机制
+筛查。它不撤销 Q1R3 空间失败，不建立空间或时间收敛，不建立数值资格，也未执行
+物理或实验验证；长期稳态、临界转速和装置级预测仍禁止。
+
+未修改 `01_最终理论/**` 或 `02_模拟程序/**`。当前停止，等待 Pro 对结果与证据的复核；
+禁止自动进入后续阶段。
