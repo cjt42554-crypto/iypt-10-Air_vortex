@@ -4,80 +4,106 @@
 
 ```text
 D2_V2_EXECUTION_REVIEW_ACCEPTED_WITH_NONBLOCKING_LEDGER_CLARIFICATION
-D3_CROSS_GRID_TEMPORAL_RESPONSE_PREREGISTERED__IMPLEMENTATION_ONLY__EXECUTION_NOT_AUTHORIZED
+D3_IMPLEMENTATION_READY_FOR_PRO_STATIC_REVIEW__DYNAMIC_EXECUTION_NOT_AUTHORIZED
 ```
 
-## 已完成
+## 本轮完成
 
-Pro 已对 D2 交付提交 `9cb1d2172f9e8992561a18efa498705d689048fc` 完成独立复核，并接受登记边界内的分类：
+远端 `main` 已同步到 D3 预注册与裁决提交 `3c4699616cf1ed73c4039629fd37704055b54fb9`。Codex 只在：
 
 ```text
-Z = SMALL + NO_CLEAR_DIRECTION
-T = MATERIAL + REDUCTION_SIGNAL
-R = MIXED_OR_INDETERMINATE + NO_CLEAR_DIRECTION
+90_候选工作区/current/07_D3跨网格时间步响应诊断/
 ```
 
-独立重算确认：
-
-- T 的完整窗口 `eta/rho` 与冻结报告一致；
-- T 的减弱方向在 `0–0.005 s` 和 `0.005–0.010 s` 两个登记诊断分窗内仍分别由至少两个主要量支持；
-- S5 六个观测量的交互系数均低于 `0.25`，没有隐藏的强非加性交互；
-- Z 很小，R 只有轴对称误差显示中等敏感性，均不足以升级为失败来源；
-- `INVENTORY_DIFFERENCE_TOP_BOUNDARY_MEDIATED` 只是预算分解，不是边界错误或数值不守恒的证明。
-
-D2 阶段台账中 S6/S7 的说明语义发生对调/压缩，但对应预算、独立分析、跟踪证据、报告和停止点均存在。该问题不改变分类；为保持冻结证据哈希，不事后修改生成产物。
-
-完整裁决见：
+完成以下候选实现：
 
 ```text
-90_候选工作区/current/09_D2V2执行结果独立复核与D3科学裁决.md
+run_d3_cross_grid_temporal.py
+analyse_d3_cross_grid_temporal.py
+tests/test_d3_cross_grid_temporal.py
+generated_configs/G6_DT0.json
+generated_configs/G6_DT1.json
+generated_configs/G6_DT2.json
+generated_configs/G9_DT0.json
+generated_configs/G9_DT1.json
+generated_configs/G9_DT2.json
+artifacts/d3_implementation_static_review.json
 ```
+
+运行器直接调用正式 HF3D 网格、初态、时间步控制、单步推进、记录和归档接口；候选代码只负责编排、身份、顺序、硬门和证据。独立分析器不导入候选运行器，而是从冻结预注册、绑定基线和正式归档读取器重新构造配置、原生输出时刻、质量门、来源身份、公式和标签优先级。
+
+六个生成配置严格对应：
+
+```text
+G6_DT0  G6_DT1  G6_DT2
+G9_DT0  G9_DT1  G9_DT2
+```
+
+时间步依次为 `5.5e-6 / 2.75e-6 / 1.375e-6 s`，只改动登记 allowlist 中的运行时长、输出间隔和时间步字段；同网格三层的其余配置身份保持一致。
+
+## 静态证据与验证
+
+最终非推进静态证据：
+
+```text
+90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/d3_implementation_static_review.json
+```
+
+其状态为：
+
+```text
+D3_IMPLEMENTATION_READY_FOR_PRO_STATIC_REVIEW__DYNAMIC_EXECUTION_NOT_AUTHORIZED
+```
+
+已实际确认：
+
+- 33/33 单元测试通过，覆盖全部登记数值质量门、尺度下限、零范数、余弦未定义、标签优先级、D2/checkpoint/符号链接拒绝、跨提交证据拒绝和阶段台账语义错位拒绝；
+- 六组正式网格和初态均被实际构造，但 `time_steps_advanced = 0`；
+- G6 与 G9 各自三层的网格、正式 G0 掩膜和初态逐 dtype、shape、SHA-256 相同；
+- 正式源码树 SHA-256 仍为 `dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8`；
+- 隔离 GPU 解释器为 Python 3.12.3、NumPy 2.5.2、CuPy CUDA 13x 14.2.0；RTX 5060 Laptop GPU 的 FP64 探测通过，无 CPU 回退；
+- Ruff 检查与格式检查、`compileall`、限定到两个 D3 源文件且跳过正式依赖递归的 mypy、8 个 JSON 严格解析、README Pandoc 解析、未来报告生成器的合成 Pandoc 解析和 `git diff --check` 均通过；
+- `prepare-execution` 与 `final` 在当前授权下均于创建 D3 raw 或报告之前按预期拒绝；
+- `artifacts/runs`、D3 动态报告和 D3 最终清单均不存在。
+
+系统 `python3` 不含 CuPy，不能作为 GPU 静态门环境；最终静态证据已使用项目既有：
+
+```text
+90_候选工作区/current/01_HF3D数值资格/.venv-gpu/bin/python
+```
+
+重新生成并通过。
 
 ## 下一项唯一任务
 
-Codex 先读取：
+把包含本交接的 `main` HEAD 交给 Pro 做 D3 实现静态复核。复核入口：
 
 ```text
 AGENTS.md
 90_候选工作区/current/09_D2V2执行结果独立复核与D3科学裁决.md
 90_候选工作区/current/07_D3跨网格时间步响应诊断/README.md
 90_候选工作区/current/07_D3跨网格时间步响应诊断/d3_cross_grid_temporal_preregistration.json
+90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py
+90_候选工作区/current/07_D3跨网格时间步响应诊断/analyse_d3_cross_grid_temporal.py
+90_候选工作区/current/07_D3跨网格时间步响应诊断/tests/test_d3_cross_grid_temporal.py
+90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/d3_implementation_static_review.json
 ```
 
-然后只在：
+Pro 需要独立确认：
 
-```text
-90_候选工作区/current/07_D3跨网格时间步响应诊断/
-```
+1. 配置生成和执行前门是否完整实现冻结合同；
+2. S1/S2 失败是否确实停止后续算例并保留诊断；
+3. 分析器是否独立重载六份归档、拒绝 D2/checkpoint/跨提交证据并逐项重算全部指标；
+4. S0–S3 的动作名、证据路径和人类说明是否严格同义；
+5. 是否可以通过新的明确裁决解除真实 CUDA 动态执行门。
 
-实现：
-
-```text
-run_d3_cross_grid_temporal.py
-analyse_d3_cross_grid_temporal.py
-tests/test_d3_cross_grid_temporal.py
-```
-
-最低要求：
-
-1. 从冻结 `6/9` 格基线配置生成 `G6/G9 × DT0/DT1/DT2` 六算例，只允许合同列出的 override；
-2. 直接导入正式 HF3D，禁止复制、分叉或修改正式求解器；
-3. 在任何真实推进前失败闭锁 clean HEAD、正式源码树、CUDA、旧 raw 卫生、配置同一性、同网格三层网格/正式 G0 掩膜/初态身份；
-4. 分析器独立重载归档、核对原生输出时刻，并重算 `q/s/u/c/eta/rho/gamma/cosine/observed order`；
-5. 测试覆盖尺度下限、零范数、余弦未定义、标签优先级、所有硬门和失败闭锁；
-6. 明确拒绝 D2 轨迹、D2 raw 路径、checkpoint 或跨提交证据进入 D3 分类；
-7. 阶段台账的编号、动作名、证据路径和人类说明必须逐项同义；
-8. 只运行不推进真实 HF3D 时间步的单元测试、配置生成/审计、dry-run、严格 JSON/Markdown 与静态证据检查；
-9. 完成后停止，状态写为：
-
-```text
-D3_IMPLEMENTATION_READY_FOR_PRO_STATIC_REVIEW__DYNAMIC_EXECUTION_NOT_AUTHORIZED
-```
+在 Pro 新裁决出现之前，Codex 不执行下一阶段。
 
 ## 当前禁止
 
-- 不运行 `G6_DT0...G9_DT2` 的真实 CUDA 动态算例；
-- 不复用 D2 F6/F9/T9 形成 D3 确认性分类；
+- 不运行 `G6_DT0...G9_DT2` 的任何真实 CUDA 动态算例；
+- 不创建声称 S1、S2 或 S3 已执行的 D3 报告；
+- 不复用 D2 F6/F9/T9、D2 raw、隔离目录或 checkpoint 形成 D3 分类；
 - 不继续 Q1R3 原时间组；
 - 不直接进入 `13.5/20.25` 格、完整 Q1R4、长期稳态或 D4；
 - 不修改 `01_最终理论/**` 或 `02_模拟程序/**`；
@@ -87,13 +113,16 @@ D3_IMPLEMENTATION_READY_FOR_PRO_STATIC_REVIEW__DYNAMIC_EXECUTION_NOT_AUTHORIZED
 
 ```text
 Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED
+Q1R4_D0_FAIL_CLOSED_AT_STATIC_GEOMETRY
 D1_GEOMETRY_EFFECT_SMALL_IN_REGISTERED_WINDOW
 D2_Z_SMALL_NO_CLEAR_DIRECTION
 D2_T_MATERIAL_REDUCTION_SIGNAL
 D2_R_MIXED_OR_INDETERMINATE_NO_CLEAR_DIRECTION
-D3_PREREGISTERED__IMPLEMENTATION_ONLY__EXECUTION_NOT_AUTHORIZED
+D3_IMPLEMENTATION_READY_FOR_PRO_STATIC_REVIEW__DYNAMIC_EXECUTION_NOT_AUTHORIZED
 NUMERICAL_QUALIFICATION = NOT_DEMONSTRATED
 PHYSICAL_VALIDATION = NOT_PERFORMED
 EXPERIMENTAL_VALIDATION = NOT_PERFORMED
 APPARATUS_PREDICTION = DISALLOWED
 ```
+
+正式理论 `01_最终理论/**` 与正式程序 `02_模拟程序/**` 本轮均未修改。
