@@ -10,18 +10,18 @@
     "automatic_follow_on": "PROHIBITED",
     "real_cuda_dynamic_execution": true
   },
-  "instructions": "Execute exactly one fresh S0-to-S3 D3 sequence on this authorization-only HEAD, using the bound GPU environment and a single foreground writer. Inspect each stage ledger before explicitly starting the next stage. Stop and preserve evidence on any failure, drift, CUDA fallback, stale output, concurrent writer, or external interruption. Do not reuse D2 data, checkpoints, prior raw products, staging residue, or partial outputs; do not modify the implementation, preregistration, formal source, thresholds, case matrix, output times, or classification precedence.",
+  "instructions": "Execute exactly one fresh S0-to-S3 D3 sequence on this authorization-only HEAD, using the bound GPU environment and a single foreground writer. Before raw creation, require the authorization audit to report the single real Unicode authorization path exactly. Inspect each stage ledger before explicitly starting the next stage. Stop and preserve evidence on any failure, drift, CUDA fallback, stale output, concurrent writer, or external interruption. Do not reuse D2 data, checkpoints, prior raw products, staging residue, or partial outputs; do not modify the implementation, preregistration, formal source, thresholds, case matrix, output times, or classification precedence.",
   "protocol_id": "D3_HF3D_CROSS_GRID_TEMPORAL_RESPONSE_V1",
   "review_binding": {
     "formal_source_tree_sha256": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8",
     "implementation_files": {
       "90_候选工作区/current/07_D3跨网格时间步响应诊断/README.md": {
-        "content_sha256": "a44be48a2660aefa2321cf94f724465fb7855e2323130bf8da55bd4dee09dec4",
-        "git_blob_sha": "19402e99007479f7faaf8e513e3e2afcef9b5ff1"
+        "content_sha256": "328b741b80f3588ecd5bb02e5044cb0a0726e35c7c3de81440dc1698dc2a48f4",
+        "git_blob_sha": "e9466767a21d422aaeaa447f9c4bf2c9db464167"
       },
       "90_候选工作区/current/07_D3跨网格时间步响应诊断/analyse_d3_cross_grid_temporal.py": {
-        "content_sha256": "4ad0c650be8d32079ad2f346b6bf3829c7e9f2c9804d9255b8a5a878696f5005",
-        "git_blob_sha": "c20aef3a884235ddf447a4d4adf8d8c817650f3e"
+        "content_sha256": "227f445ad88e7e9e153cd0f1035a1b9d342171ec296f8a4960d93415fe3ebad1",
+        "git_blob_sha": "d6b46164c8022f0a691cda877da559881c1d7bfc"
       },
       "90_候选工作区/current/07_D3跨网格时间步响应诊断/d3_cross_grid_temporal_preregistration.json": {
         "content_sha256": "74156365c8b5f2ddde4a3ad4d1033eed2ac0fa0ecf69d04b6caa4129b7420620",
@@ -56,21 +56,21 @@
         "git_blob_sha": "a259e7519c939dd8c84a1d4c01d51c0d097f6cb5"
       },
       "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py": {
-        "content_sha256": "6eff3f6fbdea299f672c62f7494d4d2aaf0c49bddc0309188b7d81681d60f1cf",
-        "git_blob_sha": "acd2d55bf35e34e5b06c82cc28532fb158641046"
+        "content_sha256": "8097d2abb58a6189f41d283c48752835ede5ffc1ca968e9944220b8f7c139912",
+        "git_blob_sha": "713115992c9cda9fd7bda9bc1b5166d359b0a8bb"
       },
       "90_候选工作区/current/07_D3跨网格时间步响应诊断/tests/test_d3_cross_grid_temporal.py": {
-        "content_sha256": "43c15fafce99fe3e53879e3050b275cccbad6412e20d6dae4d711574eb77fe94",
-        "git_blob_sha": "641bc9d0ba5dcc57fa1fe8b0748ee93ff424c308"
+        "content_sha256": "7202865f1b85fda6baac33b41e24259de7720a1678649448940dd91817a7f4c3",
+        "git_blob_sha": "ecd33cc85f8ee7f2d2bd3fbe0cb7a97425dcbe54"
       }
     },
     "preregistration_git_blob_sha": "0b6ec8c04b112a54517793504a2f0e8857358133",
-    "reviewed_implementation_commit": "9318e549451ba5429a734202e95b9be8ff8b273c"
+    "reviewed_implementation_commit": "a5fc929b64b70aca16354817cb4ba620c32affb5"
   },
   "ruling": {
-    "issued_at": "2026-08-31T06:11:14+09:00",
+    "issued_at": "2026-08-31T06:40:34+09:00",
     "reviewer": "ChatGPT Pro",
-    "ruling_document": "90_候选工作区/current/13_D3V2最终静态复核与全新执行授权.md"
+    "ruling_document": "90_候选工作区/current/14_D3授权审计中文路径修复复核与全新执行再授权.md"
   },
   "schema_version": 1,
   "status": "AUTHORIZED_BY_PRO_FOR_BOUND_IMPLEMENTATION"
