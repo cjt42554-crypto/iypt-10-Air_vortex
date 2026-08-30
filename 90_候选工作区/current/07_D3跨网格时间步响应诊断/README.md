@@ -2,7 +2,7 @@
 
 状态：
 
-- 静态实现：`D3_V2_STATE_MACHINE_PATCH_READY_FOR_PRO_REVIEW`；
+- 静态实现：`D3_V2_S3_PUBLICATION_TRANSACTION_PATCH_READY_FOR_PRO_REVIEW`；
 - 动态执行：`NOT_AUTHORIZED`。
 
 ## 目标
@@ -126,6 +126,15 @@ V2 还增加以下结果盲静态加固：
 4. 只有前置门通过后的阶段内异常才进入失败事务；失败台账候选先在内存中通过语义门，随后才写失败标记和原子替换台账，任一步写入失败都会撤回新标记并保留原台账；
 5. S3 在分析起止锁定同一 HEAD、完整授权对象、授权文件 blob/hash、裁决身份及裁决文件 blob/hash，并继续要求清洁工作树。
 
+S3 最终证据发布补丁还固定了以下事务语义：
+
+1. 共享 S3 前置门通过前的授权、身份、S0、阶段顺序、陈旧 staging 或部分最终输出拒绝均不改写台账或证据；
+2. compact evidence、tracked ledger、manifest、报告 JSON、报告 Markdown 和最终 raw ledger 全部先写入本次唯一 staging 根；
+3. 提交前重新加载全部 JSON，校验精确文件集、路径、大小、SHA-256、报告—清单—台账交叉一致性与终态台账语义；
+4. 最终目录和文件通过原子 rename 发布，canonical raw ledger 在此前一直保持 S3 `NOT_EXECUTED`，并作为成功路径的最后持久化提交点转为 `PASS/COMPLETE`；
+5. S3 阶段内的分析、复制、哈希、写入、rename 或清理故障会回滚本次发布，然后提交唯一 `FAILED_STOPPED` 台账与失败标记；失败提交自身失败时恢复原台账并撤回新标记；
+6. 跟踪事务记录绑定执行提交、授权对象、Pro 裁决、正式源码树与前后 raw ledger 哈希；未知或不匹配的陈旧输出不会被复用。
+
 ## 动态命令的当前闭锁
 
 运行器已经实现未来执行入口，但当前独立授权对象明确保存：
@@ -208,6 +217,6 @@ artifacts/d3_implementation_static_review.json
 
 ## 停止点
 
-候选状态机补丁和零步静态测试完成后停在“等待 Pro 独立复核与裁决，动态执行未授权”。
+候选 S3 发布事务补丁和零步静态测试完成后停在“等待 Pro 独立复核与裁决，动态执行未授权”。
 
 只有新的 Pro 明确裁决才能启动真实 CUDA 阶段。

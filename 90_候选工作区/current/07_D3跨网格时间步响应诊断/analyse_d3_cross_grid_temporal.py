@@ -20,9 +20,10 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import traceback
 from collections.abc import Mapping, Sequence
 from copy import deepcopy
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, field, fields
 from pathlib import Path
 from typing import Any
 
@@ -44,6 +45,9 @@ REPORT_MD = HERE / "reports" / "d3_cross_grid_temporal_report.md"
 ARTIFACT_MANIFEST = HERE / "artifacts" / "d3_cross_grid_temporal_manifest.json"
 EVIDENCE_ROOT = HERE / "artifacts" / "evidence"
 TRACKED_LEDGER = EVIDENCE_ROOT / "stage_ledger.json"
+S3_TRANSACTION_RECORD = EVIDENCE_ROOT / "s3_publication_transaction.json"
+S3_TRANSACTION_ROOT = RAW_ROOT / ".s3_publication_transaction"
+S3_RAW_LEDGER_COMMIT_TEMP = RAW_ROOT / ".stage_ledger.s3-commit.tmp"
 
 if str(FORMAL_SOURCE) not in sys.path:
     sys.path.insert(0, str(FORMAL_SOURCE))
@@ -53,7 +57,6 @@ from airvortex.core import RunStatus, SimulationConfig
 from airvortex.io import load_run_archive
 from airvortex.io.archive import source_tree_identity
 from airvortex.io.config_io import canonical_json_bytes, read_json_strict
-
 from d3_stage_machine import (
     audit_s0_report,
 )
@@ -115,6 +118,10 @@ class D3AnalysisError(RuntimeError):
     """Raised when frozen D3 evidence cannot support classification."""
 
 
+class D3AnalysisPreconditionError(D3AnalysisError):
+    """Reject S3 before its transaction begins and without filesystem writes."""
+
+
 @dataclass(slots=True)
 class RunEvidence:
     case_id: str
@@ -128,6 +135,21 @@ class RunEvidence:
     manifest: dict[str, Any]
     summary: dict[str, Any]
     hard_gate_audit: dict[str, Any]
+
+
+@dataclass(slots=True)
+class S3PublicationState:
+    """Track only paths created by the current S3 publication attempt."""
+
+    transaction_root: Path = field(default_factory=lambda: S3_TRANSACTION_ROOT)
+    raw_commit_temp: Path = field(default_factory=lambda: S3_RAW_LEDGER_COMMIT_TEMP)
+    published_paths: list[Path] = field(default_factory=list)
+
+
+def _s3_fault_injection_point(name: str) -> None:
+    """No-op seam used by result-blind write-point fault tests."""
+
+    del name
 
 
 def _git(*args: str) -> str:
@@ -239,6 +261,24 @@ def _write_json(path: Path, value: object) -> None:
     try:
         with os.fdopen(file_descriptor, "w", encoding="utf-8") as stream:
             stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary_path, path)
+    finally:
+        temporary_path.unlink(missing_ok=True)
+
+
+def _write_text(path: Path, value: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    file_descriptor, temporary_name = tempfile.mkstemp(
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+    )
+    temporary_path = Path(temporary_name)
+    try:
+        with os.fdopen(file_descriptor, "w", encoding="utf-8") as stream:
+            stream.write(value)
             stream.flush()
             os.fsync(stream.fileno())
         os.replace(temporary_path, path)
@@ -1539,6 +1579,101 @@ def _validate_preanalysis_ledger(
     }
 
 
+def _stage_pass_evidence(stage: str) -> list[str]:
+    if stage == "S0":
+        return [_relative(S0_PATH)]
+    if stage in STAGE_CASES:
+        return [
+            _relative(_case_summary_path(case_id)) for case_id in STAGE_CASES[stage]
+        ]
+    if stage == "S3":
+        return [
+            _relative(REPORT_JSON),
+            _relative(REPORT_MD),
+            _relative(ARTIFACT_MANIFEST),
+            _relative(TRACKED_LEDGER),
+        ]
+    raise D3AnalysisError(f"unknown D3 stage: {stage}")
+
+
+def _validate_terminal_s3_ledger(
+    ledger: Mapping[str, Any],
+    *,
+    execution_commit: str,
+    disposition: str,
+    classification: str | None,
+) -> dict[str, Any]:
+    """Independently validate an exact S3 success or failure terminal ledger."""
+
+    stages = ledger.get("stages")
+    exact_order = isinstance(stages, list) and [
+        item.get("stage") if isinstance(item, Mapping) else None for item in stages
+    ] == list(STAGE_ORDER)
+    per_stage: dict[str, Any] = {}
+    if isinstance(stages, list):
+        for index, item in enumerate(stages):
+            if not isinstance(item, Mapping) or index >= len(STAGE_ORDER):
+                continue
+            stage = STAGE_ORDER[index]
+            if stage != "S3":
+                expected_disposition = "EXECUTED"
+                expected_status = "PASS"
+                expected_evidence = _stage_pass_evidence(stage)
+                classification_gate = item.get("classification") is None
+            elif disposition == "PASS":
+                expected_disposition = "EXECUTED"
+                expected_status = "PASS"
+                expected_evidence = _stage_pass_evidence("S3")
+                classification_gate = (
+                    isinstance(classification, str)
+                    and bool(classification)
+                    and item.get("classification") == classification
+                )
+            elif disposition == "FAILED":
+                expected_disposition = "FAILED_STOPPED"
+                expected_status = FAIL_CLOSED
+                expected_evidence = [_relative(FAILURE_PATH)]
+                classification_gate = item.get("classification") is None
+            else:
+                raise ValueError(f"unknown terminal disposition: {disposition}")
+            gates = {
+                "stage_exact": item.get("stage") == stage,
+                "action_exact": item.get("action") == STAGE_ACTIONS[stage],
+                "description_exact": item.get("human_description")
+                == STAGE_DESCRIPTIONS[stage],
+                "cases_exact": item.get("cases") == list(STAGE_CASES.get(stage, ())),
+                "disposition_exact": item.get("disposition") == expected_disposition,
+                "status_exact": item.get("status") == expected_status,
+                "evidence_exact": item.get("evidence") == expected_evidence,
+                "classification_exact": classification_gate,
+            }
+            per_stage[stage] = {"gate_pass": all(gates.values()), "gates": gates}
+    failed = disposition == "FAILED"
+    gates = {
+        "schema_version": ledger.get("schema_version") == 2,
+        "protocol_id": ledger.get("protocol_id") == PROTOCOL_ID,
+        "execution_commit": ledger.get("execution_commit") == execution_commit,
+        "exact_stage_order": exact_order,
+        "all_stage_entries_exact": set(per_stage) == set(STAGE_ORDER)
+        and all(item["gate_pass"] for item in per_stage.values()),
+        "failed_stages_exact": ledger.get("failed_stages")
+        == (["S3"] if failed else []),
+        "unexecuted_stages_empty": ledger.get("unexecuted_stages") == [],
+        "terminal_state_exact": ledger.get("terminal_state")
+        == (FAIL_CLOSED if failed else "COMPLETE"),
+        "failure_record_exact": ledger.get("failure_record")
+        == (_relative(FAILURE_PATH) if failed else None),
+        "automatic_follow_on_prohibited": ledger.get("automatic_follow_on")
+        == "PROHIBITED",
+    }
+    return {
+        "gate_pass": all(gates.values()),
+        "gates": gates,
+        "stages": per_stage,
+        "disposition": disposition,
+    }
+
+
 def _final_stage_ledger(
     ledger: Mapping[str, Any],
     *,
@@ -1574,46 +1709,197 @@ def _final_stage_ledger(
     result["terminal_state"] = "COMPLETE"
     result["failure_record"] = None
     result["automatic_follow_on"] = "PROHIBITED"
+    audit = _validate_terminal_s3_ledger(
+        result,
+        execution_commit=str(result.get("execution_commit")),
+        disposition="PASS",
+        classification=label,
+    )
+    if not audit["gate_pass"]:
+        raise D3AnalysisError("D3 final stage ledger semantic audit failed")
     return result
 
 
-def _copy_compact_file(source: Path, target: Path) -> dict[str, Any]:
-    if not source.is_file() or source.is_symlink():
-        raise D3AnalysisError(f"compact evidence source is invalid: {source}")
-    target.parent.mkdir(parents=True, exist_ok=True)
-    if target.exists():
-        raise FileExistsError(target)
-    shutil.copyfile(source, target)
-    if _sha256(source) != _sha256(target):
-        raise D3AnalysisError(f"compact evidence copy changed bytes: {source}")
+def _failed_s3_ledger(
+    ledger: Mapping[str, Any],
+    *,
+    execution_commit: str,
+) -> dict[str, Any]:
+    result = deepcopy(dict(ledger))
+    stages = result.get("stages")
+    if not isinstance(stages, list):
+        raise D3AnalysisError("D3 stage ledger is malformed")
+    replacements = 0
+    for index, item in enumerate(stages):
+        if isinstance(item, Mapping) and item.get("stage") == "S3":
+            stages[index] = {
+                "stage": "S3",
+                "action": STAGE_ACTIONS["S3"],
+                "human_description": STAGE_DESCRIPTIONS["S3"],
+                "disposition": "FAILED_STOPPED",
+                "status": FAIL_CLOSED,
+                "cases": [],
+                "evidence": [_relative(FAILURE_PATH)],
+            }
+            replacements += 1
+    if replacements != 1:
+        raise D3AnalysisError("D3 ledger must have exactly one S3 entry")
+    result["failed_stages"] = ["S3"]
+    result["unexecuted_stages"] = []
+    result["terminal_state"] = FAIL_CLOSED
+    result["failure_record"] = _relative(FAILURE_PATH)
+    result["automatic_follow_on"] = "PROHIBITED"
+    audit = _validate_terminal_s3_ledger(
+        result,
+        execution_commit=execution_commit,
+        disposition="FAILED",
+        classification=None,
+    )
+    if not audit["gate_pass"]:
+        raise D3AnalysisError("D3 failed S3 ledger semantic audit failed")
+    return result
+
+
+def _staged_path(state: S3PublicationState, canonical_path: Path) -> Path:
+    try:
+        relative = canonical_path.relative_to(HERE)
+    except ValueError as exc:
+        raise D3AnalysisError(
+            f"S3 publication target is outside the candidate root: {canonical_path}"
+        ) from exc
+    return state.transaction_root / "staged" / relative
+
+
+def _path_present(path: Path) -> bool:
+    """Treat broken symlinks as occupied transaction paths."""
+
+    return path.exists() or path.is_symlink()
+
+
+def _s3_publication_precondition_audit() -> dict[str, Any]:
+    observed = {
+        _relative(EVIDENCE_ROOT): _path_present(EVIDENCE_ROOT),
+        _relative(ARTIFACT_MANIFEST): _path_present(ARTIFACT_MANIFEST),
+        _relative(REPORT_JSON.parent): _path_present(REPORT_JSON.parent),
+        _relative(S3_TRANSACTION_ROOT): _path_present(S3_TRANSACTION_ROOT),
+        _relative(S3_RAW_LEDGER_COMMIT_TEMP): _path_present(S3_RAW_LEDGER_COMMIT_TEMP),
+    }
+    gates = {
+        "all_canonical_targets_absent": not any(observed.values()),
+        "raw_ledger_regular": RAW_LEDGER_PATH.is_file()
+        and not RAW_LEDGER_PATH.is_symlink(),
+        "failure_marker_absent": not _path_present(FAILURE_PATH),
+    }
+    return {"gate_pass": all(gates.values()), "gates": gates, "observed": observed}
+
+
+def _transaction_record(
+    *,
+    execution_commit: str,
+    authorization_audit: Mapping[str, Any],
+    formal_source: Mapping[str, Any],
+    raw_ledger: Mapping[str, Any],
+    final_ledger: Mapping[str, Any],
+) -> dict[str, Any]:
+    observed = authorization_audit.get("observed")
+    identity = {
+        "execution_commit": execution_commit,
+        "authorization_content_sha256": observed.get("authorization_content_sha256")
+        if isinstance(observed, Mapping)
+        else None,
+        "authorization_git_blob_sha": observed.get("authorization_git_blob_sha")
+        if isinstance(observed, Mapping)
+        else None,
+        "ruling_content_sha256": observed.get("ruling_content_sha256")
+        if isinstance(observed, Mapping)
+        else None,
+        "ruling_git_blob_sha": observed.get("ruling_git_blob_sha")
+        if isinstance(observed, Mapping)
+        else None,
+        "formal_source_tree_sha256": formal_source.get("value"),
+        "raw_ledger_precondition_sha256": _canonical_sha256(raw_ledger),
+        "final_raw_ledger_sha256": _canonical_sha256(final_ledger),
+    }
     return {
-        "source": _relative(source),
-        "tracked_path": _relative(target),
-        "sha256": _sha256(target),
-        "size_bytes": target.stat().st_size,
+        "schema_version": 1,
+        "protocol_id": PROTOCOL_ID,
+        "transaction_kind": "S3_FINAL_EVIDENCE_PUBLICATION",
+        "state": "PREPARED_FOR_RAW_LEDGER_COMMIT",
+        "transaction_id": _canonical_sha256(identity),
+        "identity": identity,
+        "success_commit_point": _relative(RAW_LEDGER_PATH),
+        "expected_final_targets": [
+            _relative(EVIDENCE_ROOT),
+            _relative(ARTIFACT_MANIFEST),
+            _relative(REPORT_JSON),
+            _relative(REPORT_MD),
+            _relative(RAW_LEDGER_PATH),
+        ],
+        "recovery_policy": (
+            "Never reuse staging or partial final output. If raw S3 is not PASS, "
+            "validate this exact transaction identity before deterministic rollback "
+            "or failure commit."
+        ),
     }
 
 
-def _publish_compact_evidence(
+def _copy_compact_file(
+    source: Path,
+    staged_target: Path,
+    canonical_target: Path,
+    *,
+    copy_index: int,
+) -> dict[str, Any]:
+    if not source.is_file() or source.is_symlink():
+        raise D3AnalysisError(f"compact evidence source is invalid: {source}")
+    staged_target.parent.mkdir(parents=True, exist_ok=True)
+    if staged_target.exists():
+        raise FileExistsError(staged_target)
+    shutil.copyfile(source, staged_target)
+    _s3_fault_injection_point(f"after_compact_copy:{copy_index}")
+    if (
+        not staged_target.is_file()
+        or staged_target.is_symlink()
+        or _sha256(source) != _sha256(staged_target)
+    ):
+        raise D3AnalysisError(f"compact evidence copy changed bytes: {source}")
+    return {
+        "source": _relative(source),
+        "tracked_path": _relative(canonical_target),
+        "sha256": _sha256(staged_target),
+        "size_bytes": staged_target.stat().st_size,
+    }
+
+
+def _stage_compact_evidence(
+    state: S3PublicationState,
     runs: Mapping[str, RunEvidence],
     final_ledger: Mapping[str, Any],
+    transaction_record: Mapping[str, Any],
 ) -> dict[str, Any]:
-    if EVIDENCE_ROOT.exists():
-        raise FileExistsError(EVIDENCE_ROOT)
+    staged_evidence_root = _staged_path(state, EVIDENCE_ROOT)
+    if staged_evidence_root.exists():
+        raise FileExistsError(staged_evidence_root)
     copied: list[dict[str, Any]] = []
-    copied.append(
-        _copy_compact_file(
-            S0_PATH,
-            EVIDENCE_ROOT / "s0_identity_config_fresh_evidence_gate.json",
-        )
-    )
-    for case_id in EXPECTED_CASES:
-        case_root = EVIDENCE_ROOT / "cases" / case_id
+    copy_index = 0
+    _s3_fault_injection_point("before_first_compact_copy")
+
+    def copy(source: Path, canonical_target: Path) -> None:
+        nonlocal copy_index
         copied.append(
             _copy_compact_file(
-                _case_summary_path(case_id), case_root / "case_summary.json"
+                source,
+                _staged_path(state, canonical_target),
+                canonical_target,
+                copy_index=copy_index,
             )
         )
+        copy_index += 1
+
+    copy(S0_PATH, EVIDENCE_ROOT / "s0_identity_config_fresh_evidence_gate.json")
+    for case_id in EXPECTED_CASES:
+        canonical_case_root = EVIDENCE_ROOT / "cases" / case_id
+        copy(_case_summary_path(case_id), canonical_case_root / "case_summary.json")
         for name in (
             "config.json",
             "result.json",
@@ -1621,21 +1907,30 @@ def _publish_compact_evidence(
             "manifest.json",
             "timeseries.csv",
         ):
-            copied.append(
-                _copy_compact_file(
-                    runs[case_id].archive_path / name,
-                    case_root / name,
-                )
-            )
-    _write_json(TRACKED_LEDGER, final_ledger)
+            copy(runs[case_id].archive_path / name, canonical_case_root / name)
+
+    staged_transaction_record = _staged_path(state, S3_TRANSACTION_RECORD)
+    _write_json(staged_transaction_record, transaction_record)
+    copied.append(
+        {
+            "source": "generated_by_independent_D3_analyser",
+            "tracked_path": _relative(S3_TRANSACTION_RECORD),
+            "sha256": _sha256(staged_transaction_record),
+            "size_bytes": staged_transaction_record.stat().st_size,
+        }
+    )
+    _s3_fault_injection_point("before_tracked_ledger_write")
+    staged_tracked_ledger = _staged_path(state, TRACKED_LEDGER)
+    _write_json(staged_tracked_ledger, final_ledger)
     copied.append(
         {
             "source": "generated_by_independent_D3_analyser",
             "tracked_path": _relative(TRACKED_LEDGER),
-            "sha256": _sha256(TRACKED_LEDGER),
-            "size_bytes": TRACKED_LEDGER.stat().st_size,
+            "sha256": _sha256(staged_tracked_ledger),
+            "size_bytes": staged_tracked_ledger.stat().st_size,
         }
     )
+    _s3_fault_injection_point("after_compact_evidence_staged")
     return {
         "file_count": len(copied),
         "total_size_bytes": sum(item["size_bytes"] for item in copied),
@@ -1643,22 +1938,41 @@ def _publish_compact_evidence(
     }
 
 
-def _raw_manifest(compact: Mapping[str, Any]) -> dict[str, Any]:
-    files = [
-        {
-            "path": _relative(path),
-            "sha256": _sha256(path),
-            "size_bytes": path.stat().st_size,
-            "tracked": False,
-        }
-        for path in sorted(item for item in RAW_ROOT.rglob("*") if item.is_file())
-    ]
+def _raw_manifest(
+    compact: Mapping[str, Any],
+    *,
+    staged_raw_ledger: Path,
+) -> dict[str, Any]:
+    raw_sources: dict[Path, Path] = {}
+    for path in RAW_ROOT.rglob("*"):
+        if not path.is_file():
+            continue
+        if path == S3_RAW_LEDGER_COMMIT_TEMP or path.is_relative_to(
+            S3_TRANSACTION_ROOT
+        ):
+            continue
+        raw_sources[path] = staged_raw_ledger if path == RAW_LEDGER_PATH else path
+    if RAW_LEDGER_PATH not in raw_sources:
+        raw_sources[RAW_LEDGER_PATH] = staged_raw_ledger
+    files: list[dict[str, Any]] = []
+    for canonical_path, source_path in sorted(raw_sources.items()):
+        if not source_path.is_file() or source_path.is_symlink():
+            raise D3AnalysisError(f"raw manifest source is invalid: {source_path}")
+        files.append(
+            {
+                "path": _relative(canonical_path),
+                "sha256": _sha256(source_path),
+                "size_bytes": source_path.stat().st_size,
+                "tracked": False,
+            }
+        )
     return {
         "schema_version": 1,
         "protocol_id": PROTOCOL_ID,
         "integrity_scope": (
             "Ignored fresh D3 raw products and tracked compact evidence present "
-            "at independent final analysis."
+            "at independent final analysis. The raw ledger hash is the staged "
+            "S3 PASS ledger committed only after all final evidence."
         ),
         "raw_file_count": len(files),
         "raw_total_size_bytes": sum(item["size_bytes"] for item in files),
@@ -1738,53 +2052,533 @@ def _markdown(report: Mapping[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def analyse_final() -> dict[str, Any]:
-    """Run future-only S3 independent analysis and publish tracked evidence."""
+def _regular_tree_files(root: Path) -> list[Path]:
+    if not root.is_dir() or root.is_symlink():
+        raise D3AnalysisError(f"S3 staged tree is not a regular directory: {root}")
+    files: list[Path] = []
+    for path in sorted(root.rglob("*")):
+        if path.is_symlink():
+            raise D3AnalysisError(f"S3 staged tree contains a symlink: {path}")
+        if path.is_file():
+            files.append(path)
+        elif not path.is_dir():
+            raise D3AnalysisError(f"S3 staged tree contains a special file: {path}")
+    return files
 
-    contract = _contract()
-    authorization_audit = execution_authorization_audit()
-    if not authorization_audit["gate_pass"]:
-        failed = [
-            name for name, passed in authorization_audit["gates"].items() if not passed
-        ]
+
+def _validate_staged_s3_publication(
+    state: S3PublicationState,
+    *,
+    execution_commit: str,
+    final_ledger: Mapping[str, Any],
+    compact: Mapping[str, Any],
+    manifest: Mapping[str, Any],
+    report: Mapping[str, Any],
+    transaction_record: Mapping[str, Any],
+) -> dict[str, Any]:
+    staged_root = state.transaction_root / "staged"
+    staged_evidence = _staged_path(state, EVIDENCE_ROOT)
+    staged_manifest = _staged_path(state, ARTIFACT_MANIFEST)
+    staged_report_json = _staged_path(state, REPORT_JSON)
+    staged_report_md = _staged_path(state, REPORT_MD)
+    staged_raw_ledger = _staged_path(state, RAW_LEDGER_PATH)
+    staged_transaction_record = _staged_path(state, S3_TRANSACTION_RECORD)
+    staged_tracked_ledger = _staged_path(state, TRACKED_LEDGER)
+    all_files = _regular_tree_files(staged_root)
+    expected_compact_paths: set[Path] = set()
+    compact_records_valid = isinstance(compact.get("files"), list)
+    compact_size = 0
+    if compact_records_valid:
+        for item in compact["files"]:
+            if not isinstance(item, Mapping) or not isinstance(
+                item.get("tracked_path"), str
+            ):
+                compact_records_valid = False
+                continue
+            canonical = REPOSITORY_ROOT / str(item["tracked_path"])
+            try:
+                canonical.relative_to(EVIDENCE_ROOT)
+            except ValueError:
+                compact_records_valid = False
+                continue
+            staged = _staged_path(state, canonical)
+            expected_compact_paths.add(staged)
+            if (
+                not staged.is_file()
+                or staged.is_symlink()
+                or item.get("sha256") != _sha256(staged)
+                or item.get("size_bytes") != staged.stat().st_size
+            ):
+                compact_records_valid = False
+            else:
+                compact_size += staged.stat().st_size
+    observed_evidence_paths = set(_regular_tree_files(staged_evidence))
+    expected_all_files = {
+        *expected_compact_paths,
+        staged_manifest,
+        staged_report_json,
+        staged_report_md,
+        staged_raw_ledger,
+    }
+    json_paths = [path for path in all_files if path.suffix == ".json"]
+    strict_json_pass = True
+    try:
+        for path in json_paths:
+            read_json_strict(path)
+    except Exception:  # noqa: BLE001 - collapse to one staged gate
+        strict_json_pass = False
+    tracked_ledger = (
+        _json_object(staged_tracked_ledger) if staged_tracked_ledger.is_file() else {}
+    )
+    staged_raw = _json_object(staged_raw_ledger) if staged_raw_ledger.is_file() else {}
+    observed_manifest = (
+        _json_object(staged_manifest) if staged_manifest.is_file() else {}
+    )
+    observed_report = (
+        _json_object(staged_report_json) if staged_report_json.is_file() else {}
+    )
+    observed_transaction = (
+        _json_object(staged_transaction_record)
+        if staged_transaction_record.is_file()
+        else {}
+    )
+    terminal_audit = _validate_terminal_s3_ledger(
+        final_ledger,
+        execution_commit=execution_commit,
+        disposition="PASS",
+        classification=str(report.get("status")),
+    )
+    regenerated_manifest = _raw_manifest(
+        compact,
+        staged_raw_ledger=staged_raw_ledger,
+    )
+    expected_artifact_summary = {
+        "path": _relative(ARTIFACT_MANIFEST),
+        "raw_file_count": manifest.get("raw_file_count"),
+        "raw_total_size_bytes": manifest.get("raw_total_size_bytes"),
+        "compact_tracked_file_count": compact.get("file_count"),
+        "compact_tracked_total_size_bytes": compact.get("total_size_bytes"),
+    }
+    gates = {
+        "staged_file_set_exact": set(all_files) == expected_all_files,
+        "compact_evidence_file_set_exact": observed_evidence_paths
+        == expected_compact_paths,
+        "compact_records_hash_size_exact": compact_records_valid,
+        "compact_summary_exact": compact.get("file_count")
+        == len(expected_compact_paths)
+        and compact.get("total_size_bytes") == compact_size,
+        "all_staged_json_strict": strict_json_pass,
+        "terminal_ledger_semantics": terminal_audit["gate_pass"],
+        "tracked_and_raw_ledgers_identical": tracked_ledger == final_ledger
+        and staged_raw == final_ledger,
+        "manifest_exact": observed_manifest == manifest
+        and dict(manifest) == regenerated_manifest,
+        "manifest_compact_exact": manifest.get("compact_tracked_evidence") == compact,
+        "report_exact": observed_report == report,
+        "report_ledger_exact": report.get("stage_ledger") == final_ledger,
+        "report_manifest_summary_exact": report.get("artifact_manifest")
+        == expected_artifact_summary,
+        "markdown_exact": staged_report_md.is_file()
+        and not staged_report_md.is_symlink()
+        and staged_report_md.read_text(encoding="utf-8") == _markdown(report),
+        "transaction_record_exact": observed_transaction == transaction_record
+        and transaction_record.get("state") == "PREPARED_FOR_RAW_LEDGER_COMMIT"
+        and transaction_record.get("identity", {}).get("execution_commit")
+        == execution_commit,
+        "all_final_targets_currently_absent": not any(
+            _path_present(path)
+            for path in (EVIDENCE_ROOT, ARTIFACT_MANIFEST, REPORT_JSON.parent)
+        ),
+        "raw_ledger_not_prematurely_committed": _json_object(RAW_LEDGER_PATH)
+        != final_ledger,
+    }
+    return {
+        "gate_pass": all(gates.values()),
+        "gates": gates,
+        "terminal_ledger_audit": terminal_audit,
+        "staged_file_count": len(all_files),
+    }
+
+
+def _stage_s3_publication(
+    state: S3PublicationState,
+    *,
+    runs: Mapping[str, RunEvidence],
+    raw_ledger: Mapping[str, Any],
+    final_ledger: Mapping[str, Any],
+    report_base: Mapping[str, Any],
+    execution_commit: str,
+    authorization_audit: Mapping[str, Any],
+    formal_source: Mapping[str, Any],
+) -> dict[str, Any]:
+    if _path_present(state.transaction_root) or _path_present(state.raw_commit_temp):
+        raise D3AnalysisPreconditionError(
+            "D3 S3 stale transaction state exists; do not reuse it"
+        )
+    state.transaction_root.mkdir(parents=False, exist_ok=False)
+    staged_raw_ledger = _staged_path(state, RAW_LEDGER_PATH)
+    _write_json(staged_raw_ledger, final_ledger)
+    transaction_record = _transaction_record(
+        execution_commit=execution_commit,
+        authorization_audit=authorization_audit,
+        formal_source=formal_source,
+        raw_ledger=raw_ledger,
+        final_ledger=final_ledger,
+    )
+    _write_json(state.transaction_root / "transaction.json", transaction_record)
+    compact = _stage_compact_evidence(
+        state,
+        runs,
+        final_ledger,
+        transaction_record,
+    )
+    _s3_fault_injection_point("before_manifest_generation")
+    manifest = _raw_manifest(compact, staged_raw_ledger=staged_raw_ledger)
+    _s3_fault_injection_point("before_manifest_write")
+    _write_json(_staged_path(state, ARTIFACT_MANIFEST), manifest)
+    report = deepcopy(dict(report_base))
+    report["stage_ledger"] = deepcopy(dict(final_ledger))
+    report["artifact_manifest"] = {
+        "path": _relative(ARTIFACT_MANIFEST),
+        "raw_file_count": manifest["raw_file_count"],
+        "raw_total_size_bytes": manifest["raw_total_size_bytes"],
+        "compact_tracked_file_count": compact["file_count"],
+        "compact_tracked_total_size_bytes": compact["total_size_bytes"],
+    }
+    _s3_fault_injection_point("before_report_json_write")
+    _write_json(_staged_path(state, REPORT_JSON), report)
+    _s3_fault_injection_point("before_report_markdown_write")
+    _write_text(_staged_path(state, REPORT_MD), _markdown(report))
+    audit = _validate_staged_s3_publication(
+        state,
+        execution_commit=execution_commit,
+        final_ledger=final_ledger,
+        compact=compact,
+        manifest=manifest,
+        report=report,
+        transaction_record=transaction_record,
+    )
+    if not audit["gate_pass"]:
+        failed = [name for name, value in audit["gates"].items() if not value]
         raise D3AnalysisError(
-            "D3 final analysis lacks an exact Pro authorization binding: "
+            "D3 staged S3 publication audit failed: "
             + json.dumps(failed, ensure_ascii=False)
         )
-    if any(
-        path.exists()
-        for path in (REPORT_JSON, REPORT_MD, ARTIFACT_MANIFEST, EVIDENCE_ROOT)
-    ):
-        raise FileExistsError("D3 final tracked output already exists")
-    if FAILURE_PATH.exists():
-        raise D3AnalysisError("D3 execution failure marker exists")
-    branch = _git("branch", "--show-current")
-    head = _git("rev-parse", "HEAD")
-    porcelain = _git("status", "--porcelain=v1", "--untracked-files=all").splitlines()
-    source = dict(source_tree_identity(FORMAL_ROOT))
-    bound_source = contract["formal_source_contract"]["required_tree_sha256"]
-    if branch != "main" or porcelain:
-        raise D3AnalysisError("D3 final analysis requires a clean main worktree")
-    if source.get("value") != bound_source:
-        raise D3AnalysisError("formal source tree no longer matches the D3 binding")
-    if not RAW_LEDGER_PATH.is_file() or RAW_LEDGER_PATH.is_symlink():
-        raise D3AnalysisError("D3 raw stage ledger is not a regular file")
-    s0 = _json_object(S0_PATH)
-    s0_report_audit = audit_s0_report(
-        s0,
-        protocol_id=PROTOCOL_ID,
-        expected_commit=head,
-        expected_action=STAGE_ACTIONS["S0"],
-        expected_description=STAGE_DESCRIPTIONS["S0"],
-        expected_status="D3_S0_IDENTITY_CONFIG_IMPLEMENTATION_AND_FRESH_EVIDENCE_GATE_PASS",
-        expected_case_ids=EXPECTED_CASES,
+    return report
+
+
+def _remove_transaction_path(path: Path) -> None:
+    if not _path_present(path):
+        return
+    if path.is_dir() and not path.is_symlink():
+        shutil.rmtree(path)
+    else:
+        path.unlink()
+
+
+def _rollback_s3_publication(state: S3PublicationState) -> None:
+    cleanup_retry_reason: str | None = None
+    try:
+        _s3_fault_injection_point("before_rollback_cleanup")
+    except Exception as exc:  # noqa: BLE001 - injected first-attempt failure
+        # The cleanup operation itself is retried below; the injected first
+        # attempt must not turn a recoverable failure into partial success.
+        cleanup_retry_reason = f"{type(exc).__name__}: {exc}"
+    for path in reversed(state.published_paths):
+        _remove_transaction_path(path)
+    _remove_transaction_path(state.raw_commit_temp)
+    _remove_transaction_path(state.transaction_root)
+    residual = [
+        path
+        for path in (
+            *state.published_paths,
+            state.raw_commit_temp,
+            state.transaction_root,
+        )
+        if _path_present(path)
+    ]
+    unexpected_canonical = [
+        path
+        for path in (EVIDENCE_ROOT, ARTIFACT_MANIFEST, REPORT_JSON.parent)
+        if _path_present(path)
+    ]
+    if residual or unexpected_canonical:
+        raise D3AnalysisError(
+            "D3 S3 rollback left residual transaction paths: "
+            + json.dumps(
+                {
+                    "paths": [str(path) for path in residual],
+                    "unexpected_canonical_paths": [
+                        str(path) for path in unexpected_canonical
+                    ],
+                    "first_cleanup_attempt": cleanup_retry_reason,
+                },
+                ensure_ascii=False,
+            )
+        )
+
+
+def _publish_staged_s3(state: S3PublicationState) -> None:
+    publication_steps = (
+        (
+            "before_publish_evidence",
+            _staged_path(state, EVIDENCE_ROOT),
+            EVIDENCE_ROOT,
+        ),
+        (
+            "before_publish_manifest",
+            _staged_path(state, ARTIFACT_MANIFEST),
+            ARTIFACT_MANIFEST,
+        ),
+        (
+            "before_publish_reports",
+            _staged_path(state, REPORT_JSON.parent),
+            REPORT_JSON.parent,
+        ),
     )
-    if not s0_report_audit["gate_pass"]:
-        raise D3AnalysisError("D3 S0 identity/fresh-evidence gate is invalid")
-    raw_ledger = _json_object(RAW_LEDGER_PATH)
-    ledger_audit = _validate_preanalysis_ledger(raw_ledger, execution_commit=head)
-    if not ledger_audit["gate_pass"]:
-        raise D3AnalysisError("D3 preanalysis stage ledger semantic audit failed")
+    for fault_point, staged, canonical in publication_steps:
+        if canonical.exists() or canonical.is_symlink():
+            raise FileExistsError(canonical)
+        _s3_fault_injection_point(fault_point)
+        os.replace(staged, canonical)
+        state.published_paths.append(canonical)
+    staged_raw_ledger = _staged_path(state, RAW_LEDGER_PATH)
+    _s3_fault_injection_point("before_raw_ledger_temp_rename")
+    os.replace(staged_raw_ledger, state.raw_commit_temp)
+    _s3_fault_injection_point("before_staging_cleanup")
+    shutil.rmtree(state.transaction_root)
+    _s3_fault_injection_point("before_raw_ledger_commit")
+    os.replace(state.raw_commit_temp, RAW_LEDGER_PATH)
+
+
+def _record_s3_failure(
+    raw_ledger: Mapping[str, Any],
+    exc: Exception,
+    *,
+    execution_commit: str,
+) -> None:
+    if _json_object(RAW_LEDGER_PATH) != raw_ledger:
+        raise D3AnalysisError("D3 raw ledger changed before S3 failure commit")
+    if FAILURE_PATH.exists():
+        raise D3AnalysisError("D3 failure marker already exists")
+    failed_ledger = _failed_s3_ledger(
+        raw_ledger,
+        execution_commit=execution_commit,
+    )
+    failure_record = {
+        "schema_version": 2,
+        "protocol_id": PROTOCOL_ID,
+        "status": FAIL_CLOSED,
+        "stage": "S3",
+        "command": ["analyse_d3_cross_grid_temporal.py", "final"],
+        "failure": {
+            "type": type(exc).__name__,
+            "message": str(exc),
+            "traceback": "".join(
+                traceback.format_exception(type(exc), exc, exc.__traceback__)
+            ),
+        },
+        "diagnostic_evidence": [],
+        "execution_commit": execution_commit,
+        "subsequent_stages_executed": False,
+    }
+    marker_written = False
+    try:
+        _s3_fault_injection_point("before_failure_marker_write")
+        _write_json(FAILURE_PATH, failure_record)
+        marker_written = True
+        observed = _json_object(FAILURE_PATH)
+        marker_valid = (
+            observed == failure_record
+            and FAILURE_PATH.is_file()
+            and not FAILURE_PATH.is_symlink()
+        )
+        if not marker_valid:
+            raise D3AnalysisError("D3 S3 failure marker audit failed")
+        _s3_fault_injection_point("before_failure_ledger_write")
+        _write_json(RAW_LEDGER_PATH, failed_ledger)
+    except Exception:
+        if marker_written:
+            FAILURE_PATH.unlink(missing_ok=True)
+        raise
+
+
+def audit_committed_s3_success(*, execution_commit: str) -> dict[str, Any]:
+    """Reload canonical S3 success evidence without mutating it."""
+
+    raw_ledger = _json_object(RAW_LEDGER_PATH) if RAW_LEDGER_PATH.is_file() else {}
+    report = _json_object(REPORT_JSON) if REPORT_JSON.is_file() else {}
+    manifest = _json_object(ARTIFACT_MANIFEST) if ARTIFACT_MANIFEST.is_file() else {}
+    tracked = _json_object(TRACKED_LEDGER) if TRACKED_LEDGER.is_file() else {}
+    transaction = (
+        _json_object(S3_TRANSACTION_RECORD) if S3_TRANSACTION_RECORD.is_file() else {}
+    )
+    terminal = _validate_terminal_s3_ledger(
+        raw_ledger,
+        execution_commit=execution_commit,
+        disposition="PASS",
+        classification=str(report.get("status")),
+    )
+    compact_value = manifest.get("compact_tracked_evidence")
+    compact: Mapping[str, Any] = (
+        compact_value if isinstance(compact_value, Mapping) else {}
+    )
+    compact_files = compact.get("files")
+    compact_valid = isinstance(compact_value, Mapping) and isinstance(
+        compact_files, list
+    )
+    compact_count = len(compact_files) if isinstance(compact_files, list) else 0
+    compact_total = 0
+    if isinstance(compact_files, list):
+        for item in compact_files:
+            if not isinstance(item, Mapping) or not isinstance(
+                item.get("tracked_path"), str
+            ):
+                compact_valid = False
+                continue
+            path = REPOSITORY_ROOT / str(item["tracked_path"])
+            if (
+                not path.is_file()
+                or path.is_symlink()
+                or item.get("sha256") != _sha256(path)
+                or item.get("size_bytes") != path.stat().st_size
+            ):
+                compact_valid = False
+            else:
+                compact_total += path.stat().st_size
+    raw_valid = isinstance(manifest.get("raw_files"), list)
+    raw_total = 0
+    if raw_valid:
+        for item in manifest["raw_files"]:
+            if not isinstance(item, Mapping) or not isinstance(item.get("path"), str):
+                raw_valid = False
+                continue
+            path = REPOSITORY_ROOT / str(item["path"])
+            if (
+                not path.is_file()
+                or path.is_symlink()
+                or item.get("sha256") != _sha256(path)
+                or item.get("size_bytes") != path.stat().st_size
+            ):
+                raw_valid = False
+            else:
+                raw_total += path.stat().st_size
+    gates = {
+        "terminal_ledger_semantics": terminal["gate_pass"],
+        "tracked_raw_ledgers_identical": tracked == raw_ledger,
+        "report_ledger_identical": report.get("stage_ledger") == raw_ledger,
+        "compact_files_hash_size_exact": compact_valid
+        and compact.get("file_count") == compact_count
+        and compact.get("total_size_bytes") == compact_total,
+        "raw_files_hash_size_exact": raw_valid
+        and manifest.get("raw_file_count") == len(manifest.get("raw_files", []))
+        and manifest.get("raw_total_size_bytes") == raw_total,
+        "report_markdown_exact": REPORT_MD.is_file()
+        and not REPORT_MD.is_symlink()
+        and REPORT_MD.read_text(encoding="utf-8") == _markdown(report),
+        "transaction_identity_exact": transaction.get("state")
+        == "PREPARED_FOR_RAW_LEDGER_COMMIT"
+        and transaction.get("identity", {}).get("execution_commit") == execution_commit,
+        "all_final_targets_regular": EVIDENCE_ROOT.is_dir()
+        and not EVIDENCE_ROOT.is_symlink()
+        and ARTIFACT_MANIFEST.is_file()
+        and not ARTIFACT_MANIFEST.is_symlink()
+        and REPORT_JSON.is_file()
+        and not REPORT_JSON.is_symlink()
+        and REPORT_MD.is_file()
+        and not REPORT_MD.is_symlink(),
+        "failure_and_transaction_residue_absent": not _path_present(FAILURE_PATH)
+        and not _path_present(S3_TRANSACTION_ROOT)
+        and not _path_present(S3_RAW_LEDGER_COMMIT_TEMP),
+    }
+    return {"gate_pass": all(gates.values()), "gates": gates}
+
+
+def audit_committed_s3_failure(*, execution_commit: str) -> dict[str, Any]:
+    """Reload canonical S3 failure evidence without mutating it."""
+
+    raw_ledger = _json_object(RAW_LEDGER_PATH) if RAW_LEDGER_PATH.is_file() else {}
+    failure = _json_object(FAILURE_PATH) if FAILURE_PATH.is_file() else {}
+    terminal = _validate_terminal_s3_ledger(
+        raw_ledger,
+        execution_commit=execution_commit,
+        disposition="FAILED",
+        classification=None,
+    )
+    gates = {
+        "terminal_ledger_semantics": terminal["gate_pass"],
+        "failure_marker_regular": FAILURE_PATH.is_file()
+        and not FAILURE_PATH.is_symlink(),
+        "failure_marker_identity": failure.get("schema_version") == 2
+        and failure.get("protocol_id") == PROTOCOL_ID
+        and failure.get("status") == FAIL_CLOSED
+        and failure.get("stage") == "S3"
+        and failure.get("execution_commit") == execution_commit
+        and failure.get("subsequent_stages_executed") is False,
+        "success_outputs_absent": not any(
+            _path_present(path)
+            for path in (EVIDENCE_ROOT, ARTIFACT_MANIFEST, REPORT_JSON.parent)
+        ),
+        "transaction_residue_absent": not _path_present(S3_TRANSACTION_ROOT)
+        and not _path_present(S3_RAW_LEDGER_COMMIT_TEMP),
+    }
+    return {"gate_pass": all(gates.values()), "gates": gates}
+
+
+def _commit_s3_publication_or_failure(
+    *,
+    runs: Mapping[str, RunEvidence],
+    raw_ledger: Mapping[str, Any],
+    final_ledger: Mapping[str, Any],
+    report_base: Mapping[str, Any],
+    execution_commit: str,
+    authorization_audit: Mapping[str, Any],
+    formal_source: Mapping[str, Any],
+) -> dict[str, Any]:
+    state = S3PublicationState()
+    try:
+        report = _stage_s3_publication(
+            state,
+            runs=runs,
+            raw_ledger=raw_ledger,
+            final_ledger=final_ledger,
+            report_base=report_base,
+            execution_commit=execution_commit,
+            authorization_audit=authorization_audit,
+            formal_source=formal_source,
+        )
+        _publish_staged_s3(state)
+        return report
+    except Exception as exc:
+        try:
+            _rollback_s3_publication(state)
+            _record_s3_failure(
+                raw_ledger,
+                exc,
+                execution_commit=execution_commit,
+            )
+        except Exception as failure_exc:
+            raise D3AnalysisError(
+                "D3 S3 publication failed; rollback/failure commit also failed: "
+                f"primary={type(exc).__name__}: {exc}; "
+                f"recovery={type(failure_exc).__name__}: {failure_exc}"
+            ) from failure_exc
+        raise
+
+
+def _prepare_s3_analysis(
+    *,
+    contract: Mapping[str, Any],
+    s0: Mapping[str, Any],
+    raw_ledger: Mapping[str, Any],
+    branch: str,
+    head: str,
+    porcelain: Sequence[str],
+    source: Mapping[str, Any],
+    bound_source: str,
+    authorization_audit: Mapping[str, Any],
+) -> tuple[dict[str, RunEvidence], dict[str, Any], dict[str, Any]]:
+    """Compute S3 content after the shared precondition gate, without publishing."""
 
     runs = {
         case_id: _load_case(case_id, execution_commit=head)
@@ -1827,10 +2621,7 @@ def analyse_final() -> dict[str, Any]:
         raise D3AnalysisError(
             "D3 authorization or implementation binding changed in S3"
         )
-    compact = _publish_compact_evidence(runs, final_ledger)
-    _write_json(RAW_LEDGER_PATH, final_ledger)
-    manifest = _raw_manifest(compact)
-    report: dict[str, Any] = {
+    report_base: dict[str, Any] = {
         "schema_version": 1,
         "protocol_id": PROTOCOL_ID,
         "status": label,
@@ -1847,21 +2638,13 @@ def analyse_final() -> dict[str, Any]:
         "identity": {
             "branch": branch,
             "execution_commit": head,
-            "worktree_porcelain_at_analysis_start": porcelain,
-            "formal_source_tree": source,
+            "worktree_porcelain_at_analysis_start": list(porcelain),
+            "formal_source_tree": dict(source),
             "bound_formal_source_tree_sha256": bound_source,
             "contract_path": _relative(PREREGISTRATION_PATH),
             "contract_content_sha256": _sha256(PREREGISTRATION_PATH),
-            "execution_authorization_audit_start": authorization_audit,
+            "execution_authorization_audit_start": dict(authorization_audit),
             "execution_authorization_audit_end": authorization_end,
-        },
-        "stage_ledger": final_ledger,
-        "artifact_manifest": {
-            "path": _relative(ARTIFACT_MANIFEST),
-            "raw_file_count": manifest["raw_file_count"],
-            "raw_total_size_bytes": manifest["raw_total_size_bytes"],
-            "compact_tracked_file_count": compact["file_count"],
-            "compact_tracked_total_size_bytes": compact["total_size_bytes"],
         },
         "claim_limits": contract["claim_limits"],
         "conclusion_ceiling": {
@@ -1876,11 +2659,93 @@ def analyse_final() -> dict[str, Any]:
         },
         "stop_point": "REPORT_THEN_STOP_FOR_PRO_REVIEW",
     }
-    _write_json(ARTIFACT_MANIFEST, manifest)
-    _write_json(REPORT_JSON, report)
-    REPORT_MD.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_MD.write_text(_markdown(report), encoding="utf-8")
-    return report
+    return runs, final_ledger, report_base
+
+
+def analyse_final() -> dict[str, Any]:
+    """Run future-only S3 analysis and commit evidence as one recoverable stage."""
+
+    contract = _contract()
+    authorization_audit = execution_authorization_audit()
+    if not authorization_audit["gate_pass"]:
+        failed = [
+            name for name, passed in authorization_audit["gates"].items() if not passed
+        ]
+        raise D3AnalysisPreconditionError(
+            "D3 final analysis lacks an exact Pro authorization binding: "
+            + json.dumps(failed, ensure_ascii=False)
+        )
+    publication_precondition = _s3_publication_precondition_audit()
+    if not publication_precondition["gate_pass"]:
+        raise D3AnalysisPreconditionError(
+            "D3 S3 publication precondition rejected; stale or partial output "
+            "must not be reused: "
+            + json.dumps(publication_precondition, ensure_ascii=False)
+        )
+    branch = _git("branch", "--show-current")
+    head = _git("rev-parse", "HEAD")
+    porcelain = _git("status", "--porcelain=v1", "--untracked-files=all").splitlines()
+    source = dict(source_tree_identity(FORMAL_ROOT))
+    bound_source = str(contract["formal_source_contract"]["required_tree_sha256"])
+    if branch != "main" or porcelain:
+        raise D3AnalysisPreconditionError(
+            "D3 final analysis requires a clean main worktree"
+        )
+    if source.get("value") != bound_source:
+        raise D3AnalysisPreconditionError(
+            "formal source tree no longer matches the D3 binding"
+        )
+    s0 = _json_object(S0_PATH)
+    s0_report_audit = audit_s0_report(
+        s0,
+        protocol_id=PROTOCOL_ID,
+        expected_commit=head,
+        expected_action=STAGE_ACTIONS["S0"],
+        expected_description=STAGE_DESCRIPTIONS["S0"],
+        expected_status="D3_S0_IDENTITY_CONFIG_IMPLEMENTATION_AND_FRESH_EVIDENCE_GATE_PASS",
+        expected_case_ids=EXPECTED_CASES,
+    )
+    if not s0_report_audit["gate_pass"]:
+        raise D3AnalysisPreconditionError(
+            "D3 S0 identity/fresh-evidence gate is invalid"
+        )
+    raw_ledger = _json_object(RAW_LEDGER_PATH)
+    ledger_audit = _validate_preanalysis_ledger(raw_ledger, execution_commit=head)
+    if not ledger_audit["gate_pass"]:
+        raise D3AnalysisPreconditionError(
+            "D3 preanalysis stage ledger semantic audit failed"
+        )
+    try:
+        runs, final_ledger, report_base = _prepare_s3_analysis(
+            contract=contract,
+            s0=s0,
+            raw_ledger=raw_ledger,
+            branch=branch,
+            head=head,
+            porcelain=porcelain,
+            source=source,
+            bound_source=bound_source,
+            authorization_audit=authorization_audit,
+        )
+    except Exception as exc:
+        try:
+            _record_s3_failure(raw_ledger, exc, execution_commit=head)
+        except Exception as failure_exc:
+            raise D3AnalysisError(
+                "D3 S3 analysis failed; failure commit also failed: "
+                f"primary={type(exc).__name__}: {exc}; "
+                f"recovery={type(failure_exc).__name__}: {failure_exc}"
+            ) from failure_exc
+        raise
+    return _commit_s3_publication_or_failure(
+        runs=runs,
+        raw_ledger=raw_ledger,
+        final_ledger=final_ledger,
+        report_base=report_base,
+        execution_commit=head,
+        authorization_audit=authorization_audit,
+        formal_source=source,
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:

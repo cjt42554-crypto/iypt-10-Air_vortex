@@ -79,7 +79,6 @@ from airvortex.io.archive import git_revision_identity, source_tree_identity
 from airvortex.io.config_io import canonical_json_bytes, read_json_strict
 from airvortex.numerics.cartesian3d import ImmersedCartesianGrid
 from airvortex.numerics.projection3d_gpu import probe_gpu_projection
-
 from d3_stage_machine import (
     audit_s0_report,
 )

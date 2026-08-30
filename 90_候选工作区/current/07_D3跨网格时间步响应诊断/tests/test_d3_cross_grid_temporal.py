@@ -21,10 +21,9 @@ if str(FORMAL_SOURCE) not in sys.path:
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
-from airvortex.io.config_io import StrictJSONError
-
 import analyse_d3_cross_grid_temporal as analyser
 import run_d3_cross_grid_temporal as runner
+from airvortex.io.config_io import StrictJSONError
 
 
 def _metric_flags(**overrides: bool) -> dict[str, object]:
@@ -121,6 +120,142 @@ def _valid_s0_report(commit: str) -> dict[str, Any]:
             "time_steps_advanced": 0,
         },
     }
+
+
+def _s3_path_patches(root: Path) -> tuple[Any, ...]:
+    artifacts = root / "artifacts"
+    raw = artifacts / "runs"
+    evidence = artifacts / "evidence"
+    reports = root / "reports"
+    return (
+        patch.object(analyser, "RAW_ROOT", raw),
+        patch.object(analyser, "S0_PATH", raw / "s0.json"),
+        patch.object(analyser, "RAW_LEDGER_PATH", raw / "stage_ledger.json"),
+        patch.object(analyser, "FAILURE_PATH", raw / "execution_failure.json"),
+        patch.object(analyser, "REPORT_JSON", reports / "report.json"),
+        patch.object(analyser, "REPORT_MD", reports / "report.md"),
+        patch.object(analyser, "ARTIFACT_MANIFEST", artifacts / "manifest.json"),
+        patch.object(analyser, "EVIDENCE_ROOT", evidence),
+        patch.object(analyser, "TRACKED_LEDGER", evidence / "stage_ledger.json"),
+        patch.object(
+            analyser,
+            "S3_TRANSACTION_RECORD",
+            evidence / "s3_publication_transaction.json",
+        ),
+        patch.object(
+            analyser,
+            "S3_TRANSACTION_ROOT",
+            raw / ".s3_publication_transaction",
+        ),
+        patch.object(
+            analyser,
+            "S3_RAW_LEDGER_COMMIT_TEMP",
+            raw / ".stage_ledger.s3-commit.tmp",
+        ),
+    )
+
+
+def _s3_transaction_fixture(
+    root: Path,
+    *,
+    commit: str,
+) -> tuple[
+    dict[str, Any],
+    dict[str, Any],
+    dict[str, Any],
+    dict[str, Any],
+    dict[str, Any],
+    dict[str, Any],
+]:
+    analyser.RAW_ROOT.mkdir(parents=True, exist_ok=False)
+    analyser._write_json(analyser.S0_PATH, {"fixture": "s0"})
+    runs: dict[str, Any] = {}
+    for case_id in analyser.EXPECTED_CASES:
+        case_root = analyser.RAW_ROOT / "cases" / case_id
+        archive = case_root / "archive"
+        analyser._write_json(case_root / "case_summary.json", {"case": case_id})
+        for name in ("config.json", "result.json", "provenance.json", "manifest.json"):
+            analyser._write_json(archive / name, {"case": case_id, "name": name})
+        (archive / "timeseries.csv").write_text("time_s\n0.0\n", encoding="utf-8")
+        runs[case_id] = SimpleNamespace(archive_path=archive)
+    stages: list[dict[str, Any]] = []
+    for stage in analyser.STAGE_ORDER:
+        if stage == "S3":
+            disposition = "NOT_EXECUTED"
+            status = "NOT_EXECUTED"
+            evidence: list[str] = []
+        else:
+            disposition = "EXECUTED"
+            status = "PASS"
+            evidence = analyser._stage_pass_evidence(stage)
+        stages.append(
+            {
+                "stage": stage,
+                "action": analyser.STAGE_ACTIONS[stage],
+                "human_description": analyser.STAGE_DESCRIPTIONS[stage],
+                "disposition": disposition,
+                "status": status,
+                "cases": list(analyser.STAGE_CASES.get(stage, ())),
+                "evidence": evidence,
+            }
+        )
+    raw_ledger = {
+        "schema_version": 2,
+        "protocol_id": analyser.PROTOCOL_ID,
+        "execution_commit": commit,
+        "stages": stages,
+        "failed_stages": [],
+        "unexecuted_stages": ["S3"],
+        "terminal_state": "IN_PROGRESS",
+        "failure_record": None,
+        "automatic_follow_on": "PROHIBITED",
+    }
+    analyser._write_json(analyser.RAW_LEDGER_PATH, raw_ledger)
+    label = "D3_TEST_LABEL"
+    final_ledger = analyser._final_stage_ledger(raw_ledger, label=label)
+    metric = {
+        "eta_delta_1": 0.0,
+        "rho_common_1": 0.0,
+        "rho_common_2": 0.0,
+        "gamma_G6": 0.0,
+        "gamma_G9": 0.0,
+        "gamma_delta": 0.0,
+    }
+    report_base = {
+        "schema_version": 1,
+        "protocol_id": analyser.PROTOCOL_ID,
+        "status": label,
+        "gate_pass": True,
+        "classification": {"fixture": True},
+        "full_window_metrics": {name: deepcopy(metric) for name in analyser.PRIMARY},
+        "diagnostic_windows": {},
+        "binary_events": {},
+        "hard_gate_audits": {
+            case_id: {"gate_pass": True} for case_id in analyser.EXPECTED_CASES
+        },
+        "independent_initial_identity_audit": {"gate_pass": True},
+        "diagnostic_window_initial_value_policy": (
+            "GLOBAL_Q_T_MINUS_Q_0_BEFORE_WINDOW_SLICE"
+        ),
+        "identity": {
+            "branch": "main",
+            "execution_commit": commit,
+            "worktree_porcelain_at_analysis_start": [],
+        },
+        "claim_limits": {},
+        "conclusion_ceiling": {},
+        "stop_point": "REPORT_THEN_STOP_FOR_PRO_REVIEW",
+    }
+    authorization = {
+        "observed": {
+            "authorization_content_sha256": "a" * 64,
+            "authorization_git_blob_sha": "b" * 40,
+            "ruling_content_sha256": "c" * 64,
+            "ruling_git_blob_sha": "d" * 40,
+        }
+    }
+    source = {"available": True, "value": "e" * 64}
+    return raw_ledger, final_ledger, report_base, authorization, source, runs
 
 
 class FrozenContractAndConfigurationTests(unittest.TestCase):
@@ -1581,6 +1716,251 @@ class IdentityFreshnessAndLedgerTests(unittest.TestCase):
                     runner._json_object(failure_path)["stage"],
                     "S1",
                 )
+
+
+class S3PublicationTransactionTests(unittest.TestCase):
+    @staticmethod
+    def _commit_fixture(
+        fixture: tuple[
+            dict[str, Any],
+            dict[str, Any],
+            dict[str, Any],
+            dict[str, Any],
+            dict[str, Any],
+            dict[str, Any],
+        ],
+        *,
+        commit: str,
+    ) -> dict[str, Any]:
+        raw_ledger, final_ledger, report_base, authorization, source, runs = fixture
+        return analyser._commit_s3_publication_or_failure(
+            runs=runs,
+            raw_ledger=raw_ledger,
+            final_ledger=final_ledger,
+            report_base=report_base,
+            execution_commit=commit,
+            authorization_audit=authorization,
+            formal_source=source,
+        )
+
+    def test_success_publication_commits_raw_s3_ledger_last(self) -> None:
+        commit = "a" * 40
+        with tempfile.TemporaryDirectory(dir=HERE) as temporary_directory:
+            root = Path(temporary_directory)
+            with ExitStack() as stack:
+                for manager in _s3_path_patches(root):
+                    stack.enter_context(manager)
+                fixture = _s3_transaction_fixture(root, commit=commit)
+                raw_ledger = fixture[0]
+                observed_points: list[str] = []
+                ledger_at_commit_point: list[dict[str, Any]] = []
+
+                def observe(name: str) -> None:
+                    observed_points.append(name)
+                    if name == "before_raw_ledger_commit":
+                        ledger_at_commit_point.append(
+                            analyser._json_object(analyser.RAW_LEDGER_PATH)
+                        )
+
+                with patch.object(
+                    analyser,
+                    "_s3_fault_injection_point",
+                    side_effect=observe,
+                ):
+                    report = self._commit_fixture(fixture, commit=commit)
+
+                self.assertEqual(report["status"], "D3_TEST_LABEL")
+                self.assertEqual(observed_points[-1], "before_raw_ledger_commit")
+                self.assertEqual(ledger_at_commit_point, [raw_ledger])
+                self.assertTrue(
+                    analyser.audit_committed_s3_success(execution_commit=commit)[
+                        "gate_pass"
+                    ]
+                )
+
+    def test_each_s3_publication_fault_commits_one_coherent_failure(self) -> None:
+        commit = "a" * 40
+        fault_points = (
+            "before_first_compact_copy",
+            "after_compact_copy:3",
+            "before_tracked_ledger_write",
+            "after_compact_evidence_staged",
+            "before_manifest_generation",
+            "before_manifest_write",
+            "before_report_json_write",
+            "before_report_markdown_write",
+            "before_publish_evidence",
+            "before_publish_manifest",
+            "before_publish_reports",
+            "before_raw_ledger_temp_rename",
+            "before_staging_cleanup",
+            "before_raw_ledger_commit",
+        )
+        for fault_point in fault_points:
+            with (
+                self.subTest(fault_point=fault_point),
+                tempfile.TemporaryDirectory(dir=HERE) as temporary_directory,
+            ):
+                root = Path(temporary_directory)
+                with ExitStack() as stack:
+                    for manager in _s3_path_patches(root):
+                        stack.enter_context(manager)
+                    fixture = _s3_transaction_fixture(root, commit=commit)
+
+                    def inject(name: str, *, selected: str = fault_point) -> None:
+                        if name == selected:
+                            raise OSError(f"injected S3 fault: {selected}")
+
+                    with (
+                        patch.object(
+                            analyser,
+                            "_s3_fault_injection_point",
+                            side_effect=inject,
+                        ),
+                        self.assertRaises(OSError),
+                    ):
+                        self._commit_fixture(fixture, commit=commit)
+
+                    self.assertTrue(
+                        analyser.audit_committed_s3_failure(execution_commit=commit)[
+                            "gate_pass"
+                        ]
+                    )
+
+    def test_rollback_cleanup_first_failure_is_retried(self) -> None:
+        commit = "a" * 40
+        with tempfile.TemporaryDirectory(dir=HERE) as temporary_directory:
+            root = Path(temporary_directory)
+            with ExitStack() as stack:
+                for manager in _s3_path_patches(root):
+                    stack.enter_context(manager)
+                fixture = _s3_transaction_fixture(root, commit=commit)
+                injected = {
+                    "before_report_json_write",
+                    "before_rollback_cleanup",
+                }
+
+                def inject(name: str) -> None:
+                    if name in injected:
+                        raise OSError(f"injected S3 fault: {name}")
+
+                with (
+                    patch.object(
+                        analyser,
+                        "_s3_fault_injection_point",
+                        side_effect=inject,
+                    ),
+                    self.assertRaises(OSError),
+                ):
+                    self._commit_fixture(fixture, commit=commit)
+
+                self.assertTrue(
+                    analyser.audit_committed_s3_failure(execution_commit=commit)[
+                        "gate_pass"
+                    ]
+                )
+
+    def test_failure_commit_fault_restores_pre_s3_state(self) -> None:
+        commit = "a" * 40
+        for recovery_fault in (
+            "before_failure_marker_write",
+            "before_failure_ledger_write",
+        ):
+            with (
+                self.subTest(recovery_fault=recovery_fault),
+                tempfile.TemporaryDirectory(dir=HERE) as temporary_directory,
+            ):
+                root = Path(temporary_directory)
+                with ExitStack() as stack:
+                    for manager in _s3_path_patches(root):
+                        stack.enter_context(manager)
+                    fixture = _s3_transaction_fixture(root, commit=commit)
+                    before = analyser.RAW_LEDGER_PATH.read_bytes()
+                    injected = {"before_report_json_write", recovery_fault}
+
+                    def inject(
+                        name: str,
+                        *,
+                        selected: frozenset[str] = frozenset(injected),
+                    ) -> None:
+                        if name in selected:
+                            raise OSError(f"injected S3 fault: {name}")
+
+                    with (
+                        patch.object(
+                            analyser,
+                            "_s3_fault_injection_point",
+                            side_effect=inject,
+                        ),
+                        self.assertRaises(analyser.D3AnalysisError),
+                    ):
+                        self._commit_fixture(fixture, commit=commit)
+
+                    self.assertEqual(analyser.RAW_LEDGER_PATH.read_bytes(), before)
+                    self.assertFalse(analyser.FAILURE_PATH.exists())
+                    self.assertFalse(analyser.EVIDENCE_ROOT.exists())
+                    self.assertFalse(analyser.ARTIFACT_MANIFEST.exists())
+                    self.assertFalse(analyser.REPORT_JSON.parent.exists())
+                    self.assertFalse(analyser.S3_TRANSACTION_ROOT.exists())
+                    self.assertFalse(analyser.S3_RAW_LEDGER_COMMIT_TEMP.exists())
+
+    def test_stale_s3_output_precondition_is_side_effect_free(self) -> None:
+        commit = "a" * 40
+        with tempfile.TemporaryDirectory(dir=HERE) as temporary_directory:
+            root = Path(temporary_directory)
+            with ExitStack() as stack:
+                for manager in _s3_path_patches(root):
+                    stack.enter_context(manager)
+                _s3_transaction_fixture(root, commit=commit)
+                before = analyser.RAW_LEDGER_PATH.read_bytes()
+                analyser.EVIDENCE_ROOT.mkdir(parents=True)
+                sentinel = analyser.EVIDENCE_ROOT / "stale.json"
+                sentinel.write_text('{"stale":true}\n', encoding="utf-8")
+                sentinel_before = sentinel.read_bytes()
+
+                audit = analyser._s3_publication_precondition_audit()
+
+                self.assertFalse(audit["gate_pass"])
+                self.assertFalse(audit["gates"]["all_canonical_targets_absent"])
+                self.assertEqual(analyser.RAW_LEDGER_PATH.read_bytes(), before)
+                self.assertEqual(sentinel.read_bytes(), sentinel_before)
+                self.assertFalse(analyser.S3_TRANSACTION_ROOT.exists())
+                self.assertFalse(analyser.S3_RAW_LEDGER_COMMIT_TEMP.exists())
+
+    def test_concurrent_unknown_output_is_not_removed_or_marked_failed(self) -> None:
+        commit = "a" * 40
+        with tempfile.TemporaryDirectory(dir=HERE) as temporary_directory:
+            root = Path(temporary_directory)
+            with ExitStack() as stack:
+                for manager in _s3_path_patches(root):
+                    stack.enter_context(manager)
+                fixture = _s3_transaction_fixture(root, commit=commit)
+                before = analyser.RAW_LEDGER_PATH.read_bytes()
+                sentinel = analyser.EVIDENCE_ROOT / "external.json"
+
+                def inject(name: str) -> None:
+                    if name == "before_publish_evidence":
+                        sentinel.parent.mkdir(parents=True)
+                        sentinel.write_text('{"external":true}\n', encoding="utf-8")
+                        raise OSError("injected concurrent output")
+
+                with (
+                    patch.object(
+                        analyser,
+                        "_s3_fault_injection_point",
+                        side_effect=inject,
+                    ),
+                    self.assertRaises(analyser.D3AnalysisError),
+                ):
+                    self._commit_fixture(fixture, commit=commit)
+
+                self.assertEqual(analyser.RAW_LEDGER_PATH.read_bytes(), before)
+                self.assertEqual(
+                    sentinel.read_text(encoding="utf-8"), '{"external":true}\n'
+                )
+                self.assertFalse(analyser.FAILURE_PATH.exists())
+                self.assertFalse(analyser.S3_TRANSACTION_ROOT.exists())
+                self.assertFalse(analyser.S3_RAW_LEDGER_COMMIT_TEMP.exists())
 
 
 if __name__ == "__main__":
