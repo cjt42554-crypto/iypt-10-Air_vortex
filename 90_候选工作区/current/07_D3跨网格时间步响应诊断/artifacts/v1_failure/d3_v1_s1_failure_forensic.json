@@ -1,0 +1,416 @@
+{
+  "audit_id": "D3_V1_S1_FAILURE_FORENSIC_V1",
+  "audit_script_sha256": "dae37bb3c4c5a75dbdbf9e2ec6099de0dd6170cbe9b80ed280b9630b4ae0c1db",
+  "conclusion": {
+    "failure_cause": "CANDIDATE_OUTPUT_SCHEDULE_FLOAT_ACCUMULATION_DEFECT",
+    "g6_dt0_reuse": "PROHIBITED",
+    "scientific_classification": "NOT_FORMED",
+    "v1_failure": "UPHELD"
+  },
+  "confirmed_absent_paths": [
+    "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/cases/G6_DT1",
+    "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/cases/G6_DT2",
+    "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/cases/G9_DT0",
+    "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/cases/G9_DT1",
+    "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/cases/G9_DT2",
+    "90_候选工作区/current/07_D3跨网格时间步响应诊断/reports/d3_cross_grid_temporal_report.json",
+    "90_候选工作区/current/07_D3跨网格时间步响应诊断/reports/d3_cross_grid_temporal_report.md",
+    "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/d3_cross_grid_temporal_manifest.json",
+    "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/evidence",
+    "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/.s3_publication_transaction",
+    "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/.stage_ledger.s3-commit.tmp"
+  ],
+  "execution_commit": "90ed5c1019d8265f6e9730ff8a2d36be61deec8b",
+  "frame_time_identity": [
+    {
+      "bitwise_equal": true,
+      "index": 0,
+      "observed": {
+        "decimal": "0.0",
+        "float_hex": "0x0.0p+0",
+        "uint64": 0
+      },
+      "registered": {
+        "decimal": "0.0",
+        "float_hex": "0x0.0p+0",
+        "uint64": 0
+      },
+      "ulp_distance": 0
+    },
+    {
+      "bitwise_equal": true,
+      "index": 1,
+      "observed": {
+        "decimal": "0.001",
+        "float_hex": "0x1.0624dd2f1a9fcp-10",
+        "uint64": 4562254508917369340
+      },
+      "registered": {
+        "decimal": "0.001",
+        "float_hex": "0x1.0624dd2f1a9fcp-10",
+        "uint64": 4562254508917369340
+      },
+      "ulp_distance": 0
+    },
+    {
+      "bitwise_equal": true,
+      "index": 2,
+      "observed": {
+        "decimal": "0.002",
+        "float_hex": "0x1.0624dd2f1a9fcp-9",
+        "uint64": 4566758108544739836
+      },
+      "registered": {
+        "decimal": "0.002",
+        "float_hex": "0x1.0624dd2f1a9fcp-9",
+        "uint64": 4566758108544739836
+      },
+      "ulp_distance": 0
+    },
+    {
+      "bitwise_equal": true,
+      "index": 3,
+      "observed": {
+        "decimal": "0.003",
+        "float_hex": "0x1.89374bc6a7efap-9",
+        "uint64": 4569063951553953530
+      },
+      "registered": {
+        "decimal": "0.003",
+        "float_hex": "0x1.89374bc6a7efap-9",
+        "uint64": 4569063951553953530
+      },
+      "ulp_distance": 0
+    },
+    {
+      "bitwise_equal": true,
+      "index": 4,
+      "observed": {
+        "decimal": "0.004",
+        "float_hex": "0x1.0624dd2f1a9fcp-8",
+        "uint64": 4571261708172110332
+      },
+      "registered": {
+        "decimal": "0.004",
+        "float_hex": "0x1.0624dd2f1a9fcp-8",
+        "uint64": 4571261708172110332
+      },
+      "ulp_distance": 0
+    },
+    {
+      "bitwise_equal": true,
+      "index": 5,
+      "observed": {
+        "decimal": "0.005",
+        "float_hex": "0x1.47ae147ae147bp-8",
+        "uint64": 4572414629676717179
+      },
+      "registered": {
+        "decimal": "0.005",
+        "float_hex": "0x1.47ae147ae147bp-8",
+        "uint64": 4572414629676717179
+      },
+      "ulp_distance": 0
+    },
+    {
+      "bitwise_equal": true,
+      "index": 6,
+      "observed": {
+        "decimal": "0.006",
+        "float_hex": "0x1.89374bc6a7efap-8",
+        "uint64": 4573567551181324026
+      },
+      "registered": {
+        "decimal": "0.006",
+        "float_hex": "0x1.89374bc6a7efap-8",
+        "uint64": 4573567551181324026
+      },
+      "ulp_distance": 0
+    },
+    {
+      "bitwise_equal": true,
+      "index": 7,
+      "observed": {
+        "decimal": "0.007",
+        "float_hex": "0x1.cac083126e979p-8",
+        "uint64": 4574720472685930873
+      },
+      "registered": {
+        "decimal": "0.007",
+        "float_hex": "0x1.cac083126e979p-8",
+        "uint64": 4574720472685930873
+      },
+      "ulp_distance": 0
+    },
+    {
+      "bitwise_equal": true,
+      "index": 8,
+      "observed": {
+        "decimal": "0.008",
+        "float_hex": "0x1.0624dd2f1a9fcp-7",
+        "uint64": 4575765307799480828
+      },
+      "registered": {
+        "decimal": "0.008",
+        "float_hex": "0x1.0624dd2f1a9fcp-7",
+        "uint64": 4575765307799480828
+      },
+      "ulp_distance": 0
+    },
+    {
+      "bitwise_equal": false,
+      "index": 9,
+      "observed": {
+        "decimal": "0.009000000000000001",
+        "float_hex": "0x1.26e978d4fdf3cp-7",
+        "uint64": 4576341768551784252
+      },
+      "registered": {
+        "decimal": "0.009",
+        "float_hex": "0x1.26e978d4fdf3bp-7",
+        "uint64": 4576341768551784251
+      },
+      "ulp_distance": 1
+    },
+    {
+      "bitwise_equal": true,
+      "index": 10,
+      "observed": {
+        "decimal": "0.01",
+        "float_hex": "0x1.47ae147ae147bp-7",
+        "uint64": 4576918229304087675
+      },
+      "registered": {
+        "decimal": "0.01",
+        "float_hex": "0x1.47ae147ae147bp-7",
+        "uint64": 4576918229304087675
+      },
+      "ulp_distance": 0
+    }
+  ],
+  "gate_pass": true,
+  "gates": {
+    "absent::90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/d3_cross_grid_temporal_manifest.json": true,
+    "absent::90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/evidence": true,
+    "absent::90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/.s3_publication_transaction": true,
+    "absent::90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/.stage_ledger.s3-commit.tmp": true,
+    "absent::90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/cases/G6_DT1": true,
+    "absent::90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/cases/G6_DT2": true,
+    "absent::90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/cases/G9_DT0": true,
+    "absent::90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/cases/G9_DT1": true,
+    "absent::90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/cases/G9_DT2": true,
+    "absent::90_候选工作区/current/07_D3跨网格时间步响应诊断/reports/d3_cross_grid_temporal_report.json": true,
+    "absent::90_候选工作区/current/07_D3跨网格时间步响应诊断/reports/d3_cross_grid_temporal_report.md": true,
+    "case_completed_before_quality_failure": true,
+    "case_gate_failed": true,
+    "case_id_exact": true,
+    "case_partial_path_exact": true,
+    "case_partial_sha256_exact": true,
+    "case_quality_gate_failed": true,
+    "case_stage_exact": true,
+    "case_status_exact": true,
+    "case_summary_execution_commit_exact": true,
+    "case_summary_protocol_id_exact": true,
+    "case_summary_regular_file": true,
+    "case_summary_sha256_exact": true,
+    "failure_command_exact": true,
+    "failure_execution_commit_exact": true,
+    "failure_protocol_id_exact": true,
+    "failure_regular_file": true,
+    "failure_sha256_exact": true,
+    "failure_stage_exact": true,
+    "failure_status_exact": true,
+    "failure_type_exact": true,
+    "forensic_output_root_contains_only_registered_files": true,
+    "frame_time_all_finite": true,
+    "frame_time_member_present_once": true,
+    "frame_time_shape_exact": true,
+    "index_9_observed_hex_exact": true,
+    "index_9_registered_hex_exact": true,
+    "index_9_ulp_distance_one": true,
+    "ledger_automatic_follow_on_prohibited": true,
+    "ledger_failed_stages_exact": true,
+    "ledger_failure_record_exact": true,
+    "ledger_terminal_state_exact": true,
+    "ledger_unexecuted_stages_exact": true,
+    "native_output_times_exact_is_only_failed_quality_gate": true,
+    "only_g6_dt0_case_directory_present": true,
+    "only_index_9_differs": true,
+    "partial_member_names_unique": true,
+    "partial_npz_regular_file": true,
+    "partial_npz_sha256_exact": true,
+    "raw_hashes_unchanged_during_audit": true,
+    "s0_disposition_exact": true,
+    "s0_execution_commit_exact": true,
+    "s0_gate_pass": true,
+    "s0_protocol_id_exact": true,
+    "s0_regular_file": true,
+    "s0_sha256_exact": true,
+    "s0_stage_exact": true,
+    "s0_status_exact": true,
+    "s1_disposition_exact": true,
+    "s1_status_exact": true,
+    "s2_disposition_exact": true,
+    "s2_status_exact": true,
+    "s3_disposition_exact": true,
+    "s3_status_exact": true,
+    "stage_ledger_execution_commit_exact": true,
+    "stage_ledger_protocol_id_exact": true,
+    "stage_ledger_regular_file": true,
+    "stage_ledger_sha256_exact": true,
+    "stage_set_exact": true,
+    "subsequent_stages_not_executed": true,
+    "v1_preregistration_sha256_exact": true,
+    "v1_protocol_id_exact": true,
+    "v1_registered_times_bitwise_exact": true,
+    "v1_registered_times_shape_exact": true
+  },
+  "mismatch_indices": [
+    9
+  ],
+  "partial_npz": {
+    "arrays_read": [
+      "frame_time_s"
+    ],
+    "member_count": 71,
+    "member_names": [
+      "state_u_x_face",
+      "state_u_y_face",
+      "state_u_z_face",
+      "state_phase",
+      "state_pressure_pa",
+      "frame_time_s",
+      "grid_bar_mask",
+      "grid_active_mask",
+      "diagnostic_step_time",
+      "diagnostic_step_dt",
+      "diagnostic_step_initial_attempt_dt",
+      "diagnostic_step_time_limiter_code",
+      "diagnostic_step_cfl_retry_count",
+      "diagnostic_step_starting_cfl",
+      "diagnostic_step_pre_source_cfl",
+      "diagnostic_step_pre_projection_cfl",
+      "diagnostic_step_post_projection_cfl",
+      "diagnostic_step_maximum_rejected_cfl",
+      "diagnostic_step_momentum_advection_acceleration",
+      "diagnostic_step_viscous_acceleration",
+      "diagnostic_step_boundary_acceleration",
+      "diagnostic_step_surface_tension_acceleration",
+      "diagnostic_step_rotating_frame_acceleration",
+      "diagnostic_step_gravity_acceleration",
+      "diagnostic_step_pressure_projection_acceleration",
+      "diagnostic_step_clip",
+      "diagnostic_step_repair",
+      "diagnostic_step_divergence",
+      "diagnostic_step_pressure_residual",
+      "diagnostic_step_pressure_iterations",
+      "observable_surface_profile_m",
+      "observable_surface_profile_minimum_m",
+      "observable_surface_profile_maximum_m",
+      "observable_surface_depth",
+      "observable_surface_depth_m",
+      "observable_funnel_depth_m",
+      "observable_nominal_central_depression_m",
+      "observable_surface_profile_range_m",
+      "observable_surface_min_z_m",
+      "observable_min_gap_to_bar",
+      "observable_min_gap_to_bar_m",
+      "observable_minimum_gap_m",
+      "observable_actual_bar_rpm",
+      "observable_equivalent_bar_rpm",
+      "observable_bar_angle_rad",
+      "observable_liquid_volume_m3",
+      "observable_liquid_volume_error_m3",
+      "observable_liquid_volume_error",
+      "observable_liquid_mass_error_relative",
+      "observable_liquid_volume_balance_error_relative",
+      "observable_max_divergence",
+      "observable_divergence_before_projection",
+      "observable_pressure_residual",
+      "observable_pressure_iterations",
+      "observable_cfl_advective",
+      "observable_cfl_viscous",
+      "observable_cfl_capillary",
+      "observable_rotation_increment_rad",
+      "observable_kinetic_energy_j",
+      "observable_kinetic_energy_lab_j",
+      "observable_kinetic_energy_rotating_j",
+      "observable_angular_momentum_z_kg_m2_s",
+      "observable_viscous_dissipation_w",
+      "observable_axisymmetry_error",
+      "observable_bar_gas_contact_area_m2",
+      "observable_connection_minimum_throat_radius_m",
+      "observable_connection_required_throat_radius_m",
+      "observable_first_contact_proxy",
+      "observable_connection_candidate",
+      "observable_finite_channel_candidate",
+      "observable_isolated_gas_volume_m3"
+    ],
+    "path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/cases/G6_DT0/partial.npz"
+  },
+  "pro_ruling_commit": "b3dcc73a8d57290d372f7d8c41dbd721a01dccaf",
+  "protocol_id": "D3_HF3D_CROSS_GRID_TEMPORAL_RESPONSE_V1",
+  "raw_files": [
+    {
+      "path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/s0_identity_config_fresh_evidence_gate.json",
+      "role": "s0",
+      "sha256": "e50905260c9d7732ef68e2cf76b4ed661b19383b4f92ade409463e58b63244b2",
+      "size_bytes": 90783
+    },
+    {
+      "path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/stage_ledger.json",
+      "role": "stage_ledger",
+      "sha256": "46ff32a79a62dd6cb544a04a7377d55888dff75e313f650bd97c32cf2df62afa",
+      "size_bytes": 2090
+    },
+    {
+      "path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/execution_failure.json",
+      "role": "failure",
+      "sha256": "d63bd745ee455bfaaba563b6b348bb7f7c822d5f6d33977c6f0f02daadb7def5",
+      "size_bytes": 806
+    },
+    {
+      "path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/cases/G6_DT0/case_summary.json",
+      "role": "case_summary",
+      "sha256": "15b2e76a57ad00dd93eb7a6652f4adf697f48c9dc772f57f666a771a537ca27a",
+      "size_bytes": 59565
+    },
+    {
+      "path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/runs/cases/G6_DT0/partial.npz",
+      "role": "partial_npz",
+      "sha256": "d1b5ae2723ec60619d20fe2ce7d8d8010941083167fe1d71554990b898d9f3ed",
+      "size_bytes": 17987661
+    }
+  ],
+  "raw_hashes_unchanged_during_audit": true,
+  "schema_version": 1,
+  "scope": {
+    "partial_npz_arrays_read": [
+      "frame_time_s"
+    ],
+    "partial_npz_other_arrays_read": false,
+    "physical_observables_reported": false,
+    "purpose": "freeze V1 S1 fail-closed evidence before D3R1 implementation",
+    "scientific_classification_supported": false
+  },
+  "stage_state": {
+    "S0": {
+      "disposition": "EXECUTED",
+      "status": "PASS"
+    },
+    "S1": {
+      "disposition": "FAILED_STOPPED",
+      "status": "D3_INCONCLUSIVE_FAIL_CLOSED"
+    },
+    "S2": {
+      "disposition": "NOT_EXECUTED",
+      "status": "NOT_EXECUTED"
+    },
+    "S3": {
+      "disposition": "NOT_EXECUTED",
+      "status": "NOT_EXECUTED"
+    }
+  },
+  "status": "D3_V1_S1_FAILURE_FORENSIC_GATE_PASS",
+  "subsequent_stages_executed": false
+}
