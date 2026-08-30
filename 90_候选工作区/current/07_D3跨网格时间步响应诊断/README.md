@@ -1,44 +1,49 @@
-# D3 跨网格时间步响应诊断
+# D3 跨网格时间步响应诊断与 D3R1 修复
 
 状态：
 
-- 静态实现：`D3_V2_AUTHORIZATION_PATH_AUDIT_PATCH_READY_FOR_PRO_REVIEW`；
-- 动态执行：只以独立授权对象及其精确绑定机器审计为准；本 README 不缓存授权状态。
+- D3 V1：`D3_V1_INCONCLUSIVE_FAIL_CLOSED_AT_S1_G6_DT0_NATIVE_OUTPUT_TIMES_EXACT_GATE`；
+- V1 失败取证：`PASS`，旧运行不得追认、复用或重跑；
+- D3R1：仅允许结果盲候选实现、测试和零时间步静态审计；
+- D3R1 动态执行：`NOT_AUTHORIZED`，S0、S1、S2、S3 均不得运行。
 
-## 目标
-
-D3 检验正式 G0、`6/9` 格和 `0–0.010 s` 短窗内，两个网格对共同时间步减半的响应是否不同，以及这种差分时间步响应是否实质污染了原 Q1R3 的 `6→9` 空间差。
-
-D3 不建立数值资格，不修改正式 HF3D，不预测长期稳态或实验装置。
-
-## 冻结入口
-
-科学裁决：
+静态复核状态不缓存于本 README，以以下机器证据中的 `gate_pass` 为准：
 
 ```text
-90_候选工作区/current/09_D2V2执行结果独立复核与D3科学裁决.md
+artifacts/r1/d3_implementation_static_review.json
 ```
 
-机器可读合同：
+## 目标与结论边界
+
+D3 检验正式 G0、`6/9` 格和 `0--0.010 s` 短窗内，两个网格对共同时间步减半的响应是否不同，以及这种差分时间步响应是否实质污染了原 Q1R3 的 `6→9` 空间差。
+
+D3R1 只修复候选输出时刻调度身份并隔离新旧证据根，不改变科学问题、物理输入、六算例矩阵、三个时间步、冻结输出时刻、观测量、公式、阈值、分类优先级或结论上限。
+
+D3 和 D3R1 都不是数值资格 campaign，不撤销 Q1R3 空间阶段失败闭锁，不修改正式 HF3D，不证明物理或实验正确，也不预测长期稳态、临界转速或实验装置。
+
+## 冻结裁决与合同
+
+Pro 裁决：
 
 ```text
-90_候选工作区/current/07_D3跨网格时间步响应诊断/d3_cross_grid_temporal_preregistration.json
+90_候选工作区/current/15_D3S1输出时刻硬门失败独立复核与D3R1重跑裁决.md
 ```
 
-独立执行授权对象：
+V1 合同与授权对象保持逐字节不变：
 
 ```text
-90_候选工作区/current/07_D3跨网格时间步响应诊断/d3_execution_authorization.json
+d3_cross_grid_temporal_preregistration.json
+d3_execution_authorization.json
 ```
 
-冻结预注册继续保存科学设计与“未授权”历史状态；未来执行许可只能写入独立授权对象，不能通过翻转预注册布尔值开门。
-
-基线配置：
+D3R1 自包含合同与默认拒绝授权对象：
 
 ```text
-90_候选工作区/current/01_HF3D数值资格/generated_q1r3/space_L1_6cells.json
-90_候选工作区/current/01_HF3D数值资格/generated_q1r3/space_L2_9cells.json
+d3_cross_grid_temporal_preregistration_r1.json
+d3_r1_execution_authorization.json
 ```
+
+R1 运行器和独立分析器会机器深比较 Pro 冻结的全部 V1 科学字段。任一字段漂移、旧授权误用、V1 冻结 hash 漂移、实现身份漂移、正式源码漂移或证据根混用都会失败闭锁。
 
 正式源码树 SHA-256：
 
@@ -46,13 +51,62 @@ D3 不建立数值资格，不修改正式 HF3D，不预测长期稳态或实验
 dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
 ```
 
+## V1 失败与取证边界
+
+V1 在 S1 的首个算例 `G6_DT0` 完整推进后触发冻结硬门。原生输出时刻索引 9 为 `0.009000000000000001`，冻结字面值为 `0.009`，两者相差 1 ULP；其他冻结时刻逐位相同。该失败维持有效，未形成 D3 科学分类。
+
+跟踪取证包：
+
+```text
+audit_d3_v1_s1_failure.py
+artifacts/v1_failure/d3_v1_s1_failure_forensic.json
+artifacts/v1_failure/d3_v1_s1_failure_forensic.md
+```
+
+取证只读取 `partial.npz` 的成员名和 `frame_time_s`，并核对五个冻结 V1 raw 的 SHA-256、阶段语义和后继输出缺失。V1 raw 永久保留在以下只读位置，只能做 hash 身份审计，不能作为 R1 输入：
+
+```text
+artifacts/runs/**
+```
+
+## D3R1 结果盲修复
+
+输出目标只来自合同中的冻结 `native_output_times_s` 向量：
+
+```text
+registered_times = exact float64 parsing of native_output_times_s
+next_index = 1
+next_target = registered_times[next_index]
+```
+
+运行器只推进至当前索引目标，到达现有对齐容差后把状态时刻设为该冻结向量元素，精确记录一帧，再递增整数索引。重复浮点累加、插值、跳帧和重复帧均被禁止。完成门要求 11 帧的每个 `uint64` 位模式逐项等于冻结向量。
+
+R1 与 V1 使用互不重叠的证据位置：
+
+```text
+artifacts/r1/runs/**
+artifacts/r1/evidence/**
+artifacts/r1/d3_implementation_static_review.json
+artifacts/r1/d3_cross_grid_temporal_manifest.json
+reports/r1/d3_cross_grid_temporal_report.json
+reports/r1/d3_cross_grid_temporal_report.md
+```
+
+创建任何 R1 raw 之前，运行器必须重新核对五个冻结 V1 raw hash。R1 只接受新 R1 根内、同一清洁执行提交上从零生成的六份证据。
+
 ## 已实现文件
 
 ```text
+README.md
+audit_d3_v1_s1_failure.py
+d3_cross_grid_temporal_preregistration.json
+d3_execution_authorization.json
+d3_cross_grid_temporal_preregistration_r1.json
+d3_r1_execution_authorization.json
+d3_r1_contract.py
+d3_stage_machine.py
 run_d3_cross_grid_temporal.py
 analyse_d3_cross_grid_temporal.py
-d3_stage_machine.py
-d3_execution_authorization.json
 tests/test_d3_cross_grid_temporal.py
 generated_configs/G6_DT0.json
 generated_configs/G6_DT1.json
@@ -60,10 +114,9 @@ generated_configs/G6_DT2.json
 generated_configs/G9_DT0.json
 generated_configs/G9_DT1.json
 generated_configs/G9_DT2.json
-artifacts/d3_implementation_static_review.json
 ```
 
-运行器直接导入 `02_模拟程序/src/airvortex/**` 的正式 HF3D、时间步控制器、记录器和归档器，没有复制或修改正式求解器。独立分析器不导入候选运行器，而是从预注册和正式归档读取器重新构造配置、硬门、算术与标签。
+运行器直接导入 `02_模拟程序/src/airvortex/**` 的正式 HF3D、时间步控制器、记录器和归档器，没有复制或修改正式求解器。独立分析器不导入候选运行器，而是重新读取合同、正式归档与来源身份，独立重建配置、硬门、算术、标签和发布事务。
 
 ## 六算例设计
 
@@ -77,11 +130,11 @@ G9_DT1  2.75e-6 s
 G9_DT2  1.375e-6 s
 ```
 
-六个确认性算例必须在 D3 预注册后、同一清洁执行提交上从零运行。D2 的 F6/F9/T9 只能作为提出 D3 的既有证据，不得进入 D3 分类输入。
+六个算例及其科学字段与 V1 逐值相同。未来只有在新的 Pro 精确快照授权后，才可在同一清洁执行提交上全部从零生成。D2 轨迹和 V1 raw 都不能进入 R1 分类输入。
 
-## 当前允许的复核命令
+## 当前允许的静态命令
 
-以下命令均不推进真实 HF3D 时间步。GPU 静态审计必须使用项目既有的隔离 GPU 解释器，不能以缺少 CuPy 的系统 `python3` 代替。
+以下命令不推进真实 HF3D 时间步。GPU 静态审计必须使用项目既有的隔离 GPU 解释器，不能以缺少 CuPy 的系统解释器代替。
 
 ```bash
 D3_GPU_PYTHON="90_候选工作区/current/01_HF3D数值资格/.venv-gpu/bin/python"
@@ -96,119 +149,48 @@ D3_GPU_PYTHON="90_候选工作区/current/01_HF3D数值资格/.venv-gpu/bin/pyth
 
 "$D3_GPU_PYTHON" \
   "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py" \
-  static-audit --write
+  static-audit --write --require-clean
 ```
 
-静态审计会实际完成以下非推进检查：
+零时间步静态审计包括：
 
-1. 逐算例证明配置差异不越过登记 allowlist；
-2. 重新构造六组正式网格和初态；
-3. 对同网格三层配置逐 dtype、shape 和 SHA-256 比较网格、正式 G0 掩膜与初态；
-4. 核对正式源码树哈希；
-5. 探测实际 CUDA FP64 后端；
-6. 核对 D3 raw、动态报告和最终清单尚不存在；
-7. 核对 S0–S3 唯一有序、状态组合合法、失败后不再推进，并要求每一阶段使用精确登记的证据路径；
-8. 明确记录 `time_steps_advanced = 0`。
-
-V2 还增加以下结果盲静态加固：
-
-1. 执行授权必须绑定受复核提交、预注册 blob、正式源码树和全部候选实现文件的 Git blob 与内容 SHA-256；
-2. 授权提交必须是受复核快照的唯一直接子提交，且该提交只能修改授权对象，从而避开授权文件自哈希递归；
-3. 独立分析器自行重建并逐字段比较 S0、逐算例摘要、正式 G0 归档掩膜和同网格三个时间层的初态身份，不采信运行器给出的结论布尔值；
-4. 所有可捕获的动态异常统一写入一个失败事务出口，使失败标记、阶段台账和可恢复诊断保持一致；
-5. 诊断分窗先在完整轨迹上计算 `Q(t)-Q(0)`，再切取登记窗口；后半窗口不会重新减去 `Q(0.005 s)`。
-
-补充状态机补丁还固定了以下执行前语义：
-
-1. S1、S2 和 S3 共用 `d3_stage_machine.py` 中无文件系统副作用的前置门；目标阶段前必须形成精确 `EXECUTED/PASS` 前缀，目标及后继阶段必须全部保持 `NOT_EXECUTED`；
-2. S0 报告必须完整绑定同一执行提交、起止实现身份、六算例零步初态审计和精确 fresh-evidence 策略，并与台账 S0 的 `EXECUTED/PASS` 及登记证据路径交叉一致；
-3. 乱序、重复、前驱缺失、证据错误、授权或参数前置门失败均作为无副作用拒绝，不写失败标记、不改台账、不创建算例目录；
-4. 只有前置门通过后的阶段内异常才进入失败事务；失败台账候选先在内存中通过语义门，随后才写失败标记和原子替换台账，任一步写入失败都会撤回新标记并保留原台账；
-5. S3 在分析起止锁定同一 HEAD、完整授权对象、授权文件 blob/hash、裁决身份及裁决文件 blob/hash，并继续要求清洁工作树。
-
-S3 最终证据发布补丁还固定了以下事务语义：
-
-1. 共享 S3 前置门通过前的授权、身份、S0、阶段顺序、陈旧 staging 或部分最终输出拒绝均不改写台账或证据；
-2. compact evidence、tracked ledger、manifest、报告 JSON、报告 Markdown 和最终 raw ledger 全部先写入本次唯一 staging 根；
-3. 提交前重新加载全部 JSON，校验精确文件集、路径、大小、SHA-256、报告—清单—台账交叉一致性与终态台账语义；
-4. 最终目录和文件通过原子 rename 发布，canonical raw ledger 在此前一直保持 S3 `NOT_EXECUTED`，并作为成功路径的最后持久化提交点转为 `PASS/COMPLETE`；
-5. S3 阶段内的分析、复制、哈希、写入、rename 或清理故障会回滚本次发布，然后提交唯一 `FAILED_STOPPED` 台账与失败标记；失败提交自身失败时恢复原台账并撤回新标记；
-6. 跟踪事务记录绑定执行提交、授权对象、Pro 裁决、正式源码树与前后 raw ledger 哈希；未知或不匹配的陈旧输出不会被复用。
+1. V1 forensic bundle 与五个冻结 raw hash；
+2. V1/R1 科学字段逐值身份；
+3. R1 默认拒绝授权和旧 V1 授权失效；
+4. 六配置 allowlist 差异、正式 G0 网格、掩膜和初态身份；
+5. 冻结输出向量的位模式、索引调度规则和六配置共同时间身份；
+6. R1/V1 证据根隔离及 R1 动态输出缺失；
+7. 正式源码树、Git 实现快照、实际 CUDA FP64 探测；
+8. 全部 D3 候选测试和 S0--S3 状态机、失败事务、发布事务回归；
+9. `time_steps_advanced_by_this_audit = 0`。
 
 ## 动态命令的机器闭锁
 
-运行器已经实现执行入口。授权对象可以由 Pro 在受复核实现提交的唯一直接子提交中签发，但授权状态不会复制到本 README。只有授权对象的状态、受复核父提交、唯一变更路径、全部实现哈希、预注册 blob、正式源码树和裁决文档同时精确匹配，动态命令才可继续；旧授权、未授权或任一漂移都会在创建 D3 raw 或推进任何时间步之前拒绝以下命令：
+`prepare-execution`、`run-stage` 和独立分析器的 `final` 入口都已切换到 R1 合同、R1 授权对象和 R1 证据根。当前默认拒绝授权会在创建 R1 raw 或推进时间步前无副作用拒绝这些入口。
 
-```bash
-"$D3_GPU_PYTHON" \
-  "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py" \
-  prepare-execution
+未来授权只有在 Pro 复核唯一清洁 `main` 实现快照后才可能成立。授权提交必须是该实现提交的唯一直接子提交，并且只能修改 `d3_r1_execution_authorization.json`；授权对象必须精确绑定预注册 blob、正式源码树、全部候选实现文件和裁决文档。任何漂移都会重新闭锁执行。
 
-"$D3_GPU_PYTHON" \
-  "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py" \
-  run-stage --stage S1
-
-"$D3_GPU_PYTHON" \
-  "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py" \
-  run-stage --stage S2
-
-"$D3_GPU_PYTHON" \
-  "90_候选工作区/current/07_D3跨网格时间步响应诊断/analyse_d3_cross_grid_temporal.py" \
-  final
-```
-
-只有新的 Pro 裁决明确授权同一受复核快照后，才允许按 `S0 → S1 → S2 → S3` 顺序使用这些入口。合法授权需要满足：
-
-1. Pro 先完成对唯一清洁 `main` 快照的复核；如需新增详细裁决文档，可先单独提交该文档；
-2. 随后的授权提交只能修改 `d3_execution_authorization.json`；
-3. 授权对象把其唯一父提交、预注册 blob、正式源码树、候选实现文件集合及每个 blob/hash 全部写实；
-4. 缺失、格式错误、文件集合变化、hash 漂移、父提交漂移、配置漂移或正式源码漂移均在创建 raw 前失败。
-
-授权文件本身不写入自身提交 SHA 或自身 blob，因此不存在自哈希递归。任何实现文件在复核后发生变化，即使已经提交且工作树清洁，也会使旧授权失效。
-
-S1 或 S2 任一算例硬门失败，或在完整阶段前置门通过后，算例准备、推进、归档、摘要和阶段提交发生可捕获异常，都会进入同一失败事务，停止后续算例，并把顶层状态闭锁为 `D3_INCONCLUSIVE_FAIL_CLOSED`。前置条件拒绝不会生成动态失败证据。
+若未来获得精确授权，阶段仍只能按 `S0 → S1 → S2 → S3` 顺序执行。任一身份门、质量门、阶段门或事务门失败都立即停止后继阶段；完成 S3 后也必须停止等待新的 Pro 复核，不能自动进入更小时间步、更细网格、长期窗口、D4、Q1R4 或正式代码修改。
 
 ## 独立分析边界
 
-未来 S3 会独立重载六份正式归档并重新计算：
+未来 S3 只接受 R1 raw 根中的六份规范归档，并独立重新计算 `q`、`s`、`u`、`c`、`eta`、`rho`、`gamma`、余弦和观测阶。它拒绝 D2、V1、隔离目录、checkpoint、符号链接和跨提交轨迹，并要求逐算例摘要的归档载荷文件集、大小和 SHA-256 与实际归档精确一致。
 
-```text
-q, s, u, c
-eta_delta_1
-rho_common_1, rho_common_2
-gamma_G6, gamma_G9, gamma_delta
-cosine_G6, cosine_G9, cosine_delta
-observed_order_G6, observed_order_G9, observed_order_delta
-```
-
-分析器只接受 D3 自身 raw 根目录下的规范归档，拒绝 D2、隔离目录、checkpoint、符号链接和跨提交轨迹，并要求逐算例摘要中的归档载荷文件集、大小和 SHA-256 与实际归档精确一致。余弦零范数保持为未定义；诊断分窗不能改变完整窗口顶层标签；二值事件只记录，不作为 PASS 门。
-
-所有窗口的去初值语义统一为先在完整轨迹计算：
+所有窗口先在完整轨迹计算：
 
 $$
 q_{L,k}(t)=Q_{L,k}(t)-Q_{L,k}(0),
 $$
 
-再切取 `0–0.005 s` 或 `0.005–0.010 s` 的原生输出样本。该选择在任何 D3 动态结果出现前完成并由测试锁定。
+再切取 `0--0.005 s` 或 `0.005--0.010 s` 的原生输出样本。诊断分窗不能改变完整窗口顶层标签；余弦零范数保持未定义；二值事件只记录，不作为 PASS 门。
 
-## 当前静态证据
+## 当前禁止与停止点
 
-```text
-artifacts/d3_implementation_static_review.json
-```
+- 不得运行 D3R1 S0 或任何真实 CUDA 动态算例；
+- 不得签发允许态授权或创建声称 S1、S2、S3 已执行的证据；
+- 不得修改、移动、覆盖或复用 V1 raw；
+- 不得放宽科学阈值、质量阈值、分类优先级、CUDA 要求或来源隔离；
+- 不得修改 `01_最终理论/**`、`02_模拟程序/**` 或根目录治理文件；
+- 不得自动进入后继科学阶段。
 
-该文件只证明候选实现与静态门在所记录环境中通过，不是动态执行证据，也不包含 D3 科学分类。
-
-## 当前禁止
-
-- 运行任何真实 D3 CUDA 动态算例；
-- 创建声称 S1、S2 或 S3 已执行的报告；
-- 复用 D2 动态轨迹；
-- 修改 `01_最终理论/**` 或 `02_模拟程序/**`；
-- 自动进入更小时间步、更细网格、长期窗口、Q1R4 或 D4。
-
-## 停止点
-
-候选 S3 发布事务补丁和零步静态测试完成后停在“等待 Pro 独立复核与裁决，动态执行未授权”。
-
-只有新的 Pro 明确裁决才能启动真实 CUDA 阶段。
+D3R1 完成实现和零时间步静态证据后，必须停止并交 Pro 独立复核。新的详细裁决到达前，动态执行继续保持未授权。

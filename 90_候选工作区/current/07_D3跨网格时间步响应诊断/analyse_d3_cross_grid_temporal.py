@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Independently reload, audit, and classify future D3 HF3D archives.
+"""Independently reload, audit, and classify future D3R1 HF3D archives.
 
-This module deliberately does not import the D3 runner.  Configuration
-reconstruction, archive hard gates, vector arithmetic, label precedence, and
-provenance checks are recomputed from the preregistration and formal archive
-reader.  A separate exact-snapshot Pro authorization object currently blocks
-the ``final`` command, which also requires six fresh runs.
+This module deliberately does not import the D3R1 runner.  Configuration
+reconstruction, V1/R1 scientific-field identity, frozen-V1 hashes, archive
+hard gates, vector arithmetic, label precedence, and provenance checks are
+recomputed from the contracts and formal archive reader.  A separate R1
+exact-snapshot Pro authorization currently blocks ``final``.
 """
 
 from __future__ import annotations
@@ -34,16 +34,19 @@ HERE = Path(__file__).resolve().parent
 REPOSITORY_ROOT = HERE.parents[2]
 FORMAL_ROOT = REPOSITORY_ROOT / "02_模拟程序"
 FORMAL_SOURCE = FORMAL_ROOT / "src"
-PREREGISTRATION_PATH = HERE / "d3_cross_grid_temporal_preregistration.json"
-EXECUTION_AUTHORIZATION_PATH = HERE / "d3_execution_authorization.json"
-RAW_ROOT = HERE / "artifacts" / "runs"
+V1_PREREGISTRATION_PATH = HERE / "d3_cross_grid_temporal_preregistration.json"
+PREREGISTRATION_PATH = HERE / "d3_cross_grid_temporal_preregistration_r1.json"
+V1_EXECUTION_AUTHORIZATION_PATH = HERE / "d3_execution_authorization.json"
+EXECUTION_AUTHORIZATION_PATH = HERE / "d3_r1_execution_authorization.json"
+V1_RAW_ROOT = HERE / "artifacts" / "runs"
+RAW_ROOT = HERE / "artifacts" / "r1" / "runs"
 S0_PATH = RAW_ROOT / "s0_identity_config_fresh_evidence_gate.json"
 RAW_LEDGER_PATH = RAW_ROOT / "stage_ledger.json"
 FAILURE_PATH = RAW_ROOT / "execution_failure.json"
-REPORT_JSON = HERE / "reports" / "d3_cross_grid_temporal_report.json"
-REPORT_MD = HERE / "reports" / "d3_cross_grid_temporal_report.md"
-ARTIFACT_MANIFEST = HERE / "artifacts" / "d3_cross_grid_temporal_manifest.json"
-EVIDENCE_ROOT = HERE / "artifacts" / "evidence"
+REPORT_JSON = HERE / "reports" / "r1" / "d3_cross_grid_temporal_report.json"
+REPORT_MD = HERE / "reports" / "r1" / "d3_cross_grid_temporal_report.md"
+ARTIFACT_MANIFEST = HERE / "artifacts" / "r1" / "d3_cross_grid_temporal_manifest.json"
+EVIDENCE_ROOT = HERE / "artifacts" / "r1" / "evidence"
 TRACKED_LEDGER = EVIDENCE_ROOT / "stage_ledger.json"
 S3_TRANSACTION_RECORD = EVIDENCE_ROOT / "s3_publication_transaction.json"
 S3_TRANSACTION_ROOT = RAW_ROOT / ".s3_publication_transaction"
@@ -57,6 +60,14 @@ from airvortex.core import RunStatus, SimulationConfig
 from airvortex.io import load_run_archive
 from airvortex.io.archive import source_tree_identity
 from airvortex.io.config_io import canonical_json_bytes, read_json_strict
+from d3_r1_contract import (
+    R1_PROTOCOL_ID,
+    assert_r1_input_path,
+    audit_evidence_root_isolation,
+    audit_scientific_identity,
+    audit_v1_frozen_evidence,
+    registered_schedule_audit,
+)
 from d3_stage_machine import (
     audit_s0_report,
 )
@@ -64,8 +75,8 @@ from d3_stage_machine import (
     audit_stage_prerequisites as audit_common_stage_prerequisites,
 )
 
-PROTOCOL_ID = "D3_HF3D_CROSS_GRID_TEMPORAL_RESPONSE_V1"
-AUTHORIZATION_ID = "D3_PRO_EXECUTION_AUTHORIZATION_V1"
+PROTOCOL_ID = R1_PROTOCOL_ID
+AUTHORIZATION_ID = "D3R1_PRO_EXECUTION_AUTHORIZATION_V1"
 AUTHORIZATION_ALLOWED = "AUTHORIZED_BY_PRO_FOR_BOUND_IMPLEMENTATION"
 FAIL_CLOSED = "D3_INCONCLUSIVE_FAIL_CLOSED"
 EXPECTED_CASES = (
@@ -322,10 +333,15 @@ def _is_lower_hex(value: object, length: int) -> bool:
 def _implementation_paths() -> tuple[Path, ...]:
     return (
         HERE / "README.md",
+        HERE / "audit_d3_v1_s1_failure.py",
+        HERE / "artifacts" / "v1_failure" / "d3_v1_s1_failure_forensic.json",
+        HERE / "artifacts" / "v1_failure" / "d3_v1_s1_failure_forensic.md",
+        HERE / "d3_r1_contract.py",
         HERE / "d3_stage_machine.py",
         HERE / "run_d3_cross_grid_temporal.py",
         HERE / "analyse_d3_cross_grid_temporal.py",
         HERE / "tests" / "test_d3_cross_grid_temporal.py",
+        V1_PREREGISTRATION_PATH,
         PREREGISTRATION_PATH,
         *(HERE / "generated_configs" / f"{case_id}.json" for case_id in EXPECTED_CASES),
     )
@@ -423,6 +439,15 @@ def _validate_authorization_shape(authorization: Mapping[str, Any]) -> dict[str,
 def execution_authorization_audit() -> dict[str, Any]:
     """Independently validate the authorization-only child-commit binding."""
 
+    contract = _contract()
+    scientific_identity = r1_scientific_identity_audit()
+    v1_frozen_evidence = audit_v1_frozen_evidence(HERE)
+    evidence_root_isolation = audit_evidence_root_isolation(HERE)
+    schedule = registered_schedule_audit(
+        contract["native_output_times_s"],
+        duration_s=float(contract["frozen_run_fields"]["run.duration_s"]),
+        output_interval_s=float(contract["frozen_run_fields"]["run.output_interval_s"]),
+    )
     head = _git("rev-parse", "HEAD")
     regular = (
         EXECUTION_AUTHORIZATION_PATH.is_file()
@@ -481,6 +506,10 @@ def execution_authorization_audit() -> dict[str, Any]:
     gates = {
         "regular_file_not_symlink": regular,
         "authorization_shape": shape["gate_pass"],
+        "r1_scientific_fields_identical_to_v1": scientific_identity["gate_pass"],
+        "v1_frozen_evidence_hashes": v1_frozen_evidence["gate_pass"],
+        "r1_v1_evidence_roots_disjoint": evidence_root_isolation["gate_pass"],
+        "r1_output_schedule_bitwise_contract": schedule["gate_pass"],
         "authorization_object_committed": bool(authorization_blob),
         "authorization_worktree_matches_committed_blob": bool(authorization_blob)
         and authorization_worktree_blob == authorization_blob,
@@ -506,6 +535,10 @@ def execution_authorization_audit() -> dict[str, Any]:
         "gate_pass": all(gates.values()),
         "gates": gates,
         "authorization": authorization,
+        "r1_scientific_identity_audit": scientific_identity,
+        "v1_frozen_evidence_audit": v1_frozen_evidence,
+        "r1_v1_evidence_root_isolation_audit": evidence_root_isolation,
+        "r1_registered_output_schedule_audit": schedule,
         "observed": {
             "head": head,
             "sole_parent": sole_parent,
@@ -543,10 +576,30 @@ def _deep_set(root: dict[str, Any], dotted: str, value: Any) -> None:
     cursor[tokens[-1]] = value
 
 
+def r1_scientific_identity_audit() -> dict[str, Any]:
+    """Independently reload V1 and R1 and deep-compare scientific fields."""
+
+    return audit_scientific_identity(
+        _json_object(V1_PREREGISTRATION_PATH),
+        _json_object(PREREGISTRATION_PATH),
+    )
+
+
 def _contract() -> dict[str, Any]:
     contract = _json_object(PREREGISTRATION_PATH)
     if contract.get("protocol_id") != PROTOCOL_ID:
-        raise D3AnalysisError("D3 protocol identity mismatch")
+        raise D3AnalysisError("D3R1 protocol identity mismatch")
+    scientific_identity = audit_scientific_identity(
+        _json_object(V1_PREREGISTRATION_PATH), contract
+    )
+    if not scientific_identity["gate_pass"]:
+        failed = [
+            name for name, passed in scientific_identity["gates"].items() if not passed
+        ]
+        raise D3AnalysisError(
+            "D3R1 scientific identity differs from V1: "
+            + json.dumps(failed, ensure_ascii=False)
+        )
     return contract
 
 
@@ -874,6 +927,11 @@ def audit_archive_input_path(
 ) -> dict[str, Any]:
     root = allowed_root.resolve()
     resolved = path.resolve()
+    try:
+        assert_r1_input_path(HERE, path)
+        outside_v1_raw = True
+    except ValueError:
+        outside_v1_raw = False
     symlink_component = False
     cursor = path
     while True:
@@ -884,7 +942,8 @@ def audit_archive_input_path(
             break
         cursor = cursor.parent
     gates = {
-        "within_d3_raw_root": resolved == root or resolved.is_relative_to(root),
+        "within_r1_raw_root": resolved == root or resolved.is_relative_to(root),
+        "outside_v1_raw_root": outside_v1_raw,
         "no_symlink_component": not symlink_component,
         "no_d2_or_checkpoint_reference": not _contains_forbidden_d2_reference(
             path.as_posix()

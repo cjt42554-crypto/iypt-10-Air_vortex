@@ -1,0 +1,23 @@
+{
+  "authorization_id": "D3R1_PRO_EXECUTION_AUTHORIZATION_V1",
+  "decision": {
+    "authorized_stages": [],
+    "automatic_follow_on": "PROHIBITED",
+    "real_cuda_dynamic_execution": false
+  },
+  "instructions": "D3R1 dynamic execution remains denied. A future Pro review may authorize exactly one fresh R1 execution only by changing this file in the sole child commit of the reviewed R1 implementation commit. The R1 preregistration, scientific-field identity, V1 frozen hashes, indexed output schedule, disjoint evidence roots, implementation blobs, and formal source tree must all be bound explicitly. The V1 authorization cannot authorize R1.",
+  "protocol_id": "D3_HF3D_CROSS_GRID_TEMPORAL_RESPONSE_R1",
+  "review_binding": {
+    "formal_source_tree_sha256": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8",
+    "implementation_files": {},
+    "preregistration_git_blob_sha": null,
+    "reviewed_implementation_commit": null
+  },
+  "ruling": {
+    "issued_at": null,
+    "reviewer": "PRO_REVIEW_REQUIRED",
+    "ruling_document": null
+  },
+  "schema_version": 1,
+  "status": "NOT_AUTHORIZED"
+}

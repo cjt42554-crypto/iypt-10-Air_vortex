@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Prepare and, only after a future authorization, execute D3 HF3D cases.
+"""Prepare and, only after a future authorization, execute D3R1 HF3D cases.
 
-The frozen preregistration authorizes configuration generation and non-stepping
-static audits only.  Dynamic entry points require a separate Pro authorization
-object bound to one reviewed implementation snapshot; that object is currently
-denied.  All numerical advancement is delegated directly to the formal HF3D
-implementation; this candidate driver only supplies provenance, ordering,
-identity, and evidence gates.
+The result-blind R1 preregistration repairs only the candidate output-schedule
+identity and separates R1 evidence from preserved V1 raw.  It authorizes
+configuration generation, tests, and non-stepping audits only.  Dynamic entry
+points require a separate R1 Pro authorization bound to one reviewed
+implementation snapshot; that object is currently denied.  All numerical
+advancement remains delegated directly to the formal HF3D implementation.
 """
 
 from __future__ import annotations
@@ -37,18 +37,21 @@ REPOSITORY_ROOT = HERE.parents[2]
 FORMAL_ROOT = REPOSITORY_ROOT / "02_模拟程序"
 FORMAL_SOURCE = FORMAL_ROOT / "src"
 Q1R3_ROOT = HERE.parent / "01_HF3D数值资格"
-PREREGISTRATION_PATH = HERE / "d3_cross_grid_temporal_preregistration.json"
-EXECUTION_AUTHORIZATION_PATH = HERE / "d3_execution_authorization.json"
+V1_PREREGISTRATION_PATH = HERE / "d3_cross_grid_temporal_preregistration.json"
+PREREGISTRATION_PATH = HERE / "d3_cross_grid_temporal_preregistration_r1.json"
+V1_EXECUTION_AUTHORIZATION_PATH = HERE / "d3_execution_authorization.json"
+EXECUTION_AUTHORIZATION_PATH = HERE / "d3_r1_execution_authorization.json"
 GENERATED_CONFIG_ROOT = HERE / "generated_configs"
-STATIC_REVIEW_PATH = HERE / "artifacts" / "d3_implementation_static_review.json"
-RAW_ROOT = HERE / "artifacts" / "runs"
+STATIC_REVIEW_PATH = HERE / "artifacts" / "r1" / "d3_implementation_static_review.json"
+V1_RAW_ROOT = HERE / "artifacts" / "runs"
+RAW_ROOT = HERE / "artifacts" / "r1" / "runs"
 S0_PATH = RAW_ROOT / "s0_identity_config_fresh_evidence_gate.json"
 STAGE_LEDGER_PATH = RAW_ROOT / "stage_ledger.json"
 FAILURE_PATH = RAW_ROOT / "execution_failure.json"
-REPORT_JSON = HERE / "reports" / "d3_cross_grid_temporal_report.json"
-REPORT_MD = HERE / "reports" / "d3_cross_grid_temporal_report.md"
-FINAL_MANIFEST = HERE / "artifacts" / "d3_cross_grid_temporal_manifest.json"
-FINAL_EVIDENCE_ROOT = HERE / "artifacts" / "evidence"
+REPORT_JSON = HERE / "reports" / "r1" / "d3_cross_grid_temporal_report.json"
+REPORT_MD = HERE / "reports" / "r1" / "d3_cross_grid_temporal_report.md"
+FINAL_MANIFEST = HERE / "artifacts" / "r1" / "d3_cross_grid_temporal_manifest.json"
+FINAL_EVIDENCE_ROOT = HERE / "artifacts" / "r1" / "evidence"
 
 if str(FORMAL_SOURCE) not in sys.path:
     sys.path.insert(0, str(FORMAL_SOURCE))
@@ -79,6 +82,14 @@ from airvortex.io.archive import git_revision_identity, source_tree_identity
 from airvortex.io.config_io import canonical_json_bytes, read_json_strict
 from airvortex.numerics.cartesian3d import ImmersedCartesianGrid
 from airvortex.numerics.projection3d_gpu import probe_gpu_projection
+from d3_r1_contract import (
+    R1_PROTOCOL_ID,
+    assert_r1_input_path,
+    audit_evidence_root_isolation,
+    audit_scientific_identity,
+    audit_v1_frozen_evidence,
+    registered_schedule_audit,
+)
 from d3_stage_machine import (
     audit_s0_report,
 )
@@ -86,12 +97,12 @@ from d3_stage_machine import (
     audit_stage_prerequisites as audit_common_stage_prerequisites,
 )
 
-PROTOCOL_ID = "D3_HF3D_CROSS_GRID_TEMPORAL_RESPONSE_V1"
-AUTHORIZATION_ID = "D3_PRO_EXECUTION_AUTHORIZATION_V1"
+PROTOCOL_ID = R1_PROTOCOL_ID
+AUTHORIZATION_ID = "D3R1_PRO_EXECUTION_AUTHORIZATION_V1"
 AUTHORIZATION_ALLOWED = "AUTHORIZED_BY_PRO_FOR_BOUND_IMPLEMENTATION"
 AUTHORIZATION_DENIED = "NOT_AUTHORIZED"
 STATIC_READY = (
-    "D3_V2_IMPLEMENTATION_READY_FOR_PRO_STATIC_REVIEW__DYNAMIC_EXECUTION_NOT_AUTHORIZED"
+    "D3R1_IMPLEMENTATION_READY_FOR_PRO_STATIC_REVIEW__DYNAMIC_EXECUTION_NOT_AUTHORIZED"
 )
 S0_PASS = "D3_S0_IDENTITY_CONFIG_IMPLEMENTATION_AND_FRESH_EVIDENCE_GATE_PASS"
 CASE_PASS = "D3_CASE_COMPLETE_ALL_HARD_GATES_PASS"
@@ -551,10 +562,29 @@ def _leaf_differences(
     return differences
 
 
+def r1_scientific_identity_audit() -> dict[str, Any]:
+    """Reload both contracts and prove every frozen scientific field identical."""
+
+    v1_contract = _json_object(V1_PREREGISTRATION_PATH)
+    r1_contract = _json_object(PREREGISTRATION_PATH)
+    return audit_scientific_identity(v1_contract, r1_contract)
+
+
 def _contract() -> dict[str, Any]:
     contract = _json_object(PREREGISTRATION_PATH)
     if contract.get("protocol_id") != PROTOCOL_ID:
-        raise D3ExecutionError("D3 protocol identity mismatch")
+        raise D3ExecutionError("D3R1 protocol identity mismatch")
+    scientific_identity = audit_scientific_identity(
+        _json_object(V1_PREREGISTRATION_PATH), contract
+    )
+    if not scientific_identity["gate_pass"]:
+        failed = [
+            name for name, passed in scientific_identity["gates"].items() if not passed
+        ]
+        raise D3ExecutionError(
+            "D3R1 scientific identity differs from V1: "
+            + json.dumps(failed, ensure_ascii=False)
+        )
     return contract
 
 
@@ -585,8 +615,14 @@ def validate_contract_shape(
                 float(item.get("time_step_s", math.nan)),
             )
         )
+    scientific_identity = r1_scientific_identity_audit()
+    schedule_contract = value.get("output_schedule_contract")
+    evidence_roots = value.get("evidence_roots")
+    v1_failure_binding = value.get("v1_failure_binding")
     gates = {
         "protocol_id": value.get("protocol_id") == PROTOCOL_ID,
+        "schema_version_r1": value.get("schema_version") == 2,
+        "scientific_fields_identical_to_v1": scientific_identity["gate_pass"],
         "case_matrix_exact": observed_matrix == expected_matrix,
         "native_output_times_exact": value.get("native_output_times_s")
         == EXPECTED_OUTPUT_TIME.tolist(),
@@ -610,11 +646,41 @@ def validate_contract_shape(
             "real_cuda_dynamic_execution"
         )
         is False,
+        "indexed_output_schedule_exact": isinstance(schedule_contract, Mapping)
+        and schedule_contract.get("output_schedule_source")
+        == "native_output_times_s indexed values"
+        and schedule_contract.get("next_target_rule")
+        == "next_target = registered_times[next_index]"
+        and schedule_contract.get("next_index_initial") == 1
+        and schedule_contract.get("repeated_floating_addition") == "PROHIBITED"
+        and schedule_contract.get("interpolation") == "PROHIBITED"
+        and schedule_contract.get("bitwise_native_output_times_gate") == "UNCHANGED"
+        and schedule_contract.get("all_six_runs_fresh_after_R1_review") is True
+        and schedule_contract.get("V1_raw_or_partial_reuse") == "PROHIBITED",
+        "r1_evidence_paths_exact": isinstance(evidence_roots, Mapping)
+        and evidence_roots.get("v1_raw_read_only") == "artifacts/runs/**"
+        and evidence_roots.get("r1_raw") == "artifacts/r1/runs/**"
+        and evidence_roots.get("r1_evidence") == "artifacts/r1/evidence/**"
+        and evidence_roots.get("r1_static_review")
+        == "artifacts/r1/d3_implementation_static_review.json"
+        and evidence_roots.get("r1_manifest")
+        == "artifacts/r1/d3_cross_grid_temporal_manifest.json"
+        and evidence_roots.get("r1_report_json")
+        == "reports/r1/d3_cross_grid_temporal_report.json"
+        and evidence_roots.get("r1_report_markdown")
+        == "reports/r1/d3_cross_grid_temporal_report.md"
+        and evidence_roots.get("roots_must_be_disjoint") is True,
+        "v1_failure_binding_exact": isinstance(v1_failure_binding, Mapping)
+        and v1_failure_binding.get("execution_commit")
+        == "90ed5c1019d8265f6e9730ff8a2d36be61deec8b"
+        and v1_failure_binding.get("v1_failure_upheld") is True
+        and v1_failure_binding.get("v1_raw_or_partial_reuse") == "PROHIBITED",
     }
     return {
         "gate_pass": all(gates.values()),
         "gates": gates,
         "observed_matrix": observed_matrix,
+        "scientific_identity_audit": scientific_identity,
     }
 
 
@@ -956,6 +1022,11 @@ def audit_classification_input_paths(
     for path in paths:
         resolved = path.resolve()
         within_root = resolved == root or resolved.is_relative_to(root)
+        try:
+            assert_r1_input_path(HERE, path)
+            outside_v1_raw = True
+        except ValueError:
+            outside_v1_raw = False
         symlink_component = False
         cursor = path
         while True:
@@ -966,7 +1037,8 @@ def audit_classification_input_paths(
                 break
             cursor = cursor.parent
         gates = {
-            "within_d3_raw_root": within_root,
+            "within_r1_raw_root": within_root,
+            "outside_v1_raw_root": outside_v1_raw,
             "no_symlink_component": not symlink_component,
             "no_d2_or_checkpoint_reference": not _contains_forbidden_d2_reference(
                 path.as_posix()
@@ -1192,10 +1264,16 @@ def validate_stage_ledger_evidence_files(ledger: Mapping[str, Any]) -> dict[str,
                 for path_text in diagnostic_evidence:
                     path = REPOSITORY_ROOT / str(path_text)
                     resolved = path.resolve()
+                    try:
+                        assert_r1_input_path(HERE, path)
+                        outside_v1_raw = True
+                    except ValueError:
+                        outside_v1_raw = False
                     path_gates = {
                         "exists": path.exists(),
-                        "within_d3_raw_root": resolved == RAW_ROOT.resolve()
+                        "within_r1_raw_root": resolved == RAW_ROOT.resolve()
                         or resolved.is_relative_to(RAW_ROOT.resolve()),
+                        "outside_v1_raw_root": outside_v1_raw,
                         "not_symlink": not path.is_symlink(),
                         "no_forbidden_reference": not _contains_forbidden_d2_reference(
                             str(path_text)
@@ -1387,6 +1465,14 @@ def static_implementation_audit(*, require_clean: bool) -> dict[str, Any]:
     porcelain = _git("status", "--porcelain=v1", "--untracked-files=all").splitlines()
     contract = _contract()
     contract_shape = validate_contract_shape(contract)
+    scientific_identity = r1_scientific_identity_audit()
+    v1_frozen_evidence = audit_v1_frozen_evidence(HERE)
+    evidence_root_isolation = audit_evidence_root_isolation(HERE)
+    schedule = registered_schedule_audit(
+        contract["native_output_times_s"],
+        duration_s=float(contract["frozen_run_fields"]["run.duration_s"]),
+        output_interval_s=float(contract["frozen_run_fields"]["run.output_interval_s"]),
+    )
     configs = configuration_matrix_audit()
     generated = audit_generated_configs()
     source = _capture_source("D3 implementation static review")
@@ -1405,6 +1491,10 @@ def static_implementation_audit(*, require_clean: bool) -> dict[str, Any]:
         "main_branch": branch == "main",
         "clean_worktree_when_required": (not require_clean or not porcelain),
         "contract_shape": contract_shape["gate_pass"],
+        "r1_scientific_fields_identical_to_v1": scientific_identity["gate_pass"],
+        "v1_frozen_evidence_hashes": v1_frozen_evidence["gate_pass"],
+        "r1_v1_evidence_roots_disjoint": evidence_root_isolation["gate_pass"],
+        "r1_output_schedule_bitwise_contract": schedule["gate_pass"],
         "configuration_matrix": configs["gate_pass"],
         "generated_configs": generated["gate_pass"],
         "formal_source_tree_bound": source.get("available") is True
@@ -1445,6 +1535,10 @@ def static_implementation_audit(*, require_clean: bool) -> dict[str, Any]:
             "contract_content_sha256": _sha256(PREREGISTRATION_PATH),
         },
         "contract_shape_audit": contract_shape,
+        "r1_scientific_identity_audit": scientific_identity,
+        "v1_frozen_evidence_audit": v1_frozen_evidence,
+        "r1_v1_evidence_root_isolation_audit": evidence_root_isolation,
+        "r1_registered_output_schedule_audit": schedule,
         "configuration_matrix_audit": configs,
         "generated_config_audit": generated,
         "initial_grid_mask_state_identity": initial_identity,
@@ -1486,10 +1580,15 @@ def _implementation_paths() -> tuple[Path, ...]:
     # implementation commit, avoiding an impossible self-hash recursion.
     return (
         HERE / "README.md",
+        HERE / "audit_d3_v1_s1_failure.py",
+        HERE / "artifacts" / "v1_failure" / "d3_v1_s1_failure_forensic.json",
+        HERE / "artifacts" / "v1_failure" / "d3_v1_s1_failure_forensic.md",
+        HERE / "d3_r1_contract.py",
         HERE / "d3_stage_machine.py",
         HERE / "run_d3_cross_grid_temporal.py",
         HERE / "analyse_d3_cross_grid_temporal.py",
         HERE / "tests" / "test_d3_cross_grid_temporal.py",
+        V1_PREREGISTRATION_PATH,
         PREREGISTRATION_PATH,
         *(generated_config_path(case_id) for case_id in EXPECTED_CASES),
     )
@@ -1499,6 +1598,14 @@ def execution_binding_audit() -> dict[str, Any]:
     """Recheck immutable code, source, config, revision, and Pro authorization."""
 
     contract = _contract()
+    scientific_identity = r1_scientific_identity_audit()
+    v1_frozen_evidence = audit_v1_frozen_evidence(HERE)
+    evidence_root_isolation = audit_evidence_root_isolation(HERE)
+    schedule = registered_schedule_audit(
+        contract["native_output_times_s"],
+        duration_s=float(contract["frozen_run_fields"]["run.duration_s"]),
+        output_interval_s=float(contract["frozen_run_fields"]["run.output_interval_s"]),
+    )
     authorization = require_dynamic_execution_authorized()
     branch = _git("branch", "--show-current")
     head = _git("rev-parse", "HEAD")
@@ -1511,6 +1618,10 @@ def execution_binding_audit() -> dict[str, Any]:
         "main_branch": branch == "main",
         "clean_worktree": not porcelain,
         "pro_authorization_bound_to_exact_child_commit": authorization["gate_pass"],
+        "r1_scientific_fields_identical_to_v1": scientific_identity["gate_pass"],
+        "v1_frozen_evidence_hashes": v1_frozen_evidence["gate_pass"],
+        "r1_v1_evidence_roots_disjoint": evidence_root_isolation["gate_pass"],
+        "r1_output_schedule_bitwise_contract": schedule["gate_pass"],
         "formal_source_tree_matches": source.get("available") is True
         and source.get("value")
         == contract["formal_source_contract"]["required_tree_sha256"],
@@ -1529,6 +1640,10 @@ def execution_binding_audit() -> dict[str, Any]:
         "formal_source_tree": source,
         "implementation": implementation,
         "authorization": authorization,
+        "r1_scientific_identity_audit": scientific_identity,
+        "v1_frozen_evidence_audit": v1_frozen_evidence,
+        "r1_v1_evidence_root_isolation_audit": evidence_root_isolation,
+        "r1_registered_output_schedule_audit": schedule,
         "generated_config_audit": generated,
         "cuda_probe": cuda,
     }
@@ -1603,6 +1718,14 @@ def execution_identity_audit(*, require_fresh: bool) -> dict[str, Any]:
         "formal_source_tree": binding["formal_source_tree"],
         "implementation": binding["implementation"],
         "authorization": binding["authorization"],
+        "r1_scientific_identity_audit": binding["r1_scientific_identity_audit"],
+        "v1_frozen_evidence_audit": binding["v1_frozen_evidence_audit"],
+        "r1_v1_evidence_root_isolation_audit": binding[
+            "r1_v1_evidence_root_isolation_audit"
+        ],
+        "r1_registered_output_schedule_audit": binding[
+            "r1_registered_output_schedule_audit"
+        ],
         "generated_config_audit": binding["generated_config_audit"],
         "cuda_probe": binding["cuda_probe"],
     }
@@ -1720,133 +1843,146 @@ def _step_hard_gate(
 
 
 def advance_runtime_to_registered_end(runtime: CaseRuntime) -> dict[str, Any]:
-    """Advance one fresh case with fail-closed per-accepted-step gates."""
+    """Advance one fresh R1 case to each directly indexed registered target."""
 
     backend = HighFidelityBackend()
     end_time = runtime.config.run.duration_s
-    output_interval = runtime.config.run.output_interval_s
-    next_output = min(output_interval, end_time)
+    registered_times = np.asarray(
+        _contract()["native_output_times_s"], dtype=np.float64
+    )
+    schedule = registered_schedule_audit(
+        registered_times,
+        duration_s=end_time,
+        output_interval_s=runtime.config.run.output_interval_s,
+    )
+    if not schedule["gate_pass"]:
+        failed = [name for name, passed in schedule["gates"].items() if not passed]
+        raise D3ExecutionError(
+            "D3R1 registered output schedule failed before stepping: "
+            + json.dumps(failed, ensure_ascii=False)
+        )
     tolerance = 128.0 * np.finfo(float).eps * max(end_time, 1.0)
     start_wall = time.monotonic()
     start_cpu = time.process_time()
     total_retries = 0
+    next_index = 1
     failure: dict[str, Any] | None = None
     try:
-        while runtime.state.time_s < end_time - tolerance:
-            proposal = propose_time_step(runtime.state, runtime.config, runtime.grid)
-            target = min(next_output, end_time)
-            remaining = target - runtime.state.time_s
-            dt_s = min(proposal.stable_dt_s, remaining)
-            if not math.isfinite(dt_s) or dt_s <= 0.0:
-                raise FloatingPointError("D3 trial time step became non-positive")
-            limiter = (
-                "output_alignment"
-                if remaining < proposal.stable_dt_s
-                else str(proposal.selected_limiter)
-            )
-            initial_attempt = dt_s
-            retry_count = 0
-            maximum_rejected = 0.0
-            while True:
-                checkpoint = runtime.projection.checkpoint_history()
-                trial_state = _clone_state(runtime.state)
-                try:
-                    trial_diagnostics = backend.advance_one_step(
-                        trial_state,
-                        runtime.config,
-                        runtime.grid,
-                        runtime.projection,
-                        dt_s,
-                        expected_liquid_volume_m3=runtime.expected_volume_m3,
-                        time_step_limiter=limiter,
-                        cfl_retry_count=retry_count,
-                        initial_attempt_dt_s=initial_attempt,
-                        maximum_rejected_post_projection_cfl=maximum_rejected,
-                    )
-                except HF3DPostProjectionCFLExceeded as exc:
-                    runtime.projection.restore_history(checkpoint)
-                    maximum_rejected = max(
-                        maximum_rejected,
-                        exc.diagnostics.post_projection_advective_cfl,
-                    )
-                    maximum_retries = (
-                        runtime.config.high_fidelity.maximum_cfl_step_retries
-                    )
-                    if retry_count >= maximum_retries:
-                        raise FloatingPointError(
-                            "D3 CFL retry gate exhausted at accepted step "
-                            f"{runtime.state.step + 1}"
-                        ) from exc
-                    dt_s = retry_time_step_s(
-                        dt_s,
-                        exc.diagnostics.post_projection_advective_cfl,
-                        runtime.config.high_fidelity.cfl_limit,
-                        runtime.config.high_fidelity.cfl_controller_target_fraction,
-                    )
-                    retry_count += 1
-                    total_retries += 1
-                    limiter = "post_projection_cfl_retry"
-                    runtime.events.append(
-                        Event(
-                            runtime.state.time_s,
-                            "d3_cfl_step_retry",
-                            "Rejected D3 trial was rolled back before a stricter retry.",
-                            {
-                                "case": runtime.label,
-                                "retry_number": retry_count,
-                                "next_dt_s": dt_s,
-                            },
+        while next_index < registered_times.size:
+            next_target = float(registered_times[next_index])
+            while runtime.state.time_s < next_target - tolerance:
+                proposal = propose_time_step(
+                    runtime.state, runtime.config, runtime.grid
+                )
+                remaining = next_target - runtime.state.time_s
+                dt_s = min(proposal.stable_dt_s, remaining)
+                if not math.isfinite(dt_s) or dt_s <= 0.0:
+                    raise FloatingPointError("D3R1 trial time step became non-positive")
+                limiter = (
+                    "output_alignment"
+                    if remaining < proposal.stable_dt_s
+                    else str(proposal.selected_limiter)
+                )
+                initial_attempt = dt_s
+                retry_count = 0
+                maximum_rejected = 0.0
+                while True:
+                    checkpoint = runtime.projection.checkpoint_history()
+                    trial_state = _clone_state(runtime.state)
+                    try:
+                        trial_diagnostics = backend.advance_one_step(
+                            trial_state,
+                            runtime.config,
+                            runtime.grid,
+                            runtime.projection,
+                            dt_s,
+                            expected_liquid_volume_m3=runtime.expected_volume_m3,
+                            time_step_limiter=limiter,
+                            cfl_retry_count=retry_count,
+                            initial_attempt_dt_s=initial_attempt,
+                            maximum_rejected_post_projection_cfl=maximum_rejected,
                         )
+                    except HF3DPostProjectionCFLExceeded as exc:
+                        runtime.projection.restore_history(checkpoint)
+                        maximum_rejected = max(
+                            maximum_rejected,
+                            exc.diagnostics.post_projection_advective_cfl,
+                        )
+                        maximum_retries = (
+                            runtime.config.high_fidelity.maximum_cfl_step_retries
+                        )
+                        if retry_count >= maximum_retries:
+                            raise FloatingPointError(
+                                "D3R1 CFL retry gate exhausted at accepted step "
+                                f"{runtime.state.step + 1}"
+                            ) from exc
+                        dt_s = retry_time_step_s(
+                            dt_s,
+                            exc.diagnostics.post_projection_advective_cfl,
+                            runtime.config.high_fidelity.cfl_limit,
+                            runtime.config.high_fidelity.cfl_controller_target_fraction,
+                        )
+                        retry_count += 1
+                        total_retries += 1
+                        limiter = "post_projection_cfl_retry"
+                        runtime.events.append(
+                            Event(
+                                runtime.state.time_s,
+                                "d3_cfl_step_retry",
+                                "Rejected D3R1 trial was rolled back before a stricter retry.",
+                                {
+                                    "case": runtime.label,
+                                    "retry_number": retry_count,
+                                    "next_dt_s": dt_s,
+                                },
+                            )
+                        )
+                        continue
+                    except Exception:
+                        runtime.projection.restore_history(checkpoint)
+                        raise
+                    runtime.state = trial_state
+                    runtime.recorder.state = runtime.state
+                    runtime.last_diagnostics = trial_diagnostics
+                    runtime.expected_volume_m3 = (
+                        trial_diagnostics.expected_liquid_volume_m3
                     )
-                    continue
-                except Exception:
-                    runtime.projection.restore_history(checkpoint)
-                    raise
-                runtime.state = trial_state
-                runtime.recorder.state = runtime.state
-                runtime.last_diagnostics = trial_diagnostics
-                runtime.expected_volume_m3 = trial_diagnostics.expected_liquid_volume_m3
-                runtime.event_tracker.update(
-                    runtime.state.time_s,
-                    trial_diagnostics,
-                )
-                runtime.diagnostics.append(
-                    runtime.state.time_s,
-                    trial_diagnostics,
-                    runtime.config,
-                )
-                passed, failed = _step_hard_gate(runtime, trial_diagnostics)
-                if not passed:
-                    raise FloatingPointError(
-                        f"{runtime.label} hard gate failed: {', '.join(failed)}"
+                    runtime.event_tracker.update(
+                        runtime.state.time_s,
+                        trial_diagnostics,
                     )
-                break
-            reached_output = runtime.state.time_s >= next_output - tolerance
-            reached_end = runtime.state.time_s >= end_time - tolerance
-            if reached_output or reached_end:
-                if (
-                    reached_output
-                    and abs(runtime.state.time_s - next_output) <= tolerance
-                ):
-                    runtime.state.time_s = next_output
-                if reached_end and abs(runtime.state.time_s - end_time) <= tolerance:
-                    runtime.state.time_s = end_time
-                runtime.recorder.record_frame(runtime.last_diagnostics)
-                while next_output <= runtime.state.time_s + tolerance:
-                    next_output += output_interval
-                print(
-                    json.dumps(
-                        {
-                            "stage": "d3_case_progress",
-                            "case": runtime.label,
-                            "time_s": runtime.state.time_s,
-                            "accepted_steps": runtime.state.step,
-                            "retry_attempts": total_retries,
-                        },
-                        sort_keys=True,
-                    ),
-                    flush=True,
+                    runtime.diagnostics.append(
+                        runtime.state.time_s,
+                        trial_diagnostics,
+                        runtime.config,
+                    )
+                    passed, failed = _step_hard_gate(runtime, trial_diagnostics)
+                    if not passed:
+                        raise FloatingPointError(
+                            f"{runtime.label} hard gate failed: {', '.join(failed)}"
+                        )
+                    break
+            if abs(runtime.state.time_s - next_target) > tolerance:
+                raise FloatingPointError(
+                    f"D3R1 skipped registered output target at index {next_index}"
                 )
+            runtime.state.time_s = next_target
+            runtime.recorder.record_frame(runtime.last_diagnostics)
+            print(
+                json.dumps(
+                    {
+                        "stage": "d3r1_case_progress",
+                        "case": runtime.label,
+                        "registered_output_index": next_index,
+                        "time_s": runtime.state.time_s,
+                        "accepted_steps": runtime.state.step,
+                        "retry_attempts": total_retries,
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
+            next_index += 1
     except Exception as exc:  # noqa: BLE001 - preserve fail-closed evidence
         failure = {
             "type": type(exc).__name__,
@@ -1857,11 +1993,13 @@ def advance_runtime_to_registered_end(runtime: CaseRuntime) -> dict[str, Any]:
         }
     return {
         "completed": failure is None
+        and next_index == registered_times.size
         and math.isclose(
             runtime.state.time_s, end_time, rel_tol=0.0, abs_tol=tolerance
         ),
         "failure": failure,
         "retry_attempts": total_retries,
+        "registered_outputs_recorded": next_index,
         "wall_time_s": time.monotonic() - start_wall,
         "process_cpu_time_s": time.process_time() - start_cpu,
     }

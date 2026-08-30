@@ -1,14 +1,17 @@
 from __future__ import annotations
 
+import hashlib
+import inspect
+import io
 import math
 import sys
 import tempfile
 import unittest
-from contextlib import ExitStack
+from contextlib import ExitStack, redirect_stdout
 from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, cast
 from unittest.mock import patch
 
 import numpy as np
@@ -22,6 +25,7 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
 import analyse_d3_cross_grid_temporal as analyser
+import d3_r1_contract as r1_contract
 import run_d3_cross_grid_temporal as runner
 from airvortex.io.config_io import StrictJSONError
 
@@ -528,6 +532,258 @@ class FrozenContractAndConfigurationTests(unittest.TestCase):
                 analyser.analyse_final()
             self.assertFalse(report_json.exists())
             self.assertFalse(report_md.exists())
+
+
+class D3R1RemediationTests(unittest.TestCase):
+    def test_v1_contract_authorization_and_raw_hashes_remain_frozen(self) -> None:
+        expected = {
+            runner.V1_PREREGISTRATION_PATH: (
+                "74156365c8b5f2ddde4a3ad4d1033eed2ac0fa0ecf69d04b6caa4129b7420620"
+            ),
+            runner.V1_EXECUTION_AUTHORIZATION_PATH: (
+                "6dbbd3840eee255845d45658bf91d74b5df7bb5df62a7351afe59055201b37cf"
+            ),
+        }
+        for path, digest in expected.items():
+            with self.subTest(path=path.name):
+                self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), digest)
+        self.assertTrue(r1_contract.audit_v1_frozen_evidence(HERE)["gate_pass"])
+
+    def test_r1_scientific_fields_deep_equal_v1_and_drift_fails(self) -> None:
+        audit = runner.r1_scientific_identity_audit()
+        independent = analyser.r1_scientific_identity_audit()
+        self.assertTrue(audit["gate_pass"])
+        self.assertEqual(audit, independent)
+        self.assertTrue(all(item["deep_equal"] for item in audit["fields"].values()))
+
+        v1 = runner._json_object(runner.V1_PREREGISTRATION_PATH)
+        drifted_r1 = runner._json_object(runner.PREREGISTRATION_PATH)
+        drifted_r1["thresholds"]["contraction_gamma_max"] = 0.99
+        drift = r1_contract.audit_scientific_identity(v1, drifted_r1)
+        self.assertFalse(drift["gate_pass"])
+        self.assertFalse(drift["fields"]["thresholds"]["deep_equal"])
+
+    def test_r1_default_authorization_is_denied_and_v1_authorization_is_invalid(
+        self,
+    ) -> None:
+        r1_authorization = runner._json_object(runner.EXECUTION_AUTHORIZATION_PATH)
+        r1_audit = runner.validate_execution_authorization_shape(r1_authorization)
+        self.assertTrue(r1_audit["gate_pass"])
+        self.assertFalse(r1_audit["authorized"])
+        self.assertEqual(r1_audit["status"], runner.AUTHORIZATION_DENIED)
+
+        v1_authorization = runner._json_object(runner.V1_EXECUTION_AUTHORIZATION_PATH)
+        v1_audit = runner.validate_execution_authorization_shape(v1_authorization)
+        self.assertFalse(v1_audit["gate_pass"])
+        self.assertFalse(v1_audit["gates"]["authorization_id"])
+        self.assertFalse(v1_audit["gates"]["protocol_id"])
+
+    def test_r1_v1_evidence_roots_are_disjoint_and_v1_inputs_are_rejected(
+        self,
+    ) -> None:
+        isolation = r1_contract.audit_evidence_root_isolation(HERE)
+        self.assertTrue(isolation["gate_pass"])
+        self.assertEqual(isolation["v1_raw_root"], "artifacts/runs")
+        self.assertEqual(isolation["r1_paths"]["raw"], "artifacts/r1/runs")
+
+        v1_partial = HERE / "artifacts" / "runs" / "cases" / "G6_DT0" / "partial.npz"
+        runner_audit = runner.audit_classification_input_paths(
+            [v1_partial], allowed_root=runner.V1_RAW_ROOT
+        )
+        analyser_audit = analyser.audit_archive_input_path(
+            v1_partial, allowed_root=analyser.V1_RAW_ROOT
+        )
+        self.assertFalse(runner_audit["gate_pass"])
+        self.assertFalse(analyser_audit["gate_pass"])
+        with self.assertRaises(ValueError):
+            r1_contract.assert_r1_input_path(HERE, v1_partial)
+
+    def test_v1_hash_drift_fails_r1_binding_without_touching_raw(self) -> None:
+        original_sha256 = r1_contract._sha256
+        drifted = (HERE / "artifacts" / "runs" / "stage_ledger.json").resolve()
+
+        def fake_sha256(path: Path) -> str:
+            if path.resolve() == drifted:
+                return "0" * 64
+            return original_sha256(path)
+
+        with patch.object(r1_contract, "_sha256", side_effect=fake_sha256):
+            audit = r1_contract.audit_v1_frozen_evidence(HERE)
+        self.assertFalse(audit["gate_pass"])
+        self.assertFalse(audit["gates"]["all_v1_raw_hashes_exact"])
+
+    def test_v1_repeated_addition_regression_is_exactly_one_ulp_at_index_9(
+        self,
+    ) -> None:
+        observed = [0.0]
+        next_output = 0.001
+        for _index in range(1, 10):
+            observed.append(next_output)
+            next_output += 0.001
+        observed.append(0.01)
+        actual = np.asarray(observed, dtype=np.float64)
+        expected = runner.EXPECTED_OUTPUT_TIME
+        mismatch = np.flatnonzero(actual.view(np.uint64) != expected.view(np.uint64))
+        np.testing.assert_array_equal(mismatch, [9])
+        self.assertEqual(
+            int(actual[9].view(np.uint64)) - int(expected[9].view(np.uint64)),
+            1,
+        )
+        self.assertEqual(actual[9].hex(), "0x1.26e978d4fdf3cp-7")
+        self.assertEqual(expected[9].hex(), "0x1.26e978d4fdf3bp-7")
+
+    def test_r1_registered_schedule_is_bitwise_exact_for_all_six_configs(
+        self,
+    ) -> None:
+        vectors: list[list[int]] = []
+        for case_id in runner.EXPECTED_CASES:
+            config, _identity = runner.effective_case_config(case_id)
+            audit = r1_contract.registered_schedule_audit(
+                runner.EXPECTED_OUTPUT_TIME,
+                duration_s=config.run.duration_s,
+                output_interval_s=config.run.output_interval_s,
+            )
+            self.assertTrue(audit["gate_pass"], case_id)
+            self.assertEqual(audit["frame_count"], 11)
+            vectors.append(audit["uint64"])
+        self.assertTrue(all(vector == vectors[0] for vector in vectors))
+        self.assertEqual(runner.EXPECTED_OUTPUT_TIME[9].hex(), "0x1.26e978d4fdf3bp-7")
+
+    def test_registered_schedule_rejects_skips_duplicates_and_interpolated_times(
+        self,
+    ) -> None:
+        base = runner.EXPECTED_OUTPUT_TIME
+        variants = {
+            "skipped": np.delete(base, 5),
+            "duplicate": np.insert(base, 5, base[5]),
+            "interpolated": np.asarray(
+                [*base[:5], 0.0055, *base[6:]],
+                dtype=np.float64,
+            ),
+        }
+        for name, times in variants.items():
+            with self.subTest(name=name):
+                audit = r1_contract.registered_schedule_audit(
+                    times,
+                    duration_s=0.01,
+                    output_interval_s=0.001,
+                )
+                self.assertFalse(audit["gate_pass"])
+
+    def test_runtime_scheduler_records_each_index_once_without_interpolation(
+        self,
+    ) -> None:
+        class FakeProjection:
+            def checkpoint_history(self) -> None:
+                return None
+
+            def restore_history(self, _checkpoint: object) -> None:
+                return None
+
+        class FakeRecorder:
+            def __init__(self, state: Any) -> None:
+                self.state = state
+                self.times = [state.time_s]
+
+            def record_frame(self, _diagnostics: object) -> None:
+                self.times.append(self.state.time_s)
+
+        class FakeDiagnostics:
+            def append(self, *_arguments: object) -> None:
+                return None
+
+        class FakeTracker:
+            def update(self, *_arguments: object) -> None:
+                return None
+
+        class FakeBackend:
+            calls = 0
+
+            def advance_one_step(
+                self,
+                state: Any,
+                _config: Any,
+                _grid: Any,
+                _projection: Any,
+                dt_s: float,
+                **_kwargs: object,
+            ) -> Any:
+                type(self).calls += 1
+                state.time_s += dt_s
+                state.step += 1
+                return SimpleNamespace(expected_liquid_volume_m3=1.0)
+
+        state = runner.HF3DState(
+            time_s=0.0,
+            step=0,
+            bar_angle_rad=0.0,
+            u_x_face=np.zeros(1, dtype=np.float64),
+            u_y_face=np.zeros(1, dtype=np.float64),
+            u_z_face=np.zeros(1, dtype=np.float64),
+            phase=np.zeros(1, dtype=np.float64),
+            pressure_pa=np.zeros(1, dtype=np.float64),
+        )
+        recorder = FakeRecorder(state)
+        runtime = SimpleNamespace(
+            label="G6_DT0",
+            config=SimpleNamespace(
+                run=SimpleNamespace(duration_s=0.01, output_interval_s=0.001),
+                high_fidelity=SimpleNamespace(
+                    maximum_cfl_step_retries=4,
+                    cfl_limit=0.35,
+                    cfl_controller_target_fraction=0.8,
+                ),
+            ),
+            grid=SimpleNamespace(),
+            state=state,
+            projection=FakeProjection(),
+            pressure_accelerator={"selected": "cuda", "fallback": False},
+            initial_volume_m3=1.0,
+            expected_volume_m3=1.0,
+            recorder=recorder,
+            diagnostics=FakeDiagnostics(),
+            events=[],
+            event_tracker=FakeTracker(),
+            last_diagnostics=SimpleNamespace(),
+        )
+        with (
+            patch.object(runner, "HighFidelityBackend", FakeBackend),
+            patch.object(
+                runner,
+                "propose_time_step",
+                return_value=SimpleNamespace(
+                    stable_dt_s=1.0,
+                    selected_limiter="synthetic",
+                ),
+            ),
+            patch.object(runner, "_step_hard_gate", return_value=(True, [])),
+            redirect_stdout(io.StringIO()),
+        ):
+            outcome = runner.advance_runtime_to_registered_end(cast(Any, runtime))
+        self.assertTrue(outcome["completed"])
+        self.assertEqual(outcome["registered_outputs_recorded"], 11)
+        self.assertEqual(FakeBackend.calls, 10)
+        np.testing.assert_array_equal(
+            np.asarray(recorder.times, dtype=np.float64).view(np.uint64),
+            runner.EXPECTED_OUTPUT_TIME.view(np.uint64),
+        )
+
+    def test_scheduler_source_contains_no_repeated_output_addition(self) -> None:
+        source = inspect.getsource(runner.advance_runtime_to_registered_end)
+        self.assertNotIn("next_output +=", source)
+        self.assertNotIn("next_target +=", source)
+        self.assertIn("registered_times[next_index]", source)
+
+    def test_r1_dynamic_outputs_are_absent_before_pro_review(self) -> None:
+        for path in (
+            runner.RAW_ROOT,
+            runner.FINAL_EVIDENCE_ROOT,
+            runner.FINAL_MANIFEST,
+            runner.REPORT_JSON,
+            runner.REPORT_MD,
+        ):
+            with self.subTest(path=path):
+                self.assertFalse(path.exists())
 
 
 class MetricArithmeticTests(unittest.TestCase):

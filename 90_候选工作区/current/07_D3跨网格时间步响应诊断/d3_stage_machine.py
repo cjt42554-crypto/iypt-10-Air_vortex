@@ -31,6 +31,10 @@ def audit_s0_report(
         "formal_source_tree",
         "implementation",
         "authorization",
+        "r1_scientific_identity_audit",
+        "v1_frozen_evidence_audit",
+        "r1_v1_evidence_root_isolation_audit",
+        "r1_registered_output_schedule_audit",
         "generated_config_audit",
         "cuda_probe",
     )
