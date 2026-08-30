@@ -172,6 +172,19 @@ def _git(*args: str) -> str:
     return completed.stdout.strip()
 
 
+def _git_diff_paths(base: str, tip: str = "HEAD") -> list[str]:
+    """Return repository-relative paths without locale-dependent Git quoting."""
+
+    return _git(
+        "-c",
+        "core.quotePath=false",
+        "diff",
+        "--name-only",
+        base,
+        tip,
+    ).splitlines()
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -416,7 +429,7 @@ def execution_authorization_audit(*, require_authorized: bool) -> dict[str, Any]
         parent_record = _git("rev-list", "--parents", "-n", "1", "HEAD").split()
         sole_parent = parent_record[1] if len(parent_record) == 2 else None
         changed_paths = (
-            _git("diff", "--name-only", str(reviewed_commit), "HEAD").splitlines()
+            _git_diff_paths(str(reviewed_commit))
             if _is_lower_hex(reviewed_commit, 40)
             else []
         )
@@ -1384,6 +1397,7 @@ def static_implementation_audit(*, require_clean: bool) -> dict[str, Any]:
     unit_tests = _run_unit_tests()
     implementation = _implementation_content_evidence()
     authorization = execution_authorization_audit(require_authorized=False)
+    exact_authorization = execution_authorization_audit(require_authorized=True)
     environment = _environment_identity()
     ledger = stage_ledger_template(execution_commit=None)
     ledger_audit = validate_stage_ledger_semantics(ledger)
@@ -1406,7 +1420,9 @@ def static_implementation_audit(*, require_clean: bool) -> dict[str, Any]:
             bool(item["git_blob_sha"]) for item in implementation.values()
         ),
         "separate_authorization_object_valid": authorization["gate_pass"],
-        "separate_authorization_object_default_denied": not authorization["authorized"],
+        "review_snapshot_not_already_execution_authorized": not exact_authorization[
+            "gate_pass"
+        ],
         "dynamic_execution_still_unauthorized": contract["authorization"][
             "real_cuda_dynamic_execution"
         ]
@@ -1436,6 +1452,7 @@ def static_implementation_audit(*, require_clean: bool) -> dict[str, Any]:
         "unit_tests": unit_tests,
         "implementation_content_evidence": implementation,
         "execution_authorization_audit": authorization,
+        "exact_execution_authorization_audit": exact_authorization,
         "environment": environment,
         "dynamic_output_hygiene": no_dynamic,
         "future_stage_ledger_template": ledger,

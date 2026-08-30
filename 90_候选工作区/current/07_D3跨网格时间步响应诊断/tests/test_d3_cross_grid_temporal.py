@@ -77,6 +77,30 @@ def _synthetic_authorized_payload() -> dict[str, Any]:
     return value
 
 
+def _synthetic_denied_payload() -> dict[str, Any]:
+    value = runner._json_object(runner.EXECUTION_AUTHORIZATION_PATH)
+    value["status"] = runner.AUTHORIZATION_DENIED
+    value["decision"] = {
+        "real_cuda_dynamic_execution": False,
+        "authorized_stages": [],
+        "automatic_follow_on": "PROHIBITED",
+    }
+    value["review_binding"] = {
+        "reviewed_implementation_commit": None,
+        "preregistration_git_blob_sha": None,
+        "formal_source_tree_sha256": runner._contract()["formal_source_contract"][
+            "required_tree_sha256"
+        ],
+        "implementation_files": {},
+    }
+    value["ruling"] = {
+        "reviewer": "PRO_REVIEW_REQUIRED",
+        "ruling_document": None,
+        "issued_at": None,
+    }
+    return value
+
+
 def _execution_binding_stub(commit: str) -> dict[str, Any]:
     return {
         "gate_pass": True,
@@ -308,17 +332,40 @@ class FrozenContractAndConfigurationTests(unittest.TestCase):
         self.assertTrue(audit["gate_pass"])
         self.assertTrue(audit["gates"]["exact_file_set"])
 
-    def test_dynamic_entry_is_fail_closed_under_current_contract(self) -> None:
-        with self.assertRaises(runner.D3ExecutionError):
-            runner.require_dynamic_execution_authorized()
-        self.assertFalse(runner.RAW_ROOT.exists())
+    def test_dynamic_entry_rejects_explicit_denial_without_raw_creation(self) -> None:
+        denied = _synthetic_denied_payload()
+        original_json_object = runner._json_object
 
-    def test_separate_authorization_object_is_valid_and_default_denied(self) -> None:
+        def fake_json_object(path: Path) -> dict[str, Any]:
+            if path == runner.EXECUTION_AUTHORIZATION_PATH:
+                return deepcopy(denied)
+            return original_json_object(path)
+
+        with tempfile.TemporaryDirectory(dir=HERE) as temporary_directory:
+            raw = Path(temporary_directory) / "raw"
+            with (
+                patch.object(runner, "_json_object", side_effect=fake_json_object),
+                patch.object(runner, "RAW_ROOT", raw),
+                self.assertRaises(runner.D3ExecutionError),
+            ):
+                runner.require_dynamic_execution_authorized()
+            self.assertFalse(raw.exists())
+
+    def test_separate_authorization_object_accepts_both_explicit_states(self) -> None:
         authorization = runner._json_object(runner.EXECUTION_AUTHORIZATION_PATH)
         audit = runner.validate_execution_authorization_shape(authorization)
         self.assertTrue(audit["gate_pass"])
-        self.assertFalse(audit["authorized"])
-        self.assertEqual(audit["status"], runner.AUTHORIZATION_DENIED)
+        self.assertEqual(
+            audit["authorized"],
+            authorization["status"] == runner.AUTHORIZATION_ALLOWED,
+        )
+
+        denied_audit = runner.validate_execution_authorization_shape(
+            _synthetic_denied_payload()
+        )
+        self.assertTrue(denied_audit["gate_pass"])
+        self.assertFalse(denied_audit["authorized"])
+        self.assertEqual(denied_audit["status"], runner.AUTHORIZATION_DENIED)
 
     def test_missing_or_malformed_authorization_fails_before_raw_creation(self) -> None:
         with tempfile.TemporaryDirectory(dir=HERE) as temporary_directory:
@@ -364,6 +411,24 @@ class FrozenContractAndConfigurationTests(unittest.TestCase):
             runner.validate_execution_authorization_shape(drifted)["gate_pass"]
         )
 
+    def test_authorization_diff_paths_disable_git_path_quoting(self) -> None:
+        authorization_path = runner._relative(runner.EXECUTION_AUTHORIZATION_PATH)
+        expected_call = (
+            "-c",
+            "core.quotePath=false",
+            "diff",
+            "--name-only",
+            "a" * 40,
+            "HEAD",
+        )
+        for module in (runner, analyser):
+            with patch.object(module, "_git", return_value=authorization_path) as git:
+                self.assertEqual(
+                    module._git_diff_paths("a" * 40),
+                    [authorization_path],
+                )
+                git.assert_called_once_with(*expected_call)
+
     def test_authorization_audit_rejects_clean_committed_implementation_drift(
         self,
     ) -> None:
@@ -385,7 +450,12 @@ class FrozenContractAndConfigurationTests(unittest.TestCase):
         def fake_git(*arguments: str) -> str:
             if arguments[:3] == ("rev-list", "--parents", "-n"):
                 return f"{'e' * 40} {'a' * 40}"
-            if arguments[:2] == ("diff", "--name-only"):
+            if arguments[:4] == (
+                "-c",
+                "core.quotePath=false",
+                "diff",
+                "--name-only",
+            ):
                 return runner._relative(runner.EXECUTION_AUTHORIZATION_PATH)
             raise AssertionError(arguments)
 
@@ -434,11 +504,30 @@ class FrozenContractAndConfigurationTests(unittest.TestCase):
             self.assertFalse(audit["gate_pass"])
             self.assertFalse(audit["gates"]["implementation_binding_matches"])
 
-    def test_analyser_final_is_fail_closed_under_current_contract(self) -> None:
-        with self.assertRaises(analyser.D3AnalysisError):
-            analyser.analyse_final()
-        self.assertFalse(analyser.REPORT_JSON.exists())
-        self.assertFalse(analyser.REPORT_MD.exists())
+    def test_analyser_final_rejects_missing_exact_authorization_without_reports(
+        self,
+    ) -> None:
+        failed_authorization = {
+            "gate_pass": False,
+            "gates": {"exact_authorization": False},
+        }
+        with tempfile.TemporaryDirectory(dir=HERE) as temporary_directory:
+            root = Path(temporary_directory)
+            report_json = root / "report.json"
+            report_md = root / "report.md"
+            with (
+                patch.object(
+                    analyser,
+                    "execution_authorization_audit",
+                    return_value=failed_authorization,
+                ),
+                patch.object(analyser, "REPORT_JSON", report_json),
+                patch.object(analyser, "REPORT_MD", report_md),
+                self.assertRaises(analyser.D3AnalysisError),
+            ):
+                analyser.analyse_final()
+            self.assertFalse(report_json.exists())
+            self.assertFalse(report_md.exists())
 
 
 class MetricArithmeticTests(unittest.TestCase):

@@ -2,8 +2,8 @@
 
 状态：
 
-- 静态实现：`D3_V2_S3_PUBLICATION_TRANSACTION_PATCH_READY_FOR_PRO_REVIEW`；
-- 动态执行：`NOT_AUTHORIZED`。
+- 静态实现：`D3_V2_AUTHORIZATION_PATH_AUDIT_PATCH_READY_FOR_PRO_REVIEW`；
+- 动态执行：只以独立授权对象及其精确绑定机器审计为准；本 README 不缓存授权状态。
 
 ## 目标
 
@@ -135,17 +135,9 @@ S3 最终证据发布补丁还固定了以下事务语义：
 5. S3 阶段内的分析、复制、哈希、写入、rename 或清理故障会回滚本次发布，然后提交唯一 `FAILED_STOPPED` 台账与失败标记；失败提交自身失败时恢复原台账并撤回新标记；
 6. 跟踪事务记录绑定执行提交、授权对象、Pro 裁决、正式源码树与前后 raw ledger 哈希；未知或不匹配的陈旧输出不会被复用。
 
-## 动态命令的当前闭锁
+## 动态命令的机器闭锁
 
-运行器已经实现未来执行入口，但当前独立授权对象明确保存：
-
-```text
-status = NOT_AUTHORIZED
-real_cuda_dynamic_execution = false
-authorized_stages = []
-```
-
-会在创建 D3 raw 或推进任何时间步之前拒绝以下命令：
+运行器已经实现执行入口。授权对象可以由 Pro 在受复核实现提交的唯一直接子提交中签发，但授权状态不会复制到本 README。只有授权对象的状态、受复核父提交、唯一变更路径、全部实现哈希、预注册 blob、正式源码树和裁决文档同时精确匹配，动态命令才可继续；旧授权、未授权或任一漂移都会在创建 D3 raw 或推进任何时间步之前拒绝以下命令：
 
 ```bash
 "$D3_GPU_PYTHON" \

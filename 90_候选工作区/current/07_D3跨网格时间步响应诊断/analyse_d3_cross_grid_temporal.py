@@ -163,6 +163,19 @@ def _git(*args: str) -> str:
     return completed.stdout.strip()
 
 
+def _git_diff_paths(base: str, tip: str = "HEAD") -> list[str]:
+    """Return repository-relative paths without locale-dependent Git quoting."""
+
+    return _git(
+        "-c",
+        "core.quotePath=false",
+        "diff",
+        "--name-only",
+        base,
+        tip,
+    ).splitlines()
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -427,7 +440,7 @@ def execution_authorization_audit() -> dict[str, Any]:
     parent_record = _git("rev-list", "--parents", "-n", "1", "HEAD").split()
     sole_parent = parent_record[1] if len(parent_record) == 2 else None
     changed_paths = (
-        _git("diff", "--name-only", str(reviewed_commit), "HEAD").splitlines()
+        _git_diff_paths(str(reviewed_commit))
         if _is_lower_hex(reviewed_commit, 40)
         else []
     )
