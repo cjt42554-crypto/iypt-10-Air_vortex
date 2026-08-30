@@ -1,0 +1,23 @@
+{
+  "authorization_id": "D3_PRO_EXECUTION_AUTHORIZATION_V1",
+  "decision": {
+    "authorized_stages": [],
+    "automatic_follow_on": "PROHIBITED",
+    "real_cuda_dynamic_execution": false
+  },
+  "instructions": "A future Pro review may authorize execution only by changing this file in the sole child commit of the reviewed implementation commit. The frozen preregistration remains unchanged, and every implementation blob/hash must be bound explicitly.",
+  "protocol_id": "D3_HF3D_CROSS_GRID_TEMPORAL_RESPONSE_V1",
+  "review_binding": {
+    "formal_source_tree_sha256": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8",
+    "implementation_files": {},
+    "preregistration_git_blob_sha": null,
+    "reviewed_implementation_commit": null
+  },
+  "ruling": {
+    "issued_at": null,
+    "reviewer": "PRO_REVIEW_REQUIRED",
+    "ruling_document": null
+  },
+  "schema_version": 1,
+  "status": "NOT_AUTHORIZED"
+}

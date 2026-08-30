@@ -4,9 +4,12 @@ import math
 import sys
 import tempfile
 import unittest
+from contextlib import ExitStack
 from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
+from unittest.mock import patch
 
 import numpy as np
 
@@ -20,6 +23,7 @@ if str(HERE) not in sys.path:
 
 import analyse_d3_cross_grid_temporal as analyser
 import run_d3_cross_grid_temporal as runner
+from airvortex.io.config_io import StrictJSONError
 
 
 def _metric_flags(**overrides: bool) -> dict[str, object]:
@@ -41,6 +45,36 @@ def _classification_payload(
 ) -> dict[str, dict[str, object]]:
     values = [first, second, third or _metric_flags(), fourth or _metric_flags()]
     return dict(zip(analyser.PRIMARY, values, strict=True))
+
+
+def _synthetic_authorized_payload() -> dict[str, Any]:
+    value = runner._json_object(runner.EXECUTION_AUTHORIZATION_PATH)
+    value["status"] = runner.AUTHORIZATION_ALLOWED
+    value["decision"] = {
+        "real_cuda_dynamic_execution": True,
+        "authorized_stages": list(runner.STAGE_ORDER),
+        "automatic_follow_on": "PROHIBITED",
+    }
+    value["review_binding"] = {
+        "reviewed_implementation_commit": "a" * 40,
+        "preregistration_git_blob_sha": "b" * 40,
+        "formal_source_tree_sha256": runner._contract()["formal_source_contract"][
+            "required_tree_sha256"
+        ],
+        "implementation_files": {
+            runner._relative(path): {
+                "git_blob_sha": "c" * 40,
+                "content_sha256": "d" * 64,
+            }
+            for path in runner._implementation_paths()
+        },
+    }
+    value["ruling"] = {
+        "reviewer": "ChatGPT Pro",
+        "ruling_document": "90_候选工作区/current/10_D3实现静态复核与执行门裁决.md",
+        "issued_at": "2026-08-31T00:00:00+08:00",
+    }
+    return value
 
 
 class FrozenContractAndConfigurationTests(unittest.TestCase):
@@ -98,6 +132,127 @@ class FrozenContractAndConfigurationTests(unittest.TestCase):
             runner.require_dynamic_execution_authorized()
         self.assertFalse(runner.RAW_ROOT.exists())
 
+    def test_separate_authorization_object_is_valid_and_default_denied(self) -> None:
+        authorization = runner._json_object(runner.EXECUTION_AUTHORIZATION_PATH)
+        audit = runner.validate_execution_authorization_shape(authorization)
+        self.assertTrue(audit["gate_pass"])
+        self.assertFalse(audit["authorized"])
+        self.assertEqual(audit["status"], runner.AUTHORIZATION_DENIED)
+
+    def test_missing_or_malformed_authorization_fails_before_raw_creation(self) -> None:
+        with tempfile.TemporaryDirectory(dir=HERE) as temporary_directory:
+            root = Path(temporary_directory)
+            raw = root / "raw"
+            missing = root / "missing_authorization.json"
+            with (
+                patch.object(runner, "EXECUTION_AUTHORIZATION_PATH", missing),
+                patch.object(runner, "RAW_ROOT", raw),
+            ):
+                with self.assertRaises(runner.D3ExecutionError):
+                    runner.require_dynamic_execution_authorized()
+                self.assertFalse(raw.exists())
+
+            malformed = root / "malformed_authorization.json"
+            malformed.write_text('{"status": "NOT_AUTHORIZED",}\n', encoding="utf-8")
+            with (
+                patch.object(runner, "EXECUTION_AUTHORIZATION_PATH", malformed),
+                patch.object(runner, "RAW_ROOT", raw),
+            ):
+                with self.assertRaises(StrictJSONError):
+                    runner.require_dynamic_execution_authorized()
+                self.assertFalse(raw.exists())
+
+    def test_authorized_shape_requires_exact_bound_file_set_and_hashes(self) -> None:
+        authorization = _synthetic_authorized_payload()
+        audit = runner.validate_execution_authorization_shape(authorization)
+        self.assertTrue(audit["gate_pass"])
+        self.assertTrue(audit["authorized"])
+
+        missing = deepcopy(authorization)
+        missing["review_binding"]["implementation_files"].pop(
+            next(iter(missing["review_binding"]["implementation_files"]))
+        )
+        self.assertFalse(
+            runner.validate_execution_authorization_shape(missing)["gate_pass"]
+        )
+
+        drifted = deepcopy(authorization)
+        first = next(iter(drifted["review_binding"]["implementation_files"].values()))
+        first["git_blob_sha"] = "not-a-git-blob"
+        self.assertFalse(
+            runner.validate_execution_authorization_shape(drifted)["gate_pass"]
+        )
+
+    def test_authorization_audit_rejects_clean_committed_implementation_drift(
+        self,
+    ) -> None:
+        authorization = _synthetic_authorized_payload()
+        expected_binding = authorization["review_binding"]["implementation_files"]
+        original_json_object = runner._json_object
+
+        def fake_json_object(path: Path) -> dict[str, Any]:
+            if path == runner.EXECUTION_AUTHORIZATION_PATH:
+                return deepcopy(authorization)
+            return original_json_object(path)
+
+        def fake_blob(path: Path, revision: str = "HEAD") -> str:
+            del revision
+            if path == runner.PREREGISTRATION_PATH:
+                return "b" * 40
+            return "e" * 40
+
+        def fake_git(*arguments: str) -> str:
+            if arguments[:3] == ("rev-list", "--parents", "-n"):
+                return f"{'e' * 40} {'a' * 40}"
+            if arguments[:2] == ("diff", "--name-only"):
+                return runner._relative(runner.EXECUTION_AUTHORIZATION_PATH)
+            raise AssertionError(arguments)
+
+        source_hash = runner._contract()["formal_source_contract"][
+            "required_tree_sha256"
+        ]
+        with (
+            patch.object(runner, "_json_object", side_effect=fake_json_object),
+            patch.object(runner, "_blob_sha", side_effect=fake_blob),
+            patch.object(runner, "_git", side_effect=fake_git),
+            patch.object(
+                runner,
+                "_capture_source",
+                return_value={"available": True, "value": source_hash},
+            ),
+            patch.object(
+                runner,
+                "_implementation_binding",
+                return_value=deepcopy(expected_binding),
+            ),
+        ):
+            self.assertTrue(
+                runner.execution_authorization_audit(require_authorized=True)[
+                    "gate_pass"
+                ]
+            )
+
+        drifted_binding = deepcopy(expected_binding)
+        next(iter(drifted_binding.values()))["content_sha256"] = "0" * 64
+        with (
+            patch.object(runner, "_json_object", side_effect=fake_json_object),
+            patch.object(runner, "_blob_sha", side_effect=fake_blob),
+            patch.object(runner, "_git", side_effect=fake_git),
+            patch.object(
+                runner,
+                "_capture_source",
+                return_value={"available": True, "value": source_hash},
+            ),
+            patch.object(
+                runner,
+                "_implementation_binding",
+                return_value=drifted_binding,
+            ),
+        ):
+            audit = runner.execution_authorization_audit(require_authorized=True)
+            self.assertFalse(audit["gate_pass"])
+            self.assertFalse(audit["gates"]["implementation_binding_matches"])
+
     def test_analyser_final_is_fail_closed_under_current_contract(self) -> None:
         with self.assertRaises(analyser.D3AnalysisError):
             analyser.analyse_final()
@@ -143,7 +298,7 @@ class MetricArithmeticTests(unittest.TestCase):
             },
         )
 
-    def test_initial_removal_rebases_each_registered_window(self) -> None:
+    def test_initial_removed_uses_first_value_of_supplied_trajectory(self) -> None:
         np.testing.assert_array_equal(
             analyser.initial_removed(np.asarray([7.0, 8.0, 10.0])),
             np.asarray([0.0, 1.0, 3.0]),
@@ -152,6 +307,30 @@ class MetricArithmeticTests(unittest.TestCase):
             analyser.rms(np.asarray([0.0, 3.0, 4.0])),
             5.0 / math.sqrt(3.0),
         )
+
+    def test_late_diagnostic_window_keeps_global_t0_baseline(self) -> None:
+        full = np.asarray([10.0, 13.0, 18.0, 25.0])
+        late = analyser.global_initial_removed_window(
+            full,
+            np.asarray([2, 3], dtype=np.int64),
+        )
+        np.testing.assert_array_equal(late, np.asarray([8.0, 15.0]))
+        self.assertNotEqual(late[0], 0.0)
+
+        trajectories = {
+            case_id: late + float(index)
+            for index, case_id in enumerate(analyser.EXPECTED_CASES)
+        }
+        result = analyser.compute_temporal_response_metrics(
+            trajectories,
+            epsilon=1.0e-12,
+            trajectories_are_global_initial_removed=True,
+        )
+        self.assertEqual(
+            result["initial_value_policy"],
+            "GLOBAL_Q_T_MINUS_Q_0_BEFORE_WINDOW_SLICE",
+        )
+        self.assertEqual(result["q"]["G6_DT0"][0], 8.0)
 
     def test_scale_floor_controls_zero_spatial_norm(self) -> None:
         zeros = {case_id: np.zeros(4) for case_id in analyser.EXPECTED_CASES}
@@ -166,10 +345,13 @@ class MetricArithmeticTests(unittest.TestCase):
     def test_safe_cosine_is_undefined_for_either_zero_norm(self) -> None:
         self.assertIsNone(analyser.safe_cosine(np.zeros(3), np.ones(3)))
         self.assertIsNone(analyser.safe_cosine(np.ones(3), np.zeros(3)))
-        self.assertAlmostEqual(
-            analyser.safe_cosine(np.asarray([1.0, 0.0]), np.asarray([-1.0, 0.0])),
-            -1.0,
+        cosine = analyser.safe_cosine(
+            np.asarray([1.0, 0.0]),
+            np.asarray([-1.0, 0.0]),
         )
+        self.assertIsNotNone(cosine)
+        assert cosine is not None
+        self.assertAlmostEqual(cosine, -1.0)
 
     def test_observed_order_requires_positive_gamma_and_first_increment_scale(
         self,
@@ -188,14 +370,14 @@ class MetricArithmeticTests(unittest.TestCase):
                 first_increment_scale=0.1,
             )
         )
-        self.assertAlmostEqual(
-            analyser.observed_order(
-                0.5,
-                first_increment_rms=1.0,
-                first_increment_scale=0.1,
-            ),
-            1.0,
+        order = analyser.observed_order(
+            0.5,
+            first_increment_rms=1.0,
+            first_increment_scale=0.1,
         )
+        self.assertIsNotNone(order)
+        assert order is not None
+        self.assertAlmostEqual(order, 1.0)
 
     def test_negative_direction_cosine_blocks_non_negligible_contraction(self) -> None:
         x = np.asarray([0.0, 1.0, 2.0])
@@ -314,7 +496,7 @@ class NumericalQualityHardGateTests(unittest.TestCase):
             analyser.evaluate_numerical_quality_hard_gates(metrics)
 
     def test_runner_per_step_gate_rejects_each_dense_step_violation(self) -> None:
-        runtime = SimpleNamespace(
+        runtime: Any = SimpleNamespace(
             state=np.zeros(1),
             initial_volume_m3=1.0,
             pressure_accelerator={"selected": "cuda", "fallback": False},
@@ -326,7 +508,8 @@ class NumericalQualityHardGateTests(unittest.TestCase):
             "liquid_volume_balance_error_m3": 0.001,
             "cfl_retry_count": 4,
         }
-        passed, failed = runner._step_hard_gate(runtime, SimpleNamespace(**passing))
+        diagnostics: Any = SimpleNamespace(**passing)
+        passed, failed = runner._step_hard_gate(runtime, diagnostics)
         self.assertTrue(passed)
         self.assertEqual(failed, [])
         mutations = {
@@ -340,9 +523,8 @@ class NumericalQualityHardGateTests(unittest.TestCase):
             with self.subTest(name=name):
                 values = dict(passing)
                 values[name] = bad_value
-                passed, failed = runner._step_hard_gate(
-                    runtime, SimpleNamespace(**values)
-                )
+                diagnostics = SimpleNamespace(**values)
+                passed, failed = runner._step_hard_gate(runtime, diagnostics)
                 self.assertFalse(passed)
                 self.assertTrue(failed)
 
@@ -466,8 +648,105 @@ class IdentityFreshnessAndLedgerTests(unittest.TestCase):
                 analyser.audit_archive_input_path(link, allowed_root=root)["gate_pass"]
             )
 
+    def test_case_summary_payload_binding_rejects_extra_or_changed_file(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            archive = Path(temporary_directory)
+            first = archive / "result.json"
+            first.write_text("{}\n", encoding="utf-8")
+            record = {"payloads": analyser._archive_payloads(archive)}
+            self.assertTrue(
+                analyser.audit_summary_archive_payloads(archive, record)["gate_pass"]
+            )
+            (archive / "extra.json").write_text("{}\n", encoding="utf-8")
+            audit = analyser.audit_summary_archive_payloads(archive, record)
+            self.assertFalse(audit["gate_pass"])
+            self.assertFalse(audit["gates"]["exact_file_set_hash_and_size"])
+
+    def test_analyser_independently_rebuilds_initial_identity_not_runner_boolean(
+        self,
+    ) -> None:
+        def fake_config(case_id: str) -> dict[str, object]:
+            return {"case_id": case_id}
+
+        def fake_grid(case_id: str) -> SimpleNamespace:
+            size = 2 if case_id.startswith("G6_") else 3
+            mask = np.zeros((size, size), dtype=bool)
+            mask[0, 0] = True
+            return SimpleNamespace(bar_mask=mask, active_mask=np.ones_like(mask))
+
+        def fake_state() -> runner.HF3DState:
+            array = np.zeros((2, 2), dtype=np.float64)
+            return runner.HF3DState(
+                time_s=0.0,
+                step=0,
+                bar_angle_rad=0.0,
+                u_x_face=array.copy(),
+                u_y_face=array.copy(),
+                u_z_face=array.copy(),
+                phase=array.copy(),
+                pressure_pa=array.copy(),
+            )
+
+        class FakeBackend:
+            def make_grid(self, config: SimpleNamespace) -> SimpleNamespace:
+                return fake_grid(str(config.case_id))
+
+            def initialise_state(
+                self,
+                config: SimpleNamespace,
+                grid: SimpleNamespace,
+            ) -> runner.HF3DState:
+                del config, grid
+                return fake_state()
+
+        s0_cases: dict[str, Any] = {}
+        runs: dict[str, Any] = {}
+        for case_id in analyser.EXPECTED_CASES:
+            grid = fake_grid(case_id)
+            state = fake_state()
+            config = fake_config(case_id)
+            record = analyser._initial_identity_record(
+                grid,
+                state,
+                config_canonical_sha256=analyser._canonical_sha256(config),
+            )
+            s0_cases[case_id] = record
+            runs[case_id] = SimpleNamespace(
+                summary={
+                    "initial_identity": deepcopy(record),
+                    "gates": {"initial_grid_mask_state_matches_s0": False},
+                },
+                fields={"stir_bar_mask_3d": grid.bar_mask.astype(np.uint8)},
+            )
+        s0 = {"initial_grid_mask_state_identity": {"cases": s0_cases}}
+        with (
+            patch.object(analyser, "HighFidelityBackend", FakeBackend),
+            patch.object(analyser, "_expected_config", side_effect=fake_config),
+            patch.object(
+                analyser.SimulationConfig,
+                "from_dict",
+                side_effect=lambda value: SimpleNamespace(case_id=value["case_id"]),
+            ),
+        ):
+            audit = analyser.independent_initial_identity_audit(runs, s0)
+            self.assertTrue(audit["gate_pass"])
+            self.assertEqual(audit["time_steps_advanced"], 0)
+
+            drifted_runs = deepcopy(runs)
+            drifted_runs["G6_DT1"].summary["initial_identity"]["state"]["phase"][
+                "sha256"
+            ] = "0" * 64
+            drifted_runs["G6_DT1"].summary["gates"][
+                "initial_grid_mask_state_matches_s0"
+            ] = True
+            drifted = analyser.independent_initial_identity_audit(drifted_runs, s0)
+            self.assertFalse(drifted["gate_pass"])
+            self.assertFalse(
+                drifted["cases"]["G6_DT1"]["gates"]["case_summary_matches_s0_exactly"]
+            )
+
     @staticmethod
-    def _valid_provenance(commit: str, source: str) -> dict[str, object]:
+    def _valid_provenance(commit: str, source: str) -> dict[str, Any]:
         return {
             "source_identity": {
                 "disk_content_tree": {
@@ -548,6 +827,371 @@ class IdentityFreshnessAndLedgerTests(unittest.TestCase):
         self.assertFalse(audit["gate_pass"])
         self.assertFalse(audit["stages"]["S1"]["gates"]["human_description_exact"])
         self.assertFalse(audit["stages"]["S2"]["gates"]["human_description_exact"])
+
+    def test_stage_ledger_rejects_duplicate_reorder_and_illegal_state_pairs(
+        self,
+    ) -> None:
+        mutations: list[tuple[str, Any]] = []
+        duplicate = runner.stage_ledger_template(execution_commit="a" * 40)
+        duplicate["stages"][2]["stage"] = "S1"
+        mutations.append(("duplicate", duplicate))
+        reordered = runner.stage_ledger_template(execution_commit="a" * 40)
+        reordered["stages"][1], reordered["stages"][2] = (
+            reordered["stages"][2],
+            reordered["stages"][1],
+        )
+        mutations.append(("reordered", reordered))
+        illegal = runner.stage_ledger_template(execution_commit="a" * 40)
+        illegal["stages"][0]["disposition"] = "EXECUTED"
+        illegal["stages"][0]["status"] = "NOT_EXECUTED"
+        mutations.append(("illegal_state_pair", illegal))
+        for name, ledger in mutations:
+            with self.subTest(name=name):
+                self.assertFalse(
+                    runner.validate_stage_ledger_semantics(ledger)["gate_pass"]
+                )
+
+    def test_stage_ledger_requires_exact_ordered_evidence_paths(self) -> None:
+        ledger = runner.stage_ledger_template(execution_commit="a" * 40)
+        ledger["stages"][0] = runner._execution_stage_entry(
+            "S0",
+            disposition="EXECUTED",
+            status="PASS",
+            evidence=runner._stage_pass_evidence("S0"),
+        )
+        runner._sync_stage_ledger_summary(ledger)
+        self.assertTrue(runner.validate_stage_ledger_semantics(ledger)["gate_pass"])
+
+        wrong = deepcopy(ledger)
+        wrong["stages"][0]["evidence"] = ["wrong/s0.json"]
+        audit = runner.validate_stage_ledger_semantics(wrong)
+        self.assertFalse(audit["gate_pass"])
+        self.assertFalse(audit["stages"]["S0"]["gates"]["evidence_paths_exact"])
+
+    def test_stage_ledger_allows_one_failed_stage_then_only_unexecuted(self) -> None:
+        ledger = runner.stage_ledger_template(execution_commit="a" * 40)
+        ledger["stages"][0] = runner._execution_stage_entry(
+            "S0",
+            disposition="EXECUTED",
+            status="PASS",
+            evidence=runner._stage_pass_evidence("S0"),
+        )
+        ledger["stages"][1] = runner._execution_stage_entry(
+            "S1",
+            disposition="FAILED_STOPPED",
+            status=runner.FAIL_CLOSED,
+            evidence=[runner._relative(runner.FAILURE_PATH)],
+        )
+        runner._sync_stage_ledger_summary(ledger)
+        audit = runner.validate_stage_ledger_semantics(ledger)
+        self.assertTrue(audit["gate_pass"])
+        self.assertEqual(ledger["failed_stages"], ["S1"])
+        self.assertEqual(ledger["unexecuted_stages"], ["S2", "S3"])
+
+        invalid = deepcopy(ledger)
+        invalid["stages"][2] = runner._execution_stage_entry(
+            "S2",
+            disposition="EXECUTED",
+            status="PASS",
+            evidence=runner._stage_pass_evidence("S2"),
+        )
+        runner._sync_stage_ledger_summary(invalid)
+        self.assertFalse(runner.validate_stage_ledger_semantics(invalid)["gate_pass"])
+
+    def test_unique_failure_transaction_keeps_marker_and_ledger_consistent(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory(dir=HERE) as temporary_directory:
+            root = Path(temporary_directory)
+            ledger_path = root / "stage_ledger.json"
+            failure_path = root / "execution_failure.json"
+            with (
+                patch.object(runner, "RAW_ROOT", root),
+                patch.object(runner, "STAGE_LEDGER_PATH", ledger_path),
+                patch.object(runner, "FAILURE_PATH", failure_path),
+            ):
+                runner._write_json(
+                    ledger_path,
+                    runner.stage_ledger_template(execution_commit="a" * 40),
+                )
+                recorded = runner._record_dynamic_failure(
+                    "S0",
+                    ["prepare-execution"],
+                    RuntimeError("injected preparation failure"),
+                )
+                self.assertTrue(recorded)
+                ledger = runner._json_object(ledger_path)
+                failure = runner._json_object(failure_path)
+                self.assertTrue(
+                    runner.validate_stage_ledger_semantics(ledger)["gate_pass"]
+                )
+                self.assertTrue(
+                    runner.validate_stage_ledger_evidence_files(ledger)["gate_pass"]
+                )
+                self.assertEqual(ledger["failed_stages"], ["S0"])
+                self.assertEqual(failure["stage"], "S0")
+                self.assertEqual(failure["execution_commit"], "a" * 40)
+
+    def test_prepare_exception_is_routed_to_unique_failure_transaction(self) -> None:
+        with tempfile.TemporaryDirectory(dir=HERE) as temporary_directory:
+            root = Path(temporary_directory)
+            ledger_path = root / "stage_ledger.json"
+            failure_path = root / "execution_failure.json"
+            s0_path = root / "s0.json"
+            with (
+                patch.object(runner, "RAW_ROOT", root),
+                patch.object(runner, "STAGE_LEDGER_PATH", ledger_path),
+                patch.object(runner, "FAILURE_PATH", failure_path),
+                patch.object(runner, "S0_PATH", s0_path),
+                patch.object(
+                    runner,
+                    "execution_identity_audit",
+                    return_value={"execution_commit": "a" * 40},
+                ),
+                patch.object(
+                    runner,
+                    "initial_grid_state_identity_audit",
+                    side_effect=RuntimeError("injected initial rebuild failure"),
+                ),
+            ):
+                with self.assertRaises(RuntimeError):
+                    runner.main(["prepare-execution"])
+                ledger = runner._json_object(ledger_path)
+                self.assertEqual(ledger["failed_stages"], ["S0"])
+                self.assertEqual(
+                    runner._json_object(failure_path)["stage"],
+                    "S0",
+                )
+
+    def test_archive_and_summary_exceptions_are_wrapped_as_case_transactions(
+        self,
+    ) -> None:
+        temporary_directory = tempfile.TemporaryDirectory(dir=HERE)
+        self.addCleanup(temporary_directory.cleanup)
+        summary_path = Path(temporary_directory.name) / "case_summary.json"
+        runtime = SimpleNamespace(
+            grid=SimpleNamespace(),
+            state=SimpleNamespace(),
+            config_identity={"effective_canonical_sha256": "f" * 64},
+            pressure_accelerator={"selected": "cuda", "fallback": False},
+        )
+        binding = {
+            "execution_commit": "a" * 40,
+            "implementation": {},
+            "authorization": {"observed": {}},
+        }
+        source_hash = runner._contract()["formal_source_contract"][
+            "required_tree_sha256"
+        ]
+        outcome = {
+            "completed": True,
+            "failure": None,
+            "retry_attempts": 0,
+            "wall_time_s": 1.0,
+            "process_cpu_time_s": 1.0,
+        }
+        original_json_object = runner._json_object
+
+        def fake_case_json(path: Path) -> dict[str, Any]:
+            if path == runner.S0_PATH:
+                return {
+                    "initial_grid_mask_state_identity": {
+                        "cases": {"G6_DT0": {"identity": "exact"}}
+                    }
+                }
+            return original_json_object(path)
+
+        common_patches: tuple[Any, ...] = (
+            patch.object(
+                runner,
+                "_case_summary_path",
+                return_value=summary_path,
+            ),
+            patch.object(runner, "execution_binding_audit", return_value=binding),
+            patch.object(runner, "_prepare_runtime", return_value=runtime),
+            patch.object(
+                runner,
+                "_initial_identity_record",
+                return_value={"identity": "exact"},
+            ),
+            patch.object(
+                runner,
+                "_json_object",
+                side_effect=fake_case_json,
+            ),
+            patch.object(
+                runner,
+                "_capture_source",
+                return_value={"value": source_hash},
+            ),
+            patch.object(
+                runner,
+                "_capture_revision",
+                return_value={"value": "a" * 40},
+            ),
+            patch.object(
+                runner,
+                "advance_runtime_to_registered_end",
+                return_value=outcome,
+            ),
+            patch.object(
+                runner,
+                "_runtime_quality",
+                return_value={"gate_pass": True},
+            ),
+            patch.object(
+                runner,
+                "_save_partial",
+                return_value={"path": "recoverable/partial.npz"},
+            ),
+        )
+        with ExitStack() as stack:
+            for manager in common_patches:
+                stack.enter_context(manager)
+            stack.enter_context(
+                patch.object(
+                    runner,
+                    "_assemble_archive",
+                    side_effect=RuntimeError("injected archive failure"),
+                )
+            )
+            with self.assertRaises(runner.D3CaseTransactionError) as archive_error:
+                runner._run_one_case(
+                    "G6_DT0",
+                    {"execution_commit": "a" * 40},
+                )
+            self.assertIn("archive failure", str(archive_error.exception))
+
+        common_patches = (
+            patch.object(
+                runner,
+                "_case_summary_path",
+                return_value=summary_path,
+            ),
+            patch.object(runner, "execution_binding_audit", return_value=binding),
+            patch.object(runner, "_prepare_runtime", return_value=runtime),
+            patch.object(
+                runner,
+                "_initial_identity_record",
+                return_value={"identity": "exact"},
+            ),
+            patch.object(
+                runner,
+                "_json_object",
+                side_effect=fake_case_json,
+            ),
+            patch.object(
+                runner,
+                "_capture_source",
+                return_value={"value": source_hash},
+            ),
+            patch.object(
+                runner,
+                "_capture_revision",
+                return_value={"value": "a" * 40},
+            ),
+            patch.object(
+                runner,
+                "advance_runtime_to_registered_end",
+                return_value=outcome,
+            ),
+            patch.object(
+                runner,
+                "_runtime_quality",
+                return_value={"gate_pass": True},
+            ),
+            patch.object(
+                runner,
+                "_assemble_archive",
+                return_value={"path": "archive"},
+            ),
+            patch.object(
+                runner,
+                "_save_partial",
+                return_value={"path": "recoverable/partial.npz"},
+            ),
+            patch.object(
+                runner,
+                "_write_json",
+                side_effect=RuntimeError("injected summary failure"),
+            ),
+        )
+        with ExitStack() as stack:
+            for manager in common_patches:
+                stack.enter_context(manager)
+            with self.assertRaises(runner.D3CaseTransactionError) as summary_error:
+                runner._run_one_case(
+                    "G6_DT0",
+                    {"execution_commit": "a" * 40},
+                )
+            self.assertIn("summary failure", str(summary_error.exception))
+
+    def test_stage_commit_exception_is_routed_to_failure_transaction(self) -> None:
+        with tempfile.TemporaryDirectory(dir=HERE) as temporary_directory:
+            root = Path(temporary_directory)
+            ledger_path = root / "stage_ledger.json"
+            failure_path = root / "execution_failure.json"
+            s0_path = root / "s0.json"
+            s0_path.write_text("{}\n", encoding="utf-8")
+            original_replace = runner._replace_stage_entry
+            calls = 0
+
+            def fail_first_stage_commit(
+                stage: str,
+                *,
+                disposition: str,
+                status: str,
+                evidence: Any,
+            ) -> None:
+                nonlocal calls
+                calls += 1
+                if calls == 1:
+                    raise RuntimeError("injected stage commit failure")
+                original_replace(
+                    stage,
+                    disposition=disposition,
+                    status=status,
+                    evidence=evidence,
+                )
+
+            with (
+                patch.object(runner, "RAW_ROOT", root),
+                patch.object(runner, "STAGE_LEDGER_PATH", ledger_path),
+                patch.object(runner, "FAILURE_PATH", failure_path),
+                patch.object(runner, "S0_PATH", s0_path),
+                patch.object(
+                    runner,
+                    "execution_identity_audit",
+                    return_value={"execution_commit": "a" * 40},
+                ),
+                patch.object(
+                    runner,
+                    "_run_one_case",
+                    return_value={"gate_pass": True},
+                ),
+                patch.object(
+                    runner,
+                    "_replace_stage_entry",
+                    side_effect=fail_first_stage_commit,
+                ),
+            ):
+                ledger = runner.stage_ledger_template(execution_commit="a" * 40)
+                ledger["stages"][0] = runner._execution_stage_entry(
+                    "S0",
+                    disposition="EXECUTED",
+                    status="PASS",
+                    evidence=[runner._relative(s0_path)],
+                )
+                runner._sync_stage_ledger_summary(ledger)
+                runner._write_json(ledger_path, ledger)
+                with self.assertRaises(RuntimeError):
+                    runner.main(["run-stage", "--stage", "S1"])
+                failed_ledger = runner._json_object(ledger_path)
+                self.assertEqual(failed_ledger["failed_stages"], ["S1"])
+                self.assertEqual(
+                    runner._json_object(failure_path)["stage"],
+                    "S1",
+                )
 
 
 if __name__ == "__main__":

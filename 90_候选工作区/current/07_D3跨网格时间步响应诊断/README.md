@@ -2,9 +2,8 @@
 
 状态：
 
-```text
-D3_IMPLEMENTATION_READY_FOR_PRO_STATIC_REVIEW__DYNAMIC_EXECUTION_NOT_AUTHORIZED
-```
+- 静态实现：`D3_V2_IMPLEMENTATION_READY_FOR_PRO_STATIC_REVIEW`；
+- 动态执行：`NOT_AUTHORIZED`。
 
 ## 目标
 
@@ -26,6 +25,14 @@ D3 不建立数值资格，不修改正式 HF3D，不预测长期稳态或实验
 90_候选工作区/current/07_D3跨网格时间步响应诊断/d3_cross_grid_temporal_preregistration.json
 ```
 
+独立执行授权对象：
+
+```text
+90_候选工作区/current/07_D3跨网格时间步响应诊断/d3_execution_authorization.json
+```
+
+冻结预注册继续保存科学设计与“未授权”历史状态；未来执行许可只能写入独立授权对象，不能通过翻转预注册布尔值开门。
+
 基线配置：
 
 ```text
@@ -44,6 +51,7 @@ dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
 ```text
 run_d3_cross_grid_temporal.py
 analyse_d3_cross_grid_temporal.py
+d3_execution_authorization.json
 tests/test_d3_cross_grid_temporal.py
 generated_configs/G6_DT0.json
 generated_configs/G6_DT1.json
@@ -98,16 +106,25 @@ D3_GPU_PYTHON="90_候选工作区/current/01_HF3D数值资格/.venv-gpu/bin/pyth
 4. 核对正式源码树哈希；
 5. 探测实际 CUDA FP64 后端；
 6. 核对 D3 raw、动态报告和最终清单尚不存在；
-7. 核对 S0–S3 的阶段编号、动作名、证据字段和人类说明逐项同义；
+7. 核对 S0–S3 唯一有序、状态组合合法、失败后不再推进，并要求每一阶段使用精确登记的证据路径；
 8. 明确记录 `time_steps_advanced = 0`。
+
+V2 还增加以下结果盲静态加固：
+
+1. 执行授权必须绑定受复核提交、预注册 blob、正式源码树和全部候选实现文件的 Git blob 与内容 SHA-256；
+2. 授权提交必须是受复核快照的唯一直接子提交，且该提交只能修改授权对象，从而避开授权文件自哈希递归；
+3. 独立分析器自行重建并逐字段比较 S0、逐算例摘要、正式 G0 归档掩膜和同网格三个时间层的初态身份，不采信运行器给出的结论布尔值；
+4. 所有可捕获的动态异常统一写入一个失败事务出口，使失败标记、阶段台账和可恢复诊断保持一致；
+5. 诊断分窗先在完整轨迹上计算 `Q(t)-Q(0)`，再切取登记窗口；后半窗口不会重新减去 `Q(0.005 s)`。
 
 ## 动态命令的当前闭锁
 
-运行器已经实现未来执行入口，但当前预注册中的：
+运行器已经实现未来执行入口，但当前独立授权对象明确保存：
 
 ```text
+status = NOT_AUTHORIZED
 real_cuda_dynamic_execution = false
-execution_requires_new_pro_review = true
+authorized_stages = []
 ```
 
 会在创建 D3 raw 或推进任何时间步之前拒绝以下命令：
@@ -130,7 +147,16 @@ execution_requires_new_pro_review = true
   final
 ```
 
-只有新的 Pro 裁决明确改变执行授权后，才允许按 `S0 → S1 → S2 → S3` 顺序使用这些入口。S1 或 S2 任一算例硬门失败都会写入失败诊断、停止后续算例，并把顶层状态闭锁为 `D3_INCONCLUSIVE_FAIL_CLOSED`。
+只有新的 Pro 裁决明确授权同一受复核快照后，才允许按 `S0 → S1 → S2 → S3` 顺序使用这些入口。合法授权需要满足：
+
+1. Pro 先完成对唯一清洁 `main` 快照的复核；如需新增详细裁决文档，可先单独提交该文档；
+2. 随后的授权提交只能修改 `d3_execution_authorization.json`；
+3. 授权对象把其唯一父提交、预注册 blob、正式源码树、候选实现文件集合及每个 blob/hash 全部写实；
+4. 缺失、格式错误、文件集合变化、hash 漂移、父提交漂移、配置漂移或正式源码漂移均在创建 raw 前失败。
+
+授权文件本身不写入自身提交 SHA 或自身 blob，因此不存在自哈希递归。任何实现文件在复核后发生变化，即使已经提交且工作树清洁，也会使旧授权失效。
+
+S1 或 S2 任一算例硬门失败，或算例准备、推进、归档、摘要和阶段提交发生可捕获异常，都会进入同一失败事务，停止后续算例，并把顶层状态闭锁为 `D3_INCONCLUSIVE_FAIL_CLOSED`。
 
 ## 独立分析边界
 
@@ -145,7 +171,15 @@ cosine_G6, cosine_G9, cosine_delta
 observed_order_G6, observed_order_G9, observed_order_delta
 ```
 
-分析器只接受 D3 自身 raw 根目录下的规范归档，拒绝 D2、隔离目录、checkpoint、符号链接和跨提交轨迹。余弦零范数保持为未定义；诊断分窗不能改变完整窗口顶层标签；二值事件只记录，不作为 PASS 门。
+分析器只接受 D3 自身 raw 根目录下的规范归档，拒绝 D2、隔离目录、checkpoint、符号链接和跨提交轨迹，并要求逐算例摘要中的归档载荷文件集、大小和 SHA-256 与实际归档精确一致。余弦零范数保持为未定义；诊断分窗不能改变完整窗口顶层标签；二值事件只记录，不作为 PASS 门。
+
+所有窗口的去初值语义统一为先在完整轨迹计算：
+
+$$
+q_{L,k}(t)=Q_{L,k}(t)-Q_{L,k}(0),
+$$
+
+再切取 `0–0.005 s` 或 `0.005–0.010 s` 的原生输出样本。该选择在任何 D3 动态结果出现前完成并由测试锁定。
 
 ## 当前静态证据
 
@@ -165,10 +199,6 @@ artifacts/d3_implementation_static_review.json
 
 ## 停止点
 
-候选实现和静态测试完成后停在：
-
-```text
-D3_IMPLEMENTATION_READY_FOR_PRO_STATIC_REVIEW__DYNAMIC_EXECUTION_NOT_AUTHORIZED
-```
+候选实现和静态测试完成后停在“V2 候选实现等待 Pro 静态复核，动态执行未授权”。
 
 只有新的 Pro 明确裁决才能启动真实 CUDA 阶段。

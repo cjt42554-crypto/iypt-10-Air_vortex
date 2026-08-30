@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Prepare and, only after a future authorization, execute D3 HF3D cases.
 
-The current preregistration authorizes configuration generation and non-stepping
-static audits only.  The dynamic entry points fail closed while
-``real_cuda_dynamic_execution`` remains false.  All numerical advancement is
-delegated directly to the formal HF3D implementation; this candidate driver
-only supplies provenance, ordering, identity, and evidence gates.
+The frozen preregistration authorizes configuration generation and non-stepping
+static audits only.  Dynamic entry points require a separate Pro authorization
+object bound to one reviewed implementation snapshot; that object is currently
+denied.  All numerical advancement is delegated directly to the formal HF3D
+implementation; this candidate driver only supplies provenance, ordering,
+identity, and evidence gates.
 """
 
 from __future__ import annotations
@@ -16,8 +17,10 @@ import hashlib
 import importlib.metadata
 import json
 import math
+import os
 import subprocess
 import sys
+import tempfile
 import time
 import traceback
 from collections.abc import Mapping, Sequence
@@ -35,6 +38,7 @@ FORMAL_ROOT = REPOSITORY_ROOT / "02_模拟程序"
 FORMAL_SOURCE = FORMAL_ROOT / "src"
 Q1R3_ROOT = HERE.parent / "01_HF3D数值资格"
 PREREGISTRATION_PATH = HERE / "d3_cross_grid_temporal_preregistration.json"
+EXECUTION_AUTHORIZATION_PATH = HERE / "d3_execution_authorization.json"
 GENERATED_CONFIG_ROOT = HERE / "generated_configs"
 STATIC_REVIEW_PATH = HERE / "artifacts" / "d3_implementation_static_review.json"
 RAW_ROOT = HERE / "artifacts" / "runs"
@@ -77,8 +81,11 @@ from airvortex.numerics.cartesian3d import ImmersedCartesianGrid
 from airvortex.numerics.projection3d_gpu import probe_gpu_projection
 
 PROTOCOL_ID = "D3_HF3D_CROSS_GRID_TEMPORAL_RESPONSE_V1"
+AUTHORIZATION_ID = "D3_PRO_EXECUTION_AUTHORIZATION_V1"
+AUTHORIZATION_ALLOWED = "AUTHORIZED_BY_PRO_FOR_BOUND_IMPLEMENTATION"
+AUTHORIZATION_DENIED = "NOT_AUTHORIZED"
 STATIC_READY = (
-    "D3_IMPLEMENTATION_READY_FOR_PRO_STATIC_REVIEW__DYNAMIC_EXECUTION_NOT_AUTHORIZED"
+    "D3_V2_IMPLEMENTATION_READY_FOR_PRO_STATIC_REVIEW__DYNAMIC_EXECUTION_NOT_AUTHORIZED"
 )
 S0_PASS = "D3_S0_IDENTITY_CONFIG_IMPLEMENTATION_AND_FRESH_EVIDENCE_GATE_PASS"
 CASE_PASS = "D3_CASE_COMPLETE_ALL_HARD_GATES_PASS"
@@ -107,6 +114,7 @@ STAGE_DESCRIPTIONS = {
     "S2": "在 S1 全部硬门通过后，从零依次执行 G9_DT0、G9_DT1、G9_DT2。",
     "S3": "独立重载六份归档、发布跟踪证据和报告，然后停止等待 Pro 复核。",
 }
+STAGE_ORDER = ("S0", "S1", "S2", "S3")
 EXPECTED_OUTPUT_TIME = np.asarray(
     [0.0, 0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01],
     dtype=np.float64,
@@ -115,6 +123,14 @@ EXPECTED_OUTPUT_TIME = np.asarray(
 
 class D3ExecutionError(RuntimeError):
     """Raised when a frozen D3 execution or identity gate fails."""
+
+
+class D3CaseTransactionError(D3ExecutionError):
+    """Carry any recoverable case evidence to the unique failure transaction."""
+
+    def __init__(self, message: str, *, evidence: Sequence[str] = ()) -> None:
+        super().__init__(message)
+        self.evidence = tuple(evidence)
 
 
 @dataclass(slots=True)
@@ -178,7 +194,7 @@ def _json_object(path: Path) -> dict[str, Any]:
 
 def _write_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
+    payload = (
         json.dumps(
             value,
             ensure_ascii=False,
@@ -186,9 +202,22 @@ def _write_json(path: Path, value: object) -> None:
             sort_keys=True,
             allow_nan=False,
         )
-        + "\n",
-        encoding="utf-8",
+        + "\n"
     )
+    file_descriptor, temporary_name = tempfile.mkstemp(
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+    )
+    temporary_path = Path(temporary_name)
+    try:
+        with os.fdopen(file_descriptor, "w", encoding="utf-8") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary_path, path)
+    finally:
+        temporary_path.unlink(missing_ok=True)
 
 
 def _relative(path: Path) -> str:
@@ -197,6 +226,250 @@ def _relative(path: Path) -> str:
 
 def _blob_sha(path: Path, revision: str = "HEAD") -> str:
     return _git("rev-parse", f"{revision}:{_relative(path)}")
+
+
+def _is_lower_hex(value: object, length: int) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == length
+        and all(character in "0123456789abcdef" for character in value)
+    )
+
+
+def _implementation_binding() -> dict[str, dict[str, Any]]:
+    result: dict[str, dict[str, Any]] = {}
+    for path in _implementation_paths():
+        try:
+            blob = _blob_sha(path)
+        except subprocess.CalledProcessError:
+            blob = ""
+        result[_relative(path)] = {
+            "git_blob_sha": blob,
+            "content_sha256": _sha256(path) if path.is_file() else None,
+        }
+    return result
+
+
+def validate_execution_authorization_shape(
+    authorization: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Validate the separate Pro decision object without granting execution."""
+
+    decision = authorization.get("decision")
+    binding = authorization.get("review_binding")
+    ruling = authorization.get("ruling")
+    status = authorization.get("status")
+    expected_paths = {_relative(path) for path in _implementation_paths()}
+    implementation_files = (
+        binding.get("implementation_files") if isinstance(binding, Mapping) else None
+    )
+    common_gates = {
+        "top_level_fields_exact": set(authorization)
+        == {
+            "schema_version",
+            "authorization_id",
+            "protocol_id",
+            "status",
+            "decision",
+            "review_binding",
+            "ruling",
+            "instructions",
+        },
+        "schema_version": authorization.get("schema_version") == 1,
+        "authorization_id": authorization.get("authorization_id") == AUTHORIZATION_ID,
+        "protocol_id": authorization.get("protocol_id") == PROTOCOL_ID,
+        "known_status": status in {AUTHORIZATION_DENIED, AUTHORIZATION_ALLOWED},
+        "decision_object": isinstance(decision, Mapping),
+        "binding_object": isinstance(binding, Mapping),
+        "ruling_object": isinstance(ruling, Mapping),
+        "decision_fields_exact": isinstance(decision, Mapping)
+        and set(decision)
+        == {
+            "real_cuda_dynamic_execution",
+            "authorized_stages",
+            "automatic_follow_on",
+        },
+        "binding_fields_exact": isinstance(binding, Mapping)
+        and set(binding)
+        == {
+            "reviewed_implementation_commit",
+            "preregistration_git_blob_sha",
+            "formal_source_tree_sha256",
+            "implementation_files",
+        },
+        "ruling_fields_exact": isinstance(ruling, Mapping)
+        and set(ruling) == {"reviewer", "ruling_document", "issued_at"},
+        "instructions_present": isinstance(authorization.get("instructions"), str)
+        and bool(authorization.get("instructions")),
+        "automatic_follow_on_prohibited": isinstance(decision, Mapping)
+        and decision.get("automatic_follow_on") == "PROHIBITED",
+    }
+    authorized = (
+        status == AUTHORIZATION_ALLOWED
+        and isinstance(decision, Mapping)
+        and decision.get("real_cuda_dynamic_execution") is True
+    )
+    state_gates: dict[str, bool]
+    if status == AUTHORIZATION_DENIED:
+        state_gates = {
+            "dynamic_execution_false": isinstance(decision, Mapping)
+            and decision.get("real_cuda_dynamic_execution") is False,
+            "authorized_stages_empty": isinstance(decision, Mapping)
+            and decision.get("authorized_stages") == [],
+            "reviewed_commit_absent": isinstance(binding, Mapping)
+            and binding.get("reviewed_implementation_commit") is None,
+            "preregistration_blob_absent": isinstance(binding, Mapping)
+            and binding.get("preregistration_git_blob_sha") is None,
+            "implementation_binding_empty": implementation_files == {},
+            "formal_source_binding_exact": isinstance(binding, Mapping)
+            and binding.get("formal_source_tree_sha256")
+            == _contract()["formal_source_contract"]["required_tree_sha256"],
+            "ruling_not_issued": isinstance(ruling, Mapping)
+            and ruling.get("reviewer") == "PRO_REVIEW_REQUIRED"
+            and ruling.get("ruling_document") is None
+            and ruling.get("issued_at") is None,
+        }
+    else:
+        implementation_entries_valid = (
+            isinstance(implementation_files, Mapping)
+            and set(implementation_files) == expected_paths
+            and all(
+                isinstance(item, Mapping)
+                and set(item) == {"git_blob_sha", "content_sha256"}
+                and _is_lower_hex(item.get("git_blob_sha"), 40)
+                and _is_lower_hex(item.get("content_sha256"), 64)
+                for item in implementation_files.values()
+            )
+        )
+        state_gates = {
+            "dynamic_execution_true": isinstance(decision, Mapping)
+            and decision.get("real_cuda_dynamic_execution") is True,
+            "authorized_stages_exact": isinstance(decision, Mapping)
+            and decision.get("authorized_stages") == list(STAGE_ORDER),
+            "reviewed_commit_bound": isinstance(binding, Mapping)
+            and _is_lower_hex(binding.get("reviewed_implementation_commit"), 40),
+            "preregistration_blob_bound": isinstance(binding, Mapping)
+            and _is_lower_hex(binding.get("preregistration_git_blob_sha"), 40),
+            "formal_source_binding_exact": isinstance(binding, Mapping)
+            and binding.get("formal_source_tree_sha256")
+            == _contract()["formal_source_contract"]["required_tree_sha256"],
+            "implementation_binding_exact_path_set_and_hash_shape": (
+                implementation_entries_valid
+            ),
+            "pro_ruling_identified": isinstance(ruling, Mapping)
+            and ruling.get("reviewer") == "ChatGPT Pro"
+            and isinstance(ruling.get("ruling_document"), str)
+            and bool(ruling.get("ruling_document"))
+            and isinstance(ruling.get("issued_at"), str)
+            and bool(ruling.get("issued_at")),
+        }
+    gates = {**common_gates, **state_gates}
+    return {
+        "gate_pass": all(gates.values()),
+        "authorized": authorized,
+        "status": status,
+        "gates": gates,
+    }
+
+
+def execution_authorization_audit(*, require_authorized: bool) -> dict[str, Any]:
+    """Bind a Pro decision to one authorization-only child commit."""
+
+    regular_file = (
+        EXECUTION_AUTHORIZATION_PATH.is_file()
+        and not EXECUTION_AUTHORIZATION_PATH.is_symlink()
+    )
+    authorization = _json_object(EXECUTION_AUTHORIZATION_PATH) if regular_file else {}
+    shape = validate_execution_authorization_shape(authorization)
+    try:
+        authorization_blob = _blob_sha(EXECUTION_AUTHORIZATION_PATH)
+    except subprocess.CalledProcessError:
+        authorization_blob = ""
+    gates: dict[str, bool] = {
+        "regular_file_not_symlink": regular_file,
+        "authorization_object_committed": bool(authorization_blob),
+        "authorization_shape": shape["gate_pass"],
+    }
+    observed: dict[str, Any] = {
+        "authorization_git_blob_sha": authorization_blob,
+        "authorization_content_sha256": (
+            _sha256(EXECUTION_AUTHORIZATION_PATH) if regular_file else None
+        ),
+    }
+    if require_authorized:
+        binding = authorization.get("review_binding")
+        reviewed_commit = (
+            binding.get("reviewed_implementation_commit")
+            if isinstance(binding, Mapping)
+            else None
+        )
+        parent_record = _git("rev-list", "--parents", "-n", "1", "HEAD").split()
+        sole_parent = parent_record[1] if len(parent_record) == 2 else None
+        changed_paths = (
+            _git("diff", "--name-only", str(reviewed_commit), "HEAD").splitlines()
+            if _is_lower_hex(reviewed_commit, 40)
+            else []
+        )
+        implementation = _implementation_binding()
+        source = _capture_source("D3 Pro authorization binding audit")
+        ruling = authorization.get("ruling")
+        ruling_path = (
+            REPOSITORY_ROOT / str(ruling.get("ruling_document"))
+            if isinstance(ruling, Mapping)
+            and isinstance(ruling.get("ruling_document"), str)
+            and ruling.get("ruling_document")
+            else None
+        )
+        try:
+            preregistration_blob = _blob_sha(PREREGISTRATION_PATH)
+        except subprocess.CalledProcessError:
+            preregistration_blob = ""
+        try:
+            ruling_blob = _blob_sha(ruling_path) if ruling_path is not None else ""
+        except subprocess.CalledProcessError:
+            ruling_blob = ""
+        expected_implementation = (
+            binding.get("implementation_files")
+            if isinstance(binding, Mapping)
+            else None
+        )
+        gates.update(
+            {
+                "authorized_state": shape["authorized"],
+                "authorization_commit_has_one_parent": sole_parent is not None,
+                "reviewed_commit_is_sole_parent": reviewed_commit == sole_parent,
+                "authorization_file_is_only_change": changed_paths
+                == [_relative(EXECUTION_AUTHORIZATION_PATH)],
+                "implementation_binding_matches": expected_implementation
+                == implementation,
+                "preregistration_blob_matches": isinstance(binding, Mapping)
+                and binding.get("preregistration_git_blob_sha") == preregistration_blob,
+                "formal_source_tree_matches": isinstance(binding, Mapping)
+                and source.get("available") is True
+                and binding.get("formal_source_tree_sha256") == source.get("value"),
+                "ruling_document_is_committed_regular_file": ruling_path is not None
+                and ruling_path.is_file()
+                and not ruling_path.is_symlink()
+                and bool(ruling_blob),
+            }
+        )
+        observed.update(
+            {
+                "reviewed_implementation_commit": reviewed_commit,
+                "sole_parent": sole_parent,
+                "changed_paths_from_reviewed_commit": changed_paths,
+                "implementation_files": implementation,
+                "preregistration_git_blob_sha": preregistration_blob,
+                "formal_source_tree": source,
+            }
+        )
+    return {
+        "gate_pass": all(gates.values()),
+        "authorized": shape["authorized"],
+        "gates": gates,
+        "shape_audit": shape,
+        "observed": observed,
+    }
 
 
 def _capture_source(sample_point: str) -> dict[str, Any]:
@@ -547,6 +820,23 @@ def _state_fingerprint(state: HF3DState) -> dict[str, Any]:
     }
 
 
+def _initial_identity_record(
+    grid: ImmersedCartesianGrid,
+    state: HF3DState,
+    *,
+    config_canonical_sha256: str,
+) -> dict[str, Any]:
+    return {
+        "grid": _grid_fingerprint(grid),
+        "state": _state_fingerprint(state),
+        "formal_g0_bar_mask_sha256": _array_sha256(grid.bar_mask.astype(np.uint8)),
+        "formal_g0_bar_cell_count": int(np.sum(grid.bar_mask)),
+        "config_canonical_sha256": config_canonical_sha256,
+        "state_time_s": state.time_s,
+        "state_step": state.step,
+    }
+
+
 def initial_grid_state_identity_audit() -> dict[str, Any]:
     """Rebuild all six initial states without advancing a single time step."""
 
@@ -556,17 +846,11 @@ def initial_grid_state_identity_audit() -> dict[str, Any]:
         config, config_identity = effective_case_config(case_id)
         grid = backend.make_grid(config)
         state = backend.initialise_state(config, grid)
-        grid_fingerprint = _grid_fingerprint(grid)
-        state_fingerprint = _state_fingerprint(state)
-        per_case[case_id] = {
-            "grid": grid_fingerprint,
-            "state": state_fingerprint,
-            "formal_g0_bar_mask_sha256": _array_sha256(grid.bar_mask.astype(np.uint8)),
-            "formal_g0_bar_cell_count": int(np.sum(grid.bar_mask)),
-            "config_canonical_sha256": config_identity["effective_canonical_sha256"],
-            "state_time_s": state.time_s,
-            "state_step": state.step,
-        }
+        per_case[case_id] = _initial_identity_record(
+            grid,
+            state,
+            config_canonical_sha256=config_identity["effective_canonical_sha256"],
+        )
         del state, grid, config
         gc.collect()
     groups: dict[str, Any] = {}
@@ -677,9 +961,54 @@ def audit_classification_input_paths(
     return {"gate_pass": all(gates.values()), "gates": gates, "paths": per_path}
 
 
+def _stage_pass_evidence(stage: str) -> list[str]:
+    if stage == "S0":
+        return [_relative(S0_PATH)]
+    if stage in STAGE_CASES:
+        return [
+            _relative(_case_summary_path(case_id)) for case_id in STAGE_CASES[stage]
+        ]
+    if stage == "S3":
+        return [
+            _relative(REPORT_JSON),
+            _relative(REPORT_MD),
+            _relative(FINAL_MANIFEST),
+            _relative(FINAL_EVIDENCE_ROOT / "stage_ledger.json"),
+        ]
+    raise D3ExecutionError(f"unknown D3 stage: {stage}")
+
+
+def _sync_stage_ledger_summary(ledger: dict[str, Any]) -> None:
+    stages = ledger.get("stages")
+    if not isinstance(stages, list):
+        raise D3ExecutionError("D3 stage ledger is malformed")
+    failed = [
+        str(item.get("stage"))
+        for item in stages
+        if isinstance(item, Mapping) and item.get("disposition") == "FAILED_STOPPED"
+    ]
+    unexecuted = [
+        str(item.get("stage"))
+        for item in stages
+        if isinstance(item, Mapping) and item.get("disposition") == "NOT_EXECUTED"
+    ]
+    all_pass = all(
+        isinstance(item, Mapping)
+        and item.get("disposition") == "EXECUTED"
+        and item.get("status") == "PASS"
+        for item in stages
+    )
+    ledger["failed_stages"] = failed
+    ledger["unexecuted_stages"] = unexecuted
+    ledger["terminal_state"] = (
+        FAIL_CLOSED if failed else "COMPLETE" if all_pass else "IN_PROGRESS"
+    )
+    ledger["failure_record"] = _relative(FAILURE_PATH) if failed else None
+
+
 def stage_ledger_template(*, execution_commit: str | None) -> dict[str, Any]:
-    return {
-        "schema_version": 1,
+    ledger: dict[str, Any] = {
+        "schema_version": 2,
         "protocol_id": PROTOCOL_ID,
         "execution_commit": execution_commit,
         "stages": [
@@ -692,46 +1021,190 @@ def stage_ledger_template(*, execution_commit: str | None) -> dict[str, Any]:
                 "cases": list(STAGE_CASES.get(stage, ())),
                 "evidence": [],
             }
-            for stage in ("S0", "S1", "S2", "S3")
+            for stage in STAGE_ORDER
         ],
         "automatic_follow_on": "PROHIBITED",
     }
+    _sync_stage_ledger_summary(ledger)
+    return ledger
 
 
 def validate_stage_ledger_semantics(ledger: Mapping[str, Any]) -> dict[str, Any]:
+    """Validate a unique ordered state machine and exact evidence semantics."""
+
     stages = ledger.get("stages")
     exact_order = isinstance(stages, list) and [
         item.get("stage") if isinstance(item, Mapping) else None for item in stages
-    ] == ["S0", "S1", "S2", "S3"]
+    ] == list(STAGE_ORDER)
     per_stage: dict[str, Any] = {}
+    state_sequence: list[str] = []
     if isinstance(stages, list):
         for item in stages:
             if not isinstance(item, Mapping):
                 continue
             stage = str(item.get("stage"))
+            disposition = item.get("disposition")
+            status = item.get("status")
+            if disposition == "NOT_EXECUTED" and status == "NOT_EXECUTED":
+                state = "NOT_EXECUTED"
+                expected_evidence: list[str] = []
+            elif disposition == "EXECUTED" and status == "PASS":
+                state = "PASS"
+                expected_evidence = (
+                    _stage_pass_evidence(stage) if stage in STAGE_ORDER else []
+                )
+            elif disposition == "FAILED_STOPPED" and status == FAIL_CLOSED:
+                state = "FAILED"
+                expected_evidence = [_relative(FAILURE_PATH)]
+            else:
+                state = "INVALID"
+                expected_evidence = []
+            state_sequence.append(state)
             expected_cases = list(STAGE_CASES.get(stage, ()))
-            gates = {
+            classification_valid = (
+                isinstance(item.get("classification"), str)
+                and bool(item.get("classification"))
+                if stage == "S3" and state == "PASS"
+                else item.get("classification") is None
+            )
+            stage_gates = {
                 "known_stage": stage in STAGE_ACTIONS,
                 "action_exact": item.get("action") == STAGE_ACTIONS.get(stage),
                 "human_description_exact": item.get("human_description")
                 == STAGE_DESCRIPTIONS.get(stage),
                 "cases_exact": item.get("cases") == expected_cases,
+                "state_pair_allowed": state != "INVALID",
                 "evidence_is_list": isinstance(item.get("evidence"), list),
-                "not_executed_has_no_evidence": (
-                    item.get("disposition") != "NOT_EXECUTED"
-                    or item.get("evidence") == []
-                ),
+                "evidence_paths_exact": item.get("evidence") == expected_evidence,
+                "not_executed_has_no_evidence": state != "NOT_EXECUTED"
+                or item.get("evidence") == [],
+                "classification_semantics": classification_valid,
             }
-            per_stage[stage] = {"gate_pass": all(gates.values()), "gates": gates}
+            per_stage[stage] = {
+                "gate_pass": all(stage_gates.values()),
+                "gates": stage_gates,
+                "state": state,
+            }
+    progression_valid = len(state_sequence) == len(STAGE_ORDER)
+    closed = False
+    failed_seen = False
+    if progression_valid:
+        for state in state_sequence:
+            if not closed and state == "PASS":
+                continue
+            if not closed and state in {"NOT_EXECUTED", "FAILED"}:
+                closed = True
+                failed_seen = state == "FAILED"
+                continue
+            if closed and state == "NOT_EXECUTED":
+                continue
+            progression_valid = False
+            break
+    failed_stages = [
+        STAGE_ORDER[index]
+        for index, state in enumerate(state_sequence)
+        if index < len(STAGE_ORDER) and state == "FAILED"
+    ]
+    unexecuted_stages = [
+        STAGE_ORDER[index]
+        for index, state in enumerate(state_sequence)
+        if index < len(STAGE_ORDER) and state == "NOT_EXECUTED"
+    ]
+    all_pass = state_sequence == ["PASS"] * len(STAGE_ORDER)
+    expected_terminal = (
+        FAIL_CLOSED if failed_stages else "COMPLETE" if all_pass else "IN_PROGRESS"
+    )
+    expected_failure_record = _relative(FAILURE_PATH) if failed_stages else None
+    execution_commit = ledger.get("execution_commit")
     gates = {
+        "schema_version": ledger.get("schema_version") == 2,
         "protocol_id": ledger.get("protocol_id") == PROTOCOL_ID,
+        "execution_commit_shape": execution_commit is None
+        or _is_lower_hex(execution_commit, 40),
         "exact_stage_order": exact_order,
-        "all_stage_semantics": set(per_stage) == set(STAGE_ACTIONS)
+        "all_stage_semantics": set(per_stage) == set(STAGE_ORDER)
         and all(item["gate_pass"] for item in per_stage.values()),
+        "legal_pass_failure_unexecuted_progression": progression_valid,
+        "at_most_one_failed_stage": len(failed_stages) <= 1
+        and not (failed_seen and len(failed_stages) != 1),
+        "failed_stage_summary_exact": ledger.get("failed_stages") == failed_stages,
+        "unexecuted_stage_summary_exact": ledger.get("unexecuted_stages")
+        == unexecuted_stages,
+        "terminal_state_exact": ledger.get("terminal_state") == expected_terminal,
+        "failure_record_exact": ledger.get("failure_record") == expected_failure_record,
         "automatic_follow_on_prohibited": ledger.get("automatic_follow_on")
         == "PROHIBITED",
     }
-    return {"gate_pass": all(gates.values()), "gates": gates, "stages": per_stage}
+    return {
+        "gate_pass": all(gates.values()),
+        "gates": gates,
+        "stages": per_stage,
+        "state_sequence": state_sequence,
+    }
+
+
+def validate_stage_ledger_evidence_files(ledger: Mapping[str, Any]) -> dict[str, Any]:
+    paths: list[str] = []
+    for item in ledger.get("stages", []):
+        if isinstance(item, Mapping) and isinstance(item.get("evidence"), list):
+            paths.extend(str(path) for path in item["evidence"])
+    per_path: dict[str, Any] = {}
+    for path_text in paths:
+        path = REPOSITORY_ROOT / path_text
+        gates = {
+            "regular_file_not_symlink": path.is_file() and not path.is_symlink(),
+            "within_repository": path.resolve().is_relative_to(
+                REPOSITORY_ROOT.resolve()
+            ),
+        }
+        per_path[path_text] = {"gate_pass": all(gates.values()), "gates": gates}
+    failed_stages = ledger.get("failed_stages")
+    failure_semantics = True
+    diagnostic_evidence_audit: dict[str, Any] = {}
+    if isinstance(failed_stages, list) and failed_stages:
+        if FAILURE_PATH.is_file() and not FAILURE_PATH.is_symlink():
+            failure = _json_object(FAILURE_PATH)
+            diagnostic_evidence = failure.get("diagnostic_evidence")
+            if isinstance(diagnostic_evidence, list):
+                for path_text in diagnostic_evidence:
+                    path = REPOSITORY_ROOT / str(path_text)
+                    resolved = path.resolve()
+                    path_gates = {
+                        "exists": path.exists(),
+                        "within_d3_raw_root": resolved == RAW_ROOT.resolve()
+                        or resolved.is_relative_to(RAW_ROOT.resolve()),
+                        "not_symlink": not path.is_symlink(),
+                        "no_forbidden_reference": not _contains_forbidden_d2_reference(
+                            str(path_text)
+                        ),
+                    }
+                    diagnostic_evidence_audit[str(path_text)] = {
+                        "gate_pass": all(path_gates.values()),
+                        "gates": path_gates,
+                    }
+            failure_semantics = (
+                failure.get("status") == FAIL_CLOSED
+                and failure.get("stage") == failed_stages[0]
+                and failure.get("execution_commit") == ledger.get("execution_commit")
+                and isinstance(diagnostic_evidence, list)
+                and all(
+                    item["gate_pass"] for item in diagnostic_evidence_audit.values()
+                )
+            )
+        else:
+            failure_semantics = False
+    gates = {
+        "all_evidence_regular_and_within_repository": all(
+            item["gate_pass"] for item in per_path.values()
+        ),
+        "failure_record_matches_failed_stage": failure_semantics,
+    }
+    return {
+        "gate_pass": all(gates.values()),
+        "gates": gates,
+        "paths": per_path,
+        "diagnostic_evidence": diagnostic_evidence_audit,
+    }
 
 
 def _no_dynamic_output_audit() -> dict[str, Any]:
@@ -807,8 +1280,13 @@ def _environment_identity() -> dict[str, Any]:
 def _implementation_content_evidence() -> dict[str, Any]:
     evidence: dict[str, Any] = {}
     for path in _implementation_paths():
+        try:
+            blob = _blob_sha(path)
+        except subprocess.CalledProcessError:
+            blob = ""
         evidence[_relative(path)] = {
             "exists": path.is_file(),
+            "git_blob_sha": blob,
             "content_sha256": _sha256(path) if path.is_file() else None,
             "size_bytes": path.stat().st_size if path.is_file() else None,
         }
@@ -832,6 +1310,7 @@ def static_implementation_audit(*, require_clean: bool) -> dict[str, Any]:
     no_dynamic = _no_dynamic_output_audit()
     unit_tests = _run_unit_tests()
     implementation = _implementation_content_evidence()
+    authorization = execution_authorization_audit(require_authorized=False)
     environment = _environment_identity()
     ledger = stage_ledger_template(execution_commit=None)
     ledger_audit = validate_stage_ledger_semantics(ledger)
@@ -850,6 +1329,11 @@ def static_implementation_audit(*, require_clean: bool) -> dict[str, Any]:
         "all_implementation_files_present": all(
             item["exists"] for item in implementation.values()
         ),
+        "all_implementation_files_committed": all(
+            bool(item["git_blob_sha"]) for item in implementation.values()
+        ),
+        "separate_authorization_object_valid": authorization["gate_pass"],
+        "separate_authorization_object_default_denied": not authorization["authorized"],
         "dynamic_execution_still_unauthorized": contract["authorization"][
             "real_cuda_dynamic_execution"
         ]
@@ -878,6 +1362,7 @@ def static_implementation_audit(*, require_clean: bool) -> dict[str, Any]:
         "cuda_probe": cuda,
         "unit_tests": unit_tests,
         "implementation_content_evidence": implementation,
+        "execution_authorization_audit": authorization,
         "environment": environment,
         "dynamic_output_hygiene": no_dynamic,
         "future_stage_ledger_template": ledger,
@@ -894,24 +1379,21 @@ def static_implementation_audit(*, require_clean: bool) -> dict[str, Any]:
     }
 
 
-def require_dynamic_execution_authorized(
-    contract: Mapping[str, Any] | None = None,
-) -> None:
-    value = _contract() if contract is None else contract
-    authorization = value.get("authorization")
-    if not isinstance(authorization, Mapping):
-        raise D3ExecutionError("D3 authorization block is missing")
-    if authorization.get("real_cuda_dynamic_execution") is not True:
+def require_dynamic_execution_authorized() -> dict[str, Any]:
+    audit = execution_authorization_audit(require_authorized=True)
+    if not audit["gate_pass"]:
+        failed = [name for name, passed in audit["gates"].items() if not passed]
         raise D3ExecutionError(
-            "D3 real CUDA dynamic execution is not authorized; stop for Pro review"
+            "D3 real CUDA dynamic execution is not authorized for the exact "
+            "reviewed implementation: " + json.dumps(failed, ensure_ascii=False)
         )
-    if authorization.get("execution_requires_new_pro_review") is not False:
-        raise D3ExecutionError(
-            "D3 preregistration still requires a new Pro execution review"
-        )
+    return audit
 
 
 def _implementation_paths() -> tuple[Path, ...]:
+    # The authorization object is intentionally excluded.  A future Pro ruling
+    # changes only that object in the sole child commit of the reviewed
+    # implementation commit, avoiding an impossible self-hash recursion.
     return (
         HERE / "README.md",
         HERE / "run_d3_cross_grid_temporal.py",
@@ -922,74 +1404,94 @@ def _implementation_paths() -> tuple[Path, ...]:
     )
 
 
-def execution_identity_audit(*, require_fresh: bool) -> dict[str, Any]:
-    """Evaluate all gates required before any real D3 time advancement."""
+def execution_binding_audit() -> dict[str, Any]:
+    """Recheck immutable code, source, config, revision, and Pro authorization."""
 
     contract = _contract()
-    require_dynamic_execution_authorized(contract)
+    authorization = require_dynamic_execution_authorized()
     branch = _git("branch", "--show-current")
     head = _git("rev-parse", "HEAD")
     porcelain = _git("status", "--porcelain=v1", "--untracked-files=all").splitlines()
     source = _capture_source("D3 execution identity boundary")
-    implementation: dict[str, Any] = {}
-    committed = True
-    for path in _implementation_paths():
-        try:
-            blob = _blob_sha(path)
-        except subprocess.CalledProcessError:
-            blob = ""
-        committed = committed and bool(blob)
-        implementation[_relative(path)] = {
-            "git_blob_sha": blob,
-            "content_sha256": _sha256(path) if path.is_file() else None,
-        }
+    implementation = _implementation_binding()
     cuda = cuda_probe_audit()
     generated = audit_generated_configs()
-    base_gates = {
+    gates = {
         "main_branch": branch == "main",
         "clean_worktree": not porcelain,
-        "dynamic_execution_authorized": True,
+        "pro_authorization_bound_to_exact_child_commit": authorization["gate_pass"],
         "formal_source_tree_matches": source.get("available") is True
         and source.get("value")
         == contract["formal_source_contract"]["required_tree_sha256"],
-        "implementation_and_contract_committed": committed,
+        "implementation_and_contract_committed": all(
+            bool(item["git_blob_sha"]) for item in implementation.values()
+        ),
         "generated_configs_exact": generated["gate_pass"],
         "actual_cuda_probe_available": cuda["gate_pass"],
     }
+    result = {
+        "gate_pass": all(gates.values()),
+        "gates": gates,
+        "branch": branch,
+        "execution_commit": head,
+        "worktree_porcelain": porcelain,
+        "formal_source_tree": source,
+        "implementation": implementation,
+        "authorization": authorization,
+        "generated_config_audit": generated,
+        "cuda_probe": cuda,
+    }
+    if not result["gate_pass"]:
+        failed = [name for name, passed in gates.items() if not passed]
+        raise D3ExecutionError(
+            "D3 execution binding failed: " + json.dumps(failed, ensure_ascii=False)
+        )
+    return result
+
+
+def execution_identity_audit(*, require_fresh: bool) -> dict[str, Any]:
+    """Evaluate raw-evidence state around the immutable execution binding."""
+
+    binding = execution_binding_audit()
+    head = str(binding["execution_commit"])
+    evidence_gates: dict[str, bool] = {}
     if require_fresh:
-        base_gates["no_prior_d3_raw_or_final_output"] = _no_dynamic_output_audit()[
+        evidence_gates["no_prior_d3_raw_or_final_output"] = _no_dynamic_output_audit()[
             "gate_pass"
         ]
     else:
         s0 = _json_object(S0_PATH) if S0_PATH.is_file() else {}
         ledger = _json_object(STAGE_LEDGER_PATH) if STAGE_LEDGER_PATH.is_file() else {}
-        base_gates.update(
+        ledger_semantics = validate_stage_ledger_semantics(ledger)
+        ledger_evidence = validate_stage_ledger_evidence_files(ledger)
+        evidence_gates.update(
             {
                 "s0_pass": s0.get("gate_pass") is True
                 and s0.get("execution_commit") == head,
                 "stage_ledger_execution_commit": ledger.get("execution_commit") == head,
-                "stage_ledger_semantics": validate_stage_ledger_semantics(ledger)[
-                    "gate_pass"
-                ],
+                "stage_ledger_semantics": ledger_semantics["gate_pass"],
+                "stage_ledger_evidence": ledger_evidence["gate_pass"],
                 "no_failure_marker": not FAILURE_PATH.exists(),
                 "no_final_output_before_s3": not any(
                     path.exists() for path in (REPORT_JSON, REPORT_MD, FINAL_MANIFEST)
                 ),
             }
         )
+    gates = {"immutable_execution_binding": binding["gate_pass"], **evidence_gates}
     result = {
-        "gate_pass": all(base_gates.values()),
-        "gates": base_gates,
-        "branch": branch,
+        "gate_pass": all(gates.values()),
+        "gates": gates,
+        "branch": binding["branch"],
         "execution_commit": head,
-        "worktree_porcelain": porcelain,
-        "formal_source_tree": source,
-        "implementation": implementation,
-        "generated_config_audit": generated,
-        "cuda_probe": cuda,
+        "worktree_porcelain": binding["worktree_porcelain"],
+        "formal_source_tree": binding["formal_source_tree"],
+        "implementation": binding["implementation"],
+        "authorization": binding["authorization"],
+        "generated_config_audit": binding["generated_config_audit"],
+        "cuda_probe": binding["cuda_probe"],
     }
     if not result["gate_pass"]:
-        failed = [name for name, passed in base_gates.items() if not passed]
+        failed = [name for name, passed in gates.items() if not passed]
         raise D3ExecutionError(
             "D3 execution identity failed: " + json.dumps(failed, ensure_ascii=False)
         )
@@ -1487,6 +1989,9 @@ def _replace_stage_entry(
     evidence: Sequence[str],
 ) -> None:
     ledger = _json_object(STAGE_LEDGER_PATH)
+    current_audit = validate_stage_ledger_semantics(ledger)
+    if not current_audit["gate_pass"]:
+        raise D3ExecutionError("D3 stage ledger is invalid before transition")
     stages = ledger.get("stages")
     if not isinstance(stages, list):
         raise D3ExecutionError("D3 stage ledger is malformed")
@@ -1504,19 +2009,30 @@ def _replace_stage_entry(
         raise D3ExecutionError(
             f"D3 stage ledger has {replacements} entries for {stage}"
         )
+    _sync_stage_ledger_summary(ledger)
     audit = validate_stage_ledger_semantics(ledger)
     if not audit["gate_pass"]:
         raise D3ExecutionError(f"D3 stage ledger semantic audit failed for {stage}")
+    evidence_audit = validate_stage_ledger_evidence_files(ledger)
+    if not evidence_audit["gate_pass"]:
+        raise D3ExecutionError(f"D3 stage ledger evidence audit failed for {stage}")
     _write_json(STAGE_LEDGER_PATH, ledger)
 
 
 def command_prepare_execution() -> int:
     identity = execution_identity_audit(require_fresh=True)
+    ledger = stage_ledger_template(execution_commit=identity["execution_commit"])
+    if not validate_stage_ledger_semantics(ledger)["gate_pass"]:
+        raise D3ExecutionError("initial S0 stage ledger semantic audit failed")
+    _write_json(STAGE_LEDGER_PATH, ledger)
     initial_identity = initial_grid_state_identity_audit()
     if not initial_identity["gate_pass"]:
         raise D3ExecutionError("D3 same-grid initial identity audit failed")
+    binding_end = execution_binding_audit()
+    if binding_end["execution_commit"] != identity["execution_commit"]:
+        raise D3ExecutionError("D3 execution binding changed during S0")
     report = {
-        "schema_version": 1,
+        "schema_version": 2,
         "protocol_id": PROTOCOL_ID,
         "stage": "S0",
         "action": STAGE_ACTIONS["S0"],
@@ -1524,7 +2040,8 @@ def command_prepare_execution() -> int:
         "status": S0_PASS,
         "gate_pass": True,
         "execution_commit": identity["execution_commit"],
-        "execution_identity": identity,
+        "execution_identity_start": identity,
+        "execution_binding_end": binding_end,
         "initial_grid_mask_state_identity": initial_identity,
         "fresh_evidence_policy": {
             "d2_dynamic_inputs_used": False,
@@ -1534,16 +2051,12 @@ def command_prepare_execution() -> int:
         },
     }
     _write_json(S0_PATH, report)
-    ledger = stage_ledger_template(execution_commit=identity["execution_commit"])
-    ledger["stages"][0] = _execution_stage_entry(
+    _replace_stage_entry(
         "S0",
         disposition="EXECUTED",
         status="PASS",
         evidence=[_relative(S0_PATH)],
     )
-    if not validate_stage_ledger_semantics(ledger)["gate_pass"]:
-        raise D3ExecutionError("S0 stage ledger semantic audit failed")
-    _write_json(STAGE_LEDGER_PATH, ledger)
     print(json.dumps({"status": S0_PASS, "path": str(S0_PATH)}, ensure_ascii=False))
     return 0
 
@@ -1552,90 +2065,125 @@ def _run_one_case(case_id: str, identity: Mapping[str, Any]) -> dict[str, Any]:
     summary_path = _case_summary_path(case_id)
     if summary_path.exists():
         raise FileExistsError(summary_path)
-    runtime = _prepare_runtime(case_id)
-    initial_fingerprint = {
-        "grid": _grid_fingerprint(runtime.grid),
-        "state": _state_fingerprint(runtime.state),
-        "formal_g0_bar_mask_sha256": _array_sha256(
-            runtime.grid.bar_mask.astype(np.uint8)
-        ),
-    }
-    s0 = _json_object(S0_PATH)
-    expected_initial = s0["initial_grid_mask_state_identity"]["cases"][case_id]
-    initial_match = (
-        initial_fingerprint["grid"] == expected_initial["grid"]
-        and initial_fingerprint["state"] == expected_initial["state"]
-        and initial_fingerprint["formal_g0_bar_mask_sha256"]
-        == expected_initial["formal_g0_bar_mask_sha256"]
-    )
-    if not initial_match:
-        raise D3ExecutionError(f"{case_id} initial state differs from S0")
-    source_start = _capture_source(f"D3 {case_id} execution start")
-    revision_start = _capture_revision(f"D3 {case_id} execution start")
-    outcome = advance_runtime_to_registered_end(runtime)
-    source_end = _capture_source(f"D3 {case_id} execution end")
-    revision_end = _capture_revision(f"D3 {case_id} execution end")
-    quality = _runtime_quality(runtime, completed=bool(outcome["completed"]))
-    contract = _contract()
-    source_hash = contract["formal_source_contract"]["required_tree_sha256"]
-    revision = str(identity["execution_commit"])
-    gates = {
-        "run_completed": bool(outcome["completed"]),
-        "all_numerical_quality_gates": quality["gate_pass"],
-        "initial_grid_mask_state_matches_s0": initial_match,
-        "formal_source_stable_and_bound": source_start.get("value")
-        == source_end.get("value")
-        == source_hash,
-        "execution_revision_stable": revision_start.get("value")
-        == revision_end.get("value")
-        == revision,
-        "fresh_from_zero_without_checkpoint": True,
-        "d2_dynamic_input_used": False,
-    }
-    summary: dict[str, Any] = {
-        "schema_version": 1,
-        "protocol_id": PROTOCOL_ID,
-        "case_id": case_id,
-        "stage": "S1" if case_id.startswith("G6_") else "S2",
-        "status": CASE_PASS if all(gates.values()) else FAIL_CLOSED,
-        "gate_pass": all(gates.values()),
-        "gates": gates,
-        "failure": outcome["failure"],
-        "execution_commit": revision,
-        "execution_identity": dict(identity),
-        "config_identity": runtime.config_identity,
-        "initial_identity": initial_fingerprint,
-        "source_tree_execution_start": source_start,
-        "source_tree_execution_end": source_end,
-        "git_revision_execution_start": revision_start,
-        "git_revision_execution_end": revision_end,
-        "pressure_accelerator": runtime.pressure_accelerator,
-        "quality": quality,
-        "retry_attempts": outcome["retry_attempts"],
-        "wall_time_s": outcome["wall_time_s"],
-        "process_cpu_time_s": outcome["process_cpu_time_s"],
-        "fresh_evidence": {
-            "started_from_zero": True,
-            "checkpoint_used": False,
-            "d2_dynamic_input_used": False,
-        },
-    }
-    if summary["gate_pass"]:
-        summary["archive"] = _assemble_archive(
-            runtime,
-            summary_path.parent / "archive",
-            source_start=source_start,
-            source_end=source_end,
-            revision_start=revision_start,
-            revision_end=revision_end,
-            process_cpu_time_s=float(outcome["process_cpu_time_s"]),
+    runtime: CaseRuntime | None = None
+    recoverable_evidence: list[str] = []
+    try:
+        binding_start = execution_binding_audit()
+        runtime = _prepare_runtime(case_id)
+        initial_fingerprint = _initial_identity_record(
+            runtime.grid,
+            runtime.state,
+            config_canonical_sha256=runtime.config_identity[
+                "effective_canonical_sha256"
+            ],
         )
-    else:
-        summary["partial_evidence"] = _save_partial(
-            summary_path.parent / "partial.npz", runtime
+        s0 = _json_object(S0_PATH)
+        expected_initial = s0["initial_grid_mask_state_identity"]["cases"][case_id]
+        initial_match = initial_fingerprint == expected_initial
+        if not initial_match:
+            raise D3ExecutionError(f"{case_id} initial state differs from S0")
+        source_start = _capture_source(f"D3 {case_id} execution start")
+        revision_start = _capture_revision(f"D3 {case_id} execution start")
+        outcome = advance_runtime_to_registered_end(runtime)
+        source_end = _capture_source(f"D3 {case_id} execution end")
+        revision_end = _capture_revision(f"D3 {case_id} execution end")
+        binding_end = execution_binding_audit()
+        quality = _runtime_quality(runtime, completed=bool(outcome["completed"]))
+        contract = _contract()
+        source_hash = contract["formal_source_contract"]["required_tree_sha256"]
+        revision = str(identity["execution_commit"])
+        binding_stable = (
+            binding_start["execution_commit"]
+            == binding_end["execution_commit"]
+            == revision
+            and binding_start["implementation"] == binding_end["implementation"]
+            and binding_start["authorization"]["observed"]
+            == binding_end["authorization"]["observed"]
         )
-    _write_json(summary_path, summary)
-    return summary
+        gates = {
+            "run_completed": bool(outcome["completed"]),
+            "all_numerical_quality_gates": quality["gate_pass"],
+            "initial_grid_mask_state_matches_s0": initial_match,
+            "formal_source_stable_and_bound": source_start.get("value")
+            == source_end.get("value")
+            == source_hash,
+            "execution_revision_stable": revision_start.get("value")
+            == revision_end.get("value")
+            == revision,
+            "authorization_and_implementation_binding_stable": binding_stable,
+            "fresh_from_zero_without_checkpoint": True,
+            "d2_dynamic_input_not_used": True,
+        }
+        summary: dict[str, Any] = {
+            "schema_version": 2,
+            "protocol_id": PROTOCOL_ID,
+            "case_id": case_id,
+            "stage": "S1" if case_id.startswith("G6_") else "S2",
+            "status": CASE_PASS if all(gates.values()) else FAIL_CLOSED,
+            "gate_pass": all(gates.values()),
+            "gates": gates,
+            "failure": outcome["failure"],
+            "execution_commit": revision,
+            "execution_identity": dict(identity),
+            "execution_binding_start": binding_start,
+            "execution_binding_end": binding_end,
+            "config_identity": runtime.config_identity,
+            "initial_identity": initial_fingerprint,
+            "source_tree_execution_start": source_start,
+            "source_tree_execution_end": source_end,
+            "git_revision_execution_start": revision_start,
+            "git_revision_execution_end": revision_end,
+            "pressure_accelerator": runtime.pressure_accelerator,
+            "quality": quality,
+            "retry_attempts": outcome["retry_attempts"],
+            "wall_time_s": outcome["wall_time_s"],
+            "process_cpu_time_s": outcome["process_cpu_time_s"],
+            "fresh_evidence": {
+                "started_from_zero": True,
+                "checkpoint_used": False,
+                "d2_dynamic_input_used": False,
+            },
+        }
+        if summary["gate_pass"]:
+            summary["archive"] = _assemble_archive(
+                runtime,
+                summary_path.parent / "archive",
+                source_start=source_start,
+                source_end=source_end,
+                revision_start=revision_start,
+                revision_end=revision_end,
+                process_cpu_time_s=float(outcome["process_cpu_time_s"]),
+            )
+        else:
+            partial = _save_partial(summary_path.parent / "partial.npz", runtime)
+            summary["partial_evidence"] = partial
+            recoverable_evidence.append(str(partial["path"]))
+        _write_json(summary_path, summary)
+        recoverable_evidence.append(_relative(summary_path))
+        return summary
+    except Exception as exc:
+        if runtime is not None:
+            partial_path = summary_path.parent / "partial.npz"
+            if not partial_path.exists():
+                try:
+                    partial = _save_partial(partial_path, runtime)
+                    recoverable_evidence.append(str(partial["path"]))
+                except Exception as partial_error:  # noqa: BLE001
+                    print(
+                        f"D3 partial evidence recovery failed for {case_id}: "
+                        f"{type(partial_error).__name__}: {partial_error}",
+                        file=sys.stderr,
+                    )
+        if summary_path.is_file() and not summary_path.is_symlink():
+            recoverable_evidence.append(_relative(summary_path))
+        archive_path = summary_path.parent / "archive"
+        if archive_path.is_dir() and not archive_path.is_symlink():
+            recoverable_evidence.append(_relative(archive_path))
+        raise D3CaseTransactionError(
+            f"{case_id} failed outside the normal case-summary transaction: "
+            f"{type(exc).__name__}: {exc}",
+            evidence=tuple(dict.fromkeys(recoverable_evidence)),
+        ) from exc
 
 
 def command_run_stage(stage: str) -> int:
@@ -1658,14 +2206,24 @@ def command_run_stage(stage: str) -> int:
     evidence: list[str] = []
     for case_id in STAGE_CASES[stage]:
         execution_identity_audit(require_fresh=False)
-        summary = _run_one_case(case_id, identity)
+        try:
+            summary = _run_one_case(case_id, identity)
+        except D3CaseTransactionError as exc:
+            exc.evidence = tuple(dict.fromkeys([*evidence, *exc.evidence]))
+            raise
         evidence.append(_relative(_case_summary_path(case_id)))
         if not summary["gate_pass"]:
-            _replace_stage_entry(
+            failure = D3ExecutionError(
+                f"{case_id} completed its evidence transaction but failed hard gates"
+            )
+            _record_dynamic_failure(
                 stage,
-                disposition="FAILED_STOPPED",
-                status=FAIL_CLOSED,
-                evidence=evidence,
+                ["run-stage", "--stage", stage],
+                failure,
+                diagnostic_evidence=[
+                    *evidence,
+                    str(summary.get("partial_evidence", {}).get("path", "")),
+                ],
             )
             return 2
     _replace_stage_entry(
@@ -1683,24 +2241,87 @@ def command_run_stage(stage: str) -> int:
     return 0
 
 
-def _write_failure(command: Sequence[str], exc: Exception) -> None:
-    if FAILURE_PATH.exists() or not RAW_ROOT.exists():
-        return
-    _write_json(
-        FAILURE_PATH,
-        {
-            "schema_version": 1,
-            "protocol_id": PROTOCOL_ID,
-            "status": FAIL_CLOSED,
-            "command": list(command),
-            "failure": {
-                "type": type(exc).__name__,
-                "message": str(exc),
-                "traceback": traceback.format_exc(),
-            },
-            "execution_commit": _git("rev-parse", "HEAD"),
+def _record_dynamic_failure(
+    stage: str,
+    command: Sequence[str],
+    exc: Exception,
+    *,
+    diagnostic_evidence: Sequence[str] = (),
+) -> bool:
+    """Converge every post-authorization exception on one failure transaction."""
+
+    if stage not in STAGE_ORDER or not STAGE_LEDGER_PATH.is_file():
+        return False
+    ledger = _json_object(STAGE_LEDGER_PATH)
+    if not validate_stage_ledger_semantics(ledger)["gate_pass"]:
+        raise D3ExecutionError("cannot record failure against an invalid D3 ledger")
+    entries = {
+        str(item.get("stage")): item
+        for item in ledger.get("stages", [])
+        if isinstance(item, Mapping)
+    }
+    current = entries.get(stage, {})
+    if current.get("disposition") == "FAILED_STOPPED":
+        return validate_stage_ledger_evidence_files(ledger)["gate_pass"]
+    if current.get("disposition") != "NOT_EXECUTED":
+        raise D3ExecutionError(f"cannot fail D3 stage from current state: {stage}")
+    normalized_evidence: list[str] = []
+    for value in dict.fromkeys(str(item) for item in diagnostic_evidence):
+        if not value:
+            continue
+        path = REPOSITORY_ROOT / value
+        resolved = path.resolve()
+        if (
+            path.exists()
+            and not path.is_symlink()
+            and (
+                resolved == RAW_ROOT.resolve()
+                or resolved.is_relative_to(RAW_ROOT.resolve())
+            )
+            and not _contains_forbidden_d2_reference(value)
+        ):
+            normalized_evidence.append(value)
+    failure_record = {
+        "schema_version": 2,
+        "protocol_id": PROTOCOL_ID,
+        "status": FAIL_CLOSED,
+        "stage": stage,
+        "command": list(command),
+        "failure": {
+            "type": type(exc).__name__,
+            "message": str(exc),
+            "traceback": "".join(
+                traceback.format_exception(type(exc), exc, exc.__traceback__)
+            ),
         },
+        "diagnostic_evidence": normalized_evidence,
+        "execution_commit": ledger.get("execution_commit"),
+        "subsequent_stages_executed": False,
+    }
+    if FAILURE_PATH.exists():
+        observed = _json_object(FAILURE_PATH)
+        if observed.get("stage") != stage:
+            raise D3ExecutionError("D3 failure marker already belongs to another stage")
+    else:
+        _write_json(FAILURE_PATH, failure_record)
+    _replace_stage_entry(
+        stage,
+        disposition="FAILED_STOPPED",
+        status=FAIL_CLOSED,
+        evidence=[_relative(FAILURE_PATH)],
     )
+    return True
+
+
+def _stage_for_dynamic_command(arguments: Sequence[str]) -> str | None:
+    if arguments and arguments[0] == "prepare-execution":
+        return "S0"
+    if arguments and arguments[0] == "run-stage":
+        try:
+            return str(arguments[arguments.index("--stage") + 1])
+        except (ValueError, IndexError):
+            return None
+    return None
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -1718,7 +2339,7 @@ def build_parser() -> argparse.ArgumentParser:
     static_parser.add_argument("--require-clean", action="store_true")
     subparsers.add_parser(
         "prepare-execution",
-        help="future-only S0; blocked until a new Pro authorization changes the contract",
+        help="future-only S0; blocked until an exact-snapshot Pro authorization exists",
     )
     stage_parser = subparsers.add_parser(
         "run-stage",
@@ -1768,7 +2389,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     except Exception as exc:
         if args.command in {"prepare-execution", "run-stage"}:
             try:
-                _write_failure(arguments, exc)
+                stage = _stage_for_dynamic_command(arguments)
+                if stage is not None:
+                    _record_dynamic_failure(
+                        stage,
+                        arguments,
+                        exc,
+                        diagnostic_evidence=getattr(exc, "evidence", ()),
+                    )
             except Exception as write_error:  # noqa: BLE001
                 print(
                     "D3 failure evidence could not be written: "
