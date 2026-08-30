@@ -1,23 +1,77 @@
 {
   "authorization_id": "D3_PRO_EXECUTION_AUTHORIZATION_V1",
   "decision": {
-    "authorized_stages": [],
+    "authorized_stages": [
+      "S0",
+      "S1",
+      "S2",
+      "S3"
+    ],
     "automatic_follow_on": "PROHIBITED",
-    "real_cuda_dynamic_execution": false
+    "real_cuda_dynamic_execution": true
   },
-  "instructions": "A future Pro review may authorize execution only by changing this file in the sole child commit of the reviewed implementation commit. The frozen preregistration remains unchanged, and every implementation blob/hash must be bound explicitly.",
+  "instructions": "Execute exactly one fresh S0-to-S3 D3 sequence on this authorization-only HEAD, using the bound GPU environment and a single foreground writer. Inspect each stage ledger before explicitly starting the next stage. Stop and preserve evidence on any failure, drift, CUDA fallback, stale output, concurrent writer, or external interruption. Do not reuse D2 data, checkpoints, prior raw products, staging residue, or partial outputs; do not modify the implementation, preregistration, formal source, thresholds, case matrix, output times, or classification precedence.",
   "protocol_id": "D3_HF3D_CROSS_GRID_TEMPORAL_RESPONSE_V1",
   "review_binding": {
     "formal_source_tree_sha256": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8",
-    "implementation_files": {},
-    "preregistration_git_blob_sha": null,
-    "reviewed_implementation_commit": null
+    "implementation_files": {
+      "90_候选工作区/current/07_D3跨网格时间步响应诊断/README.md": {
+        "content_sha256": "a44be48a2660aefa2321cf94f724465fb7855e2323130bf8da55bd4dee09dec4",
+        "git_blob_sha": "19402e99007479f7faaf8e513e3e2afcef9b5ff1"
+      },
+      "90_候选工作区/current/07_D3跨网格时间步响应诊断/analyse_d3_cross_grid_temporal.py": {
+        "content_sha256": "4ad0c650be8d32079ad2f346b6bf3829c7e9f2c9804d9255b8a5a878696f5005",
+        "git_blob_sha": "c20aef3a884235ddf447a4d4adf8d8c817650f3e"
+      },
+      "90_候选工作区/current/07_D3跨网格时间步响应诊断/d3_cross_grid_temporal_preregistration.json": {
+        "content_sha256": "74156365c8b5f2ddde4a3ad4d1033eed2ac0fa0ecf69d04b6caa4129b7420620",
+        "git_blob_sha": "0b6ec8c04b112a54517793504a2f0e8857358133"
+      },
+      "90_候选工作区/current/07_D3跨网格时间步响应诊断/d3_stage_machine.py": {
+        "content_sha256": "c0632ba4bc9713c59366ee09a2373814b7329b11eec467114800bb8eea7771cc",
+        "git_blob_sha": "4260ad1ae4d342853563eebd10884905828e4aeb"
+      },
+      "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G6_DT0.json": {
+        "content_sha256": "602dead5fa6b8b4485103bf91adb53b1bb17b6b3e3f9c8f7c0578be4242d0cd0",
+        "git_blob_sha": "2db601de7aab1c1fa71ebbb06b2b9b21c0b53016"
+      },
+      "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G6_DT1.json": {
+        "content_sha256": "a23abf398cbc3720f81cce860eaf9775209cf9d564e9a6fb7960086a5ecbbbd1",
+        "git_blob_sha": "298cf309abed196a9659ed4cd0a996734cd4a2ef"
+      },
+      "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G6_DT2.json": {
+        "content_sha256": "259de111e77c08004dec90be0a52b167b82f5570549d4243b8767a26bd40e1fa",
+        "git_blob_sha": "09ea9a9d5ae336bec30111785cd120675f34ea4f"
+      },
+      "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G9_DT0.json": {
+        "content_sha256": "64bf8553b88e546b3bd18a8867fd9ed5455be475bb77f467f8c45c157353b86d",
+        "git_blob_sha": "d4a897d4c906bf29f922edc4ea874c0af80996b0"
+      },
+      "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G9_DT1.json": {
+        "content_sha256": "c5fb44e90f6f3e2f2bc0a2c13d46969e3be861219ad44f1259afaadbd11c28db",
+        "git_blob_sha": "eef4953e679343d43e7150e9e4e1d4a176504c21"
+      },
+      "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G9_DT2.json": {
+        "content_sha256": "c924a225d4d35b25217318c0bdbe7728bceb637f5474e0eb9e2cbffac6ccdb37",
+        "git_blob_sha": "a259e7519c939dd8c84a1d4c01d51c0d097f6cb5"
+      },
+      "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py": {
+        "content_sha256": "6eff3f6fbdea299f672c62f7494d4d2aaf0c49bddc0309188b7d81681d60f1cf",
+        "git_blob_sha": "acd2d55bf35e34e5b06c82cc28532fb158641046"
+      },
+      "90_候选工作区/current/07_D3跨网格时间步响应诊断/tests/test_d3_cross_grid_temporal.py": {
+        "content_sha256": "43c15fafce99fe3e53879e3050b275cccbad6412e20d6dae4d711574eb77fe94",
+        "git_blob_sha": "641bc9d0ba5dcc57fa1fe8b0748ee93ff424c308"
+      }
+    },
+    "preregistration_git_blob_sha": "0b6ec8c04b112a54517793504a2f0e8857358133",
+    "reviewed_implementation_commit": "9318e549451ba5429a734202e95b9be8ff8b273c"
   },
   "ruling": {
-    "issued_at": null,
-    "reviewer": "PRO_REVIEW_REQUIRED",
-    "ruling_document": null
+    "issued_at": "2026-08-31T06:11:14+09:00",
+    "reviewer": "ChatGPT Pro",
+    "ruling_document": "90_候选工作区/current/13_D3V2最终静态复核与全新执行授权.md"
   },
   "schema_version": 1,
-  "status": "NOT_AUTHORIZED"
+  "status": "AUTHORIZED_BY_PRO_FOR_BOUND_IMPLEMENTATION"
 }
