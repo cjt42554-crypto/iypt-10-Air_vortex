@@ -2,7 +2,7 @@
 
 状态：
 
-- 静态实现：`D3_V2_IMPLEMENTATION_READY_FOR_PRO_STATIC_REVIEW`；
+- 静态实现：`D3_V2_STATE_MACHINE_PATCH_READY_FOR_PRO_REVIEW`；
 - 动态执行：`NOT_AUTHORIZED`。
 
 ## 目标
@@ -51,6 +51,7 @@ dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
 ```text
 run_d3_cross_grid_temporal.py
 analyse_d3_cross_grid_temporal.py
+d3_stage_machine.py
 d3_execution_authorization.json
 tests/test_d3_cross_grid_temporal.py
 generated_configs/G6_DT0.json
@@ -117,6 +118,14 @@ V2 还增加以下结果盲静态加固：
 4. 所有可捕获的动态异常统一写入一个失败事务出口，使失败标记、阶段台账和可恢复诊断保持一致；
 5. 诊断分窗先在完整轨迹上计算 `Q(t)-Q(0)`，再切取登记窗口；后半窗口不会重新减去 `Q(0.005 s)`。
 
+补充状态机补丁还固定了以下执行前语义：
+
+1. S1、S2 和 S3 共用 `d3_stage_machine.py` 中无文件系统副作用的前置门；目标阶段前必须形成精确 `EXECUTED/PASS` 前缀，目标及后继阶段必须全部保持 `NOT_EXECUTED`；
+2. S0 报告必须完整绑定同一执行提交、起止实现身份、六算例零步初态审计和精确 fresh-evidence 策略，并与台账 S0 的 `EXECUTED/PASS` 及登记证据路径交叉一致；
+3. 乱序、重复、前驱缺失、证据错误、授权或参数前置门失败均作为无副作用拒绝，不写失败标记、不改台账、不创建算例目录；
+4. 只有前置门通过后的阶段内异常才进入失败事务；失败台账候选先在内存中通过语义门，随后才写失败标记和原子替换台账，任一步写入失败都会撤回新标记并保留原台账；
+5. S3 在分析起止锁定同一 HEAD、完整授权对象、授权文件 blob/hash、裁决身份及裁决文件 blob/hash，并继续要求清洁工作树。
+
 ## 动态命令的当前闭锁
 
 运行器已经实现未来执行入口，但当前独立授权对象明确保存：
@@ -156,7 +165,7 @@ authorized_stages = []
 
 授权文件本身不写入自身提交 SHA 或自身 blob，因此不存在自哈希递归。任何实现文件在复核后发生变化，即使已经提交且工作树清洁，也会使旧授权失效。
 
-S1 或 S2 任一算例硬门失败，或算例准备、推进、归档、摘要和阶段提交发生可捕获异常，都会进入同一失败事务，停止后续算例，并把顶层状态闭锁为 `D3_INCONCLUSIVE_FAIL_CLOSED`。
+S1 或 S2 任一算例硬门失败，或在完整阶段前置门通过后，算例准备、推进、归档、摘要和阶段提交发生可捕获异常，都会进入同一失败事务，停止后续算例，并把顶层状态闭锁为 `D3_INCONCLUSIVE_FAIL_CLOSED`。前置条件拒绝不会生成动态失败证据。
 
 ## 独立分析边界
 
@@ -199,6 +208,6 @@ artifacts/d3_implementation_static_review.json
 
 ## 停止点
 
-候选实现和静态测试完成后停在“V2 候选实现等待 Pro 静态复核，动态执行未授权”。
+候选状态机补丁和零步静态测试完成后停在“等待 Pro 独立复核与裁决，动态执行未授权”。
 
 只有新的 Pro 明确裁决才能启动真实 CUDA 阶段。

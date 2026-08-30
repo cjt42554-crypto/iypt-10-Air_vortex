@@ -80,6 +80,13 @@ from airvortex.io.config_io import canonical_json_bytes, read_json_strict
 from airvortex.numerics.cartesian3d import ImmersedCartesianGrid
 from airvortex.numerics.projection3d_gpu import probe_gpu_projection
 
+from d3_stage_machine import (
+    audit_s0_report,
+)
+from d3_stage_machine import (
+    audit_stage_prerequisites as audit_common_stage_prerequisites,
+)
+
 PROTOCOL_ID = "D3_HF3D_CROSS_GRID_TEMPORAL_RESPONSE_V1"
 AUTHORIZATION_ID = "D3_PRO_EXECUTION_AUTHORIZATION_V1"
 AUTHORIZATION_ALLOWED = "AUTHORIZED_BY_PRO_FOR_BOUND_IMPLEMENTATION"
@@ -123,6 +130,10 @@ EXPECTED_OUTPUT_TIME = np.asarray(
 
 class D3ExecutionError(RuntimeError):
     """Raised when a frozen D3 execution or identity gate fails."""
+
+
+class D3PreconditionError(D3ExecutionError):
+    """Reject a dynamic command before it enters a stage transaction."""
 
 
 class D3CaseTransactionError(D3ExecutionError):
@@ -1207,6 +1218,69 @@ def validate_stage_ledger_evidence_files(ledger: Mapping[str, Any]) -> dict[str,
     }
 
 
+def stage_prerequisite_audit(
+    stage: str,
+    ledger: Mapping[str, Any],
+    *,
+    execution_commit: str,
+) -> dict[str, Any]:
+    """Prove a PASS prefix and untouched target/suffix without writing raw."""
+
+    semantics = validate_stage_ledger_semantics(ledger)
+    evidence = validate_stage_ledger_evidence_files(ledger)
+    common = audit_common_stage_prerequisites(
+        ledger,
+        stage,
+        stage_order=STAGE_ORDER,
+        pass_evidence={item: _stage_pass_evidence(item) for item in STAGE_ORDER},
+        expected_execution_commit=execution_commit,
+        ledger_semantics_pass=semantics["gate_pass"],
+        failure_marker_exists=FAILURE_PATH.exists(),
+    )
+    gates = {
+        "common_stage_prerequisites": common["gate_pass"],
+        "existing_evidence_files": evidence["gate_pass"],
+    }
+    return {
+        "gate_pass": all(gates.values()),
+        "stage": stage,
+        "gates": gates,
+        "common_audit": common,
+        "ledger_semantics_audit": semantics,
+        "evidence_file_audit": evidence,
+    }
+
+
+def assert_stage_ready(
+    stage: str,
+    ledger: Mapping[str, Any],
+    *,
+    execution_commit: str,
+) -> dict[str, Any]:
+    """Raise a side-effect-free precondition error before entering a stage."""
+
+    audit = stage_prerequisite_audit(
+        stage,
+        ledger,
+        execution_commit=execution_commit,
+    )
+    if not audit["gate_pass"]:
+        failed = [name for name, passed in audit["gates"].items() if not passed]
+        common_failed = [
+            name
+            for name, passed in audit["common_audit"]["gates"].items()
+            if not passed
+        ]
+        raise D3PreconditionError(
+            f"{stage} stage prerequisites rejected before transaction: "
+            + json.dumps(
+                {"top_level": failed, "common": common_failed},
+                ensure_ascii=False,
+            )
+        )
+    return audit
+
+
 def _no_dynamic_output_audit() -> dict[str, Any]:
     paths = (RAW_ROOT, REPORT_JSON, REPORT_MD, FINAL_MANIFEST, FINAL_EVIDENCE_ROOT)
     observed = {str(path.name): path.exists() for path in paths}
@@ -1396,6 +1470,7 @@ def _implementation_paths() -> tuple[Path, ...]:
     # implementation commit, avoiding an impossible self-hash recursion.
     return (
         HERE / "README.md",
+        HERE / "d3_stage_machine.py",
         HERE / "run_d3_cross_grid_temporal.py",
         HERE / "analyse_d3_cross_grid_temporal.py",
         HERE / "tests" / "test_d3_cross_grid_temporal.py",
@@ -1460,14 +1535,39 @@ def execution_identity_audit(*, require_fresh: bool) -> dict[str, Any]:
             "gate_pass"
         ]
     else:
-        s0 = _json_object(S0_PATH) if S0_PATH.is_file() else {}
-        ledger = _json_object(STAGE_LEDGER_PATH) if STAGE_LEDGER_PATH.is_file() else {}
+        s0_regular = S0_PATH.is_file() and not S0_PATH.is_symlink()
+        s0 = _json_object(S0_PATH) if s0_regular else {}
+        ledger_regular = (
+            STAGE_LEDGER_PATH.is_file() and not STAGE_LEDGER_PATH.is_symlink()
+        )
+        ledger = _json_object(STAGE_LEDGER_PATH) if ledger_regular else {}
         ledger_semantics = validate_stage_ledger_semantics(ledger)
         ledger_evidence = validate_stage_ledger_evidence_files(ledger)
+        s0_report_audit = audit_s0_report(
+            s0,
+            protocol_id=PROTOCOL_ID,
+            expected_commit=head,
+            expected_action=STAGE_ACTIONS["S0"],
+            expected_description=STAGE_DESCRIPTIONS["S0"],
+            expected_status=S0_PASS,
+            expected_case_ids=EXPECTED_CASES,
+        )
+        s0_entries = [
+            item
+            for item in ledger.get("stages", [])
+            if isinstance(item, Mapping) and item.get("stage") == "S0"
+        ]
+        s0_entry = s0_entries[0] if len(s0_entries) == 1 else {}
         evidence_gates.update(
             {
-                "s0_pass": s0.get("gate_pass") is True
-                and s0.get("execution_commit") == head,
+                "s0_regular_file_not_symlink": s0_regular,
+                "s0_report_identity_exact": s0_report_audit["gate_pass"],
+                "stage_ledger_regular_file_not_symlink": ledger_regular,
+                "s0_ledger_entry_executed_pass": s0_entry.get("disposition")
+                == "EXECUTED"
+                and s0_entry.get("status") == "PASS",
+                "s0_ledger_evidence_exact": s0_entry.get("evidence")
+                == _stage_pass_evidence("S0"),
                 "stage_ledger_execution_commit": ledger.get("execution_commit") == head,
                 "stage_ledger_semantics": ledger_semantics["gate_pass"],
                 "stage_ledger_evidence": ledger_evidence["gate_pass"],
@@ -1981,18 +2081,21 @@ def _execution_stage_entry(
     }
 
 
-def _replace_stage_entry(
+def _transition_stage_entry(
+    ledger: Mapping[str, Any],
     stage: str,
     *,
     disposition: str,
     status: str,
     evidence: Sequence[str],
-) -> None:
-    ledger = _json_object(STAGE_LEDGER_PATH)
+) -> dict[str, Any]:
+    """Build and validate a stage transition entirely in memory."""
+
     current_audit = validate_stage_ledger_semantics(ledger)
     if not current_audit["gate_pass"]:
         raise D3ExecutionError("D3 stage ledger is invalid before transition")
-    stages = ledger.get("stages")
+    result = deepcopy(dict(ledger))
+    stages = result.get("stages")
     if not isinstance(stages, list):
         raise D3ExecutionError("D3 stage ledger is malformed")
     replacements = 0
@@ -2009,18 +2112,44 @@ def _replace_stage_entry(
         raise D3ExecutionError(
             f"D3 stage ledger has {replacements} entries for {stage}"
         )
-    _sync_stage_ledger_summary(ledger)
-    audit = validate_stage_ledger_semantics(ledger)
+    _sync_stage_ledger_summary(result)
+    audit = validate_stage_ledger_semantics(result)
     if not audit["gate_pass"]:
         raise D3ExecutionError(f"D3 stage ledger semantic audit failed for {stage}")
-    evidence_audit = validate_stage_ledger_evidence_files(ledger)
+    return result
+
+
+def _replace_stage_entry(
+    stage: str,
+    *,
+    disposition: str,
+    status: str,
+    evidence: Sequence[str],
+) -> None:
+    ledger = _json_object(STAGE_LEDGER_PATH)
+    result = _transition_stage_entry(
+        ledger,
+        stage,
+        disposition=disposition,
+        status=status,
+        evidence=evidence,
+    )
+    evidence_audit = validate_stage_ledger_evidence_files(result)
     if not evidence_audit["gate_pass"]:
         raise D3ExecutionError(f"D3 stage ledger evidence audit failed for {stage}")
-    _write_json(STAGE_LEDGER_PATH, ledger)
+    _write_json(STAGE_LEDGER_PATH, result)
 
 
 def command_prepare_execution() -> int:
-    identity = execution_identity_audit(require_fresh=True)
+    try:
+        identity = execution_identity_audit(require_fresh=True)
+    except D3PreconditionError:
+        raise
+    except Exception as exc:
+        raise D3PreconditionError(
+            "S0 preconditions rejected before creating D3 raw: "
+            f"{type(exc).__name__}: {exc}"
+        ) from exc
     ledger = stage_ledger_template(execution_commit=identity["execution_commit"])
     if not validate_stage_ledger_semantics(ledger)["gate_pass"]:
         raise D3ExecutionError("initial S0 stage ledger semantic audit failed")
@@ -2051,12 +2180,18 @@ def command_prepare_execution() -> int:
         },
     }
     _write_json(S0_PATH, report)
-    _replace_stage_entry(
-        "S0",
-        disposition="EXECUTED",
-        status="PASS",
-        evidence=[_relative(S0_PATH)],
-    )
+    try:
+        _replace_stage_entry(
+            "S0",
+            disposition="EXECUTED",
+            status="PASS",
+            evidence=[_relative(S0_PATH)],
+        )
+    except Exception as exc:
+        raise D3CaseTransactionError(
+            "S0 failed while committing its PASS ledger transition",
+            evidence=[_relative(S0_PATH)],
+        ) from exc
     print(json.dumps({"status": S0_PASS, "path": str(S0_PATH)}, ensure_ascii=False))
     return 0
 
@@ -2188,21 +2323,26 @@ def _run_one_case(case_id: str, identity: Mapping[str, Any]) -> dict[str, Any]:
 
 def command_run_stage(stage: str) -> int:
     if stage not in STAGE_CASES:
-        raise D3ExecutionError(f"unsupported D3 dynamic stage: {stage}")
-    identity = execution_identity_audit(require_fresh=False)
-    ledger = _json_object(STAGE_LEDGER_PATH)
-    entries = {
-        str(item.get("stage")): item
-        for item in ledger.get("stages", [])
-        if isinstance(item, Mapping)
-    }
-    if entries.get(stage, {}).get("disposition") != "NOT_EXECUTED":
-        raise D3ExecutionError(f"{stage} is not in NOT_EXECUTED state")
-    if stage == "S2":
-        if entries.get("S1", {}).get("status") != "PASS":
-            raise D3ExecutionError("S2 requires S1 PASS")
-        for case_id in STAGE_CASES["S1"]:
-            _require_case_pass(case_id)
+        raise D3PreconditionError(f"unsupported D3 dynamic stage: {stage}")
+    try:
+        identity = execution_identity_audit(require_fresh=False)
+        ledger = _json_object(STAGE_LEDGER_PATH)
+        assert_stage_ready(
+            stage,
+            ledger,
+            execution_commit=str(identity["execution_commit"]),
+        )
+        target_index = STAGE_ORDER.index(stage)
+        for predecessor in STAGE_ORDER[:target_index]:
+            for case_id in STAGE_CASES.get(predecessor, ()):
+                _require_case_pass(case_id)
+    except D3PreconditionError:
+        raise
+    except Exception as exc:
+        raise D3PreconditionError(
+            f"{stage} preconditions rejected before stage transaction: "
+            f"{type(exc).__name__}: {exc}"
+        ) from exc
     evidence: list[str] = []
     for case_id in STAGE_CASES[stage]:
         execution_identity_audit(require_fresh=False)
@@ -2226,12 +2366,18 @@ def command_run_stage(stage: str) -> int:
                 ],
             )
             return 2
-    _replace_stage_entry(
-        stage,
-        disposition="EXECUTED",
-        status="PASS",
-        evidence=evidence,
-    )
+    try:
+        _replace_stage_entry(
+            stage,
+            disposition="EXECUTED",
+            status="PASS",
+            evidence=evidence,
+        )
+    except Exception as exc:
+        raise D3CaseTransactionError(
+            f"{stage} failed while committing its PASS ledger transition",
+            evidence=evidence,
+        ) from exc
     print(
         json.dumps(
             {"stage": stage, "status": "PASS", "evidence": evidence},
@@ -2265,6 +2411,17 @@ def _record_dynamic_failure(
         return validate_stage_ledger_evidence_files(ledger)["gate_pass"]
     if current.get("disposition") != "NOT_EXECUTED":
         raise D3ExecutionError(f"cannot fail D3 stage from current state: {stage}")
+    candidate_ledger = _transition_stage_entry(
+        ledger,
+        stage,
+        disposition="FAILED_STOPPED",
+        status=FAIL_CLOSED,
+        evidence=[_relative(FAILURE_PATH)],
+    )
+    if FAILURE_PATH.exists():
+        raise D3ExecutionError(
+            "D3 failure marker exists without the matching failed ledger state"
+        )
     normalized_evidence: list[str] = []
     for value in dict.fromkeys(str(item) for item in diagnostic_evidence):
         if not value:
@@ -2298,18 +2455,20 @@ def _record_dynamic_failure(
         "execution_commit": ledger.get("execution_commit"),
         "subsequent_stages_executed": False,
     }
-    if FAILURE_PATH.exists():
-        observed = _json_object(FAILURE_PATH)
-        if observed.get("stage") != stage:
-            raise D3ExecutionError("D3 failure marker already belongs to another stage")
-    else:
+    marker_written = False
+    try:
         _write_json(FAILURE_PATH, failure_record)
-    _replace_stage_entry(
-        stage,
-        disposition="FAILED_STOPPED",
-        status=FAIL_CLOSED,
-        evidence=[_relative(FAILURE_PATH)],
-    )
+        marker_written = True
+        evidence_audit = validate_stage_ledger_evidence_files(candidate_ledger)
+        if not evidence_audit["gate_pass"]:
+            raise D3ExecutionError(
+                f"D3 failure evidence audit failed before committing {stage}"
+            )
+        _write_json(STAGE_LEDGER_PATH, candidate_ledger)
+    except Exception:
+        if marker_written:
+            FAILURE_PATH.unlink(missing_ok=True)
+        raise
     return True
 
 
@@ -2387,7 +2546,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             return command_run_stage(args.stage)
         raise AssertionError(args.command)
     except Exception as exc:
-        if args.command in {"prepare-execution", "run-stage"}:
+        if args.command in {"prepare-execution", "run-stage"} and not isinstance(
+            exc, D3PreconditionError
+        ):
             try:
                 stage = _stage_for_dynamic_command(arguments)
                 if stage is not None:

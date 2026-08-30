@@ -54,6 +54,13 @@ from airvortex.io import load_run_archive
 from airvortex.io.archive import source_tree_identity
 from airvortex.io.config_io import canonical_json_bytes, read_json_strict
 
+from d3_stage_machine import (
+    audit_s0_report,
+)
+from d3_stage_machine import (
+    audit_stage_prerequisites as audit_common_stage_prerequisites,
+)
+
 PROTOCOL_ID = "D3_HF3D_CROSS_GRID_TEMPORAL_RESPONSE_V1"
 AUTHORIZATION_ID = "D3_PRO_EXECUTION_AUTHORIZATION_V1"
 AUTHORIZATION_ALLOWED = "AUTHORIZED_BY_PRO_FOR_BOUND_IMPLEMENTATION"
@@ -247,6 +254,10 @@ def _blob_sha(path: Path, revision: str = "HEAD") -> str:
     return _git("rev-parse", f"{revision}:{_relative(path)}")
 
 
+def _worktree_blob_sha(path: Path) -> str:
+    return _git("hash-object", "--", _relative(path))
+
+
 def _is_lower_hex(value: object, length: int) -> bool:
     return (
         isinstance(value, str)
@@ -258,6 +269,7 @@ def _is_lower_hex(value: object, length: int) -> bool:
 def _implementation_paths() -> tuple[Path, ...]:
     return (
         HERE / "README.md",
+        HERE / "d3_stage_machine.py",
         HERE / "run_d3_cross_grid_temporal.py",
         HERE / "analyse_d3_cross_grid_temporal.py",
         HERE / "tests" / "test_d3_cross_grid_temporal.py",
@@ -358,6 +370,7 @@ def _validate_authorization_shape(authorization: Mapping[str, Any]) -> dict[str,
 def execution_authorization_audit() -> dict[str, Any]:
     """Independently validate the authorization-only child-commit binding."""
 
+    head = _git("rev-parse", "HEAD")
     regular = (
         EXECUTION_AUTHORIZATION_PATH.is_file()
         and not EXECUTION_AUTHORIZATION_PATH.is_symlink()
@@ -393,13 +406,31 @@ def execution_authorization_audit() -> dict[str, Any]:
     except subprocess.CalledProcessError:
         authorization_blob = ""
     try:
+        authorization_worktree_blob = (
+            _worktree_blob_sha(EXECUTION_AUTHORIZATION_PATH) if regular else ""
+        )
+    except subprocess.CalledProcessError:
+        authorization_worktree_blob = ""
+    try:
         ruling_blob = _blob_sha(ruling_path) if ruling_path is not None else ""
     except subprocess.CalledProcessError:
         ruling_blob = ""
+    try:
+        ruling_worktree_blob = (
+            _worktree_blob_sha(ruling_path)
+            if ruling_path is not None
+            and ruling_path.is_file()
+            and not ruling_path.is_symlink()
+            else ""
+        )
+    except subprocess.CalledProcessError:
+        ruling_worktree_blob = ""
     gates = {
         "regular_file_not_symlink": regular,
         "authorization_shape": shape["gate_pass"],
         "authorization_object_committed": bool(authorization_blob),
+        "authorization_worktree_matches_committed_blob": bool(authorization_blob)
+        and authorization_worktree_blob == authorization_blob,
         "authorization_commit_has_one_parent": sole_parent is not None,
         "reviewed_commit_is_sole_parent": reviewed_commit == sole_parent,
         "authorization_file_is_only_change": changed_paths
@@ -415,14 +446,30 @@ def execution_authorization_audit() -> dict[str, Any]:
         and ruling_path.is_file()
         and not ruling_path.is_symlink()
         and bool(ruling_blob),
+        "ruling_worktree_matches_committed_blob": bool(ruling_blob)
+        and ruling_worktree_blob == ruling_blob,
     }
     return {
         "gate_pass": all(gates.values()),
         "gates": gates,
         "authorization": authorization,
         "observed": {
+            "head": head,
             "sole_parent": sole_parent,
             "changed_paths_from_reviewed_commit": changed_paths,
+            "authorization_git_blob_sha": authorization_blob,
+            "authorization_worktree_blob_sha": authorization_worktree_blob,
+            "authorization_content_sha256": _sha256(EXECUTION_AUTHORIZATION_PATH)
+            if regular
+            else None,
+            "ruling_identity": dict(ruling) if isinstance(ruling, Mapping) else None,
+            "ruling_git_blob_sha": ruling_blob,
+            "ruling_worktree_blob_sha": ruling_worktree_blob,
+            "ruling_content_sha256": _sha256(ruling_path)
+            if ruling_path is not None
+            and ruling_path.is_file()
+            and not ruling_path.is_symlink()
+            else None,
             "implementation_files": implementation,
             "preregistration_git_blob_sha": preregistration_blob,
             "formal_source_tree": source,
@@ -1446,14 +1493,35 @@ def _validate_preanalysis_ledger(
         (REPOSITORY_ROOT / path).is_file() and not (REPOSITORY_ROOT / path).is_symlink()
         for path in evidence_paths
     )
+    local_semantics_pass = set(per_stage) == set(STAGE_ORDER) and all(
+        item["gate_pass"] for item in per_stage.values()
+    )
+    common_prerequisites = audit_common_stage_prerequisites(
+        ledger,
+        "S3",
+        stage_order=STAGE_ORDER,
+        pass_evidence={
+            "S0": [_relative(S0_PATH)],
+            "S1": [
+                _relative(_case_summary_path(case_id)) for case_id in STAGE_CASES["S1"]
+            ],
+            "S2": [
+                _relative(_case_summary_path(case_id)) for case_id in STAGE_CASES["S2"]
+            ],
+            "S3": [],
+        },
+        expected_execution_commit=execution_commit,
+        ledger_semantics_pass=local_semantics_pass,
+        failure_marker_exists=FAILURE_PATH.exists(),
+    )
     gates = {
         "schema_version": ledger.get("schema_version") == 2,
         "protocol_id": ledger.get("protocol_id") == PROTOCOL_ID,
         "execution_commit": ledger.get("execution_commit") == execution_commit,
         "exact_stage_order": exact_order,
         "exact_stage_set": set(per_stage) == set(STAGE_ORDER),
-        "all_stage_semantics": set(per_stage) == set(STAGE_ORDER)
-        and all(item["gate_pass"] for item in per_stage.values()),
+        "all_stage_semantics": local_semantics_pass,
+        "shared_s3_stage_prerequisites": common_prerequisites["gate_pass"],
         "failed_stages_empty": ledger.get("failed_stages") == [],
         "unexecuted_stages_exact": ledger.get("unexecuted_stages") == ["S3"],
         "terminal_state_in_progress": ledger.get("terminal_state") == "IN_PROGRESS",
@@ -1463,7 +1531,12 @@ def _validate_preanalysis_ledger(
         "automatic_follow_on_prohibited": ledger.get("automatic_follow_on")
         == "PROHIBITED",
     }
-    return {"gate_pass": all(gates.values()), "gates": gates, "stages": per_stage}
+    return {
+        "gate_pass": all(gates.values()),
+        "gates": gates,
+        "stages": per_stage,
+        "common_stage_prerequisite_audit": common_prerequisites,
+    }
 
 
 def _final_stage_ledger(
@@ -1694,13 +1767,19 @@ def analyse_final() -> dict[str, Any]:
         raise D3AnalysisError("D3 final analysis requires a clean main worktree")
     if source.get("value") != bound_source:
         raise D3AnalysisError("formal source tree no longer matches the D3 binding")
+    if not RAW_LEDGER_PATH.is_file() or RAW_LEDGER_PATH.is_symlink():
+        raise D3AnalysisError("D3 raw stage ledger is not a regular file")
     s0 = _json_object(S0_PATH)
-    if (
-        s0.get("schema_version") != 2
-        or s0.get("gate_pass") is not True
-        or s0.get("execution_commit") != head
-        or s0.get("fresh_evidence_policy", {}).get("time_steps_advanced") != 0
-    ):
+    s0_report_audit = audit_s0_report(
+        s0,
+        protocol_id=PROTOCOL_ID,
+        expected_commit=head,
+        expected_action=STAGE_ACTIONS["S0"],
+        expected_description=STAGE_DESCRIPTIONS["S0"],
+        expected_status="D3_S0_IDENTITY_CONFIG_IMPLEMENTATION_AND_FRESH_EVIDENCE_GATE_PASS",
+        expected_case_ids=EXPECTED_CASES,
+    )
+    if not s0_report_audit["gate_pass"]:
         raise D3AnalysisError("D3 S0 identity/fresh-evidence gate is invalid")
     raw_ledger = _json_object(RAW_LEDGER_PATH)
     ledger_audit = _validate_preanalysis_ledger(raw_ledger, execution_commit=head)
@@ -1741,6 +1820,9 @@ def analyse_final() -> dict[str, Any]:
     authorization_end = execution_authorization_audit()
     if not authorization_end["gate_pass"] or (
         authorization_end["observed"] != authorization_audit["observed"]
+        or authorization_end["authorization"] != authorization_audit["authorization"]
+        or _git("rev-parse", "HEAD") != head
+        or bool(_git("status", "--porcelain=v1", "--untracked-files=all").splitlines())
     ):
         raise D3AnalysisError(
             "D3 authorization or implementation binding changed in S3"

@@ -21,9 +21,10 @@ if str(FORMAL_SOURCE) not in sys.path:
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
+from airvortex.io.config_io import StrictJSONError
+
 import analyse_d3_cross_grid_temporal as analyser
 import run_d3_cross_grid_temporal as runner
-from airvortex.io.config_io import StrictJSONError
 
 
 def _metric_flags(**overrides: bool) -> dict[str, object]:
@@ -75,6 +76,51 @@ def _synthetic_authorized_payload() -> dict[str, Any]:
         "issued_at": "2026-08-31T00:00:00+08:00",
     }
     return value
+
+
+def _execution_binding_stub(commit: str) -> dict[str, Any]:
+    return {
+        "gate_pass": True,
+        "branch": "main",
+        "execution_commit": commit,
+        "worktree_porcelain": [],
+        "formal_source_tree": {"available": True, "value": "f" * 64},
+        "implementation": {},
+        "authorization": {"gate_pass": True, "observed": {}},
+        "generated_config_audit": {"gate_pass": True},
+        "cuda_probe": {"gate_pass": True},
+    }
+
+
+def _valid_s0_report(commit: str) -> dict[str, Any]:
+    binding = _execution_binding_stub(commit)
+    return {
+        "schema_version": 2,
+        "protocol_id": runner.PROTOCOL_ID,
+        "stage": "S0",
+        "action": runner.STAGE_ACTIONS["S0"],
+        "human_description": runner.STAGE_DESCRIPTIONS["S0"],
+        "status": runner.S0_PASS,
+        "gate_pass": True,
+        "execution_commit": commit,
+        "execution_identity_start": deepcopy(binding),
+        "execution_binding_end": deepcopy(binding),
+        "initial_grid_mask_state_identity": {
+            "gate_pass": True,
+            "groups": {
+                "G6": {"gate_pass": True},
+                "G9": {"gate_pass": True},
+            },
+            "cases": {case_id: {} for case_id in runner.EXPECTED_CASES},
+            "time_steps_advanced": 0,
+        },
+        "fresh_evidence_policy": {
+            "d2_dynamic_inputs_used": False,
+            "checkpoint_used": False,
+            "d3_prior_raw_present": False,
+            "time_steps_advanced": 0,
+        },
+    }
 
 
 class FrozenContractAndConfigurationTests(unittest.TestCase):
@@ -898,6 +944,265 @@ class IdentityFreshnessAndLedgerTests(unittest.TestCase):
         runner._sync_stage_ledger_summary(invalid)
         self.assertFalse(runner.validate_stage_ledger_semantics(invalid)["gate_pass"])
 
+    def test_orphan_s0_report_rejects_s1_before_case_or_failure_write(self) -> None:
+        commit = "a" * 40
+        with tempfile.TemporaryDirectory(dir=HERE) as temporary_directory:
+            root = Path(temporary_directory)
+            ledger_path = root / "stage_ledger.json"
+            failure_path = root / "execution_failure.json"
+            s0_path = root / "s0.json"
+            with (
+                patch.object(runner, "RAW_ROOT", root),
+                patch.object(runner, "STAGE_LEDGER_PATH", ledger_path),
+                patch.object(runner, "FAILURE_PATH", failure_path),
+                patch.object(runner, "S0_PATH", s0_path),
+                patch.object(
+                    runner,
+                    "execution_binding_audit",
+                    return_value=_execution_binding_stub(commit),
+                ),
+                patch.object(runner, "_run_one_case") as run_case,
+            ):
+                runner._write_json(s0_path, _valid_s0_report(commit))
+                runner._write_json(
+                    ledger_path,
+                    runner.stage_ledger_template(execution_commit=commit),
+                )
+                before = ledger_path.read_bytes()
+                with self.assertRaises(runner.D3PreconditionError):
+                    runner.main(["run-stage", "--stage", "S1"])
+                run_case.assert_not_called()
+                self.assertEqual(ledger_path.read_bytes(), before)
+                self.assertFalse(failure_path.exists())
+                self.assertFalse((root / "cases").exists())
+
+    def test_s0_report_ledger_binding_mismatches_are_side_effect_free(self) -> None:
+        commit = "a" * 40
+        for mutation in (
+            "missing_report",
+            "report_commit",
+            "ledger_commit",
+            "evidence",
+        ):
+            with (
+                self.subTest(mutation=mutation),
+                tempfile.TemporaryDirectory(dir=HERE) as temporary_directory,
+            ):
+                root = Path(temporary_directory)
+                ledger_path = root / "stage_ledger.json"
+                failure_path = root / "execution_failure.json"
+                s0_path = root / "s0.json"
+                with (
+                    patch.object(runner, "RAW_ROOT", root),
+                    patch.object(runner, "STAGE_LEDGER_PATH", ledger_path),
+                    patch.object(runner, "FAILURE_PATH", failure_path),
+                    patch.object(runner, "S0_PATH", s0_path),
+                    patch.object(
+                        runner,
+                        "execution_binding_audit",
+                        return_value=_execution_binding_stub(commit),
+                    ),
+                    patch.object(runner, "_run_one_case") as run_case,
+                ):
+                    if mutation != "missing_report":
+                        report = _valid_s0_report(commit)
+                        if mutation == "report_commit":
+                            report["execution_commit"] = "b" * 40
+                        runner._write_json(s0_path, report)
+                    ledger_commit = "b" * 40 if mutation == "ledger_commit" else commit
+                    ledger = runner.stage_ledger_template(
+                        execution_commit=ledger_commit
+                    )
+                    evidence = runner._stage_pass_evidence("S0")
+                    if mutation == "evidence":
+                        evidence = [runner._relative(root / "wrong_s0.json")]
+                    ledger["stages"][0] = runner._execution_stage_entry(
+                        "S0",
+                        disposition="EXECUTED",
+                        status="PASS",
+                        evidence=evidence,
+                    )
+                    runner._sync_stage_ledger_summary(ledger)
+                    runner._write_json(ledger_path, ledger)
+                    before = ledger_path.read_bytes()
+                    with self.assertRaises(runner.D3PreconditionError):
+                        runner.main(["run-stage", "--stage", "S1"])
+                    run_case.assert_not_called()
+                    self.assertEqual(ledger_path.read_bytes(), before)
+                    self.assertFalse(failure_path.exists())
+                    self.assertFalse((root / "cases").exists())
+
+    def test_out_of_order_s2_rejection_is_side_effect_free(self) -> None:
+        commit = "a" * 40
+        with tempfile.TemporaryDirectory(dir=HERE) as temporary_directory:
+            root = Path(temporary_directory)
+            ledger_path = root / "stage_ledger.json"
+            failure_path = root / "execution_failure.json"
+            s0_path = root / "s0.json"
+            with (
+                patch.object(runner, "RAW_ROOT", root),
+                patch.object(runner, "STAGE_LEDGER_PATH", ledger_path),
+                patch.object(runner, "FAILURE_PATH", failure_path),
+                patch.object(runner, "S0_PATH", s0_path),
+                patch.object(
+                    runner,
+                    "execution_binding_audit",
+                    return_value=_execution_binding_stub(commit),
+                ),
+                patch.object(runner, "_run_one_case") as run_case,
+            ):
+                runner._write_json(s0_path, _valid_s0_report(commit))
+                ledger = runner.stage_ledger_template(execution_commit=commit)
+                ledger["stages"][0] = runner._execution_stage_entry(
+                    "S0",
+                    disposition="EXECUTED",
+                    status="PASS",
+                    evidence=runner._stage_pass_evidence("S0"),
+                )
+                runner._sync_stage_ledger_summary(ledger)
+                runner._write_json(ledger_path, ledger)
+                before = ledger_path.read_bytes()
+                with self.assertRaises(runner.D3PreconditionError):
+                    runner.main(["run-stage", "--stage", "S2"])
+                run_case.assert_not_called()
+                self.assertEqual(ledger_path.read_bytes(), before)
+                self.assertFalse(failure_path.exists())
+                self.assertFalse((root / "cases").exists())
+
+    def test_repeated_s1_rejection_preserves_completed_ledger(self) -> None:
+        commit = "a" * 40
+        with tempfile.TemporaryDirectory(dir=HERE) as temporary_directory:
+            root = Path(temporary_directory)
+            ledger_path = root / "stage_ledger.json"
+            failure_path = root / "execution_failure.json"
+            s0_path = root / "s0.json"
+            with (
+                patch.object(runner, "RAW_ROOT", root),
+                patch.object(runner, "STAGE_LEDGER_PATH", ledger_path),
+                patch.object(runner, "FAILURE_PATH", failure_path),
+                patch.object(runner, "S0_PATH", s0_path),
+                patch.object(
+                    runner,
+                    "execution_binding_audit",
+                    return_value=_execution_binding_stub(commit),
+                ),
+                patch.object(runner, "_run_one_case") as run_case,
+            ):
+                runner._write_json(s0_path, _valid_s0_report(commit))
+                ledger = runner.stage_ledger_template(execution_commit=commit)
+                ledger["stages"][0] = runner._execution_stage_entry(
+                    "S0",
+                    disposition="EXECUTED",
+                    status="PASS",
+                    evidence=runner._stage_pass_evidence("S0"),
+                )
+                runner._sync_stage_ledger_summary(ledger)
+                for case_id in runner.STAGE_CASES["S1"]:
+                    runner._write_json(
+                        runner._case_summary_path(case_id),
+                        {"status": runner.CASE_PASS, "gate_pass": True},
+                    )
+                ledger = runner._transition_stage_entry(
+                    ledger,
+                    "S1",
+                    disposition="EXECUTED",
+                    status="PASS",
+                    evidence=runner._stage_pass_evidence("S1"),
+                )
+                runner._write_json(ledger_path, ledger)
+                before = ledger_path.read_bytes()
+                with self.assertRaises(runner.D3PreconditionError):
+                    runner.main(["run-stage", "--stage", "S1"])
+                run_case.assert_not_called()
+                self.assertEqual(ledger_path.read_bytes(), before)
+                self.assertFalse(failure_path.exists())
+
+    def test_shared_stage_gate_accepts_only_exact_pass_prefixes(self) -> None:
+        commit = "a" * 40
+        with tempfile.TemporaryDirectory(dir=HERE) as temporary_directory:
+            root = Path(temporary_directory)
+            ledger_path = root / "stage_ledger.json"
+            failure_path = root / "execution_failure.json"
+            s0_path = root / "s0.json"
+            with (
+                patch.object(runner, "RAW_ROOT", root),
+                patch.object(runner, "STAGE_LEDGER_PATH", ledger_path),
+                patch.object(runner, "FAILURE_PATH", failure_path),
+                patch.object(runner, "S0_PATH", s0_path),
+                patch.object(analyser, "RAW_ROOT", root),
+                patch.object(analyser, "RAW_LEDGER_PATH", ledger_path),
+                patch.object(analyser, "FAILURE_PATH", failure_path),
+                patch.object(analyser, "S0_PATH", s0_path),
+            ):
+                runner._write_json(s0_path, _valid_s0_report(commit))
+                ledger = runner.stage_ledger_template(execution_commit=commit)
+                ledger["stages"][0] = runner._execution_stage_entry(
+                    "S0",
+                    disposition="EXECUTED",
+                    status="PASS",
+                    evidence=runner._stage_pass_evidence("S0"),
+                )
+                runner._sync_stage_ledger_summary(ledger)
+                runner._write_json(ledger_path, ledger)
+                self.assertTrue(
+                    runner.stage_prerequisite_audit(
+                        "S1", ledger, execution_commit=commit
+                    )["gate_pass"]
+                )
+
+                for case_id in runner.STAGE_CASES["S1"]:
+                    path = runner._case_summary_path(case_id)
+                    runner._write_json(
+                        path,
+                        {"status": runner.CASE_PASS, "gate_pass": True},
+                    )
+                ledger = runner._transition_stage_entry(
+                    ledger,
+                    "S1",
+                    disposition="EXECUTED",
+                    status="PASS",
+                    evidence=runner._stage_pass_evidence("S1"),
+                )
+                runner._write_json(ledger_path, ledger)
+                self.assertTrue(
+                    runner.stage_prerequisite_audit(
+                        "S2", ledger, execution_commit=commit
+                    )["gate_pass"]
+                )
+
+                for case_id in runner.STAGE_CASES["S2"]:
+                    path = runner._case_summary_path(case_id)
+                    runner._write_json(
+                        path,
+                        {"status": runner.CASE_PASS, "gate_pass": True},
+                    )
+                ledger = runner._transition_stage_entry(
+                    ledger,
+                    "S2",
+                    disposition="EXECUTED",
+                    status="PASS",
+                    evidence=runner._stage_pass_evidence("S2"),
+                )
+                runner._write_json(ledger_path, ledger)
+                self.assertTrue(
+                    analyser._validate_preanalysis_ledger(
+                        ledger,
+                        execution_commit=commit,
+                    )["gate_pass"]
+                )
+
+                repeated = runner.stage_prerequisite_audit(
+                    "S1", ledger, execution_commit=commit
+                )
+                self.assertFalse(repeated["gate_pass"])
+                wrong_evidence = deepcopy(ledger)
+                wrong_evidence["stages"][0]["evidence"] = ["wrong/s0.json"]
+                self.assertFalse(
+                    runner.stage_prerequisite_audit(
+                        "S3", wrong_evidence, execution_commit=commit
+                    )["gate_pass"]
+                )
+
     def test_unique_failure_transaction_keeps_marker_and_ledger_consistent(
         self,
     ) -> None:
@@ -931,6 +1236,90 @@ class IdentityFreshnessAndLedgerTests(unittest.TestCase):
                 self.assertEqual(ledger["failed_stages"], ["S0"])
                 self.assertEqual(failure["stage"], "S0")
                 self.assertEqual(failure["execution_commit"], "a" * 40)
+
+    def test_illegal_failure_transition_writes_neither_marker_nor_ledger(self) -> None:
+        with tempfile.TemporaryDirectory(dir=HERE) as temporary_directory:
+            root = Path(temporary_directory)
+            ledger_path = root / "stage_ledger.json"
+            failure_path = root / "execution_failure.json"
+            s0_path = root / "s0.json"
+            with (
+                patch.object(runner, "RAW_ROOT", root),
+                patch.object(runner, "STAGE_LEDGER_PATH", ledger_path),
+                patch.object(runner, "FAILURE_PATH", failure_path),
+                patch.object(runner, "S0_PATH", s0_path),
+            ):
+                runner._write_json(s0_path, {})
+                ledger = runner.stage_ledger_template(execution_commit="a" * 40)
+                ledger["stages"][0] = runner._execution_stage_entry(
+                    "S0",
+                    disposition="EXECUTED",
+                    status="PASS",
+                    evidence=runner._stage_pass_evidence("S0"),
+                )
+                runner._sync_stage_ledger_summary(ledger)
+                runner._write_json(ledger_path, ledger)
+                before = ledger_path.read_bytes()
+                with self.assertRaises(runner.D3ExecutionError):
+                    runner._record_dynamic_failure(
+                        "S2",
+                        ["run-stage", "--stage", "S2"],
+                        RuntimeError("out-of-order precondition"),
+                    )
+                self.assertEqual(ledger_path.read_bytes(), before)
+                self.assertFalse(failure_path.exists())
+
+    def test_failure_transaction_rolls_back_each_write_failure(self) -> None:
+        for failing_target in ("marker", "ledger"):
+            with (
+                self.subTest(failing_target=failing_target),
+                tempfile.TemporaryDirectory(dir=HERE) as temporary_directory,
+            ):
+                root = Path(temporary_directory)
+                ledger_path = root / "stage_ledger.json"
+                failure_path = root / "execution_failure.json"
+                with (
+                    patch.object(runner, "RAW_ROOT", root),
+                    patch.object(runner, "STAGE_LEDGER_PATH", ledger_path),
+                    patch.object(runner, "FAILURE_PATH", failure_path),
+                ):
+                    runner._write_json(
+                        ledger_path,
+                        runner.stage_ledger_template(execution_commit="a" * 40),
+                    )
+                    before = ledger_path.read_bytes()
+                    original_write = runner._write_json
+                    target_path = (
+                        failure_path if failing_target == "marker" else ledger_path
+                    )
+
+                    def injected_write(
+                        path: Path,
+                        value: object,
+                        *,
+                        target: Path = target_path,
+                        original: Any = original_write,
+                        label: str = failing_target,
+                    ) -> None:
+                        if path == target:
+                            raise OSError(f"injected {label} write failure")
+                        original(path, value)
+
+                    with (
+                        patch.object(
+                            runner,
+                            "_write_json",
+                            side_effect=injected_write,
+                        ),
+                        self.assertRaises(OSError),
+                    ):
+                        runner._record_dynamic_failure(
+                            "S0",
+                            ["prepare-execution"],
+                            RuntimeError("post-start failure"),
+                        )
+                    self.assertEqual(ledger_path.read_bytes(), before)
+                    self.assertFalse(failure_path.exists())
 
     def test_prepare_exception_is_routed_to_unique_failure_transaction(self) -> None:
         with tempfile.TemporaryDirectory(dir=HERE) as temporary_directory:
