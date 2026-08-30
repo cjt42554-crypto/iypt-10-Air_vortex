@@ -4,113 +4,121 @@
 
 ```text
 D2_V2_EXECUTION_REVIEW_ACCEPTED_WITH_NONBLOCKING_LEDGER_CLARIFICATION
-D3_V2_FINAL_STATIC_REVIEW_ACCEPTED
-D3_S3_PUBLICATION_TRANSACTION_ACCEPTED
-D3_PREEXECUTION_FAILURE_CONFIRMED_AS_AUTHORIZATION_AUDIT_FALSE_NEGATIVE
 D3_AUTHORIZATION_UNICODE_PATH_AUDIT_PATCH_ACCEPTED
-D3_EXECUTION_REAUTHORIZED_IFF_CURRENT_HEAD_PASSES_MACHINE_AUTHORIZATION_AUDIT
-D3_FRESH_S0_S1_S2_S3_EXECUTION_NOT_YET_PERFORMED
+D3_PATCHED_SNAPSHOT_AUTHORIZATION_PRECHECK_PASS
+D3_S0_EXECUTED_PASS
+D3_S1_FAILED_STOPPED_AT_G6_DT0_NATIVE_OUTPUT_TIMES_EXACT_GATE
+D3_S2_S3_NOT_EXECUTED
+D3_SCIENTIFIC_CLASSIFICATION_NOT_FORMED
 ```
 
-## 本轮复核与裁决
+## 本轮执行结论
 
-Pro 已独立复核当前 `main` 上的中文路径授权审计修复、状态中立授权生命周期测试和零步静态证据。裁决正文：
+Pro 裁决与再授权正文：
 
 ```text
 90_候选工作区/current/14_D3授权审计中文路径修复复核与全新执行再授权.md
 ```
 
-结论：前一授权 HEAD 上的失败是执行前机器审计假阴性，不是 S0、数值算例或科学分类失败。旧实现用默认 `git diff --name-only` 输出，Git 将中文授权路径写成带引号的八进制转义串，导致精确路径比较错误。修复后的运行器和独立分析器都使用：
+本地已快进到唯一授权子提交：
 
 ```text
-git -c core.quotePath=false diff --name-only <reviewed_commit> HEAD
+execution commit = 90ed5c1019d8265f6e9730ff8a2d36be61deec8b
+reviewed parent = a5fc929b64b70aca16354817cb4ba620c32affb5
 ```
 
-精确唯一路径比较、父提交绑定、实现 blob/hash、预注册、正式源码树和裁决文档门均未放宽。新静态证据中的旧授权审计已实际输出真实中文路径列表，并仍因旧父提交和旧实现绑定而正确失败闭锁。
+运行器与独立分析器的授权审计、真实 Unicode 唯一路径、父提交、实现 blob/hash、预注册、正式源码树、裁决文档、六配置、清洁工作树、空输出和 RTX 5060 Laptop GPU CuPy FP64 门在 raw 创建前全部通过。
 
-提交证据记录：D3 测试 `61/61`、Ruff、格式、限定 mypy、`compileall`、9 份严格 JSON、Pandoc/MathML/Chrome、`git diff --check` 和 RTX 5060 Laptop GPU CUDA FP64 零步探针通过；`time_steps_advanced = 0`，D3 raw、动态 reports、最终 manifest 和 compact evidence 不存在。网页端本轮没有独立重跑这些命令，不把它们写成本轮重算结果。
+S0 随后成功提交，时间步推进数为 0。S1 只完成第一个算例 `G6_DT0`；该算例完整推进到 `0.010 s` 后，冻结质量门 `native_output_times_exact` 失败，命令以退出码 2 结束并进入唯一失败事务。运行器没有启动 `G6_DT1`、`G6_DT2`、S2 或 S3，Codex 也没有重跑、删除、修补或继续。
 
-## 机器授权判定
-
-本裁决、current 和 history 所在提交是受复核父提交。紧随其后的唯一直接子提交只能修改：
+最终台账状态：
 
 ```text
-90_候选工作区/current/07_D3跨网格时间步响应诊断/d3_execution_authorization.json
-```
-
-只有当前 HEAD 上运行器与分析器的机器审计同时满足以下条件，才视为动态执行已授权：
-
-```text
-status = AUTHORIZED_BY_PRO_FOR_BOUND_IMPLEMENTATION
-real_cuda_dynamic_execution = true
-authorized_stages = [S0, S1, S2, S3]
+S0 = EXECUTED / PASS
+S1 = FAILED_STOPPED / D3_INCONCLUSIVE_FAIL_CLOSED
+S2 = NOT_EXECUTED
+S3 = NOT_EXECUTED
+terminal_state = D3_INCONCLUSIVE_FAIL_CLOSED
 automatic_follow_on = PROHIBITED
-current HEAD = authorization-only child of reviewed parent
-changed_paths = [真实 Unicode 授权文件路径]
-all implementation/blob/hash/source/preregistration/ruling bindings = PASS
 ```
 
-旧授权仍然无效；不得通过人工解释、修改 Git 全局配置、跳过机器门或手工创建 raw 来绕过。新允许态对象只对当前精确快照有效。
+台账语义、证据路径和失败记录交叉审计全部通过。`execution_failure.json` 明确记录 `subsequent_stages_executed = false`。
+
+## G6_DT0 失败证据
+
+`G6_DT0` 实际完成：
+
+```text
+simulated_time_s = 0.010
+accepted_steps = 1820
+retry_attempts = 0
+wall_time_s = 818.6739202680001
+CUDA device = NVIDIA GeForce RTX 5060 Laptop GPU
+compute capability = 12.0
+requested/selected = cuda/cuda
+fallback = false
+execution commit start/end = 90ed5c1019d8265f6e9730ff8a2d36be61deec8b
+formal source tree start/end = dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
+```
+
+除 `native_output_times_exact` 外，其余质量门全部通过。主要记录值：
+
+```text
+maximum_advective_cfl = 0.07135371797767952
+maximum_cfl_retry_count = 0
+maximum_pressure_relative_residual = 9.999623167132062e-08
+maximum_projected_divergence_s_inv = 7.454811945528661e-06
+maximum_liquid_volume_balance_error_relative = 3.1520299546005352e-12
+cumulative_phase_clip_relative = 3.152340439859344e-12
+cumulative_phase_repair_relative = 0.0
+configured_time_step_active_fraction = 0.9945054945054945
+all_state_and_diagnostic_values_finite = true
+```
+
+输出时刻只有索引 9 不逐位相等：
+
+```text
+observed[9] = 0.009000000000000001
+expected[9] = 0.009
+delta = 1.734723475976807e-18 s
+spacing(expected[9]) = 1.734723475976807e-18 s
+delta = 1 ULP
+all other registered output times = bitwise equal
+```
+
+只读复算确认，从 `0.001` 开始重复执行八次 `next_output += 0.001` 得到的正是归档值 `0.009000000000000001`；冻结 `EXPECTED_OUTPUT_TIME` 的字面量 `0.009` 是相邻的低一位浮点值。这个事实不撤销本轮失败：合同要求逐位精确，本轮授权明确禁止失败后重跑或现场修改门。
+
+## 必须保留的本地证据
+
+以下 raw 被 `.gitignore` 忽略，只存在于当前用户机器；不得删除、移动、覆盖或复用：
+
+```text
+e50905260c9d7732ef68e2cf76b4ed661b19383b4f92ade409463e58b63244b2  artifacts/runs/s0_identity_config_fresh_evidence_gate.json
+46ff32a79a62dd6cb544a04a7377d55888dff75e313f650bd97c32cf2df62afa  artifacts/runs/stage_ledger.json
+d63bd745ee455bfaaba563b6b348bb7f7c822d5f6d33977c6f0f02daadb7def5  artifacts/runs/execution_failure.json
+15b2e76a57ad00dd93eb7a6652f4adf697f48c9dc772f57f666a771a537ca27a  artifacts/runs/cases/G6_DT0/case_summary.json
+d1b5ae2723ec60619d20fe2ce7d8d8010941083167fe1d71554990b898d9f3ed  artifacts/runs/cases/G6_DT0/partial.npz
+```
+
+完整相对根为：
+
+```text
+90_候选工作区/current/07_D3跨网格时间步响应诊断/
+```
+
+`G6_DT1`、`G6_DT2`、全部 G9 算例目录、动态报告、最终 manifest、compact evidence 和 S3 staging 均不存在。Git 工作树仍清洁，当前无 D3/HF3D 写入进程。
 
 ## 下一项唯一任务
 
-Codex 拉取当前远端 `main` 后，先运行不推进时间步的授权、身份、CUDA、空输出和单写入者检查。只有全部通过，才可在同一清洁 HEAD 上逐阶段执行一次全新 D3：
+由 Pro 独立复核本次 S1 失败、冻结精确门语义、重复累加产生的 1 ULP 差异和本地证据摘要，并裁决后续。Pro 的详细最终分析等价于人工裁决。
 
-```text
-S0 → 检查精确 PASS
-S1: G6_DT0 → G6_DT1 → G6_DT2 → 检查精确 PASS
-S2: G9_DT0 → G9_DT1 → G9_DT2 → 检查精确 PASS
-S3: 独立分析、事务发布、完整重载审计后停止
-```
+在新裁决到来前，Codex 不得：
 
-命令：
-
-```bash
-"$D3_GPU_PYTHON" \
-  "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py" \
-  prepare-execution
-
-"$D3_GPU_PYTHON" \
-  "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py" \
-  run-stage --stage S1
-
-"$D3_GPU_PYTHON" \
-  "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py" \
-  run-stage --stage S2
-
-"$D3_GPU_PYTHON" \
-  "90_候选工作区/current/07_D3跨网格时间步响应诊断/analyse_d3_cross_grid_temporal.py" \
-  final
-```
-
-`automatic_follow_on = PROHIBITED`：每个阶段结束后必须显式读取台账、失败标记和阶段证据，只有精确 `EXECUTED/PASS` 才可启动下一阶段。禁止后台无检查串联。
-
-## 执行前冻结条件
-
-1. `main` 工作树清洁，当前 HEAD 为有效新授权提交；S0–S3 之间不得产生 commit 或文件修改。
-2. 授权审计的 `authorization_file_is_only_change`、父提交、实现绑定、预注册、正式源码树和裁决文档全部为 PASS；中文路径必须以真实 Unicode 路径出现。
-3. D3 raw、动态 reports、最终 manifest、compact evidence、S3 staging 和 raw ledger 临时文件全部不存在；未知残留不得删除后继续。
-4. 没有 D3/HF3D 后台或并发写入进程，整个序列维持单一前台写入者。
-5. 使用零步静态证据记录的 GPU Python/CuPy 环境；真实 CUDA 且无 CPU 回退。
-6. 不复用 D2 raw、旧轨迹、隔离目录、checkpoint、陈旧 staging 或部分输出。
-7. 正式源码树保持：
-
-```text
-dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
-```
-
-## 失败停止条件
-
-任一命令非零退出、异常、硬门失败、CUDA 回退、`execution_failure.json` 出现、台账/归档/manifest/报告不一致、身份漂移、未知输出、并发写入或外部中断，立即停止。禁止删除、修补、拼接、选择性保留或重跑同一阶段；保留原始证据并更新交接后交 Pro 复核。
-
-## 成功交付
-
-仅当 S3 `EXECUTED/PASS`，tracked/raw ledger 一致，报告、manifest、compact evidence 和事务记录的独立重载审计全部通过时：
-
-1. 提交跟踪的 D3 报告、manifest、compact evidence 与更新后的交接；
-2. 明确记录唯一执行提交和六算例状态；
-3. 立即停止交 Pro 做结果复核，无论分类标签是什么；
-4. 不自动运行更小时间步、更细网格、长期窗口、Q1R4 或 D4。
+1. 重跑 S0、S1 或 `G6_DT0`；
+2. 启动 `G6_DT1`、`G6_DT2`、S2 或 S3；
+3. 删除、移动、改写或选择性保留上述 raw；
+4. 修改冻结时刻、容差、质量门、矩阵、阈值、正式源码或授权对象；
+5. 把 `G6_DT0` 的部分证据用于 D3 分类或数值资格结论。
 
 ## 当前结论上限
 
@@ -121,11 +129,12 @@ D1_GEOMETRY_EFFECT_SMALL_IN_REGISTERED_WINDOW
 D2_Z_SMALL_NO_CLEAR_DIRECTION
 D2_T_MATERIAL_REDUCTION_SIGNAL
 D2_R_MIXED_OR_INDETERMINATE_NO_CLEAR_DIRECTION
-D3_PATCHED_EXACT_SNAPSHOT_REAL_CUDA_EXECUTION_REAUTHORIZED_NOT_YET_EXECUTED
+D3_INCONCLUSIVE_FAIL_CLOSED_AT_S1_G6_DT0_NATIVE_OUTPUT_TIMES_EXACT_GATE
+D3_SCIENTIFIC_CLASSIFICATION = NOT_FORMED
 NUMERICAL_QUALIFICATION = NOT_DEMONSTRATED
 PHYSICAL_VALIDATION = NOT_PERFORMED
 EXPERIMENTAL_VALIDATION = NOT_PERFORMED
 APPARATUS_PREDICTION = DISALLOWED
 ```
 
-正式理论 `01_最终理论/**`、正式程序 `02_模拟程序/**`、顶层 `AGENTS.md`、冻结预注册、科学阈值、六算例矩阵、输出时刻和标签优先级本轮均未修改。本轮没有运行 S0、D3 动态算例或实验，也没有提高数值资格、物理验证、实验验证或装置预测结论。
+正式理论 `01_最终理论/**`、正式程序 `02_模拟程序/**`、顶层 `AGENTS.md`、冻结预注册、科学阈值、六算例矩阵、输出时刻和标签优先级均未修改。本轮实际运行了 S0 和一个完整 `G6_DT0` 动态算例，但没有形成 D3 分类、数值资格、物理验证、实验验证或装置预测结论。
