@@ -3,165 +3,132 @@
 当前状态：
 
 ```text
-D2_V2_EXECUTION_REVIEW_ACCEPTED_WITH_NONBLOCKING_LEDGER_CLARIFICATION
 D3_V1_S1_FAIL_CLOSED_UPHELD
 D3_V1_FAILURE_CAUSE_OUTPUT_SCHEDULE_IMPLEMENTATION_DEFECT
 D3_V1_G6_DT0_NOT_ADMISSIBLE_FOR_CLASSIFICATION_OR_REUSE
-D3R1_IMPLEMENTATION_READY_FOR_PRO_STATIC_REVIEW
-D3R1_DYNAMIC_EXECUTION_NOT_AUTHORIZED
+D3R1_FINAL_STATIC_REVIEW_ACCEPTED
+D3R1_V1_FORENSIC_BUNDLE_ACCEPTED
+D3R1_INDEXED_NATIVE_TIME_SCHEDULE_ACCEPTED
+D3R1_EXECUTION_AUTHORIZED_IFF_CURRENT_HEAD_PASSES_MACHINE_AUTHORIZATION_AUDIT
+D3R1_FRESH_S0_S1_S2_S3_EXECUTION_NOT_YET_PERFORMED
 ```
 
-## 当前唯一待续任务
+## 本轮 Pro 复核与裁决
 
-请 Pro 读取 GitHub 上 iypt 10 仓库的当前 `main`，独立复核 D3R1 结果盲候选实现和零时间步静态证据，并详细裁决后续。新的完整裁决到达前不得运行 R1 S0、S1、S2 或 S3，也不得签发允许态授权。
-
-## 裁决与实现身份
-
-D3 V1 失败及 D3R1 实现授权裁决：
+裁决正文：
 
 ```text
-90_候选工作区/current/15_D3S1输出时刻硬门失败独立复核与D3R1重跑裁决.md
+90_候选工作区/current/16_D3R1最终静态复核与全新执行授权.md
 ```
 
-V1 失败 forensic bundle 提交：
+Pro 已独立复核：
 
 ```text
-73c3b54  evidence: freeze D3 V1 S1 failure
+reviewed main: d57a6b797343417229439e01e8cbec63d44ba38b
+R1 implementation commit: 80b42121c9a67e3ed80368e6eeeb10c48ccc59f1
+V1 forensic commit: 73c3b54183d0304116bedfc9b955253d64a2b568
+R1 preregistration blob: a692d4c81684925cb4276a73a195dca4f5175ef7
+formal source tree: dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
 ```
 
-D3R1 受静态证据绑定的实现提交：
+结论：
+
+1. V1 forensic bundle 可接受。五个 ignored raw 的冻结 hash、S0/S1/S2/S3 状态、失败标记和后续阶段未执行均通过；`partial.npz` 只读取成员清单和 `frame_time_s`，没有读取或报告主要物理观测量。
+2. V1 失败维持，G6_DT0 不得分类或复用。
+3. R1 与 V1 的 19 个科学字段逐值相同；六算例矩阵、正式 G0、输出时刻、质量门、公式、阈值和分类优先级未改变。
+4. 输出目标改为直接索引冻结 `native_output_times_s`，不再重复累加；11 个目标的位模式和逐位硬门保持原样。
+5. V1 raw 与 R1 raw/evidence/reports 完全隔离。运行器和独立分析器拒绝 V1 partial、V1 归档、D2 输出和 checkpoint 作为 R1 输入。
+6. S0–S2 失败事务、共享阶段门、S3 staging/完整验证/raw-ledger-last 发布继续成立。
+7. 提交的零步静态证据记录 D3R1 测试 72/72、CUDA FP64、科学字段同一性、V1 hash、证据根隔离和索引式时刻门全部通过；R1 时间步推进为 0，R1 动态输出不存在，授权仍为默认拒绝。网页端没有独立重跑这些命令。
+
+未发现继续阻塞一次全新 D3R1 短窗执行的实现或科学合同问题。
+
+## 机器授权判定
+
+本裁决、current 和 history 所在提交是受复核父提交。紧随其后的唯一直接子提交只能修改：
 
 ```text
-80b42121c9a67e3ed80368e6eeeb10c48ccc59f1
-feat: implement result-blind D3R1 remediation
+90_候选工作区/current/07_D3跨网格时间步响应诊断/d3_r1_execution_authorization.json
 ```
 
-正式源码树 SHA-256 保持：
+执行许可不以自然语言交接为唯一依据。只有当前 HEAD 上运行器与独立分析器的机器审计同时满足：
+
+```text
+status = AUTHORIZED_BY_PRO_FOR_BOUND_IMPLEMENTATION
+real_cuda_dynamic_execution = true
+authorized_stages = [S0, S1, S2, S3]
+automatic_follow_on = PROHIBITED
+current HEAD = authorization-only child of reviewed parent
+all implementation/blob/hash/source/R1-preregistration/ruling bindings = PASS
+V1 frozen raw and forensic hashes = PASS
+R1/V1 scientific identity and evidence-root isolation = PASS
+```
+
+才视为 D3R1 动态执行已授权。V1 授权对象不能授权 R1；旧授权、额外文件变化、实现漂移、V1 hash 漂移或任一机器门失败均不得执行。
+
+## 下一项唯一任务
+
+Codex 拉取当前远端 `main` 后，先运行不推进时间步的授权、身份、V1 hash、科学字段同一性、证据隔离、CUDA、空 R1 输出和单写入者检查。全部通过后，才可在同一清洁授权 HEAD 上逐阶段完成一次全新 D3R1：
+
+```text
+S0 → 检查精确 PASS
+S1: G6_DT0 → G6_DT1 → G6_DT2 → 检查精确 PASS
+S2: G9_DT0 → G9_DT1 → G9_DT2 → 检查精确 PASS
+S3: 独立分析、事务发布、完整重载审计后停止
+```
+
+命令：
+
+```bash
+"$D3_GPU_PYTHON" \
+  "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py" \
+  prepare-execution
+
+"$D3_GPU_PYTHON" \
+  "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py" \
+  run-stage --stage S1
+
+"$D3_GPU_PYTHON" \
+  "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py" \
+  run-stage --stage S2
+
+"$D3_GPU_PYTHON" \
+  "90_候选工作区/current/07_D3跨网格时间步响应诊断/analyse_d3_cross_grid_temporal.py" \
+  final
+```
+
+`automatic_follow_on = PROHIBITED`。每个阶段结束后必须显式读取台账、失败标记和阶段证据，只有精确 `EXECUTED/PASS` 才可启动下一阶段；禁止后台无检查串联。
+
+## 执行前冻结条件
+
+1. `main` 工作树清洁，HEAD 为有效 R1 授权提交；S0–S3 之间不得产生 commit 或文件修改。
+2. R1 授权子提交相对受复核父提交的唯一变化是 `d3_r1_execution_authorization.json`。
+3. 五个 V1 ignored raw 和三份 forensic 文件必须存在且 hash 精确；不得删除、移动、覆盖或复用 V1 raw。
+4. R1 `artifacts/r1/runs/`、动态 reports、manifest、compact evidence、S3 staging 和 raw-ledger 临时文件全部不存在；未知残留不得删除后继续。
+5. 没有 D3/D3R1/HF3D 后台或并发写入进程，整个序列维持单一前台写入者。
+6. 使用零步静态证据记录的 GPU Python/CuPy 环境；实际 CUDA 且无 CPU 回退。
+7. 正式源码树保持：
 
 ```text
 dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
 ```
 
-## D3 V1 冻结状态
+8. 不把 V1 partial、case summary、S0 或其他 V1 动态内容作为 R1 初态或分类输入；V1 只做 hash 身份检查。
 
-V1 在 S1 首个算例 `G6_DT0` 的冻结 `native_output_times_exact` 门失败，原因是旧候选运行器以重复浮点累加构造输出目标，使索引 9 的实际值比冻结 `0.009` 大 1 ULP。该失败维持有效，未形成 D3 科学分类；旧 G6_DT0 不得追认、分类、调参、补跑或复用。
+## 失败停止条件
 
-跟踪 forensic bundle：
+任一命令非零退出、异常、硬门失败、输出时刻非逐位相等、CUDA 回退、`execution_failure.json` 出现、V1 hash 漂移、身份漂移、未知输出、并发写入、外部中断或台账/归档/manifest/报告不一致，立即停止。
 
-```text
-90_候选工作区/current/07_D3跨网格时间步响应诊断/audit_d3_v1_s1_failure.py
-90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/v1_failure/d3_v1_s1_failure_forensic.json
-90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/v1_failure/d3_v1_s1_failure_forensic.md
-```
+失败后禁止删除、修补、拼接、选择性保留或重跑同一阶段；必须原样保留 V1 和 R1 证据并更新交接后交 Pro 复核。
 
-取证审计 74 个门全部通过，只从 `partial.npz` 读取成员名和 `frame_time_s`。五个 V1 ignored raw 保持原路径、原内容和以下 SHA-256：
+## 成功交付
 
-```text
-e50905260c9d7732ef68e2cf76b4ed661b19383b4f92ade409463e58b63244b2
-46ff32a79a62dd6cb544a04a7377d55888dff75e313f650bd97c32cf2df62afa
-d63bd745ee455bfaaba563b6b348bb7f7c822d5f6d33977c6f0f02daadb7def5
-15b2e76a57ad00dd93eb7a6652f4adf697f48c9dc772f57f666a771a537ca27a
-d1b5ae2723ec60619d20fe2ce7d8d8010941083167fe1d71554990b898d9f3ed
-```
+仅当 S3 `EXECUTED/PASS`、tracked/raw ledger 一致、六算例硬门通过、原生输出时刻逐位精确，且报告、manifest、compact evidence 和事务记录的独立重载审计全部通过时：
 
-V1 合同与授权对象也保持逐字节不变：
-
-```text
-d3_cross_grid_temporal_preregistration.json
-SHA-256 74156365c8b5f2ddde4a3ad4d1033eed2ac0fa0ecf69d04b6caa4129b7420620
-
-d3_execution_authorization.json
-SHA-256 6dbbd3840eee255845d45658bf91d74b5df7bb5df62a7351afe59055201b37cf
-```
-
-## D3R1 已完成内容
-
-仅在以下候选目录内建立了 D3R1：
-
-```text
-90_候选工作区/current/07_D3跨网格时间步响应诊断/**
-```
-
-主要新增对象：
-
-```text
-d3_cross_grid_temporal_preregistration_r1.json
-d3_r1_execution_authorization.json
-d3_r1_contract.py
-artifacts/r1/d3_implementation_static_review.json
-```
-
-结果盲实现完成以下边界：
-
-1. 机器深比较 Pro 冻结的 19 个 V1 科学字段，R1 逐值相同；
-2. R1 授权对象默认 `NOT_AUTHORIZED`，旧 V1 授权不能授权 R1；
-3. 输出目标只由冻结 `native_output_times_s` 的整数索引取得，禁止重复浮点累加、插值、跳帧或重复帧；
-4. 11 个冻结时刻和六配置共同时间向量均逐 `uint64` 位模式锁定；
-5. R1 raw、evidence、manifest 和报告根与 V1 `artifacts/runs/**` 完全隔离；
-6. 创建任何 R1 raw 前重新核对五个 V1 hash，且拒绝把 V1 partial、case summary 或 S0 当作 R1 输入；
-7. 运行器、独立分析器、状态机、失败事务和 S3 发布事务全部切换并绑定同一 R1 身份。
-
-## 零时间步静态证据
-
-证据路径：
-
-```text
-90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/d3_implementation_static_review.json
-```
-
-该证据在清洁 `main` 提交 `80b42121c9a67e3ed80368e6eeeb10c48ccc59f1` 上生成，顶层 `gate_pass=true`，全部静态门为 true：
-
-```text
-forensic_bundle_gate = PASS
-V1_raw_hashes_unchanged = true
-V1_failure_upheld = true
-R1_scientific_fields_identical_to_V1 = true
-R1_output_schedule_bitwise_exact = true
-R1_V1_evidence_roots_disjoint = true
-R1_authorization_status = NOT_AUTHORIZED
-time_steps_advanced_by_R1_work = 0
-R1_dynamic_outputs = absent
-formal_source_tree = dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
-```
-
-实际 CUDA FP64 探针设备：
-
-```text
-NVIDIA GeForce RTX 5060 Laptop GPU
-compute capability 12.0
-```
-
-静态审计实际重建六配置及正式 G0 网格、掩膜和初态，但 `time_steps_advanced=0`；没有创建 R1 raw、动态报告、最终 manifest 或 compact evidence。
-
-## 已执行验证
-
-- D3 候选测试：`72/72` 通过，既有状态机、失败事务、S3 发布事务和 Unicode 路径回归继续通过；
-- Ruff 与格式检查：通过；
-- 限定 mypy：5 个候选源文件无问题；
-- `compileall`：通过；
-- 严格 JSON：通过；
-- README：Pandoc `markdown` reader、HTML5/MathML 生成和四页 XeLaTeX 实际视觉检查通过，无截断、重叠、乱码或公式损坏；
-- Markdown 数学专用检查器：仓库中不存在，未执行；
-- `git diff --check`：通过。
-
-未执行任何 R1 动态数值算例、S0、实验或物理验证。
-
-## 保护边界
-
-本轮没有修改：
-
-```text
-01_最终理论/**
-02_模拟程序/**
-AGENTS.md
-根目录 README.md
-V1 d3_cross_grid_temporal_preregistration.json
-V1 d3_execution_authorization.json
-V1 ignored raw 内容或路径
-既有 D1/D2/Q1R 证据
-```
-
-禁止放宽科学阈值、质量阈值、六算例矩阵、输出时刻、CUDA 要求、来源隔离或分类优先级；禁止自动进入更小时间步、更细网格、长期窗口、D4、Q1R4 或正式代码修改。
+1. 提交跟踪的 R1 报告、manifest、compact evidence 与更新后的交接；
+2. 明确记录唯一执行提交和六算例状态；
+3. 立即停止交 Pro 做结果复核，无论分类标签是什么；
+4. 不自动运行更小时间步、更细网格、长期窗口、Q1R4 或 D4。
 
 ## 当前结论上限
 
@@ -175,10 +142,11 @@ D2_R_MIXED_OR_INDETERMINATE_NO_CLEAR_DIRECTION
 D3_V1_INCONCLUSIVE_FAIL_CLOSED_AT_S1_G6_DT0_NATIVE_OUTPUT_TIMES_EXACT_GATE
 D3_V1_FAILURE_CAUSE_OUTPUT_SCHEDULE_IMPLEMENTATION_DEFECT
 D3_V1_SCIENTIFIC_CLASSIFICATION = NOT_FORMED
-D3R1_IMPLEMENTATION_READY_FOR_PRO_STATIC_REVIEW
-D3R1_DYNAMIC_EXECUTION = NOT_AUTHORIZED
+D3R1_EXACT_SNAPSHOT_REAL_CUDA_EXECUTION_AUTHORIZED_NOT_YET_EXECUTED
 NUMERICAL_QUALIFICATION = NOT_DEMONSTRATED
 PHYSICAL_VALIDATION = NOT_PERFORMED
 EXPERIMENTAL_VALIDATION = NOT_PERFORMED
 APPARATUS_PREDICTION = DISALLOWED
 ```
+
+正式理论 `01_最终理论/**`、正式程序 `02_模拟程序/**`、顶层 `AGENTS.md`、V1 合同/授权、V1 raw、R1 科学字段、六算例矩阵、输出时刻和分类优先级本轮均未修改。本轮没有运行 R1 S0、动态算例或实验。
