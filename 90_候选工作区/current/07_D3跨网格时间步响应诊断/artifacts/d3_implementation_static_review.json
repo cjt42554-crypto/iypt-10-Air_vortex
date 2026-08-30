@@ -342,8 +342,129 @@
     "python_implementation": "cpython",
     "python_version": "3.12.3"
   },
+  "exact_execution_authorization_audit": {
+    "authorized": true,
+    "gate_pass": false,
+    "gates": {
+      "authorization_commit_has_one_parent": true,
+      "authorization_file_is_only_change": false,
+      "authorization_object_committed": true,
+      "authorization_shape": true,
+      "authorized_state": true,
+      "formal_source_tree_matches": true,
+      "implementation_binding_matches": false,
+      "preregistration_blob_matches": true,
+      "regular_file_not_symlink": true,
+      "reviewed_commit_is_sole_parent": false,
+      "ruling_document_is_committed_regular_file": true
+    },
+    "observed": {
+      "authorization_content_sha256": "e5097618b74c71cf905260ed019c49f400e9a8a49075624b2f768bb8ccbc39e2",
+      "authorization_git_blob_sha": "cc1a0ea57d920804bccfddf77e7613f7a3b75bea",
+      "changed_paths_from_reviewed_commit": [
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/README.md",
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/analyse_d3_cross_grid_temporal.py",
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/d3_execution_authorization.json",
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py",
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/tests/test_d3_cross_grid_temporal.py"
+      ],
+      "formal_source_tree": {
+        "absolute_root_stored": false,
+        "algorithm": "sha256",
+        "available": true,
+        "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+        "file_count": 58,
+        "reason": null,
+        "sample_point": "D3 Pro authorization binding audit",
+        "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+        "total_bytes": 1004894,
+        "unit": null,
+        "value": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8"
+      },
+      "implementation_files": {
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/README.md": {
+          "content_sha256": "328b741b80f3588ecd5bb02e5044cb0a0726e35c7c3de81440dc1698dc2a48f4",
+          "git_blob_sha": "e9466767a21d422aaeaa447f9c4bf2c9db464167"
+        },
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/analyse_d3_cross_grid_temporal.py": {
+          "content_sha256": "227f445ad88e7e9e153cd0f1035a1b9d342171ec296f8a4960d93415fe3ebad1",
+          "git_blob_sha": "d6b46164c8022f0a691cda877da559881c1d7bfc"
+        },
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/d3_cross_grid_temporal_preregistration.json": {
+          "content_sha256": "74156365c8b5f2ddde4a3ad4d1033eed2ac0fa0ecf69d04b6caa4129b7420620",
+          "git_blob_sha": "0b6ec8c04b112a54517793504a2f0e8857358133"
+        },
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/d3_stage_machine.py": {
+          "content_sha256": "c0632ba4bc9713c59366ee09a2373814b7329b11eec467114800bb8eea7771cc",
+          "git_blob_sha": "4260ad1ae4d342853563eebd10884905828e4aeb"
+        },
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G6_DT0.json": {
+          "content_sha256": "602dead5fa6b8b4485103bf91adb53b1bb17b6b3e3f9c8f7c0578be4242d0cd0",
+          "git_blob_sha": "2db601de7aab1c1fa71ebbb06b2b9b21c0b53016"
+        },
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G6_DT1.json": {
+          "content_sha256": "a23abf398cbc3720f81cce860eaf9775209cf9d564e9a6fb7960086a5ecbbbd1",
+          "git_blob_sha": "298cf309abed196a9659ed4cd0a996734cd4a2ef"
+        },
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G6_DT2.json": {
+          "content_sha256": "259de111e77c08004dec90be0a52b167b82f5570549d4243b8767a26bd40e1fa",
+          "git_blob_sha": "09ea9a9d5ae336bec30111785cd120675f34ea4f"
+        },
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G9_DT0.json": {
+          "content_sha256": "64bf8553b88e546b3bd18a8867fd9ed5455be475bb77f467f8c45c157353b86d",
+          "git_blob_sha": "d4a897d4c906bf29f922edc4ea874c0af80996b0"
+        },
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G9_DT1.json": {
+          "content_sha256": "c5fb44e90f6f3e2f2bc0a2c13d46969e3be861219ad44f1259afaadbd11c28db",
+          "git_blob_sha": "eef4953e679343d43e7150e9e4e1d4a176504c21"
+        },
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G9_DT2.json": {
+          "content_sha256": "c924a225d4d35b25217318c0bdbe7728bceb637f5474e0eb9e2cbffac6ccdb37",
+          "git_blob_sha": "a259e7519c939dd8c84a1d4c01d51c0d097f6cb5"
+        },
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py": {
+          "content_sha256": "8097d2abb58a6189f41d283c48752835ede5ffc1ca968e9944220b8f7c139912",
+          "git_blob_sha": "713115992c9cda9fd7bda9bc1b5166d359b0a8bb"
+        },
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/tests/test_d3_cross_grid_temporal.py": {
+          "content_sha256": "7202865f1b85fda6baac33b41e24259de7720a1678649448940dd91817a7f4c3",
+          "git_blob_sha": "ecd33cc85f8ee7f2d2bd3fbe0cb7a97425dcbe54"
+        }
+      },
+      "preregistration_git_blob_sha": "0b6ec8c04b112a54517793504a2f0e8857358133",
+      "reviewed_implementation_commit": "9318e549451ba5429a734202e95b9be8ff8b273c",
+      "sole_parent": "a0271e0da74ececdd5083d7c517ecea63710c6bd"
+    },
+    "shape_audit": {
+      "authorized": true,
+      "gate_pass": true,
+      "gates": {
+        "authorization_id": true,
+        "authorized_stages_exact": true,
+        "automatic_follow_on_prohibited": true,
+        "binding_fields_exact": true,
+        "binding_object": true,
+        "decision_fields_exact": true,
+        "decision_object": true,
+        "dynamic_execution_true": true,
+        "formal_source_binding_exact": true,
+        "implementation_binding_exact_path_set_and_hash_shape": true,
+        "instructions_present": true,
+        "known_status": true,
+        "preregistration_blob_bound": true,
+        "pro_ruling_identified": true,
+        "protocol_id": true,
+        "reviewed_commit_bound": true,
+        "ruling_fields_exact": true,
+        "ruling_object": true,
+        "schema_version": true,
+        "top_level_fields_exact": true
+      },
+      "status": "AUTHORIZED_BY_PRO_FOR_BOUND_IMPLEMENTATION"
+    }
+  },
   "execution_authorization_audit": {
-    "authorized": false,
+    "authorized": true,
     "gate_pass": true,
     "gates": {
       "authorization_object_committed": true,
@@ -351,35 +472,35 @@
       "regular_file_not_symlink": true
     },
     "observed": {
-      "authorization_content_sha256": "8318b27dbd53dbc2142f88d821572f578f1d0ea3874531aea2f074ea010598b3",
-      "authorization_git_blob_sha": "14fa1abc70b6ab08744c7ac0ad4c61480b8721d8"
+      "authorization_content_sha256": "e5097618b74c71cf905260ed019c49f400e9a8a49075624b2f768bb8ccbc39e2",
+      "authorization_git_blob_sha": "cc1a0ea57d920804bccfddf77e7613f7a3b75bea"
     },
     "shape_audit": {
-      "authorized": false,
+      "authorized": true,
       "gate_pass": true,
       "gates": {
         "authorization_id": true,
-        "authorized_stages_empty": true,
+        "authorized_stages_exact": true,
         "automatic_follow_on_prohibited": true,
         "binding_fields_exact": true,
         "binding_object": true,
         "decision_fields_exact": true,
         "decision_object": true,
-        "dynamic_execution_false": true,
+        "dynamic_execution_true": true,
         "formal_source_binding_exact": true,
-        "implementation_binding_empty": true,
+        "implementation_binding_exact_path_set_and_hash_shape": true,
         "instructions_present": true,
         "known_status": true,
-        "preregistration_blob_absent": true,
+        "preregistration_blob_bound": true,
+        "pro_ruling_identified": true,
         "protocol_id": true,
-        "reviewed_commit_absent": true,
+        "reviewed_commit_bound": true,
         "ruling_fields_exact": true,
-        "ruling_not_issued": true,
         "ruling_object": true,
         "schema_version": true,
         "top_level_fields_exact": true
       },
-      "status": "NOT_AUTHORIZED"
+      "status": "AUTHORIZED_BY_PRO_FOR_BOUND_IMPLEMENTATION"
     }
   },
   "future_stage_ledger_semantics_audit": {
@@ -543,7 +664,7 @@
     "main_branch": true,
     "no_dynamic_outputs": true,
     "no_time_steps_advanced": true,
-    "separate_authorization_object_default_denied": true,
+    "review_snapshot_not_already_execution_authorized": true,
     "separate_authorization_object_valid": true,
     "stage_ledger_semantics": true,
     "unit_tests": true
@@ -641,21 +762,21 @@
       "unit": null,
       "value": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8"
     },
-    "observed_head": "dfa0aae04c87bc52c0dd21bd5cf32deed47aee60",
+    "observed_head": "8d39a0e445e08c3741feb0fb82b5c747767ce056",
     "worktree_porcelain": []
   },
   "implementation_content_evidence": {
     "90_候选工作区/current/07_D3跨网格时间步响应诊断/README.md": {
-      "content_sha256": "a44be48a2660aefa2321cf94f724465fb7855e2323130bf8da55bd4dee09dec4",
+      "content_sha256": "328b741b80f3588ecd5bb02e5044cb0a0726e35c7c3de81440dc1698dc2a48f4",
       "exists": true,
-      "git_blob_sha": "19402e99007479f7faaf8e513e3e2afcef9b5ff1",
-      "size_bytes": 10214
+      "git_blob_sha": "e9466767a21d422aaeaa447f9c4bf2c9db464167",
+      "size_bytes": 10501
     },
     "90_候选工作区/current/07_D3跨网格时间步响应诊断/analyse_d3_cross_grid_temporal.py": {
-      "content_sha256": "4ad0c650be8d32079ad2f346b6bf3829c7e9f2c9804d9255b8a5a878696f5005",
+      "content_sha256": "227f445ad88e7e9e153cd0f1035a1b9d342171ec296f8a4960d93415fe3ebad1",
       "exists": true,
-      "git_blob_sha": "c20aef3a884235ddf447a4d4adf8d8c817650f3e",
-      "size_bytes": 107994
+      "git_blob_sha": "d6b46164c8022f0a691cda877da559881c1d7bfc",
+      "size_bytes": 108257
     },
     "90_候选工作区/current/07_D3跨网格时间步响应诊断/d3_cross_grid_temporal_preregistration.json": {
       "content_sha256": "74156365c8b5f2ddde4a3ad4d1033eed2ac0fa0ecf69d04b6caa4129b7420620",
@@ -706,16 +827,16 @@
       "size_bytes": 3533
     },
     "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py": {
-      "content_sha256": "6eff3f6fbdea299f672c62f7494d4d2aaf0c49bddc0309188b7d81681d60f1cf",
+      "content_sha256": "8097d2abb58a6189f41d283c48752835ede5ffc1ca968e9944220b8f7c139912",
       "exists": true,
-      "git_blob_sha": "acd2d55bf35e34e5b06c82cc28532fb158641046",
-      "size_bytes": 99614
+      "git_blob_sha": "713115992c9cda9fd7bda9bc1b5166d359b0a8bb",
+      "size_bytes": 100057
     },
     "90_候选工作区/current/07_D3跨网格时间步响应诊断/tests/test_d3_cross_grid_temporal.py": {
-      "content_sha256": "43c15fafce99fe3e53879e3050b275cccbad6412e20d6dae4d711574eb77fe94",
+      "content_sha256": "7202865f1b85fda6baac33b41e24259de7720a1678649448940dd91817a7f4c3",
       "exists": true,
-      "git_blob_sha": "641bc9d0ba5dcc57fa1fe8b0748ee93ff424c308",
-      "size_bytes": 82532
+      "git_blob_sha": "ecd33cc85f8ee7f2d2bd3fbe0cb7a97425dcbe54",
+      "size_bytes": 85746
     }
   },
   "initial_grid_mask_state_identity": {
@@ -2898,7 +3019,7 @@
     ],
     "pass": true,
     "returncode": 0,
-    "stderr": "test_contracting_reduction_precedes_plain_reduction (test_d3_cross_grid_temporal.ClassificationPrecedenceTests.test_contracting_reduction_precedes_plain_reduction) ... ok\ntest_exact_primary_set_is_mandatory (test_d3_cross_grid_temporal.ClassificationPrecedenceTests.test_exact_primary_set_is_mandatory) ... ok\ntest_hard_gate_failure_has_absolute_precedence (test_d3_cross_grid_temporal.ClassificationPrecedenceTests.test_hard_gate_failure_has_absolute_precedence) ... ok\ntest_increase_label_requires_two_primary_observables (test_d3_cross_grid_temporal.ClassificationPrecedenceTests.test_increase_label_requires_two_primary_observables) ... ok\ntest_plain_reduction_precedes_increase (test_d3_cross_grid_temporal.ClassificationPrecedenceTests.test_plain_reduction_precedes_increase) ... ok\ntest_small_label_requires_all_four_primary_observables (test_d3_cross_grid_temporal.ClassificationPrecedenceTests.test_small_label_requires_all_four_primary_observables) ... ok\ntest_analyser_final_is_fail_closed_under_current_contract (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_analyser_final_is_fail_closed_under_current_contract) ... ok\ntest_authorization_audit_rejects_clean_committed_implementation_drift (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_authorization_audit_rejects_clean_committed_implementation_drift) ... ok\ntest_authorized_shape_requires_exact_bound_file_set_and_hashes (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_authorized_shape_requires_exact_bound_file_set_and_hashes) ... ok\ntest_contract_matrix_and_current_authorization_are_exact (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_contract_matrix_and_current_authorization_are_exact) ... ok\ntest_dynamic_entry_is_fail_closed_under_current_contract (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_dynamic_entry_is_fail_closed_under_current_contract) ... ok\ntest_generated_configs_are_strict_and_exact (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_generated_configs_are_strict_and_exact) ... ok\ntest_missing_or_malformed_authorization_fails_before_raw_creation (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_missing_or_malformed_authorization_fails_before_raw_creation) ... ok\ntest_same_grid_physical_configuration_identity (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_same_grid_physical_configuration_identity) ... ok\ntest_separate_authorization_object_is_valid_and_default_denied (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_separate_authorization_object_is_valid_and_default_denied) ... ok\ntest_six_configs_change_only_registered_paths (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_six_configs_change_only_registered_paths) ... ok\ntest_time_steps_are_exact_by_level_on_both_grids (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_time_steps_are_exact_by_level_on_both_grids) ... ok\ntest_analyser_independently_rebuilds_initial_identity_not_runner_boolean (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_analyser_independently_rebuilds_initial_identity_not_runner_boolean) ... ok\ntest_analyser_input_path_rejects_outside_root_and_symlink (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_analyser_input_path_rejects_outside_root_and_symlink) ... ok\ntest_archive_and_summary_exceptions_are_wrapped_as_case_transactions (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_archive_and_summary_exceptions_are_wrapped_as_case_transactions) ... ok\ntest_case_summary_payload_binding_rejects_extra_or_changed_file (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_case_summary_payload_binding_rejects_extra_or_changed_file) ... ok\ntest_cross_commit_provenance_is_rejected (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_cross_commit_provenance_is_rejected) ... ok\ntest_failure_transaction_rolls_back_each_write_failure (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_failure_transaction_rolls_back_each_write_failure) ... ok\ntest_formal_g0_mask_rejects_one_flipped_cell (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_formal_g0_mask_rejects_one_flipped_cell) ... ok\ntest_illegal_failure_transition_writes_neither_marker_nor_ledger (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_illegal_failure_transition_writes_neither_marker_nor_ledger) ... ok\ntest_not_executed_stage_cannot_claim_evidence (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_not_executed_stage_cannot_claim_evidence) ... ok\ntest_orphan_s0_report_rejects_s1_before_case_or_failure_write (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_orphan_s0_report_rejects_s1_before_case_or_failure_write) ... ok\ntest_out_of_order_s2_rejection_is_side_effect_free (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_out_of_order_s2_rejection_is_side_effect_free) ... ok\ntest_prepare_exception_is_routed_to_unique_failure_transaction (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_prepare_exception_is_routed_to_unique_failure_transaction) ... ok\ntest_provenance_with_d2_reference_is_rejected (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_provenance_with_d2_reference_is_rejected) ... ok\ntest_repeated_s1_rejection_preserves_completed_ledger (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_repeated_s1_rejection_preserves_completed_ledger) ... ok\ntest_runner_input_path_rejects_d2_and_checkpoint_paths (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_runner_input_path_rejects_d2_and_checkpoint_paths) ... ok\ntest_s0_report_ledger_binding_mismatches_are_side_effect_free (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_s0_report_ledger_binding_mismatches_are_side_effect_free) ... ok\ntest_s1_s2_descriptions_cannot_be_semantically_swapped (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_s1_s2_descriptions_cannot_be_semantically_swapped) ... ok\ntest_shared_stage_gate_accepts_only_exact_pass_prefixes (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_shared_stage_gate_accepts_only_exact_pass_prefixes) ... ok\ntest_stage_commit_exception_is_routed_to_failure_transaction (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_stage_commit_exception_is_routed_to_failure_transaction) ... ok\ntest_stage_ledger_actions_and_descriptions_are_exact (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_stage_ledger_actions_and_descriptions_are_exact) ... ok\ntest_stage_ledger_allows_one_failed_stage_then_only_unexecuted (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_stage_ledger_allows_one_failed_stage_then_only_unexecuted) ... ok\ntest_stage_ledger_rejects_duplicate_reorder_and_illegal_state_pairs (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_stage_ledger_rejects_duplicate_reorder_and_illegal_state_pairs) ... ok\ntest_stage_ledger_requires_exact_ordered_evidence_paths (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_stage_ledger_requires_exact_ordered_evidence_paths) ... ok\ntest_unique_failure_transaction_keeps_marker_and_ledger_consistent (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_unique_failure_transaction_keeps_marker_and_ledger_consistent) ... ok\ntest_initial_removed_uses_first_value_of_supplied_trajectory (test_d3_cross_grid_temporal.MetricArithmeticTests.test_initial_removed_uses_first_value_of_supplied_trajectory) ... ok\ntest_late_diagnostic_window_keeps_global_t0_baseline (test_d3_cross_grid_temporal.MetricArithmeticTests.test_late_diagnostic_window_keeps_global_t0_baseline) ... ok\ntest_metric_rejects_missing_case_and_mismatched_lengths (test_d3_cross_grid_temporal.MetricArithmeticTests.test_metric_rejects_missing_case_and_mismatched_lengths) ... ok\ntest_negative_direction_cosine_blocks_non_negligible_contraction (test_d3_cross_grid_temporal.MetricArithmeticTests.test_negative_direction_cosine_blocks_non_negligible_contraction) ... ok\ntest_observed_order_requires_positive_gamma_and_first_increment_scale (test_d3_cross_grid_temporal.MetricArithmeticTests.test_observed_order_requires_positive_gamma_and_first_increment_scale) ... ok\ntest_q_s_u_c_arithmetic_and_contraction (test_d3_cross_grid_temporal.MetricArithmeticTests.test_q_s_u_c_arithmetic_and_contraction) ... ok\ntest_safe_cosine_is_undefined_for_either_zero_norm (test_d3_cross_grid_temporal.MetricArithmeticTests.test_safe_cosine_is_undefined_for_either_zero_norm) ... ok\ntest_scale_floor_controls_zero_spatial_norm (test_d3_cross_grid_temporal.MetricArithmeticTests.test_scale_floor_controls_zero_spatial_norm) ... ok\ntest_all_registered_quality_threshold_boundaries_pass (test_d3_cross_grid_temporal.NumericalQualityHardGateTests.test_all_registered_quality_threshold_boundaries_pass) ... ok\ntest_each_registered_quality_failure_is_individually_fail_closed (test_d3_cross_grid_temporal.NumericalQualityHardGateTests.test_each_registered_quality_failure_is_individually_fail_closed) ... ok\ntest_nonfinite_quality_value_fails_closed (test_d3_cross_grid_temporal.NumericalQualityHardGateTests.test_nonfinite_quality_value_fails_closed) ... ok\ntest_quality_metric_set_cannot_be_silently_incomplete (test_d3_cross_grid_temporal.NumericalQualityHardGateTests.test_quality_metric_set_cannot_be_silently_incomplete) ... ok\ntest_runner_per_step_gate_rejects_each_dense_step_violation (test_d3_cross_grid_temporal.NumericalQualityHardGateTests.test_runner_per_step_gate_rejects_each_dense_step_violation) ... ok\ntest_concurrent_unknown_output_is_not_removed_or_marked_failed (test_d3_cross_grid_temporal.S3PublicationTransactionTests.test_concurrent_unknown_output_is_not_removed_or_marked_failed) ... ok\ntest_each_s3_publication_fault_commits_one_coherent_failure (test_d3_cross_grid_temporal.S3PublicationTransactionTests.test_each_s3_publication_fault_commits_one_coherent_failure) ... ok\ntest_failure_commit_fault_restores_pre_s3_state (test_d3_cross_grid_temporal.S3PublicationTransactionTests.test_failure_commit_fault_restores_pre_s3_state) ... ok\ntest_rollback_cleanup_first_failure_is_retried (test_d3_cross_grid_temporal.S3PublicationTransactionTests.test_rollback_cleanup_first_failure_is_retried) ... ok\ntest_stale_s3_output_precondition_is_side_effect_free (test_d3_cross_grid_temporal.S3PublicationTransactionTests.test_stale_s3_output_precondition_is_side_effect_free) ... ok\ntest_success_publication_commits_raw_s3_ledger_last (test_d3_cross_grid_temporal.S3PublicationTransactionTests.test_success_publication_commits_raw_s3_ledger_last) ... ok\n\n----------------------------------------------------------------------\nRan 60 tests in 5.221s\n\nOK\n",
+    "stderr": "test_contracting_reduction_precedes_plain_reduction (test_d3_cross_grid_temporal.ClassificationPrecedenceTests.test_contracting_reduction_precedes_plain_reduction) ... ok\ntest_exact_primary_set_is_mandatory (test_d3_cross_grid_temporal.ClassificationPrecedenceTests.test_exact_primary_set_is_mandatory) ... ok\ntest_hard_gate_failure_has_absolute_precedence (test_d3_cross_grid_temporal.ClassificationPrecedenceTests.test_hard_gate_failure_has_absolute_precedence) ... ok\ntest_increase_label_requires_two_primary_observables (test_d3_cross_grid_temporal.ClassificationPrecedenceTests.test_increase_label_requires_two_primary_observables) ... ok\ntest_plain_reduction_precedes_increase (test_d3_cross_grid_temporal.ClassificationPrecedenceTests.test_plain_reduction_precedes_increase) ... ok\ntest_small_label_requires_all_four_primary_observables (test_d3_cross_grid_temporal.ClassificationPrecedenceTests.test_small_label_requires_all_four_primary_observables) ... ok\ntest_analyser_final_rejects_missing_exact_authorization_without_reports (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_analyser_final_rejects_missing_exact_authorization_without_reports) ... ok\ntest_authorization_audit_rejects_clean_committed_implementation_drift (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_authorization_audit_rejects_clean_committed_implementation_drift) ... ok\ntest_authorization_diff_paths_disable_git_path_quoting (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_authorization_diff_paths_disable_git_path_quoting) ... ok\ntest_authorized_shape_requires_exact_bound_file_set_and_hashes (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_authorized_shape_requires_exact_bound_file_set_and_hashes) ... ok\ntest_contract_matrix_and_current_authorization_are_exact (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_contract_matrix_and_current_authorization_are_exact) ... ok\ntest_dynamic_entry_rejects_explicit_denial_without_raw_creation (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_dynamic_entry_rejects_explicit_denial_without_raw_creation) ... ok\ntest_generated_configs_are_strict_and_exact (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_generated_configs_are_strict_and_exact) ... ok\ntest_missing_or_malformed_authorization_fails_before_raw_creation (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_missing_or_malformed_authorization_fails_before_raw_creation) ... ok\ntest_same_grid_physical_configuration_identity (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_same_grid_physical_configuration_identity) ... ok\ntest_separate_authorization_object_accepts_both_explicit_states (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_separate_authorization_object_accepts_both_explicit_states) ... ok\ntest_six_configs_change_only_registered_paths (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_six_configs_change_only_registered_paths) ... ok\ntest_time_steps_are_exact_by_level_on_both_grids (test_d3_cross_grid_temporal.FrozenContractAndConfigurationTests.test_time_steps_are_exact_by_level_on_both_grids) ... ok\ntest_analyser_independently_rebuilds_initial_identity_not_runner_boolean (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_analyser_independently_rebuilds_initial_identity_not_runner_boolean) ... ok\ntest_analyser_input_path_rejects_outside_root_and_symlink (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_analyser_input_path_rejects_outside_root_and_symlink) ... ok\ntest_archive_and_summary_exceptions_are_wrapped_as_case_transactions (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_archive_and_summary_exceptions_are_wrapped_as_case_transactions) ... ok\ntest_case_summary_payload_binding_rejects_extra_or_changed_file (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_case_summary_payload_binding_rejects_extra_or_changed_file) ... ok\ntest_cross_commit_provenance_is_rejected (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_cross_commit_provenance_is_rejected) ... ok\ntest_failure_transaction_rolls_back_each_write_failure (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_failure_transaction_rolls_back_each_write_failure) ... ok\ntest_formal_g0_mask_rejects_one_flipped_cell (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_formal_g0_mask_rejects_one_flipped_cell) ... ok\ntest_illegal_failure_transition_writes_neither_marker_nor_ledger (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_illegal_failure_transition_writes_neither_marker_nor_ledger) ... ok\ntest_not_executed_stage_cannot_claim_evidence (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_not_executed_stage_cannot_claim_evidence) ... ok\ntest_orphan_s0_report_rejects_s1_before_case_or_failure_write (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_orphan_s0_report_rejects_s1_before_case_or_failure_write) ... ok\ntest_out_of_order_s2_rejection_is_side_effect_free (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_out_of_order_s2_rejection_is_side_effect_free) ... ok\ntest_prepare_exception_is_routed_to_unique_failure_transaction (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_prepare_exception_is_routed_to_unique_failure_transaction) ... ok\ntest_provenance_with_d2_reference_is_rejected (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_provenance_with_d2_reference_is_rejected) ... ok\ntest_repeated_s1_rejection_preserves_completed_ledger (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_repeated_s1_rejection_preserves_completed_ledger) ... ok\ntest_runner_input_path_rejects_d2_and_checkpoint_paths (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_runner_input_path_rejects_d2_and_checkpoint_paths) ... ok\ntest_s0_report_ledger_binding_mismatches_are_side_effect_free (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_s0_report_ledger_binding_mismatches_are_side_effect_free) ... ok\ntest_s1_s2_descriptions_cannot_be_semantically_swapped (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_s1_s2_descriptions_cannot_be_semantically_swapped) ... ok\ntest_shared_stage_gate_accepts_only_exact_pass_prefixes (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_shared_stage_gate_accepts_only_exact_pass_prefixes) ... ok\ntest_stage_commit_exception_is_routed_to_failure_transaction (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_stage_commit_exception_is_routed_to_failure_transaction) ... ok\ntest_stage_ledger_actions_and_descriptions_are_exact (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_stage_ledger_actions_and_descriptions_are_exact) ... ok\ntest_stage_ledger_allows_one_failed_stage_then_only_unexecuted (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_stage_ledger_allows_one_failed_stage_then_only_unexecuted) ... ok\ntest_stage_ledger_rejects_duplicate_reorder_and_illegal_state_pairs (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_stage_ledger_rejects_duplicate_reorder_and_illegal_state_pairs) ... ok\ntest_stage_ledger_requires_exact_ordered_evidence_paths (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_stage_ledger_requires_exact_ordered_evidence_paths) ... ok\ntest_unique_failure_transaction_keeps_marker_and_ledger_consistent (test_d3_cross_grid_temporal.IdentityFreshnessAndLedgerTests.test_unique_failure_transaction_keeps_marker_and_ledger_consistent) ... ok\ntest_initial_removed_uses_first_value_of_supplied_trajectory (test_d3_cross_grid_temporal.MetricArithmeticTests.test_initial_removed_uses_first_value_of_supplied_trajectory) ... ok\ntest_late_diagnostic_window_keeps_global_t0_baseline (test_d3_cross_grid_temporal.MetricArithmeticTests.test_late_diagnostic_window_keeps_global_t0_baseline) ... ok\ntest_metric_rejects_missing_case_and_mismatched_lengths (test_d3_cross_grid_temporal.MetricArithmeticTests.test_metric_rejects_missing_case_and_mismatched_lengths) ... ok\ntest_negative_direction_cosine_blocks_non_negligible_contraction (test_d3_cross_grid_temporal.MetricArithmeticTests.test_negative_direction_cosine_blocks_non_negligible_contraction) ... ok\ntest_observed_order_requires_positive_gamma_and_first_increment_scale (test_d3_cross_grid_temporal.MetricArithmeticTests.test_observed_order_requires_positive_gamma_and_first_increment_scale) ... ok\ntest_q_s_u_c_arithmetic_and_contraction (test_d3_cross_grid_temporal.MetricArithmeticTests.test_q_s_u_c_arithmetic_and_contraction) ... ok\ntest_safe_cosine_is_undefined_for_either_zero_norm (test_d3_cross_grid_temporal.MetricArithmeticTests.test_safe_cosine_is_undefined_for_either_zero_norm) ... ok\ntest_scale_floor_controls_zero_spatial_norm (test_d3_cross_grid_temporal.MetricArithmeticTests.test_scale_floor_controls_zero_spatial_norm) ... ok\ntest_all_registered_quality_threshold_boundaries_pass (test_d3_cross_grid_temporal.NumericalQualityHardGateTests.test_all_registered_quality_threshold_boundaries_pass) ... ok\ntest_each_registered_quality_failure_is_individually_fail_closed (test_d3_cross_grid_temporal.NumericalQualityHardGateTests.test_each_registered_quality_failure_is_individually_fail_closed) ... ok\ntest_nonfinite_quality_value_fails_closed (test_d3_cross_grid_temporal.NumericalQualityHardGateTests.test_nonfinite_quality_value_fails_closed) ... ok\ntest_quality_metric_set_cannot_be_silently_incomplete (test_d3_cross_grid_temporal.NumericalQualityHardGateTests.test_quality_metric_set_cannot_be_silently_incomplete) ... ok\ntest_runner_per_step_gate_rejects_each_dense_step_violation (test_d3_cross_grid_temporal.NumericalQualityHardGateTests.test_runner_per_step_gate_rejects_each_dense_step_violation) ... ok\ntest_concurrent_unknown_output_is_not_removed_or_marked_failed (test_d3_cross_grid_temporal.S3PublicationTransactionTests.test_concurrent_unknown_output_is_not_removed_or_marked_failed) ... ok\ntest_each_s3_publication_fault_commits_one_coherent_failure (test_d3_cross_grid_temporal.S3PublicationTransactionTests.test_each_s3_publication_fault_commits_one_coherent_failure) ... ok\ntest_failure_commit_fault_restores_pre_s3_state (test_d3_cross_grid_temporal.S3PublicationTransactionTests.test_failure_commit_fault_restores_pre_s3_state) ... ok\ntest_rollback_cleanup_first_failure_is_retried (test_d3_cross_grid_temporal.S3PublicationTransactionTests.test_rollback_cleanup_first_failure_is_retried) ... ok\ntest_stale_s3_output_precondition_is_side_effect_free (test_d3_cross_grid_temporal.S3PublicationTransactionTests.test_stale_s3_output_precondition_is_side_effect_free) ... ok\ntest_success_publication_commits_raw_s3_ledger_last (test_d3_cross_grid_temporal.S3PublicationTransactionTests.test_success_publication_commits_raw_s3_ledger_last) ... ok\n\n----------------------------------------------------------------------\nRan 61 tests in 5.264s\n\nOK\n",
     "stdout": ""
   }
 }

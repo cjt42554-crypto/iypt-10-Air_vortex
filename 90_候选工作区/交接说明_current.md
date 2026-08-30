@@ -6,21 +6,23 @@
 D2_V2_EXECUTION_REVIEW_ACCEPTED_WITH_NONBLOCKING_LEDGER_CLARIFICATION
 D3_V2_FINAL_STATIC_REVIEW_ACCEPTED
 D3_S3_PUBLICATION_TRANSACTION_ACCEPTED
-D3_EXECUTION_AUTHORIZED_IFF_CURRENT_HEAD_PASSES_MACHINE_AUTHORIZATION_AUDIT
+D3_PREEXECUTION_MACHINE_GATE_FAILED_CLOSED_BEFORE_S0
+D3_AUTHORIZATION_PATH_QUOTING_AUDIT_PATCH_READY_FOR_PRO_REVIEW
+D3_DYNAMIC_EXECUTION_NOT_AUTHORIZED_FOR_PATCHED_SNAPSHOT
 D3_FRESH_S0_S1_S2_S3_EXECUTION_NOT_YET_PERFORMED
 ```
 
-## 本轮裁决
+## 最近裁决与本轮执行前结果
 
-Pro 已完成对 D3 S3 发布事务补丁、共享状态机、运行器、独立分析器、故障注入测试和零时间步证据的结果盲静态复核。裁决正文：
+Pro 已完成对 D3 S3 发布事务补丁、共享状态机、运行器、独立分析器、故障注入测试和零时间步证据的结果盲静态复核，并曾对精确快照签发执行授权。裁决正文：
 
 ```text
 90_候选工作区/current/13_D3V2最终静态复核与全新执行授权.md
 ```
 
-结论：上一轮 S3 非事务发布阻塞已经关闭。当前实现会先在唯一 staging 根生成并验证 compact evidence、tracked ledger、manifest、报告和最终 raw ledger；canonical raw ledger 的 S3 `PASS/COMPLETE` 是成功路径最后一个持久化提交点。S3 阶段内异常会回滚本轮新输出并提交自洽的 `FAILED_STOPPED` 状态，失败提交自身失败时保留原合法台账和无标记状态。
+本地拉取授权提交 `a0271e0` 后，执行前机器门在创建 D3 raw 和推进时间步之前拒绝 S0。唯一失败项最初为 `authorization_file_is_only_change`：Git 默认把中文授权路径输出为带引号的八进制转义串，而审计把它与真实 Unicode 路径直接比较。人工父子提交差异与修复后的机器审计都确认唯一变更确为授权文件；这是授权审计实现缺陷，不是动态算例失败。
 
-提交证据记录：D3 测试 `60/60`、Ruff、限定 mypy、`compileall`、严格 JSON、Pandoc/MathML/Chrome、`git diff --check` 和 RTX 5060 Laptop GPU CUDA FP64 零步探针通过；`time_steps_advanced = 0`，动态输出不存在。网页端本轮没有独立重跑这些命令，不把它们写成本轮重算结果。
+候选实现提交 `8d39a0e` 同时修复运行器与独立分析器的 Git 中文路径读取，并把测试/静态审计从“授权对象必须永远保持默认拒绝”改为“待复核实现快照不得已具备精确绑定授权”，从而允许合法授权子提交存在而不削弱实现漂移闭锁。61/61 测试、Ruff、格式、限定 mypy、`compileall`、9 份严格 JSON、Pandoc/MathML/Chrome 和 `git diff --check` 通过；在清洁 `8d39a0e` 上生成的零步静态证据全门通过，RTX 5060 Laptop GPU CuPy FP64 探针通过，`time_steps_advanced = 0`，动态输出不存在。
 
 ## 机器授权的判定方式
 
@@ -43,38 +45,13 @@ all implementation/blob/hash/source/preregistration/ruling bindings = PASS
 
 若当前 HEAD 不是该唯一授权子提交，或任一授权门失败，则不得执行任何动态命令。
 
+旧授权绑定的是修复前实现，已因实现哈希漂移自动失效；不得通过环境配置、手工解释或修改授权对象绕过。修复后的实现必须重新接受 Pro 独立复核并获得新的精确快照裁决。
+
 ## 下一项唯一任务
 
-由 Codex 在本地读取当前 `main` 和上述裁决，先运行非推进的授权、身份、CUDA 与空目录检查；全部通过后，在同一清洁执行提交上逐阶段完成一次全新 D3：
+由 Pro 独立复核当前远端 `main` 的中文路径审计修复、状态中立回归测试和零步静态证据，并裁决是否对该精确实现快照重新签发执行授权。在新的机器授权审计全门通过前，Codex 不得运行 S0、S1、S2 或 S3。
 
-```text
-S0 → 检查精确 PASS
-S1: G6_DT0 → G6_DT1 → G6_DT2 → 检查精确 PASS
-S2: G9_DT0 → G9_DT1 → G9_DT2 → 检查精确 PASS
-S3: 独立分析、事务发布、报告后停止
-```
-
-命令：
-
-```bash
-"$D3_GPU_PYTHON" \
-  "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py" \
-  prepare-execution
-
-"$D3_GPU_PYTHON" \
-  "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py" \
-  run-stage --stage S1
-
-"$D3_GPU_PYTHON" \
-  "90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py" \
-  run-stage --stage S2
-
-"$D3_GPU_PYTHON" \
-  "90_候选工作区/current/07_D3跨网格时间步响应诊断/analyse_d3_cross_grid_temporal.py" \
-  final
-```
-
-`automatic_follow_on = PROHIBITED`：每个阶段结束后必须显式读取台账、失败标记和阶段证据，只有精确 `EXECUTED/PASS` 才能发起下一命令。不得用后台队列无检查串联四阶段。
+如果 Pro 重新授权，Codex 拉取后仍须先做非推进的授权、身份、CUDA、空输出和单写入者检查；只有全部通过，才可按既有裁决逐阶段显式执行并逐阶段检查，禁止后台无检查串联。
 
 ## 执行前冻结条件
 
@@ -111,7 +88,7 @@ D1_GEOMETRY_EFFECT_SMALL_IN_REGISTERED_WINDOW
 D2_Z_SMALL_NO_CLEAR_DIRECTION
 D2_T_MATERIAL_REDUCTION_SIGNAL
 D2_R_MIXED_OR_INDETERMINATE_NO_CLEAR_DIRECTION
-D3_EXACT_SNAPSHOT_REAL_CUDA_EXECUTION_AUTHORIZED_NOT_YET_EXECUTED
+D3_PATCHED_SNAPSHOT_REAL_CUDA_EXECUTION_NOT_AUTHORIZED_PENDING_PRO_REVIEW
 NUMERICAL_QUALIFICATION = NOT_DEMONSTRATED
 PHYSICAL_VALIDATION = NOT_PERFORMED
 EXPERIMENTAL_VALIDATION = NOT_PERFORMED
