@@ -4,75 +4,66 @@
 
 ```text
 D2_V2_EXECUTION_REVIEW_ACCEPTED_WITH_NONBLOCKING_LEDGER_CLARIFICATION
-D3_V2_STATE_MACHINE_PATCH_PARTIAL_PASS
-D3_V2_PRO_STATIC_REVIEW_BLOCKED_AT_S3_PUBLICATION_TRANSACTION
-D3_V2_S3_PUBLICATION_TRANSACTION_PATCH_REQUIRED
+D3_V2_S3_PUBLICATION_TRANSACTION_PATCH_READY_FOR_PRO_REVIEW
 D3_DYNAMIC_EXECUTION_NOT_AUTHORIZED
 ```
 
 ## 本轮完成
 
-Pro 已对 Codex 的 D3 V2 状态机补丁和零时间步静态证据做提交级结果盲复核。复核对象为：
-
-```text
-reviewed main HEAD: ded900f0d88a5f7f329bde996f75bb494857390c
-implementation commit: 0fb00992dade903e3acba8a214480ed0b4d27e7f
-formal source tree SHA-256: dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
-```
-
-裁决正文：
+Codex 已按 Pro 裁决：
 
 ```text
 90_候选工作区/current/12_D3V2状态机补丁复核与S3发布事务裁决.md
 ```
 
-上一裁决中的两个具体阻塞已经关闭并接受：
+在候选 D3 目录完成 S3 最终证据发布事务补丁。唯一实现提交为：
 
-1. 共享阶段门现在统一要求 S1 的 S0、S2 的 S0/S1、S3 的 S0/S1/S2 均为精确 `EXECUTED/PASS`，证据路径、执行提交、失败摘要和未执行后缀一致；孤立 S0 报告不能再越过未提交的 S0 台账。
-2. 乱序、重复、前驱未通过、授权或身份前置错误现在是无副作用拒绝；S0–S2 阶段内失败会先验证候选失败台账，再提交失败标记和台账，并在写入异常时撤回新标记。
+```text
+dfa0aae04c87bc52c0dd21bd5cf32deed47aee60
+```
 
-但本轮发现分析器侧仍有一个 P0 证据事务断口：S3 先逐文件发布 compact evidence，再把 raw ledger 写成 `S3 PASS / COMPLETE`，之后才写 manifest、报告 JSON 和报告 Markdown；若后续任一写入失败，台账会声称完成，却引用不存在或不完整的最终证据。compact evidence 中途失败也可能留下无台账登记的部分最终目录，并阻止确定性重试。
+主要改动：
 
-因此本轮拒绝签发允许态机器授权。仓库中仍不存在 D3 `artifacts/runs/`、动态报告或最终清单；本轮没有运行任何 D3 动态入口，HF3D 时间步推进数为零。
+1. S3 共享前置门通过前的授权、身份、S0、阶段顺序、失败标记、陈旧 staging 和部分 canonical 输出拒绝仍保持无副作用。
+2. compact evidence、tracked ledger、manifest、报告 JSON、报告 Markdown 和最终 raw ledger 全部先进入本次唯一 staging 根；提交前重新加载全部 JSON，核对精确文件集、路径、大小、SHA-256、报告—清单—台账一致性与终态语义。
+3. evidence 目录、manifest 和 reports 目录通过原子 rename 发布；canonical raw ledger 在此前一直保持 S3 `NOT_EXECUTED`，并作为成功路径最后一个持久化动作转为 `PASS/COMPLETE`。
+4. S3 前置门后的分析、复制、哈希、写入、rename 或清理异常统一回滚本次新输出，然后提交唯一 S3 `FAILED_STOPPED` 台账与失败标记；失败标记或失败台账提交自身失败时，恢复原合法台账并撤回新标记。
+5. 事务记录绑定执行提交、授权对象、Pro 裁决、正式源码树以及前后 raw ledger 哈希；未知、并发或不匹配输出不被删除、不被拼接、不被误记为本轮失败证据。
+
+## 已执行验证
+
+在实现提交 `dfa0aae` 上生成的零步静态证据：
+
+```text
+90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/d3_implementation_static_review.json
+```
+
+实际结果：
+
+- D3 测试 `60/60` 通过；
+- 成功路径和失败路径都由独立重载审计验证；
+- 结果盲故障注入覆盖首份/中途 compact 复制、tracked ledger、compact 完成点、manifest 生成与写入、两份报告、三个最终发布 rename、raw ledger 临时 rename、staging 清理、raw ledger 最终提交、回滚清理、失败标记与失败台账提交；
+- Ruff 格式与静态检查、限定 mypy、`compileall`、9 份 JSON 严格解析、Pandoc Markdown 解析、MathML/Chrome 实际渲染和 `git diff --check` 通过；仓库中不存在 Markdown 数学专用检查器；
+- RTX 5060 Laptop GPU 的 CuPy FP64 静态探针通过；
+- 正式源码树 SHA-256 仍为 `dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8`；
+- `time_steps_advanced = 0`，`dynamic_execution_still_unauthorized = true`，`no_dynamic_outputs = true`；D3 raw、动态报告、最终 manifest 和 compact evidence 均不存在。
+
+静态证据中已列出全部候选实现文件的 Git blob、内容 SHA-256 和字节数。
 
 ## 下一项唯一任务
 
-把当前 `main` 交给 Codex，严格按照：
+Pro 读取 GitHub 上 iypt 10 仓库的当前 `main`、本交接和零步静态证据，对 S3 发布事务补丁独立复核并给出完整最终裁决。
 
-```text
-90_候选工作区/current/12_D3V2状态机补丁复核与S3发布事务裁决.md
-```
-
-完成 S3 最终发布事务补丁。工作范围仅限：
-
-```text
-90_候选工作区/current/07_D3跨网格时间步响应诊断/**
-90_候选工作区/交接说明_current.md
-90_候选工作区/交接说明_history.md
-```
-
-必须完成：
-
-- 把 S3 分析、compact evidence、tracked ledger、manifest、报告和 raw ledger 提交纳入一个可恢复事务；
-- 所有最终文件先暂存并完整验证，raw ledger 的 S3 `PASS/COMPLETE` 只能作为最后成功提交点；
-- S3 前置拒绝继续完全无副作用，前置门通过后的任何复制、哈希、写入、rename 或清理异常必须形成自洽的 S3 失败事务；
-- 不得留下 `S3 PASS + 缺失证据`、`S3 NOT_EXECUTED + 无登记部分输出`、失败标记与台账不一致或 tracked/raw ledger 分类不一致；
-- 增加覆盖 compact 复制、tracked ledger、manifest、两份报告、最终 rename、失败标记和失败台账写入点的故障注入测试；
-- 每个故障测试必须验证完整成功或完整失败文件系统，而不只是验证抛出异常；
-- 重新生成零时间步静态证据，保留机器授权 `NOT_AUTHORIZED`，然后立即停止交 Pro 复核。
-
-不得在本轮补丁中提交允许态授权文件，也不得运行 `prepare-execution`、S1、S2 或 S3。
+在 Pro 明确新裁决之前，不得执行 S0、S1、S2 或 S3，不得写入允许态机器授权。
 
 ## 当前禁止
 
-- 不运行 `G6_DT0...G9_DT2` 的任何真实 CUDA 动态算例；
-- 不创建声称 S0、S1、S2 或 S3 已通过的动态报告；
-- 不签发或模拟允许态机器授权；
-- 不复用 D2 F6/F9/T9、D2 raw、隔离目录、陈旧 staging 或 checkpoint 形成 D3 分类；
-- 不继续 Q1R3 原时间组，不进入更细网格、完整 Q1R4、长期稳态或 D4；
-- 不修改 `01_最终理论/**`、`02_模拟程序/**`、`AGENTS.md`、冻结预注册或既有冻结证据；
-- 不放宽 D3 科学阈值、六算例矩阵、输出时刻或标签优先级；
-- 不把静态补丁或测试通过写成数值资格、时间/空间收敛、物理验证、实验验证或装置预测。
+- 不运行 `prepare-execution`、`G6_DT0...G9_DT2` 或 `final`；
+- 不创建声称 S0、S1、S2 或 S3 已通过的动态证据；
+- 不签发、模拟或预写允许态机器授权；
+- 不复用 D2 raw、隔离目录、checkpoint、陈旧 staging 或部分最终输出形成 D3 分类；
+- 不修改 `01_最终理论/**`、`02_模拟程序/**`、`AGENTS.md`、冻结预注册、科学阈值、六算例矩阵、输出时刻、标签优先级或默认拒绝授权对象；
+- 不自动进入更小时间步、更细网格、长期窗口、Q1R4 或 D4。
 
 ## 结论上限
 
@@ -83,8 +74,7 @@ D1_GEOMETRY_EFFECT_SMALL_IN_REGISTERED_WINDOW
 D2_Z_SMALL_NO_CLEAR_DIRECTION
 D2_T_MATERIAL_REDUCTION_SIGNAL
 D2_R_MIXED_OR_INDETERMINATE_NO_CLEAR_DIRECTION
-D3_V2_STATE_MACHINE_PATCH_PARTIAL_PASS
-D3_V2_S3_PUBLICATION_TRANSACTION_PATCH_REQUIRED
+D3_V2_S3_PUBLICATION_TRANSACTION_PATCH_READY_FOR_PRO_REVIEW
 D3_DYNAMIC_EXECUTION_NOT_AUTHORIZED
 NUMERICAL_QUALIFICATION = NOT_DEMONSTRATED
 PHYSICAL_VALIDATION = NOT_PERFORMED
@@ -92,4 +82,4 @@ EXPERIMENTAL_VALIDATION = NOT_PERFORMED
 APPARATUS_PREDICTION = DISALLOWED
 ```
 
-正式理论 `01_最终理论/**`、正式程序 `02_模拟程序/**`、顶层 `AGENTS.md`、冻结预注册和默认拒绝授权对象本轮均未修改。本轮没有独立重跑 Codex 报告的 54 项测试或 CUDA FP64 探针，没有运行任何动态算例或实验。
+正式理论、正式程序、顶层 `AGENTS.md`、冻结科学合同、既有 D1/D2/Q1R 证据与默认拒绝授权对象本轮均未修改。本轮没有运行数值算例或实验，没有提高数值资格、物理验证、实验验证或装置预测结论。
