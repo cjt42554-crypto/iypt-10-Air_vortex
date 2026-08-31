@@ -8,110 +8,226 @@ D3R1_DIRECT_TRIGGER = PROJECTED_DIVERGENCE
 D3R1_FAILURE_MECHANISM = NOT_YET_ESTABLISHED
 D3R1_S3 = NOT_EXECUTED
 D3R1_SCIENTIFIC_CLASSIFICATION = NOT_FORMED
-HF3D_P0_D_RESULT_BLIND_DIVERGENCE_DIAGNOSTICS = COMPLETED
-HF3D_P0_P_PRODUCTION_PATH_BASELINE_AND_PROFILER = NOT_STARTED_ENVIRONMENT_GATE_INVALID
+HF3D_P0_D = COMPLETED
+HF3D_P0_P_FINAL_PLAN = FROZEN_BY_PRO
+HF3D_P0_P_ZERO_STEP_HARNESS_IMPLEMENTATION = AUTHORIZED
+HF3D_P0_P_DYNAMIC_SAMPLES = NOT_AUTHORIZED_PENDING_PRO_STATIC_REVIEW
 HF3D_P1_IMPLEMENTATION_AND_FORMAL_SOURCE_MODIFICATION = NOT_AUTHORIZED
 ```
 
-## 有效 Pro 裁决与冻结合同
+## 有效裁决与绑定
 
-详细裁决：
+P0-P 最终规划裁决：
 
 ```text
-90_候选工作区/current/18_D3R1S2散度失败独立复核与HF3D性能P0授权.md
+90_候选工作区/current/19_HF3DP0P最终规划与证据充分性裁决.md
 ```
 
-关键提交：
+复核绑定：
 
 ```text
-Pro P0 authorization: a1676fe2f81e984ce96b421a0e91d7413dfa5f0d
-P0 preregistration: 246a4d5c365b022ad4bd2e930393bacdd59fef61
-P0-D implementation: e00b4f40f3aff1fc0fe6d04fd97b0e31ef5c33dc
-D3R1 execution: be349aec2f1bdcdb232e282a11175921eda7976b
+reviewed main: e1e72f95548b9456d94cb91d7dc64a6b925dd2b8
+P0 contract blob: 62f256574f67654d13f588e0505f63505d065907
 formal source tree: dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
-```
-
-冻结合同：
-
-```text
-90_候选工作区/current/17_HF3D性能优化/00_P0性能与散度诊断预注册.json
-```
-
-P0 只允许在 `90_候选工作区/current/17_HF3D性能优化/**` 建立诊断、基线和 profiler 证据。`01_最终理论/**`、`02_模拟程序/**`、D3R1 raw、合同、矩阵、阈值和时间步均只读。P0 完成后必须停止交 Pro；P1 和正式源码修改仍未授权。
-
-## P0-D 已完成
-
-执行绑定：
-
-```text
-execution commit: e00b4f40f3aff1fc0fe6d04fd97b0e31ef5c33dc
-R1 raw files: 40
-R1 raw bytes: 359454291
 R1 raw canonical SHA-256: 906a32f71f3e095afc7cba6a3eddf7a83e4d639d36dc0b3014278b3e0001b032
-G9_DT2 partial SHA-256: 8f1e0973eda48c2ecc54f10001f28b988d353e85a728a16ec24f74582527cbcc
 ```
 
-输出：
+P0-D 已完成并保持结果盲边界；P0 预注册、正式源码和 P0-D 输出本轮只读。
+
+## 本机 profiler 能力裁决
+
+已接受用户提供的独立实测：
 
 ```text
-90_候选工作区/current/17_HF3D性能优化/artifacts/p0/divergence_diagnostics.json
-90_候选工作区/current/17_HF3D性能优化/artifacts/p0/divergence_diagnostics.md
-90_候选工作区/current/17_HF3D性能优化/artifacts/p0/divergence_access_ledger.json
+nsys 2026.2.1
+--trace=cuda,nvtx --sample=none --cpuctxsw=none
 ```
 
-输出 SHA-256：
+可正常产生 `.nsys-rep`、SQLite，并导出：
 
 ```text
-divergence_diagnostics.json = d83f3bd42b819cdfadea51dd2153f183eee7f7d29fbde6111722fb6abc0cffa5
-divergence_diagnostics.md = ec0be83f071ed5b60c6dd84024e3414583a7e03d38ef0b60d15f360267ccec42
-divergence_access_ledger.json = d6c380cc09e3eada938df9dfa9deab9106018511f935bbd196afe5d9e2ecbd0f
+cuda_api_sum
+cuda_gpu_kern_sum
+cuda_gpu_mem_time_sum
+cuda_gpu_mem_size_sum
 ```
 
-访问边界实际成立：只加载预注册的 10 条 `float64` 一维诊断序列；完整归档只经 `arrays.fields` 元数据解析到允许成员，失败 partial 只经显式映射读取。访问账本记录：
+该配置可用于 kernel/API/memcpy 时间线、H2D/D2H 次数/字节/时间。正式 P0-P 禁止未经新 probe 启用 `osrt`、`--cuda-memory-usage`、CPU/Python sampling 或 backtrace；这些更重配置曾出现收尾异常。
+
+当前 CPU sampling/perf 和 py-spy 不可用。P0-P 允许用：
 
 ```text
-physical_observables_read = false
-state_fields_read = false
-grid_array_values_read = false
-prohibited_numeric_values_loaded = false
+cProfile + 透明正式算子包装
+pidstat
+the validated lightweight nsys trace
+nvidia-smi / turbostat
+validated host-native allocator observer
+validated CuPy/device allocator recorder
 ```
 
-raw 规范哈希在数值读取前、分析后、发布后及独立复核时均为 `906a32f...1b032`。
+形成互补证据。cProfile 不能作为 benchmark 或 native symbol sampling；pidstat/nvidia-smi 不能替代热点或 memcpy trace。
 
-六案例最大投影散度与冻结门比：
+## 冻结 profile bundle
 
-| 案例 | 接受步 | 终止时刻 s | 最大散度 s^-1 | 门比 |
-|---|---:|---:|---:|---:|
-| G6_DT0 | 1820 | 0.010000000 | 7.56280062397e-06 | 0.0756280062 |
-| G6_DT1 | 3640 | 0.010000000 | 1.37050733995e-06 | 0.0137050734 |
-| G6_DT2 | 7280 | 0.010000000 | 1.50924509068e-06 | 0.0150924509 |
-| G9_DT0 | 1820 | 0.010000000 | 1.25912862083e-05 | 0.1259128621 |
-| G9_DT1 | 3640 | 0.010000000 | 1.78754339224e-05 | 0.1787543392 |
-| G9_DT2 | 6695 | 0.009196625 | 1.02491858996e-04 | 1.0249185900 |
-
-`G9_DT2` 中达到 `0.80/0.90/0.95/1.00` 倍门的步数分别为 `3/2/1/1`。失败步是全序列最大散度步；不是登记输出对齐步；无 retry；投影后 CFL/门为 `0.6719008722`；压力残差/门为 `0.9830838356`；压力迭代不是冻结稳健异常，散度是冻结稳健异常。只能登记“末端散度异常并伴随高压力残差”的描述，不能据此唯一裁定压力耦合、孤立尖峰、持续逼近或其他机制，也不能放宽门。
-
-已执行验证：6 个合成访问边界/统计负例测试、Ruff、格式、限定 mypy、`compileall`、严格 JSON 内部交叉、脚本哈希、raw 独立复核、Pandoc `markdown` reader，以及三页 Chrome/PDF 实际视觉检查。正式理论与正式程序未变化。
-
-## 下一项唯一任务：P0-P
-
-继续使用冻结合同中的 B1/B2/B3、交错顺序和环境门，不得重排、替换样本或改变除 `run.duration_s=0.002` 外的配置：
+预注册的 `PROFILED_B2`、`PROFILED_B3` 分别冻结为三个独立新进程：
 
 ```text
-B1 = G6_DT0
-B2 = G9_DT0
-B3 = G9_DT2
+PROFILED_B2_HOST
+PROFILED_B2_CUDA
+PROFILED_B2_MEMORY
+PROFILED_B3_HOST
+PROFILED_B3_CUDA
+PROFILED_B3_MEMORY
 ```
 
-顺序固定为 3 次不计分 warm-up、每项 3 次新进程计时、再对 B2/B3 各做 1 次独立 profiled 运行。必须从零运行正式生产路径并包含初始化、步进、硬门、帧、归档、严格重载和 GPU 同步；不得使用 checkpoint 或旧轨迹。
+- HOST：cProfile、透明语义包装、pidstat、nvidia-smi；
+- CUDA：仅轻量 nsys CUDA/NVTX、透明 NVTX 包装、pidstat、nvidia-smi；
+- MEMORY：host native allocation observer、CuPy/device recorder、RSS/ru_maxrss/nvidia-smi；不同时启用 cProfile 或 nsys。
 
-2026-08-31 18:03 +0800 环境快照不满足开跑门：仓库外 Brinkman 进程约占 `114%` 单核 CPU，Bilibili/Codex 渲染负载活跃，CPU Tctl 约 `96.2 C`，高于冻结的 `90 C` 起始上限；GPU 约 `68 C`。未终止或修改任何仓库外进程，P0-P 尚未启动、没有样本或 raw。
+全部 profile 子运行不计分，且必须与对应未插桩样本数值 payload 逐位相同。
 
-在等待环境合法期间，只允许完成候选 harness、解析器、合成测试和零步检查。真正开跑前须重新完成合同要求的最长 1800 秒有界等待，并以 30 秒背景 CPU、CPU/GPU 温度、其他 CPU/GPU 计算进程、AC、32 个在线逻辑 CPU、governor、CUDA 环境和 profiler 覆盖能力逐项判门。任一门失败就停止，不得以线程环境变量替代端到端性能证据。
+## 下一项唯一任务：零时间步实现
 
-## P0 停止点与结论上限
+只允许在：
 
-P0-P 完成或失败闭锁后，提交全部实现、raw manifest、紧凑基线/profiler 报告和交接，push `main`，然后立即交 Pro 独立复核；不得在同一轮进入 P1 或修改正式程序。
+```text
+90_候选工作区/current/17_HF3D性能优化/**
+90_候选工作区/交接说明_current.md
+90_候选工作区/交接说明_history.md
+```
+
+实现：
+
+```text
+P0-P orchestrator
+single-sample worker
+strict benchmark config generator/auditor
+environment gate and single-writer lock
+pidstat/nvidia-smi/turbostat monitors and parsers
+cProfile launcher/pstats parser
+transparent semantic wrapper and NVTX registry
+nsys launcher/export/schema/stats parser
+host native allocation observer
+device allocation recorder
+archive/numerical-payload verifier
+atomic sample manifest/failure transaction
+machine-readable static audit
+default NOT_AUTHORIZED p0p_execution_authorization.json
+```
+
+禁止修改：
+
+```text
+02_模拟程序/**
+01_最终理论/**
+90_候选工作区/current/07_D3跨网格时间步响应诊断/**
+AGENTS.md
+00_P0性能与散度诊断预注册.json
+P0-D 已提交输出
+```
+
+## 关键证据门
+
+### 主机热点
+
+```text
+top-level phase wall coverage >= 98%
+solver named exclusive attribution >= 90%
+any unknown region >= 5% => FAIL
+```
+
+cProfile 只解释 Python调用图、次数和 operator boundary；不能声称 native symbol 或微架构归因。perf 不是必需条件，但如果上述语义覆盖不达门，perf 缺失不能用利用率图替代。
+
+### CUDA trace
+
+正式 nsys profile 只能使用已验证轻量配置。必须生成并交叉核验 `.nsys-rep`、SQLite、四个 stats 报告、NVTX ranges、kernel/API/memcpy timeline。SQLite 和 summary 的 H2D/D2H direction/count/bytes 必须一致，并与 `pressure.project` 包装器按 shape/dtype/nbytes 计算的 full-field transfer 多重集交叉。
+
+### 内存
+
+`tracemalloc`、RSS、ru_maxrss、cProfile 或 pidstat 单独都不能满足 host native allocation count。必须实现并合成验证透明 native allocation observer；不能可靠计数即失败闭锁。
+
+设备侧必须组合：
+
+```text
+CuPy allocator request recorder
+pool used/total high-water
+cudaMemGetInfo/phase boundary
+nsys allocation API count
+nvidia-smi process/device memory timeline
+```
+
+存在无法界定大小/峰值的 unmatched device allocation 即失败闭锁。
+
+### 跨模式数值同一
+
+同一 B1/B2/B3 的 warm-up、三次 timed、HOST/CUDA/MEMORY profile 必须在排除时间和性能元数据后得到相同 numerical payload SHA-256，并保持相同步数、dt、limiter、retry、压力迭代、硬门、登记时刻和真实 CUDA。
+
+## 当前环境与禁止开跑
+
+当前存在仓库外计算进程且 CPU Tctl 约 96 °C，不满足冻结的：
+
+```text
+no_other_compute_process
+background CPU <= 25% for 30 s
+CPU Tctl <= 90 °C
+```
+
+本轮不得启动：
+
+```text
+WARMUP_B1/B2/B3
+任何 TIMED_* 样本
+任何 PROFILED_* 子运行
+任何 HF3D 时间步
+```
+
+零步 preflight 应正确拒绝当前环境，并且不得创建 performance sample raw。
+
+## 零步返回 Pro 前最低验收
+
+必须通过：
+
+- config 只允许 `run.duration_s=0.002`；
+- 固定 schedule 不可重排/补样；
+- scored 模式拒绝 profiler/interposer；
+- wrapper 参数/返回/异常/单调用/nested exclusive 测试；
+- 90%/98% 覆盖边界负例；
+- 已验证 nsys probe、SQLite integrity、四报告及缺表/缺 tail 负例；
+- H2D/D2H direction/count/bytes/range 解析；
+- pidstat/nvidia-smi/turbostat telemetry gap/PID reuse 负例；
+- host allocator 已知 count/bytes/peak、多线程/realloc/aligned/mmap 测试；
+- CuPy allocator 与 nsys allocation cross-check；
+- instrumented/uninstrumented 最小 NumPy+CuPy hash 同一；
+- archive payload identity、atomic publish、symlink/concurrency/failure injection；
+- 当前非法环境零步拒绝；
+- Ruff、格式、限定 mypy、`compileall`、严格 JSON、文档解析和 `git diff --check`。
+
+返回时必须证明：
+
+```text
+HF3D time_steps_advanced = 0
+warmup_samples_started = 0
+scored_samples_started = 0
+profile_samples_started = 0
+formal source unchanged
+P1 not implemented
+P0-P authorization = NOT_AUTHORIZED
+```
+
+完成后立即停止交 Pro 静态复核，不得等待环境冷却后自行开跑。
+
+## 未来开跑方式
+
+Pro 接受零步实现后，才可采用：
+
+```text
+reviewed parent: ruling + implementation + static evidence
+unique authorization child: only p0p_execution_authorization.json changes
+```
+
+授权必须绑定 harness、worker、wrapper、monitors/parsers、allocation observer 源码与构建物、P0 contract、正式源码树、工具版本和 GPU 环境，只允许冻结 schedule 的一次执行。每个样本前仍实时判环境门；任一失败终止剩余计划。P0-P 完成后停止，不得进入 P1。
+
+## 当前结论上限
 
 ```text
 D3R1_S2 = FAILED_STOPPED
@@ -119,9 +235,13 @@ D3R1_DIRECT_TRIGGER = PROJECTED_DIVERGENCE
 D3R1_FAILURE_MECHANISM = NOT_YET_ESTABLISHED
 D3R1_S3 = NOT_EXECUTED
 D3R1_SCIENTIFIC_CLASSIFICATION = NOT_FORMED
+
 HF3D_P0_D = COMPLETED
-HF3D_P0_P = NOT_STARTED_ENVIRONMENT_GATE_INVALID
+HF3D_P0_P_PLAN = FROZEN
+HF3D_P0_P_ZERO_STEP_IMPLEMENTATION = AUTHORIZED
+HF3D_P0_P_DYNAMIC_SAMPLES = NOT_AUTHORIZED_PENDING_PRO_STATIC_REVIEW
 HF3D_P1_IMPLEMENTATION = NOT_AUTHORIZED
+
 NUMERICAL_QUALIFICATION = NOT_DEMONSTRATED
 PHYSICAL_VALIDATION = NOT_PERFORMED
 EXPERIMENTAL_VALIDATION = NOT_PERFORMED
