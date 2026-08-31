@@ -1,0 +1,848 @@
+{
+  "audit_id": "D3R1_S2_G9_DT2_PROJECTED_DIVERGENCE_FAILURE_FORENSIC_V1",
+  "audit_script_sha256": "72060a5794812a072e92483fe7217b5a92e69c40263531345c30a1bfebd8a8f6",
+  "completed_cases": [
+    {
+      "archive": {
+        "frame_time_sha256": "e52205371322af4d28e3457768060cf75656e818d1829a63d4754f7b386d3e49",
+        "path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G6_DT0/archive",
+        "payloads": [
+          {
+            "name": "arrays.npz",
+            "sha256": "b23dad64b34eebe5747815a9e1a11e40e6dfb246093f44a1d775d1684962e49b",
+            "size_bytes": 30875304
+          },
+          {
+            "name": "config.json",
+            "sha256": "602dead5fa6b8b4485103bf91adb53b1bb17b6b3e3f9c8f7c0578be4242d0cd0",
+            "size_bytes": 3528
+          },
+          {
+            "name": "manifest.json",
+            "sha256": "0dc980b0976add34cc9cc4787ef1e9c45af556e5b9a7b41555035128b7d69414",
+            "size_bytes": 2728
+          },
+          {
+            "name": "provenance.json",
+            "sha256": "ad9d4eb16cf7708710e331f3cf16577ccad7a7e2d531896229ee403dfbd2cd23",
+            "size_bytes": 5600
+          },
+          {
+            "name": "result.json",
+            "sha256": "2771cbed5d7a21a18aa2e5b34ec96c0d9d2cea7053c5dd72e0d6531068bd81e5",
+            "size_bytes": 26730
+          },
+          {
+            "name": "timeseries.csv",
+            "sha256": "ba8b1198bbadaf7013234fae56ad1b87117ff97694fa0c42fc22b86f58bb31f7",
+            "size_bytes": 7426
+          }
+        ],
+        "result_status": "completed"
+      },
+      "case_id": "G6_DT0",
+      "process_cpu_time_s": 800.1138087019999,
+      "retry_attempts": 0,
+      "stage": "S1",
+      "status": "D3_CASE_COMPLETE_ALL_HARD_GATES_PASS",
+      "summary_path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G6_DT0/case_summary.json",
+      "summary_sha256": "347d7905f3af725666ec448947f1f59435cda41bf6678a9ba0717d1785dd8692",
+      "wall_time_s": 790.5615579219993
+    },
+    {
+      "archive": {
+        "frame_time_sha256": "e52205371322af4d28e3457768060cf75656e818d1829a63d4754f7b386d3e49",
+        "path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G6_DT1/archive",
+        "payloads": [
+          {
+            "name": "arrays.npz",
+            "sha256": "8fa407fb494622f8142d41fcab1ffeb2057f5aaff2a3960328047eaadf7a7e7a",
+            "size_bytes": 30712969
+          },
+          {
+            "name": "config.json",
+            "sha256": "a23abf398cbc3720f81cce860eaf9775209cf9d564e9a6fb7960086a5ecbbbd1",
+            "size_bytes": 3529
+          },
+          {
+            "name": "manifest.json",
+            "sha256": "bbbe118d6746b4b4e14eb4025c721add096cf7f1bd40419c43b4025315281266",
+            "size_bytes": 2728
+          },
+          {
+            "name": "provenance.json",
+            "sha256": "8e2d89f40182967dbae4ea1e98f7f7a374d0dae22fca699cb768d9bfb5c90d6b",
+            "size_bytes": 5601
+          },
+          {
+            "name": "result.json",
+            "sha256": "2f96b5fc73dc2e65180def9aff81f2d900cd74b0c592a976532cae41ac9d0360",
+            "size_bytes": 26736
+          },
+          {
+            "name": "timeseries.csv",
+            "sha256": "fe23cf463666e8a4e8460500066b2daf003b7586dd84376853935a0d10695ccf",
+            "size_bytes": 7565
+          }
+        ],
+        "result_status": "completed"
+      },
+      "case_id": "G6_DT1",
+      "process_cpu_time_s": 1561.0674672290002,
+      "retry_attempts": 0,
+      "stage": "S1",
+      "status": "D3_CASE_COMPLETE_ALL_HARD_GATES_PASS",
+      "summary_path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G6_DT1/case_summary.json",
+      "summary_sha256": "d9cfcb950b4a36db0bc36a2c794532b28b7a146b73cf1bb7c45fc6b0424e7479",
+      "wall_time_s": 1542.2555614190023
+    },
+    {
+      "archive": {
+        "frame_time_sha256": "e52205371322af4d28e3457768060cf75656e818d1829a63d4754f7b386d3e49",
+        "path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G6_DT2/archive",
+        "payloads": [
+          {
+            "name": "arrays.npz",
+            "sha256": "d2a023e52eac1509d1b25c32d580eb6d248bc8eae45739ada1da6f7faf53b827",
+            "size_bytes": 30789140
+          },
+          {
+            "name": "config.json",
+            "sha256": "259de111e77c08004dec90be0a52b167b82f5570549d4243b8767a26bd40e1fa",
+            "size_bytes": 3530
+          },
+          {
+            "name": "manifest.json",
+            "sha256": "7586780cfd231f943daddcbea050e2f5ba8cd91b6ed4982642591af36ba521ab",
+            "size_bytes": 2728
+          },
+          {
+            "name": "provenance.json",
+            "sha256": "017162df654ba85055930e10bf560969fba37c61c7c39ffe41d009937827bfb6",
+            "size_bytes": 5597
+          },
+          {
+            "name": "result.json",
+            "sha256": "8e74210e38513233c98eb5f34eaf1060af465e1f0311c7413d26774409c5d529",
+            "size_bytes": 26734
+          },
+          {
+            "name": "timeseries.csv",
+            "sha256": "cf82a08d8b64267c471587b26ae4b1ae85557daa3cbe4caa1915e49d4950df00",
+            "size_bytes": 7648
+          }
+        ],
+        "result_status": "completed"
+      },
+      "case_id": "G6_DT2",
+      "process_cpu_time_s": 3014.482554961,
+      "retry_attempts": 0,
+      "stage": "S1",
+      "status": "D3_CASE_COMPLETE_ALL_HARD_GATES_PASS",
+      "summary_path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G6_DT2/case_summary.json",
+      "summary_sha256": "04884541a990f7b886f36b8d1261d681bb482d06b80771c0a7600e11b35e9f4f",
+      "wall_time_s": 2977.589639031001
+    },
+    {
+      "archive": {
+        "frame_time_sha256": "e52205371322af4d28e3457768060cf75656e818d1829a63d4754f7b386d3e49",
+        "path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G9_DT0/archive",
+        "payloads": [
+          {
+            "name": "arrays.npz",
+            "sha256": "b0c6dbe4b000c169499609025faab8439468e6d4c4bc71d61d83cd332c9e50ae",
+            "size_bytes": 102604445
+          },
+          {
+            "name": "config.json",
+            "sha256": "64bf8553b88e546b3bd18a8867fd9ed5455be475bb77f467f8c45c157353b86d",
+            "size_bytes": 3531
+          },
+          {
+            "name": "manifest.json",
+            "sha256": "84beb96576e1a6cbce1ffa9c36eae8b3766b7cd654324e9448e0210b1d50c3aa",
+            "size_bytes": 2729
+          },
+          {
+            "name": "provenance.json",
+            "sha256": "8809aa3a171c0076aed3bae1aa1cded068291dca27ebd7cc4a3c1f2300323b8e",
+            "size_bytes": 5597
+          },
+          {
+            "name": "result.json",
+            "sha256": "8069981558cd7fe9a1f57295c435d992d30ecb096b338e2190d10f944cfe0db6",
+            "size_bytes": 26937
+          },
+          {
+            "name": "timeseries.csv",
+            "sha256": "55551e0584de03d22f8809dd86e9514d515c97111f11647dc9fb5e6cb7dca623",
+            "size_bytes": 7265
+          }
+        ],
+        "result_status": "completed"
+      },
+      "case_id": "G9_DT0",
+      "process_cpu_time_s": 4059.093850564,
+      "retry_attempts": 0,
+      "stage": "S2",
+      "status": "D3_CASE_COMPLETE_ALL_HARD_GATES_PASS",
+      "summary_path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G9_DT0/case_summary.json",
+      "summary_sha256": "7f53e506a65bf34b21fa0fbabffe27c64a636b576172b5ab8240bbc656291770",
+      "wall_time_s": 3982.075570653
+    },
+    {
+      "archive": {
+        "frame_time_sha256": "e52205371322af4d28e3457768060cf75656e818d1829a63d4754f7b386d3e49",
+        "path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G9_DT1/archive",
+        "payloads": [
+          {
+            "name": "arrays.npz",
+            "sha256": "2835e4025b43d7a06219580edf8e8129fba9b0c05cecdff8172fa1f72f950d5c",
+            "size_bytes": 102698394
+          },
+          {
+            "name": "config.json",
+            "sha256": "c5fb44e90f6f3e2f2bc0a2c13d46969e3be861219ad44f1259afaadbd11c28db",
+            "size_bytes": 3532
+          },
+          {
+            "name": "manifest.json",
+            "sha256": "42a8f1566ae31df73dee058a46aef66fff7262897d480a68cc877628a817094d",
+            "size_bytes": 2729
+          },
+          {
+            "name": "provenance.json",
+            "sha256": "7ad99307f50492115b51814d31dbf42602b5000bb9ff8da9547dc65f46e54d39",
+            "size_bytes": 5600
+          },
+          {
+            "name": "result.json",
+            "sha256": "995a7a423fb440f1f9704652e73c1cb92e80553e51885a697500746ddbc5420b",
+            "size_bytes": 26900
+          },
+          {
+            "name": "timeseries.csv",
+            "sha256": "eab0314526898920bfb61e5013b104acd5a4f0d1a5aae4b0a174eef0b15aaab1",
+            "size_bytes": 7442
+          }
+        ],
+        "result_status": "completed"
+      },
+      "case_id": "G9_DT1",
+      "process_cpu_time_s": 7942.530703983999,
+      "retry_attempts": 0,
+      "stage": "S2",
+      "status": "D3_CASE_COMPLETE_ALL_HARD_GATES_PASS",
+      "summary_path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G9_DT1/case_summary.json",
+      "summary_sha256": "2570ae9fe038d0b186c508cd8a3a7a9af5aa19b63e7fe0522595f16b272924b8",
+      "wall_time_s": 7821.489455764997
+    }
+  ],
+  "conclusion": {
+    "APPARATUS_PREDICTION": "DISALLOWED",
+    "D3R1_FAILURE_CASE": "G9_DT2",
+    "D3R1_FAILURE_GATE": "PROJECTED_DIVERGENCE",
+    "D3R1_S2": "FAILED_STOPPED",
+    "D3R1_S3": "NOT_EXECUTED",
+    "D3R1_SCIENTIFIC_CLASSIFICATION": "NOT_FORMED",
+    "EXPERIMENTAL_VALIDATION": "NOT_PERFORMED",
+    "NUMERICAL_QUALIFICATION": "NOT_DEMONSTRATED",
+    "PHYSICAL_VALIDATION": "NOT_PERFORMED"
+  },
+  "confirmed_absent_s3_paths": [
+    "90_候选工作区/current/07_D3跨网格时间步响应诊断/reports/r1/d3_cross_grid_temporal_report.json",
+    "90_候选工作区/current/07_D3跨网格时间步响应诊断/reports/r1/d3_cross_grid_temporal_report.md",
+    "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/d3_cross_grid_temporal_manifest.json",
+    "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/evidence",
+    "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/.s3_publication_transaction",
+    "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/.stage_ledger.s3-commit.tmp"
+  ],
+  "execution_commit": "be349aec2f1bdcdb232e282a11175921eda7976b",
+  "failed_case": {
+    "archive_created": false,
+    "case_id": "G9_DT2",
+    "failure": {
+      "accepted_steps": 6695,
+      "message": "G9_DT2 hard gate failed: projected_divergence",
+      "simulated_time_s": 0.009196624999999948,
+      "traceback": "Traceback (most recent call last):\n  File \"/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/07_D3跨网格时间步响应诊断/run_d3_cross_grid_temporal.py\", line 1961, in advance_runtime_to_registered_end\n    raise FloatingPointError(\nFloatingPointError: G9_DT2 hard gate failed: projected_divergence\n",
+      "type": "FloatingPointError"
+    },
+    "gate_excess_s_inv": 2.4918589962453504e-06,
+    "gate_ratio": 1.0249185899624536,
+    "maximum_projected_divergence_s_inv": 0.00010249185899624536,
+    "process_cpu_time_s": 13609.942915174,
+    "projected_divergence_gate_s_inv": 0.0001,
+    "quality_false_gates": [
+      "complete_to_registered_end_time",
+      "native_output_times_exact",
+      "projected_divergence"
+    ],
+    "retry_attempts": 0,
+    "status": "D3_INCONCLUSIVE_FAIL_CLOSED",
+    "summary_path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G9_DT2/case_summary.json",
+    "summary_sha256": "3eb6d14e11fd45d944f213177cb5cec4eb92e2c333ba7c696f803839c2df73c6",
+    "wall_time_s": 13425.307207369995
+  },
+  "failure_record": {
+    "path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/execution_failure.json",
+    "sha256": "bc9233adabb138d576344c71197d2dd537652cafdea7c397e428c0129fafc104",
+    "size_bytes": 1050,
+    "subsequent_stages_executed": false
+  },
+  "formal_source_tree_sha256": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8",
+  "gate_pass": true,
+  "gates": {
+    "completed_case_G6_DT0_cuda": true,
+    "completed_case_G6_DT0_execution_commit": true,
+    "completed_case_G6_DT0_formal_source": true,
+    "completed_case_G6_DT0_identity": true,
+    "completed_case_G6_DT0_pass": true,
+    "completed_case_G6_DT1_cuda": true,
+    "completed_case_G6_DT1_execution_commit": true,
+    "completed_case_G6_DT1_formal_source": true,
+    "completed_case_G6_DT1_identity": true,
+    "completed_case_G6_DT1_pass": true,
+    "completed_case_G6_DT2_cuda": true,
+    "completed_case_G6_DT2_execution_commit": true,
+    "completed_case_G6_DT2_formal_source": true,
+    "completed_case_G6_DT2_identity": true,
+    "completed_case_G6_DT2_pass": true,
+    "completed_case_G9_DT0_cuda": true,
+    "completed_case_G9_DT0_execution_commit": true,
+    "completed_case_G9_DT0_formal_source": true,
+    "completed_case_G9_DT0_identity": true,
+    "completed_case_G9_DT0_pass": true,
+    "completed_case_G9_DT1_cuda": true,
+    "completed_case_G9_DT1_execution_commit": true,
+    "completed_case_G9_DT1_formal_source": true,
+    "completed_case_G9_DT1_identity": true,
+    "completed_case_G9_DT1_pass": true,
+    "failed_case_cuda_without_fallback": true,
+    "failed_case_exception_exact": true,
+    "failed_case_identity_stable": true,
+    "failed_case_partial_metadata": true,
+    "failed_case_status": true,
+    "failed_quality_gate_set_exact": true,
+    "failure_record_semantics": true,
+    "ledger_terminal_semantics": true,
+    "partial_frame_times_are_registered_prefix": true,
+    "partial_identity": true,
+    "preregistration_identity": true,
+    "projected_divergence_threshold_exceeded": true,
+    "raw_hashes_unchanged_during_audit": true,
+    "raw_snapshot_identity": true,
+    "s3_outputs_absent": true,
+    "stage_S0_exact": true,
+    "stage_S1_exact": true,
+    "stage_S2_exact": true,
+    "stage_S3_exact": true,
+    "stage_set_exact": true
+  },
+  "partial": {
+    "frame_time_identity": [
+      {
+        "bitwise_equal": true,
+        "index": 0,
+        "observed_decimal": "0.0",
+        "observed_float_hex": "0x0.0p+0",
+        "observed_uint64": 0,
+        "registered_decimal": "0.0",
+        "registered_float_hex": "0x0.0p+0",
+        "registered_uint64": 0
+      },
+      {
+        "bitwise_equal": true,
+        "index": 1,
+        "observed_decimal": "0.001",
+        "observed_float_hex": "0x1.0624dd2f1a9fcp-10",
+        "observed_uint64": 4562254508917369340,
+        "registered_decimal": "0.001",
+        "registered_float_hex": "0x1.0624dd2f1a9fcp-10",
+        "registered_uint64": 4562254508917369340
+      },
+      {
+        "bitwise_equal": true,
+        "index": 2,
+        "observed_decimal": "0.002",
+        "observed_float_hex": "0x1.0624dd2f1a9fcp-9",
+        "observed_uint64": 4566758108544739836,
+        "registered_decimal": "0.002",
+        "registered_float_hex": "0x1.0624dd2f1a9fcp-9",
+        "registered_uint64": 4566758108544739836
+      },
+      {
+        "bitwise_equal": true,
+        "index": 3,
+        "observed_decimal": "0.003",
+        "observed_float_hex": "0x1.89374bc6a7efap-9",
+        "observed_uint64": 4569063951553953530,
+        "registered_decimal": "0.003",
+        "registered_float_hex": "0x1.89374bc6a7efap-9",
+        "registered_uint64": 4569063951553953530
+      },
+      {
+        "bitwise_equal": true,
+        "index": 4,
+        "observed_decimal": "0.004",
+        "observed_float_hex": "0x1.0624dd2f1a9fcp-8",
+        "observed_uint64": 4571261708172110332,
+        "registered_decimal": "0.004",
+        "registered_float_hex": "0x1.0624dd2f1a9fcp-8",
+        "registered_uint64": 4571261708172110332
+      },
+      {
+        "bitwise_equal": true,
+        "index": 5,
+        "observed_decimal": "0.005",
+        "observed_float_hex": "0x1.47ae147ae147bp-8",
+        "observed_uint64": 4572414629676717179,
+        "registered_decimal": "0.005",
+        "registered_float_hex": "0x1.47ae147ae147bp-8",
+        "registered_uint64": 4572414629676717179
+      },
+      {
+        "bitwise_equal": true,
+        "index": 6,
+        "observed_decimal": "0.006",
+        "observed_float_hex": "0x1.89374bc6a7efap-8",
+        "observed_uint64": 4573567551181324026,
+        "registered_decimal": "0.006",
+        "registered_float_hex": "0x1.89374bc6a7efap-8",
+        "registered_uint64": 4573567551181324026
+      },
+      {
+        "bitwise_equal": true,
+        "index": 7,
+        "observed_decimal": "0.007",
+        "observed_float_hex": "0x1.cac083126e979p-8",
+        "observed_uint64": 4574720472685930873,
+        "registered_decimal": "0.007",
+        "registered_float_hex": "0x1.cac083126e979p-8",
+        "registered_uint64": 4574720472685930873
+      },
+      {
+        "bitwise_equal": true,
+        "index": 8,
+        "observed_decimal": "0.008",
+        "observed_float_hex": "0x1.0624dd2f1a9fcp-7",
+        "observed_uint64": 4575765307799480828,
+        "registered_decimal": "0.008",
+        "registered_float_hex": "0x1.0624dd2f1a9fcp-7",
+        "registered_uint64": 4575765307799480828
+      },
+      {
+        "bitwise_equal": true,
+        "index": 9,
+        "observed_decimal": "0.009",
+        "observed_float_hex": "0x1.26e978d4fdf3bp-7",
+        "observed_uint64": 4576341768551784251,
+        "registered_decimal": "0.009",
+        "registered_float_hex": "0x1.26e978d4fdf3bp-7",
+        "registered_uint64": 4576341768551784251
+      }
+    ],
+    "members": [
+      "diagnostic_step_boundary_acceleration",
+      "diagnostic_step_cfl_retry_count",
+      "diagnostic_step_clip",
+      "diagnostic_step_divergence",
+      "diagnostic_step_dt",
+      "diagnostic_step_gravity_acceleration",
+      "diagnostic_step_initial_attempt_dt",
+      "diagnostic_step_maximum_rejected_cfl",
+      "diagnostic_step_momentum_advection_acceleration",
+      "diagnostic_step_post_projection_cfl",
+      "diagnostic_step_pre_projection_cfl",
+      "diagnostic_step_pre_source_cfl",
+      "diagnostic_step_pressure_iterations",
+      "diagnostic_step_pressure_projection_acceleration",
+      "diagnostic_step_pressure_residual",
+      "diagnostic_step_repair",
+      "diagnostic_step_rotating_frame_acceleration",
+      "diagnostic_step_starting_cfl",
+      "diagnostic_step_surface_tension_acceleration",
+      "diagnostic_step_time",
+      "diagnostic_step_time_limiter_code",
+      "diagnostic_step_viscous_acceleration",
+      "frame_time_s",
+      "grid_active_mask",
+      "grid_bar_mask",
+      "observable_actual_bar_rpm",
+      "observable_angular_momentum_z_kg_m2_s",
+      "observable_axisymmetry_error",
+      "observable_bar_angle_rad",
+      "observable_bar_gas_contact_area_m2",
+      "observable_cfl_advective",
+      "observable_cfl_capillary",
+      "observable_cfl_viscous",
+      "observable_connection_candidate",
+      "observable_connection_minimum_throat_radius_m",
+      "observable_connection_required_throat_radius_m",
+      "observable_divergence_before_projection",
+      "observable_equivalent_bar_rpm",
+      "observable_finite_channel_candidate",
+      "observable_first_contact_proxy",
+      "observable_funnel_depth_m",
+      "observable_isolated_gas_volume_m3",
+      "observable_kinetic_energy_j",
+      "observable_kinetic_energy_lab_j",
+      "observable_kinetic_energy_rotating_j",
+      "observable_liquid_mass_error_relative",
+      "observable_liquid_volume_balance_error_relative",
+      "observable_liquid_volume_error",
+      "observable_liquid_volume_error_m3",
+      "observable_liquid_volume_m3",
+      "observable_max_divergence",
+      "observable_min_gap_to_bar",
+      "observable_min_gap_to_bar_m",
+      "observable_minimum_gap_m",
+      "observable_nominal_central_depression_m",
+      "observable_pressure_iterations",
+      "observable_pressure_residual",
+      "observable_rotation_increment_rad",
+      "observable_surface_depth",
+      "observable_surface_depth_m",
+      "observable_surface_min_z_m",
+      "observable_surface_profile_m",
+      "observable_surface_profile_maximum_m",
+      "observable_surface_profile_minimum_m",
+      "observable_surface_profile_range_m",
+      "observable_viscous_dissipation_w",
+      "state_phase",
+      "state_pressure_pa",
+      "state_u_x_face",
+      "state_u_y_face",
+      "state_u_z_face"
+    ],
+    "members_inspected_only_by_name": [
+      "diagnostic_step_boundary_acceleration",
+      "diagnostic_step_cfl_retry_count",
+      "diagnostic_step_clip",
+      "diagnostic_step_divergence",
+      "diagnostic_step_dt",
+      "diagnostic_step_gravity_acceleration",
+      "diagnostic_step_initial_attempt_dt",
+      "diagnostic_step_maximum_rejected_cfl",
+      "diagnostic_step_momentum_advection_acceleration",
+      "diagnostic_step_post_projection_cfl",
+      "diagnostic_step_pre_projection_cfl",
+      "diagnostic_step_pre_source_cfl",
+      "diagnostic_step_pressure_iterations",
+      "diagnostic_step_pressure_projection_acceleration",
+      "diagnostic_step_pressure_residual",
+      "diagnostic_step_repair",
+      "diagnostic_step_rotating_frame_acceleration",
+      "diagnostic_step_starting_cfl",
+      "diagnostic_step_surface_tension_acceleration",
+      "diagnostic_step_time",
+      "diagnostic_step_time_limiter_code",
+      "diagnostic_step_viscous_acceleration",
+      "grid_active_mask",
+      "grid_bar_mask",
+      "observable_actual_bar_rpm",
+      "observable_angular_momentum_z_kg_m2_s",
+      "observable_axisymmetry_error",
+      "observable_bar_angle_rad",
+      "observable_bar_gas_contact_area_m2",
+      "observable_cfl_advective",
+      "observable_cfl_capillary",
+      "observable_cfl_viscous",
+      "observable_connection_candidate",
+      "observable_connection_minimum_throat_radius_m",
+      "observable_connection_required_throat_radius_m",
+      "observable_divergence_before_projection",
+      "observable_equivalent_bar_rpm",
+      "observable_finite_channel_candidate",
+      "observable_first_contact_proxy",
+      "observable_funnel_depth_m",
+      "observable_isolated_gas_volume_m3",
+      "observable_kinetic_energy_j",
+      "observable_kinetic_energy_lab_j",
+      "observable_kinetic_energy_rotating_j",
+      "observable_liquid_mass_error_relative",
+      "observable_liquid_volume_balance_error_relative",
+      "observable_liquid_volume_error",
+      "observable_liquid_volume_error_m3",
+      "observable_liquid_volume_m3",
+      "observable_max_divergence",
+      "observable_min_gap_to_bar",
+      "observable_min_gap_to_bar_m",
+      "observable_minimum_gap_m",
+      "observable_nominal_central_depression_m",
+      "observable_pressure_iterations",
+      "observable_pressure_residual",
+      "observable_rotation_increment_rad",
+      "observable_surface_depth",
+      "observable_surface_depth_m",
+      "observable_surface_min_z_m",
+      "observable_surface_profile_m",
+      "observable_surface_profile_maximum_m",
+      "observable_surface_profile_minimum_m",
+      "observable_surface_profile_range_m",
+      "observable_viscous_dissipation_w",
+      "state_phase",
+      "state_pressure_pa",
+      "state_u_x_face",
+      "state_u_y_face",
+      "state_u_z_face"
+    ],
+    "only_array_value_loaded": "frame_time_s",
+    "path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G9_DT2/partial.npz",
+    "sha256": "8f1e0973eda48c2ecc54f10001f28b988d353e85a728a16ec24f74582527cbcc",
+    "size_bytes": 60848588
+  },
+  "pro_ruling_commit": "d1aff0b6f46783096ecfcc8c820b68145b78aa55",
+  "protocol_id": "D3_HF3D_CROSS_GRID_TEMPORAL_RESPONSE_R1",
+  "raw_snapshot": {
+    "canonical_snapshot_sha256": "906a32f71f3e095afc7cba6a3eddf7a83e4d639d36dc0b3014278b3e0001b032",
+    "file_count": 40,
+    "files": [
+      {
+        "path": "cases/G6_DT0/archive/arrays.npz",
+        "sha256": "b23dad64b34eebe5747815a9e1a11e40e6dfb246093f44a1d775d1684962e49b",
+        "size_bytes": 30875304
+      },
+      {
+        "path": "cases/G6_DT0/archive/config.json",
+        "sha256": "602dead5fa6b8b4485103bf91adb53b1bb17b6b3e3f9c8f7c0578be4242d0cd0",
+        "size_bytes": 3528
+      },
+      {
+        "path": "cases/G6_DT0/archive/manifest.json",
+        "sha256": "0dc980b0976add34cc9cc4787ef1e9c45af556e5b9a7b41555035128b7d69414",
+        "size_bytes": 2728
+      },
+      {
+        "path": "cases/G6_DT0/archive/provenance.json",
+        "sha256": "ad9d4eb16cf7708710e331f3cf16577ccad7a7e2d531896229ee403dfbd2cd23",
+        "size_bytes": 5600
+      },
+      {
+        "path": "cases/G6_DT0/archive/result.json",
+        "sha256": "2771cbed5d7a21a18aa2e5b34ec96c0d9d2cea7053c5dd72e0d6531068bd81e5",
+        "size_bytes": 26730
+      },
+      {
+        "path": "cases/G6_DT0/archive/timeseries.csv",
+        "sha256": "ba8b1198bbadaf7013234fae56ad1b87117ff97694fa0c42fc22b86f58bb31f7",
+        "size_bytes": 7426
+      },
+      {
+        "path": "cases/G6_DT0/case_summary.json",
+        "sha256": "347d7905f3af725666ec448947f1f59435cda41bf6678a9ba0717d1785dd8692",
+        "size_bytes": 96060
+      },
+      {
+        "path": "cases/G6_DT1/archive/arrays.npz",
+        "sha256": "8fa407fb494622f8142d41fcab1ffeb2057f5aaff2a3960328047eaadf7a7e7a",
+        "size_bytes": 30712969
+      },
+      {
+        "path": "cases/G6_DT1/archive/config.json",
+        "sha256": "a23abf398cbc3720f81cce860eaf9775209cf9d564e9a6fb7960086a5ecbbbd1",
+        "size_bytes": 3529
+      },
+      {
+        "path": "cases/G6_DT1/archive/manifest.json",
+        "sha256": "bbbe118d6746b4b4e14eb4025c721add096cf7f1bd40419c43b4025315281266",
+        "size_bytes": 2728
+      },
+      {
+        "path": "cases/G6_DT1/archive/provenance.json",
+        "sha256": "8e2d89f40182967dbae4ea1e98f7f7a374d0dae22fca699cb768d9bfb5c90d6b",
+        "size_bytes": 5601
+      },
+      {
+        "path": "cases/G6_DT1/archive/result.json",
+        "sha256": "2f96b5fc73dc2e65180def9aff81f2d900cd74b0c592a976532cae41ac9d0360",
+        "size_bytes": 26736
+      },
+      {
+        "path": "cases/G6_DT1/archive/timeseries.csv",
+        "sha256": "fe23cf463666e8a4e8460500066b2daf003b7586dd84376853935a0d10695ccf",
+        "size_bytes": 7565
+      },
+      {
+        "path": "cases/G6_DT1/case_summary.json",
+        "sha256": "d9cfcb950b4a36db0bc36a2c794532b28b7a146b73cf1bb7c45fc6b0424e7479",
+        "size_bytes": 96172
+      },
+      {
+        "path": "cases/G6_DT2/archive/arrays.npz",
+        "sha256": "d2a023e52eac1509d1b25c32d580eb6d248bc8eae45739ada1da6f7faf53b827",
+        "size_bytes": 30789140
+      },
+      {
+        "path": "cases/G6_DT2/archive/config.json",
+        "sha256": "259de111e77c08004dec90be0a52b167b82f5570549d4243b8767a26bd40e1fa",
+        "size_bytes": 3530
+      },
+      {
+        "path": "cases/G6_DT2/archive/manifest.json",
+        "sha256": "7586780cfd231f943daddcbea050e2f5ba8cd91b6ed4982642591af36ba521ab",
+        "size_bytes": 2728
+      },
+      {
+        "path": "cases/G6_DT2/archive/provenance.json",
+        "sha256": "017162df654ba85055930e10bf560969fba37c61c7c39ffe41d009937827bfb6",
+        "size_bytes": 5597
+      },
+      {
+        "path": "cases/G6_DT2/archive/result.json",
+        "sha256": "8e74210e38513233c98eb5f34eaf1060af465e1f0311c7413d26774409c5d529",
+        "size_bytes": 26734
+      },
+      {
+        "path": "cases/G6_DT2/archive/timeseries.csv",
+        "sha256": "cf82a08d8b64267c471587b26ae4b1ae85557daa3cbe4caa1915e49d4950df00",
+        "size_bytes": 7648
+      },
+      {
+        "path": "cases/G6_DT2/case_summary.json",
+        "sha256": "04884541a990f7b886f36b8d1261d681bb482d06b80771c0a7600e11b35e9f4f",
+        "size_bytes": 96168
+      },
+      {
+        "path": "cases/G9_DT0/archive/arrays.npz",
+        "sha256": "b0c6dbe4b000c169499609025faab8439468e6d4c4bc71d61d83cd332c9e50ae",
+        "size_bytes": 102604445
+      },
+      {
+        "path": "cases/G9_DT0/archive/config.json",
+        "sha256": "64bf8553b88e546b3bd18a8867fd9ed5455be475bb77f467f8c45c157353b86d",
+        "size_bytes": 3531
+      },
+      {
+        "path": "cases/G9_DT0/archive/manifest.json",
+        "sha256": "84beb96576e1a6cbce1ffa9c36eae8b3766b7cd654324e9448e0210b1d50c3aa",
+        "size_bytes": 2729
+      },
+      {
+        "path": "cases/G9_DT0/archive/provenance.json",
+        "sha256": "8809aa3a171c0076aed3bae1aa1cded068291dca27ebd7cc4a3c1f2300323b8e",
+        "size_bytes": 5597
+      },
+      {
+        "path": "cases/G9_DT0/archive/result.json",
+        "sha256": "8069981558cd7fe9a1f57295c435d992d30ecb096b338e2190d10f944cfe0db6",
+        "size_bytes": 26937
+      },
+      {
+        "path": "cases/G9_DT0/archive/timeseries.csv",
+        "sha256": "55551e0584de03d22f8809dd86e9514d515c97111f11647dc9fb5e6cb7dca623",
+        "size_bytes": 7265
+      },
+      {
+        "path": "cases/G9_DT0/case_summary.json",
+        "sha256": "7f53e506a65bf34b21fa0fbabffe27c64a636b576172b5ab8240bbc656291770",
+        "size_bytes": 96212
+      },
+      {
+        "path": "cases/G9_DT1/archive/arrays.npz",
+        "sha256": "2835e4025b43d7a06219580edf8e8129fba9b0c05cecdff8172fa1f72f950d5c",
+        "size_bytes": 102698394
+      },
+      {
+        "path": "cases/G9_DT1/archive/config.json",
+        "sha256": "c5fb44e90f6f3e2f2bc0a2c13d46969e3be861219ad44f1259afaadbd11c28db",
+        "size_bytes": 3532
+      },
+      {
+        "path": "cases/G9_DT1/archive/manifest.json",
+        "sha256": "42a8f1566ae31df73dee058a46aef66fff7262897d480a68cc877628a817094d",
+        "size_bytes": 2729
+      },
+      {
+        "path": "cases/G9_DT1/archive/provenance.json",
+        "sha256": "7ad99307f50492115b51814d31dbf42602b5000bb9ff8da9547dc65f46e54d39",
+        "size_bytes": 5600
+      },
+      {
+        "path": "cases/G9_DT1/archive/result.json",
+        "sha256": "995a7a423fb440f1f9704652e73c1cb92e80553e51885a697500746ddbc5420b",
+        "size_bytes": 26900
+      },
+      {
+        "path": "cases/G9_DT1/archive/timeseries.csv",
+        "sha256": "eab0314526898920bfb61e5013b104acd5a4f0d1a5aae4b0a174eef0b15aaab1",
+        "size_bytes": 7442
+      },
+      {
+        "path": "cases/G9_DT1/case_summary.json",
+        "sha256": "2570ae9fe038d0b186c508cd8a3a7a9af5aa19b63e7fe0522595f16b272924b8",
+        "size_bytes": 96306
+      },
+      {
+        "path": "cases/G9_DT2/case_summary.json",
+        "sha256": "3eb6d14e11fd45d944f213177cb5cec4eb92e2c333ba7c696f803839c2df73c6",
+        "size_bytes": 95925
+      },
+      {
+        "path": "cases/G9_DT2/partial.npz",
+        "sha256": "8f1e0973eda48c2ecc54f10001f28b988d353e85a728a16ec24f74582527cbcc",
+        "size_bytes": 60848588
+      },
+      {
+        "path": "execution_failure.json",
+        "sha256": "bc9233adabb138d576344c71197d2dd537652cafdea7c397e428c0129fafc104",
+        "size_bytes": 1050
+      },
+      {
+        "path": "s0_identity_config_fresh_evidence_gate.json",
+        "sha256": "b019d0690b4a7b7b32ec32956bdbaf46d89ee7d311ba12d5e0c728468fa7bb55",
+        "size_bytes": 114436
+      },
+      {
+        "path": "stage_ledger.json",
+        "sha256": "6c0125cd64417c0e381269cdc4ff5832d352e3c43e4bb337f9777ecb41508e30",
+        "size_bytes": 2452
+      }
+    ],
+    "total_size_bytes": 359454291
+  },
+  "schema_version": 1,
+  "scope": {
+    "completed_case_summaries_and_archive_payloads_verified": true,
+    "failed_case_summary_and_hard_gate_verified": true,
+    "partial_array_values_loaded": [
+      "frame_time_s"
+    ],
+    "partial_member_names_enumerated": true,
+    "physical_observable_arrays_read": false,
+    "raw_tree_fully_hashed": true,
+    "scientific_classification_allowed": false,
+    "state_arrays_read": false
+  },
+  "stage_state": {
+    "S0": {
+      "disposition": "EXECUTED",
+      "evidence": [
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/s0_identity_config_fresh_evidence_gate.json"
+      ],
+      "status": "PASS"
+    },
+    "S1": {
+      "disposition": "EXECUTED",
+      "evidence": [
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G6_DT0/case_summary.json",
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G6_DT1/case_summary.json",
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G6_DT2/case_summary.json"
+      ],
+      "status": "PASS"
+    },
+    "S2": {
+      "disposition": "FAILED_STOPPED",
+      "evidence": [
+        "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/execution_failure.json"
+      ],
+      "status": "D3_INCONCLUSIVE_FAIL_CLOSED"
+    },
+    "S3": {
+      "disposition": "NOT_EXECUTED",
+      "evidence": [],
+      "status": "NOT_EXECUTED"
+    }
+  },
+  "status": "D3R1_S2_G9_DT2_PROJECTED_DIVERGENCE_FAILURE_FORENSIC_GATE_PASS"
+}
