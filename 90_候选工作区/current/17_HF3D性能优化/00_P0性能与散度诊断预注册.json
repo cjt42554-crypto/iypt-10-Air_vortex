@@ -1,0 +1,343 @@
+{
+  "schema_version": 1,
+  "contract_id": "HF3D_P0_RESULT_BLIND_DIVERGENCE_AND_PERFORMANCE_BASELINE_V1",
+  "status": "FROZEN_BEFORE_DIAGNOSTIC_VALUES_OR_BENCHMARK_EXECUTION",
+  "frozen_at": "2026-08-31T17:35:00+08:00",
+  "scientific_use": "ENGINEERING_DIAGNOSTICS_ONLY__NOT_D3_CLASSIFICATION_OR_NUMERICAL_QUALIFICATION",
+  "binding": {
+    "repository": "cjt42554-crypto/iypt-10-Air_vortex",
+    "branch": "main",
+    "pro_authorization_commit": "a1676fe2f81e984ce96b421a0e91d7413dfa5f0d",
+    "reviewed_codex_commit": "fde3ad8c715034ef5bfa426d8e106810ae79e912",
+    "d3r1_execution_commit": "be349aec2f1bdcdb232e282a11175921eda7976b",
+    "previous_performance_ruling_commit": "d1aff0b6f46783096ecfcc8c820b68145b78aa55",
+    "formal_source_tree_sha256": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8",
+    "r1_preregistration_sha256": "bc6beda32e942292f5e17bd8236b9f99a2e1966c07ac2b0d620c39612d0a4354",
+    "r1_runner_sha256": "d5103e4b26a066bc7c3aeccc14990ab28c3a82d21619eab6fc817bbb60e2b1b0",
+    "r1_raw_file_count": 40,
+    "r1_raw_total_size_bytes": 359454291,
+    "r1_raw_canonical_snapshot_sha256": "906a32f71f3e095afc7cba6a3eddf7a83e4d639d36dc0b3014278b3e0001b032",
+    "g9_dt2_partial_size_bytes": 60848588,
+    "g9_dt2_partial_sha256": "8f1e0973eda48c2ecc54f10001f28b988d353e85a728a16ec24f74582527cbcc"
+  },
+  "scope": {
+    "writable_paths": [
+      "90_候选工作区/current/17_HF3D性能优化/**",
+      "90_候选工作区/交接说明_current.md",
+      "90_候选工作区/交接说明_history.md"
+    ],
+    "read_only_paths": [
+      "90_候选工作区/current/07_D3跨网格时间步响应诊断/**",
+      "01_最终理论/**",
+      "02_模拟程序/**",
+      "AGENTS.md"
+    ],
+    "prohibited_actions": [
+      "modify 01_最终理论/** or 02_模拟程序/**",
+      "run any D3R1 S0/S1/S2/S3 command",
+      "reuse V1/R1 state, trajectory, partial, archive, or checkpoint as a benchmark initial condition",
+      "read prohibited state, field, grid-array, observable, or D3 classification values",
+      "change any physical equation, geometry, threshold, time step, output schedule, pressure tolerance, preconditioner, CG stopping rule, diagnostic, or classification contract",
+      "begin P1 accelerated implementation before a new Pro ruling"
+    ]
+  },
+  "p0_d": {
+    "purpose": "Describe the frozen accepted-step numerical diagnostics around the direct projected-divergence trigger without reading physical state or D3 observables.",
+    "cases": [
+      "G6_DT0",
+      "G6_DT1",
+      "G6_DT2",
+      "G9_DT0",
+      "G9_DT1",
+      "G9_DT2"
+    ],
+    "completed_case_artifact": "archive/arrays.npz addressed only through archive/result.json arrays.fields metadata",
+    "failed_case_artifact": "partial.npz",
+    "allowed_logical_series": [
+      "frame_time_s",
+      "diagnostic_step_time_s",
+      "diagnostic_dt_s",
+      "diagnostic_time_step_limiter_code",
+      "diagnostic_cfl_retry_count",
+      "diagnostic_pre_projection_advective_cfl",
+      "diagnostic_post_projection_advective_cfl",
+      "diagnostic_projected_divergence_s_inv",
+      "diagnostic_pressure_relative_residual",
+      "diagnostic_pressure_iterations"
+    ],
+    "failed_partial_name_mapping": {
+      "frame_time_s": "frame_time_s",
+      "diagnostic_step_time_s": "diagnostic_step_time",
+      "diagnostic_dt_s": "diagnostic_step_dt",
+      "diagnostic_time_step_limiter_code": "diagnostic_step_time_limiter_code",
+      "diagnostic_cfl_retry_count": "diagnostic_step_cfl_retry_count",
+      "diagnostic_pre_projection_advective_cfl": "diagnostic_step_pre_projection_cfl",
+      "diagnostic_post_projection_advective_cfl": "diagnostic_step_post_projection_cfl",
+      "diagnostic_projected_divergence_s_inv": "diagnostic_step_divergence",
+      "diagnostic_pressure_relative_residual": "diagnostic_step_pressure_residual",
+      "diagnostic_pressure_iterations": "diagnostic_step_pressure_iterations"
+    },
+    "prohibited_numeric_names_or_prefixes": [
+      "state_*",
+      "observable_*",
+      "grid_*",
+      "field arrays not mapped to an allowed_logical_series",
+      "phase",
+      "velocity",
+      "pressure full fields",
+      "funnel depth",
+      "kinetic energy",
+      "angular momentum",
+      "axisymmetry",
+      "minimum gap",
+      "binary topology or contact observables"
+    ],
+    "access_enforcement": {
+      "completed_archives": "Parse only the leading arrays.fields metadata object from result.json, reject duplicate keys, resolve only allowed logical names, and load only the corresponding NPZ members.",
+      "failed_partial": "Enumerate all names, reject an allow-list mismatch, and call NPZ member access only for the explicit failed_partial_name_mapping values.",
+      "audit_log": "Record every enumerated member, every loaded logical/member name, and physical_observables_read=false.",
+      "unexpected_access": "Fail closed before publishing diagnostic results."
+    },
+    "series_identity": {
+      "required_dtype": "float64",
+      "required_rank": 1,
+      "accepted_step_series_equal_shape": true,
+      "accepted_step_count_must_match_case_summary": true,
+      "hash_definition": "SHA-256 of dtype.str, shape encoded as little-endian uint64, then C-contiguous array bytes",
+      "time_identity": "Compare float64 values by uint64 bit pattern whenever matching registered output times."
+    },
+    "frozen_limits": {
+      "projected_divergence_max_s_inv": 0.0001,
+      "pressure_relative_residual_max": 1e-07,
+      "accepted_advective_cfl_max": 0.35,
+      "maximum_cfl_step_retries": 4
+    },
+    "registered_output_times_s": [
+      0.0,
+      0.001,
+      0.002,
+      0.003,
+      0.004,
+      0.005,
+      0.006,
+      0.007,
+      0.008,
+      0.009,
+      0.01
+    ],
+    "threshold_ratios": [
+      0.8,
+      0.9,
+      0.95,
+      1.0
+    ],
+    "threshold_event_definition": "projected_divergence >= ratio * frozen projected-divergence limit; report 1-based accepted-step number, time, first, last, and count; report null first/last when count is zero.",
+    "fixed_windows": [
+      {
+        "id": "W0",
+        "lower_s": 0.0,
+        "lower_inclusive": true,
+        "upper_s": 0.005,
+        "upper_inclusive": true
+      },
+      {
+        "id": "W1",
+        "lower_s": 0.005,
+        "lower_inclusive": false,
+        "upper_s": 0.009,
+        "upper_inclusive": true
+      },
+      {
+        "id": "W2",
+        "lower_s": 0.009,
+        "lower_inclusive": false,
+        "upper": "case terminal accepted-step time",
+        "upper_inclusive": true
+      }
+    ],
+    "window_statistics": [
+      "count",
+      "minimum",
+      "maximum",
+      "arithmetic_mean",
+      "population_standard_deviation",
+      "median",
+      "p90_linear",
+      "p95_linear",
+      "p99_linear",
+      "first_value",
+      "last_value",
+      "ordinary_least_squares_slope_per_second"
+    ],
+    "frozen_rows": {
+      "terminal_rows": 64,
+      "highest_divergence_rows": 32,
+      "highest_sort": "descending projected divergence, then ascending 1-based accepted-step number",
+      "columns": [
+        "accepted_step",
+        "time_s",
+        "dt_s",
+        "limiter_code",
+        "retry_count",
+        "pressure_relative_residual",
+        "pressure_iterations",
+        "pre_projection_cfl",
+        "post_projection_cfl",
+        "projected_divergence_s_inv"
+      ]
+    },
+    "descriptive_flags": {
+      "failure_step_is_registered_output_alignment": "Failure-step time is uint64-identical to any registered output time OR limiter code equals the frozen output_alignment code 5.",
+      "pressure_residual_near_gate": "pressure residual / 1e-7 >= 0.8",
+      "post_projection_cfl_near_gate": "post-projection CFL / 0.35 >= 0.8",
+      "retry_present": "retry count > 0",
+      "pressure_iteration_robust_outlier": "value > median(previous up to 512 steps) + max(6 * MAD(previous up to 512 steps), 1); unavailable when fewer than 32 prior steps",
+      "divergence_robust_outlier": "value > median(previous up to 512 steps) + max(6 * MAD(previous up to 512 steps), 64 * machine_epsilon * max(abs(median), 1e-4)); unavailable when fewer than 32 prior steps",
+      "interpretation_ceiling": "Flags are descriptive and cannot establish a unique numerical mechanism or justify a contract change."
+    },
+    "completed_case_safety_margin": "Report maximum divergence, maximum/limit ratio, and 1 - maximum/limit for every completed case.",
+    "native_time_comparison": "At every uint64-identical registered time present in the accepted-step series, report the frozen diagnostic columns for G6 and G9 across DT0/DT1/DT2; no interpolation is permitted.",
+    "raw_invariance": "Recompute the complete 40-file canonical snapshot immediately before loading any values and again after all P0-D outputs are atomically published; both must equal the frozen hash.",
+    "outputs": [
+      "artifacts/p0/divergence_diagnostics.json",
+      "artifacts/p0/divergence_diagnostics.md",
+      "artifacts/p0/divergence_access_ledger.json"
+    ]
+  },
+  "p0_p": {
+    "purpose": "Measure the unchanged formal production path end to end and attribute its wall time, CPU/GPU occupancy, transfers, allocations, pressure solve, archive, and reload costs.",
+    "benchmark_definitions": {
+      "B1": {
+        "source_case": "G6_DT0",
+        "source_config_sha256": "602dead5fa6b8b4485103bf91adb53b1bb17b6b3e3f9c8f7c0578be4242d0cd0",
+        "duration_s": 0.002,
+        "only_allowed_config_change": "run.duration_s"
+      },
+      "B2": {
+        "source_case": "G9_DT0",
+        "source_config_sha256": "64bf8553b88e546b3bd18a8867fd9ed5455be475bb77f467f8c45c157353b86d",
+        "duration_s": 0.002,
+        "only_allowed_config_change": "run.duration_s"
+      },
+      "B3": {
+        "source_case": "G9_DT2",
+        "source_config_sha256": "c924a225d4d35b25217318c0bdbe7728bceb637f5474e0eb9e2cbffac6ccdb37",
+        "duration_s": 0.002,
+        "only_allowed_config_change": "run.duration_s"
+      }
+    },
+    "output_interval_s": 0.001,
+    "required_registered_times_s": [
+      0.0,
+      0.001,
+      0.002
+    ],
+    "execution_schedule": [
+      "WARMUP_B1",
+      "WARMUP_B2",
+      "WARMUP_B3",
+      "TIMED_R1_B1",
+      "TIMED_R1_B2",
+      "TIMED_R1_B3",
+      "TIMED_R2_B2",
+      "TIMED_R2_B3",
+      "TIMED_R2_B1",
+      "TIMED_R3_B3",
+      "TIMED_R3_B1",
+      "TIMED_R3_B2",
+      "PROFILED_B2",
+      "PROFILED_B3"
+    ],
+    "process_policy": {
+      "fresh_process_per_sample": true,
+      "single_HF3D_writer": true,
+      "checkpoint_or_prior_trajectory_used": false,
+      "explicit_gpu_sync_before_timed_construction": true,
+      "explicit_gpu_sync_after_strict_archive_reload": true,
+      "scored_samples": "Only TIMED_* samples; warm-up and profiled samples are never scored.",
+      "failure_policy": "Any nonzero exit, hard-gate failure, CUDA fallback, archive/reload failure, source/config drift, telemetry gap, or environment validity failure stops the remaining schedule without retrying or replacing the sample."
+    },
+    "frozen_thread_environment": {
+      "AIRVORTEX_BLAS_THREADS": "unset, selecting formal auto policy",
+      "selected_threads": 2,
+      "OMP_DYNAMIC": "FALSE",
+      "library_specific_thread_variables": "unset before Python startup so the formal auto policy applies 2 to each supported library"
+    },
+    "environment_start_gates": {
+      "ac_power_online": true,
+      "online_logical_cpus": 32,
+      "cpu_governors_all_equal": true,
+      "no_other_compute_or_HF3D_process": true,
+      "no_other_GPU_compute_process": true,
+      "background_non_monitor_CPU_percent_max_for_30s": 25.0,
+      "cpu_tctl_start_max_c": 90.0,
+      "nvidia_gpu_start_max_c": 75.0,
+      "maximum_wait_for_valid_environment_s": 1800,
+      "invalid_environment_action": "Stop without starting a sample; retain telemetry and do not substitute or reorder samples."
+    },
+    "required_sample_measurements": [
+      "end-to-end wall and process CPU time",
+      "accepted steps, rejected trials, retries, and accepted steps per second",
+      "aggregate and per-thread CPU utilization timeline",
+      "GPU utilization, clocks, memory, temperature, power, and throttle-reason timeline",
+      "H2D and D2H call count and bytes per accepted step",
+      "host and device allocation count and peak memory",
+      "pressure solve wall time and pressure iteration distribution",
+      "archive write and strict reload wall time",
+      "driver, Python, NumPy, SciPy, CuPy, OS, CPU, GPU, affinity, governors, AC, and thread-policy identity",
+      "background process identity and thermal state before and after"
+    ],
+    "profile_policy": {
+      "B2": "one separate fresh process",
+      "B3": "one separate fresh process",
+      "required_coverage": "Python/native hotspots totaling at least 90% measured wall time plus CUDA kernel/API/memcpy timeline sufficient to count and size H2D/D2H transfers.",
+      "profiler_unavailable_or_incomplete": "Stop P0-P and report the exact missing coverage; do not infer transfer cost from utilization alone."
+    },
+    "report_statistics": {
+      "per_benchmark_scored_n": 3,
+      "location": "median",
+      "dispersion": [
+        "minimum",
+        "maximum",
+        "sample_standard_deviation",
+        "median_absolute_deviation",
+        "coefficient_of_variation"
+      ],
+      "no_outlier_exclusion": true,
+      "no_sample_replacement": true,
+      "performance_claim_ceiling": "P0 is a baseline and profiler phase; it cannot demonstrate a candidate speedup."
+    },
+    "raw_output_root": "90_候选工作区/current/17_HF3D性能优化/artifacts/p0/performance_raw",
+    "compact_outputs": [
+      "artifacts/p0/performance_manifest.json",
+      "artifacts/p0/performance_baseline.json",
+      "artifacts/p0/performance_baseline.md",
+      "artifacts/p0/profiler_summary.json",
+      "artifacts/p0/profiler_summary.md"
+    ]
+  },
+  "global_stop_conditions": [
+    "R1 raw, failed partial, preregistration, runner, formal source, or source-config identity drift",
+    "an attempted access to a prohibited numeric array or field",
+    "a benchmark uses an old trajectory, checkpoint, partial, or archive as initial state",
+    "a benchmark hard gate fails or CUDA falls back",
+    "environment or telemetry validity gates fail",
+    "P0 requires a modification under 02_模拟程序/**",
+    "diagnosis requires state, pressure, velocity, grid-array, or D3 observable values",
+    "performance requires a numerical-contract change",
+    "P0-D and P0-P are complete, at which point work stops for Pro review"
+  ],
+  "conclusion_ceiling": {
+    "D3R1_S2": "FAILED_STOPPED",
+    "D3R1_DIRECT_TRIGGER": "PROJECTED_DIVERGENCE",
+    "D3R1_FAILURE_MECHANISM": "NOT_YET_ESTABLISHED",
+    "D3R1_S3": "NOT_EXECUTED",
+    "D3R1_SCIENTIFIC_CLASSIFICATION": "NOT_FORMED",
+    "HF3D_P0_PERFORMANCE_AND_DIVERGENCE_DIAGNOSTICS": "AUTHORIZED",
+    "HF3D_P1_IMPLEMENTATION": "NOT_AUTHORIZED",
+    "NUMERICAL_QUALIFICATION": "NOT_DEMONSTRATED",
+    "PHYSICAL_VALIDATION": "NOT_PERFORMED",
+    "EXPERIMENTAL_VALIDATION": "NOT_PERFORMED",
+    "APPARATUS_PREDICTION": "DISALLOWED"
+  }
+}
