@@ -11,140 +11,16 @@ D3R1_SCIENTIFIC_CLASSIFICATION = NOT_FORMED
 
 HF3D_P0_D = COMPLETED
 HF3D_P0_P_PLAN = FROZEN
-HF3D_P0_P_AUTHORIZATION_SELF_REFERENCE_DEFECT = CONFIRMED
+HF3D_P0_P_I_ZERO_STEP_IMPLEMENTATION = STATIC_AUDIT_PASS_PENDING_PRO_REVIEW
 HF3D_P0_P_AUTHORIZATION_STRUCTURE = PARENT_ANCHORED_EXACT_BLOB_GRANT
-HF3D_P0_P_ZERO_STEP_AUTHORIZATION_REFACTOR = AUTHORIZED
-HF3D_P0_P_DYNAMIC_SAMPLES = NOT_AUTHORIZED_PENDING_NEW_STATIC_REVIEW
+HF3D_P0_P_AUTHORIZATION_TICKET = ABSENT_NOT_ISSUED
+HF3D_P0_P_DYNAMIC_SAMPLES = NOT_AUTHORIZED_PENDING_PRO_STATIC_REVIEW
 HF3D_P1_IMPLEMENTATION_AND_FORMAL_SOURCE_MODIFICATION = NOT_AUTHORIZED
 ```
 
-## 最新 Pro 裁决
+## 本轮完成内容
 
-详细裁决：
-
-```text
-90_候选工作区/current/20_HF3DP0P无自引用精确授权结构裁决.md
-```
-
-复核基线：
-
-```text
-reviewed main: d12078f996092c82f46936b594c7d6d645ccdda0
-P0 contract blob: 62f256574f67654d13f588e0505f63505d065907
-formal source tree: dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
-P0-D: completed
-P0-P samples: not started
-```
-
-## 自引用问题的裁决
-
-`p0p_execution_authorization.json` 不得要求预先写入或校验其所在授权子提交的最终 commit hash。该文件一旦包含候选 child hash，就会改变自身 blob、tree 和 child commit hash，形成不可用的 Git 固定点问题。
-
-以下字段和方案明确禁止：
-
-```text
-authorization_child_commit
-self_commit_hash
-self_blob_hash
-先写 placeholder/null 后回填
-循环 amend 求稳定 hash
-运行时修改授权 JSON
-用 grandchild receipt 代替直接授权 child
-```
-
-实际授权 child commit hash只能在 schedule 开始后写入动态 `execution_claim.json`、sample manifests、完成/失败记录和后续交接，不能先验写入 tracked 授权文件。
-
-## 选定的无自引用结构
-
-未来授权采用：
-
-```text
-I = Codex 零步实现和静态证据提交
-P = Pro 已复核父提交
-C = 唯一授权子提交
-Q = 运行时一次性 execution claim
-
-I -- P -- C
-```
-
-### I：零步实现
-
-包含：
-
-```text
-完整 P0-P harness/worker/monitors/parsers/allocator observers
-静态审计和合成测试
-默认拒绝 p0p_execution_authorization.json
-```
-
-不得包含允许态票据或动态样本。
-
-### P：父提交票据
-
-Pro 独立复核 I 后，在单父直接子提交 P 中加入：
-
-```text
-20/后续最终授权裁决
-p0p_authorization_ticket.json
-current/history
-```
-
-P 中授权文件仍保持精确 denied blob。票据必须预登记：
-
-```text
-I commit/tree/implementation manifest
-P0 contract and P0-D identity
-formal source tree
-exact denied authorization blob
-exact future authorized authorization blob
-fixed 18-item schedule and canonical hash
-single-child/single-file/mode policy
-one-claim/no-resume/no-replacement policy
-toolchain and capability manifest
-```
-
-票据不能包含其所在 P 的 hash。运行器从 C 的唯一 parent 得到 P，并从 Git 对象 `P:<ticket_path>` 读取票据。
-
-### C：唯一授权 child
-
-C 必须：
-
-```text
-恰有一个 parent P
-当前 local main 和 origin/main 均指向 C
-P..C 恰一条 modified path
-path = p0p_execution_authorization.json
-mode = 100644 -> 100644
-old blob = ticket.denied_parent_blob
-new blob = ticket.authorized_child_blob
-```
-
-允许态授权 JSON 的完整字节必须在 P 创建前确定并由票据预登记，因此不得含 P、C 或自身 object hash。
-
-### Q：一次性 claim
-
-全部 Git、实现、工具和环境门通过后，首个 `WARMUP_B1` 启动前原子创建：
-
-```text
-artifacts/p0/performance_raw/execution_claim.json
-```
-
-Q 记录实际：
-
-```text
-C child commit
-P reviewed parent
-I reviewed snapshot
-ticket/blob/schedule/formal source/toolchain identity
-grant nonce
-single-writer lock identity
-```
-
-Claim 一旦创建即消费授权；任何失败、异常、中断或崩溃均禁止 resume、补样、替换或重新 claim。
-
-## 下一项唯一任务：零步授权结构重构
-
-Codex 只能在：
+本轮只在以下范围完成 P0-P 的零时间步实现与静态证据：
 
 ```text
 90_候选工作区/current/17_HF3D性能优化/**
@@ -152,103 +28,85 @@ Codex 只能在：
 90_候选工作区/交接说明_history.md
 ```
 
-完成：
+实现包括：
 
-1. 默认拒绝授权 JSON 移除所有 child/self hash 语义；
-2. 实现未来 `p0p_authorization_ticket.json` 的严格 parser/audit；
-3. 使用 Git plumbing 和 NUL 分隔路径验证 parent、blob、mode 和 exact one-file delta；
-4. 实现 `origin/main == HEAD`、单父 child、P 为 I 单父 review commit 和 review-only delta 门；
-5. 实现非消费 preflight；
-6. 实现 `O_CREAT|O_EXCL` execution claim、独占 writer lock 和固定 18-item schedule ledger；
-7. 禁止 `--only/--skip/--repeat/--start-at/--resume`；
-8. worker 必须要求有效 claim、锁所有权、expected sequence index 和一次性 launch token；
-9. 增加合成 Git 仓库正负测试；
-10. 生成零时间步静态证据后立即停止交 Pro。
+- 严格验证 `I -> P -> C` 单父拓扑、`main == origin/main`、清洁工作树、父票据 Git object、精确 blob/mode 和 NUL 分隔路径；
+- 默认拒绝授权文件不含 child、parent 或 self hash，真实 `p0p_authorization_ticket.json` 保持不存在；
+- 原子 `O_CREAT|O_EXCL` claim、固定 18 项顺序 ledger、无恢复/补样/替换、一次性 worker token、存活 flock 与 PID start-ticks 门；
+- scored、HOST、CUDA、MEMORY 互斥启动结构，外部 GPU/Tctl/proc/pidstat 监测，cProfile 语义区间、Nsight CUDA/NVTX、主机原生分配观察器、CuPy 分配和独立最终分析；
+- 严格重算 host 区间树、Nsight SQLite/CSV、H2D/D2H 多重集、分配器账本、遥测覆盖、归档数值载荷和终态控制文件；
+- 完成态与失败态互斥，claim 或 ledger 部分写入、崩溃、重复 worker、跳步、重复、merge、rename/copy/mode/symlink 和 Git 漂移均失败闭锁。
 
-## 必须通过的合成 Git 测试
+正式理论、正式程序、D3、P0 合同、P0-D 证据和顶层 `AGENTS.md` 均未修改。
 
-至少覆盖：
+## 规范零步证据
+
+主报告：
 
 ```text
-I -> P -> C 正路径
-C merge parent
-C parent 错误
-P parent 不是 I
-I..P 出现未批准实现变化
-P..C 多一个文件
-rename/copy/mode/symlink
-parent denied blob 错
-child authorized blob 错
-从工作树而非 P Git object 读取 ticket
-中文路径和 NUL-safe parsing
-local HEAD != origin/main
-授权 schema 出现 child/self hash 字段
-允许态 exact bytes 在 P 创建前可稳定 hash
+90_候选工作区/current/17_HF3D性能优化/artifacts/p0/p0p_static/p0p_static_audit.json
 ```
 
-## 一次性消费测试
-
-必须覆盖：
+能力绑定：
 
 ```text
-非法环境 preflight 不消费 claim
-preflight 不创建 sample raw
-合法环境只允许一次 O_EXCL claim
-第二次 claim 拒绝
-claim 后崩溃禁止 resume
-固定顺序不可跳步/重复/替换/补样
-直接 worker 调用拒绝
-并发 orchestrator/stale lock/PID reuse
-claim/ledger atomic write failure injection
-完成或失败后授权不可再次使用
+90_候选工作区/current/17_HF3D性能优化/artifacts/p0/p0p_static/p0p_capability_manifest.json
 ```
 
-## 零步返回 Pro 前的硬门
-
-静态证据必须明确：
+审计状态：
 
 ```text
+HF3D_P0P_ZERO_STEP_HARNESS_STATIC_AUDIT_PASS
+synthetic tests = 30/30 PASS
+full candidate regression = 36/36 PASS
 HF3D time_steps_advanced = 0
 warmup_samples_started = 0
 scored_samples_started = 0
 profile_samples_started = 0
+performance_samples_started = 0
 formal source unchanged = true
 P1 implemented = false
 p0p_execution_authorization = NOT_AUTHORIZED
-actual Pro ticket = absent or NOT_ISSUED
+actual Pro ticket = absent
 self-referential authorization fields = absent
-synthetic parent-ticket authorization tests = PASS
 ```
 
-当前环境仍存在仓库外计算进程且温度门不满足。不得启动任何 warm-up、timed 或 profiled 样本。
-
-## 禁止修改
+真实零步探针已经通过：
 
 ```text
-02_模拟程序/**
-01_最终理论/**
-90_候选工作区/current/07_D3跨网格时间步响应诊断/**
-00_P0性能与散度诊断预注册.json
-P0-D 已提交输出
-AGENTS.md
+native allocator build/probes = PASS
+instrumentation numerical equivalence = PASS
+nsys 2026.2.1 CUDA/NVTX trace and independent parsers = PASS
+worker/orchestrator deny before numerical imports = PASS
+production static-audit binding parser = PASS
+Ruff = PASS
+limited mypy = 18 source files PASS
+GCC -fanalyzer = PASS
 ```
 
-不得创建真实允许态票据、允许态授权 child，不得进入 P1。
+当前瞬时环境门仍失败：CPU Tctl 为 `96.875 C`，高于冻结的 `90 C` 上限；GPU 为 `66 C`，本次快照未见其他 GPU compute process。环境失败没有消费 claim，也没有创建 `performance_raw` 或 campaign lock。
 
-## 后续正式签发流程
+## Pro 下一步
 
-零步实现推送后：
+Pro 应从远端 `main` 读取本交接所在的同一实现提交 `I`，独立复核完整实现和规范静态证据，并给出完整最终裁决。中途思考摘要不算完成。
 
-1. Pro 复核 I；
-2. Pro 先生成不含 P/C/self hash 的 exact allow JSON A1；
-3. 计算 A1 Git blob 和 SHA-256；
-4. 创建父票据和裁决提交 P，P 中授权仍 denied；
-5. 创建唯一 child C，只把授权文件替换为 A1；
-6. 推送 C 到 origin/main；
-7. Codex 先运行非消费 preflight；
-8. 环境合法后原子 claim 并执行一次固定 schedule。
+若 Pro 接受 `I` 并决定签发动态执行授权，必须严格按最新裁决创建：
 
-任何额外 commit、实现漂移、ticket/blob 不一致、dirty worktree 或环境失败均不能执行。
+```text
+I = 本零步实现提交
+P = Pro 单父 review/ticket 提交，授权文件仍为 exact denied blob
+C = P 的唯一单父 child，且只修改 p0p_execution_authorization.json
+Q = 环境合法后、首个 WARMUP_B1 前原子创建的一次性 claim
+```
+
+在 Pro 完成 `P/C` 并推送前，不得创建真实票据、允许态文件或任何动态样本。即使授权结构合格，当前温度门未恢复前也不得 claim 或开跑。
+
+## 用户要求 Pro 同时独立裁决的两项问题
+
+这两项为开放式附加审查，不预设目录、模块、问题来源、重构尺度或并行技术路线，也不自动授权受保护路径修改：
+
+1. 审查整个项目的技术债是否过重，判断是否需要不重构、局部重构或大范围重构，并给出问题证据、优先级、预期收益、风险、迁移顺序和验证要求；
+2. 结合当前模拟程序、实测瓶颈和本机 CPU/GPU 条件，判断硬件利用是否充分，规划以实测 CPU/GPU 利用率、数值等价性和端到端加速比为验收依据的优化路线。
 
 ## 当前结论上限
 
@@ -260,8 +118,8 @@ D3R1_S3 = NOT_EXECUTED
 D3R1_SCIENTIFIC_CLASSIFICATION = NOT_FORMED
 
 HF3D_P0_D = COMPLETED
-HF3D_P0_P_ZERO_STEP_AUTHORIZATION_REFACTOR = AUTHORIZED
-HF3D_P0_P_DYNAMIC_SAMPLES = NOT_AUTHORIZED_PENDING_NEW_STATIC_REVIEW
+HF3D_P0_P_I_ZERO_STEP_IMPLEMENTATION = STATIC_AUDIT_PASS_PENDING_PRO_REVIEW
+HF3D_P0_P_DYNAMIC_SAMPLES = NOT_AUTHORIZED_PENDING_PRO_STATIC_REVIEW
 HF3D_P1_IMPLEMENTATION = NOT_AUTHORIZED
 
 NUMERICAL_QUALIFICATION = NOT_DEMONSTRATED

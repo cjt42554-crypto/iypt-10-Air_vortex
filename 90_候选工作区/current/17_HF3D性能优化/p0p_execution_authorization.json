@@ -1,0 +1,17 @@
+{
+  "P1": "PROHIBITED",
+  "authorization_id": "HF3D_P0P_DYNAMIC_EXECUTION_AUTHORIZATION_V1",
+  "claim_before_first_sample": true,
+  "dynamic_samples_authorized": false,
+  "fixed_schedule_id": "HF3D_P0P_FIXED_18_V1",
+  "fixed_schedule_sha256": "2138aea65041ff322a0cc2ce22945544d51d1e39db1929079f9f6265e494dceb",
+  "maximum_schedule_claims": 0,
+  "preflight_consumes_claim": false,
+  "reason": "Zero-step implementation and synthetic authorization tests only. No parent ticket has been issued, so every warm-up, timed, profiled, and HF3D time-step execution remains prohibited pending a new Pro static review.",
+  "sample_replacement": "PROHIBITED",
+  "schedule_resume_after_claim": "PROHIBITED",
+  "schema_version": 2,
+  "status": "NOT_AUTHORIZED_PENDING_PRO_STATIC_REVIEW",
+  "ticket_id": null,
+  "ticket_path": "90_候选工作区/current/17_HF3D性能优化/p0p_authorization_ticket.json"
+}

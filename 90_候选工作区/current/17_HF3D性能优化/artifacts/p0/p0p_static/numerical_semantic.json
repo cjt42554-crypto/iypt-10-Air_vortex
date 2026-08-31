@@ -1,0 +1,55 @@
+{
+  "device_allocation_recorder": null,
+  "expected_pressure_transfers": [],
+  "hf3d_time_steps_advanced": 0,
+  "input_nbytes": 8192,
+  "mode": "semantic",
+  "numerical_sha256": "34d46acc7352c3bf9a9a44e36573061209f2e0fa9f2398d0f847fd90d87c4a19",
+  "output_nbytes": 8192,
+  "pid": 493296,
+  "schema_version": 1,
+  "semantic_ranges": [
+    {
+      "attributed": true,
+      "binding": {
+        "module": "__main__",
+        "qualname": "compute",
+        "source_inside_repository": true,
+        "source_path": "90_候选工作区/current/17_HF3D性能优化/p0p_capability_probe.py",
+        "source_regular_file_not_symlink": true,
+        "source_sha256": "2ec636e338362d8e45be00f3c3fee4b4d3a59077c0bdbcf419fdd1f7ef8c247d"
+      },
+      "call_id": 1,
+      "child_ns": 0,
+      "end_ns": 74940358893221,
+      "exclusive_ns": 221857652,
+      "inclusive_ns": 221857652,
+      "name": "synthetic_numpy_cupy_operator",
+      "parent_call_id": null,
+      "start_ns": 74940137035569,
+      "status": "returned",
+      "thread_id": 493296
+    }
+  ],
+  "status": "P0P_ZERO_STEP_CAPABILITY_PROBE_PASS",
+  "toolchain_identity": {
+    "cuda_compute_capability": "120",
+    "cuda_device_count": 1,
+    "cuda_device_index": 0,
+    "cuda_device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "cuda_driver_version": 13000,
+    "cuda_runtime_version": 13020,
+    "cuda_total_global_memory_bytes": 8053915648,
+    "cupy_version": "14.2.0",
+    "gpu_python_realpath": "/usr/bin/python3.12",
+    "machine": "x86_64",
+    "packages": {
+      "cupy-cuda13x": "14.2.0",
+      "numpy": "2.5.2",
+      "scipy": "1.17.1"
+    },
+    "python_implementation": "CPython",
+    "python_version": "3.12.3",
+    "system": "Linux"
+  }
+}

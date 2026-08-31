@@ -1,0 +1,33 @@
+{
+  "device_allocation_recorder": null,
+  "expected_pressure_transfers": [],
+  "hf3d_time_steps_advanced": 0,
+  "input_nbytes": 8192,
+  "mode": "uninstrumented",
+  "numerical_sha256": "34d46acc7352c3bf9a9a44e36573061209f2e0fa9f2398d0f847fd90d87c4a19",
+  "output_nbytes": 8192,
+  "pid": 493287,
+  "schema_version": 1,
+  "semantic_ranges": null,
+  "status": "P0P_ZERO_STEP_CAPABILITY_PROBE_PASS",
+  "toolchain_identity": {
+    "cuda_compute_capability": "120",
+    "cuda_device_count": 1,
+    "cuda_device_index": 0,
+    "cuda_device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "cuda_driver_version": 13000,
+    "cuda_runtime_version": 13020,
+    "cuda_total_global_memory_bytes": 8053915648,
+    "cupy_version": "14.2.0",
+    "gpu_python_realpath": "/usr/bin/python3.12",
+    "machine": "x86_64",
+    "packages": {
+      "cupy-cuda13x": "14.2.0",
+      "numpy": "2.5.2",
+      "scipy": "1.17.1"
+    },
+    "python_implementation": "CPython",
+    "python_version": "3.12.3",
+    "system": "Linux"
+  }
+}

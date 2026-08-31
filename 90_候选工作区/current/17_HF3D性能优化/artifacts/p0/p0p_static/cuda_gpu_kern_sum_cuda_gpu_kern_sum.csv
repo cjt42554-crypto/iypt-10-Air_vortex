@@ -1,0 +1,3 @@
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+62.1,1152,1,1152.0,1152.0,1152,1152,0.0,cupy_multiply__float64_float_float64
+37.9,704,1,704.0,704.0,704,704,0.0,cupy_add__float64_float_float64
