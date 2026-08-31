@@ -8,87 +8,143 @@ D3R1_DIRECT_TRIGGER = PROJECTED_DIVERGENCE
 D3R1_FAILURE_MECHANISM = NOT_YET_ESTABLISHED
 D3R1_S3 = NOT_EXECUTED
 D3R1_SCIENTIFIC_CLASSIFICATION = NOT_FORMED
+
 HF3D_P0_D = COMPLETED
-HF3D_P0_P_FINAL_PLAN = FROZEN_BY_PRO
-HF3D_P0_P_ZERO_STEP_HARNESS_IMPLEMENTATION = AUTHORIZED
-HF3D_P0_P_DYNAMIC_SAMPLES = NOT_AUTHORIZED_PENDING_PRO_STATIC_REVIEW
+HF3D_P0_P_PLAN = FROZEN
+HF3D_P0_P_AUTHORIZATION_SELF_REFERENCE_DEFECT = CONFIRMED
+HF3D_P0_P_AUTHORIZATION_STRUCTURE = PARENT_ANCHORED_EXACT_BLOB_GRANT
+HF3D_P0_P_ZERO_STEP_AUTHORIZATION_REFACTOR = AUTHORIZED
+HF3D_P0_P_DYNAMIC_SAMPLES = NOT_AUTHORIZED_PENDING_NEW_STATIC_REVIEW
 HF3D_P1_IMPLEMENTATION_AND_FORMAL_SOURCE_MODIFICATION = NOT_AUTHORIZED
 ```
 
-## 有效裁决与绑定
+## 最新 Pro 裁决
 
-P0-P 最终规划裁决：
+详细裁决：
 
 ```text
-90_候选工作区/current/19_HF3DP0P最终规划与证据充分性裁决.md
+90_候选工作区/current/20_HF3DP0P无自引用精确授权结构裁决.md
 ```
 
-复核绑定：
+复核基线：
 
 ```text
-reviewed main: e1e72f95548b9456d94cb91d7dc64a6b925dd2b8
+reviewed main: d12078f996092c82f46936b594c7d6d645ccdda0
 P0 contract blob: 62f256574f67654d13f588e0505f63505d065907
 formal source tree: dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
-R1 raw canonical SHA-256: 906a32f71f3e095afc7cba6a3eddf7a83e4d639d36dc0b3014278b3e0001b032
+P0-D: completed
+P0-P samples: not started
 ```
 
-P0-D 已完成并保持结果盲边界；P0 预注册、正式源码和 P0-D 输出本轮只读。
+## 自引用问题的裁决
 
-## 本机 profiler 能力裁决
+`p0p_execution_authorization.json` 不得要求预先写入或校验其所在授权子提交的最终 commit hash。该文件一旦包含候选 child hash，就会改变自身 blob、tree 和 child commit hash，形成不可用的 Git 固定点问题。
 
-已接受用户提供的独立实测：
+以下字段和方案明确禁止：
 
 ```text
-nsys 2026.2.1
---trace=cuda,nvtx --sample=none --cpuctxsw=none
+authorization_child_commit
+self_commit_hash
+self_blob_hash
+先写 placeholder/null 后回填
+循环 amend 求稳定 hash
+运行时修改授权 JSON
+用 grandchild receipt 代替直接授权 child
 ```
 
-可正常产生 `.nsys-rep`、SQLite，并导出：
+实际授权 child commit hash只能在 schedule 开始后写入动态 `execution_claim.json`、sample manifests、完成/失败记录和后续交接，不能先验写入 tracked 授权文件。
+
+## 选定的无自引用结构
+
+未来授权采用：
 
 ```text
-cuda_api_sum
-cuda_gpu_kern_sum
-cuda_gpu_mem_time_sum
-cuda_gpu_mem_size_sum
+I = Codex 零步实现和静态证据提交
+P = Pro 已复核父提交
+C = 唯一授权子提交
+Q = 运行时一次性 execution claim
+
+I -- P -- C
 ```
 
-该配置可用于 kernel/API/memcpy 时间线、H2D/D2H 次数/字节/时间。正式 P0-P 禁止未经新 probe 启用 `osrt`、`--cuda-memory-usage`、CPU/Python sampling 或 backtrace；这些更重配置曾出现收尾异常。
+### I：零步实现
 
-当前 CPU sampling/perf 和 py-spy 不可用。P0-P 允许用：
+包含：
 
 ```text
-cProfile + 透明正式算子包装
-pidstat
-the validated lightweight nsys trace
-nvidia-smi / turbostat
-validated host-native allocator observer
-validated CuPy/device allocator recorder
+完整 P0-P harness/worker/monitors/parsers/allocator observers
+静态审计和合成测试
+默认拒绝 p0p_execution_authorization.json
 ```
 
-形成互补证据。cProfile 不能作为 benchmark 或 native symbol sampling；pidstat/nvidia-smi 不能替代热点或 memcpy trace。
+不得包含允许态票据或动态样本。
 
-## 冻结 profile bundle
+### P：父提交票据
 
-预注册的 `PROFILED_B2`、`PROFILED_B3` 分别冻结为三个独立新进程：
+Pro 独立复核 I 后，在单父直接子提交 P 中加入：
 
 ```text
-PROFILED_B2_HOST
-PROFILED_B2_CUDA
-PROFILED_B2_MEMORY
-PROFILED_B3_HOST
-PROFILED_B3_CUDA
-PROFILED_B3_MEMORY
+20/后续最终授权裁决
+p0p_authorization_ticket.json
+current/history
 ```
 
-- HOST：cProfile、透明语义包装、pidstat、nvidia-smi；
-- CUDA：仅轻量 nsys CUDA/NVTX、透明 NVTX 包装、pidstat、nvidia-smi；
-- MEMORY：host native allocation observer、CuPy/device recorder、RSS/ru_maxrss/nvidia-smi；不同时启用 cProfile 或 nsys。
+P 中授权文件仍保持精确 denied blob。票据必须预登记：
 
-全部 profile 子运行不计分，且必须与对应未插桩样本数值 payload 逐位相同。
+```text
+I commit/tree/implementation manifest
+P0 contract and P0-D identity
+formal source tree
+exact denied authorization blob
+exact future authorized authorization blob
+fixed 18-item schedule and canonical hash
+single-child/single-file/mode policy
+one-claim/no-resume/no-replacement policy
+toolchain and capability manifest
+```
 
-## 下一项唯一任务：零时间步实现
+票据不能包含其所在 P 的 hash。运行器从 C 的唯一 parent 得到 P，并从 Git 对象 `P:<ticket_path>` 读取票据。
 
-只允许在：
+### C：唯一授权 child
+
+C 必须：
+
+```text
+恰有一个 parent P
+当前 local main 和 origin/main 均指向 C
+P..C 恰一条 modified path
+path = p0p_execution_authorization.json
+mode = 100644 -> 100644
+old blob = ticket.denied_parent_blob
+new blob = ticket.authorized_child_blob
+```
+
+允许态授权 JSON 的完整字节必须在 P 创建前确定并由票据预登记，因此不得含 P、C 或自身 object hash。
+
+### Q：一次性 claim
+
+全部 Git、实现、工具和环境门通过后，首个 `WARMUP_B1` 启动前原子创建：
+
+```text
+artifacts/p0/performance_raw/execution_claim.json
+```
+
+Q 记录实际：
+
+```text
+C child commit
+P reviewed parent
+I reviewed snapshot
+ticket/blob/schedule/formal source/toolchain identity
+grant nonce
+single-writer lock identity
+```
+
+Claim 一旦创建即消费授权；任何失败、异常、中断或崩溃均禁止 resume、补样、替换或重新 claim。
+
+## 下一项唯一任务：零步授权结构重构
+
+Codex 只能在：
 
 ```text
 90_候选工作区/current/17_HF3D性能优化/**
@@ -96,136 +152,103 @@ PROFILED_B3_MEMORY
 90_候选工作区/交接说明_history.md
 ```
 
-实现：
+完成：
+
+1. 默认拒绝授权 JSON 移除所有 child/self hash 语义；
+2. 实现未来 `p0p_authorization_ticket.json` 的严格 parser/audit；
+3. 使用 Git plumbing 和 NUL 分隔路径验证 parent、blob、mode 和 exact one-file delta；
+4. 实现 `origin/main == HEAD`、单父 child、P 为 I 单父 review commit 和 review-only delta 门；
+5. 实现非消费 preflight；
+6. 实现 `O_CREAT|O_EXCL` execution claim、独占 writer lock 和固定 18-item schedule ledger；
+7. 禁止 `--only/--skip/--repeat/--start-at/--resume`；
+8. worker 必须要求有效 claim、锁所有权、expected sequence index 和一次性 launch token；
+9. 增加合成 Git 仓库正负测试；
+10. 生成零时间步静态证据后立即停止交 Pro。
+
+## 必须通过的合成 Git 测试
+
+至少覆盖：
 
 ```text
-P0-P orchestrator
-single-sample worker
-strict benchmark config generator/auditor
-environment gate and single-writer lock
-pidstat/nvidia-smi/turbostat monitors and parsers
-cProfile launcher/pstats parser
-transparent semantic wrapper and NVTX registry
-nsys launcher/export/schema/stats parser
-host native allocation observer
-device allocation recorder
-archive/numerical-payload verifier
-atomic sample manifest/failure transaction
-machine-readable static audit
-default NOT_AUTHORIZED p0p_execution_authorization.json
+I -> P -> C 正路径
+C merge parent
+C parent 错误
+P parent 不是 I
+I..P 出现未批准实现变化
+P..C 多一个文件
+rename/copy/mode/symlink
+parent denied blob 错
+child authorized blob 错
+从工作树而非 P Git object 读取 ticket
+中文路径和 NUL-safe parsing
+local HEAD != origin/main
+授权 schema 出现 child/self hash 字段
+允许态 exact bytes 在 P 创建前可稳定 hash
 ```
 
-禁止修改：
+## 一次性消费测试
+
+必须覆盖：
 
 ```text
-02_模拟程序/**
-01_最终理论/**
-90_候选工作区/current/07_D3跨网格时间步响应诊断/**
-AGENTS.md
-00_P0性能与散度诊断预注册.json
-P0-D 已提交输出
+非法环境 preflight 不消费 claim
+preflight 不创建 sample raw
+合法环境只允许一次 O_EXCL claim
+第二次 claim 拒绝
+claim 后崩溃禁止 resume
+固定顺序不可跳步/重复/替换/补样
+直接 worker 调用拒绝
+并发 orchestrator/stale lock/PID reuse
+claim/ledger atomic write failure injection
+完成或失败后授权不可再次使用
 ```
 
-## 关键证据门
+## 零步返回 Pro 前的硬门
 
-### 主机热点
-
-```text
-top-level phase wall coverage >= 98%
-solver named exclusive attribution >= 90%
-any unknown region >= 5% => FAIL
-```
-
-cProfile 只解释 Python调用图、次数和 operator boundary；不能声称 native symbol 或微架构归因。perf 不是必需条件，但如果上述语义覆盖不达门，perf 缺失不能用利用率图替代。
-
-### CUDA trace
-
-正式 nsys profile 只能使用已验证轻量配置。必须生成并交叉核验 `.nsys-rep`、SQLite、四个 stats 报告、NVTX ranges、kernel/API/memcpy timeline。SQLite 和 summary 的 H2D/D2H direction/count/bytes 必须一致，并与 `pressure.project` 包装器按 shape/dtype/nbytes 计算的 full-field transfer 多重集交叉。
-
-### 内存
-
-`tracemalloc`、RSS、ru_maxrss、cProfile 或 pidstat 单独都不能满足 host native allocation count。必须实现并合成验证透明 native allocation observer；不能可靠计数即失败闭锁。
-
-设备侧必须组合：
-
-```text
-CuPy allocator request recorder
-pool used/total high-water
-cudaMemGetInfo/phase boundary
-nsys allocation API count
-nvidia-smi process/device memory timeline
-```
-
-存在无法界定大小/峰值的 unmatched device allocation 即失败闭锁。
-
-### 跨模式数值同一
-
-同一 B1/B2/B3 的 warm-up、三次 timed、HOST/CUDA/MEMORY profile 必须在排除时间和性能元数据后得到相同 numerical payload SHA-256，并保持相同步数、dt、limiter、retry、压力迭代、硬门、登记时刻和真实 CUDA。
-
-## 当前环境与禁止开跑
-
-当前存在仓库外计算进程且 CPU Tctl 约 96 °C，不满足冻结的：
-
-```text
-no_other_compute_process
-background CPU <= 25% for 30 s
-CPU Tctl <= 90 °C
-```
-
-本轮不得启动：
-
-```text
-WARMUP_B1/B2/B3
-任何 TIMED_* 样本
-任何 PROFILED_* 子运行
-任何 HF3D 时间步
-```
-
-零步 preflight 应正确拒绝当前环境，并且不得创建 performance sample raw。
-
-## 零步返回 Pro 前最低验收
-
-必须通过：
-
-- config 只允许 `run.duration_s=0.002`；
-- 固定 schedule 不可重排/补样；
-- scored 模式拒绝 profiler/interposer；
-- wrapper 参数/返回/异常/单调用/nested exclusive 测试；
-- 90%/98% 覆盖边界负例；
-- 已验证 nsys probe、SQLite integrity、四报告及缺表/缺 tail 负例；
-- H2D/D2H direction/count/bytes/range 解析；
-- pidstat/nvidia-smi/turbostat telemetry gap/PID reuse 负例；
-- host allocator 已知 count/bytes/peak、多线程/realloc/aligned/mmap 测试；
-- CuPy allocator 与 nsys allocation cross-check；
-- instrumented/uninstrumented 最小 NumPy+CuPy hash 同一；
-- archive payload identity、atomic publish、symlink/concurrency/failure injection；
-- 当前非法环境零步拒绝；
-- Ruff、格式、限定 mypy、`compileall`、严格 JSON、文档解析和 `git diff --check`。
-
-返回时必须证明：
+静态证据必须明确：
 
 ```text
 HF3D time_steps_advanced = 0
 warmup_samples_started = 0
 scored_samples_started = 0
 profile_samples_started = 0
-formal source unchanged
-P1 not implemented
-P0-P authorization = NOT_AUTHORIZED
+formal source unchanged = true
+P1 implemented = false
+p0p_execution_authorization = NOT_AUTHORIZED
+actual Pro ticket = absent or NOT_ISSUED
+self-referential authorization fields = absent
+synthetic parent-ticket authorization tests = PASS
 ```
 
-完成后立即停止交 Pro 静态复核，不得等待环境冷却后自行开跑。
+当前环境仍存在仓库外计算进程且温度门不满足。不得启动任何 warm-up、timed 或 profiled 样本。
 
-## 未来开跑方式
-
-Pro 接受零步实现后，才可采用：
+## 禁止修改
 
 ```text
-reviewed parent: ruling + implementation + static evidence
-unique authorization child: only p0p_execution_authorization.json changes
+02_模拟程序/**
+01_最终理论/**
+90_候选工作区/current/07_D3跨网格时间步响应诊断/**
+00_P0性能与散度诊断预注册.json
+P0-D 已提交输出
+AGENTS.md
 ```
 
-授权必须绑定 harness、worker、wrapper、monitors/parsers、allocation observer 源码与构建物、P0 contract、正式源码树、工具版本和 GPU 环境，只允许冻结 schedule 的一次执行。每个样本前仍实时判环境门；任一失败终止剩余计划。P0-P 完成后停止，不得进入 P1。
+不得创建真实允许态票据、允许态授权 child，不得进入 P1。
+
+## 后续正式签发流程
+
+零步实现推送后：
+
+1. Pro 复核 I；
+2. Pro 先生成不含 P/C/self hash 的 exact allow JSON A1；
+3. 计算 A1 Git blob 和 SHA-256；
+4. 创建父票据和裁决提交 P，P 中授权仍 denied；
+5. 创建唯一 child C，只把授权文件替换为 A1；
+6. 推送 C 到 origin/main；
+7. Codex 先运行非消费 preflight；
+8. 环境合法后原子 claim 并执行一次固定 schedule。
+
+任何额外 commit、实现漂移、ticket/blob 不一致、dirty worktree 或环境失败均不能执行。
 
 ## 当前结论上限
 
@@ -237,9 +260,8 @@ D3R1_S3 = NOT_EXECUTED
 D3R1_SCIENTIFIC_CLASSIFICATION = NOT_FORMED
 
 HF3D_P0_D = COMPLETED
-HF3D_P0_P_PLAN = FROZEN
-HF3D_P0_P_ZERO_STEP_IMPLEMENTATION = AUTHORIZED
-HF3D_P0_P_DYNAMIC_SAMPLES = NOT_AUTHORIZED_PENDING_PRO_STATIC_REVIEW
+HF3D_P0_P_ZERO_STEP_AUTHORIZATION_REFACTOR = AUTHORIZED
+HF3D_P0_P_DYNAMIC_SAMPLES = NOT_AUTHORIZED_PENDING_NEW_STATIC_REVIEW
 HF3D_P1_IMPLEMENTATION = NOT_AUTHORIZED
 
 NUMERICAL_QUALIFICATION = NOT_DEMONSTRATED
