@@ -11,9 +11,12 @@ D3R1_SCIENTIFIC_CLASSIFICATION = NOT_FORMED
 
 HF3D_P0_D = COMPLETED
 HF3D_P0_P_ZERO_STEP_IMPLEMENTATION = STATIC_REVIEW_ACCEPTED
-HF3D_P0_P_REVIEW_BINDING_MATERIAL = IMPLEMENTED_PENDING_PRO_REVIEW
-HF3D_P0_P_DYNAMIC_SAMPLES = NOT_AUTHORIZED
-HF3D_P1_IMPLEMENTATION = NOT_AUTHORIZED
+HF3D_P0_P_REVIEW_BINDING_MATERIAL = ACCEPTED
+HF3D_P0_P_EXACT_AUTHORIZATION = ISSUED
+HF3D_P0_P_DYNAMIC_SCHEDULE = AUTHORIZED_ONCE_NOT_STARTED
+HF3D_P0_P_EXECUTION_CLAIM = NOT_CREATED
+HF3D_P0_P_DYNAMIC_OUTPUT = ABSENT
+HF3D_P1_IMPLEMENTATION = PROHIBITED
 
 PROJECT_REFACTOR = TARGETED_CROSS_MODULE_REFACTOR
 PROJECT_WIDE_REWRITE = REJECTED
@@ -24,168 +27,150 @@ REFERENCE_BACKEND = RETAINED
 
 ## 最新 Pro 裁决
 
-详细裁决：
-
 ```text
-90_候选工作区/current/21_P0P零步实现终审与全项目技术债性能路线裁决.md
+90_候选工作区/current/22_P0P绑定材料复核与动态执行裁决.md
 ```
 
-复核绑定：
+绑定实现快照：
 
 ```text
-reviewed runtime commit: 8a0c2fa564d9d6abfd84e5620379af11e5f858d3
-reviewed runtime tree: 57dc939af0bc923ef3076d1d14ea889573041cf7
-Pro ruling commit: 06d7fd5e49b398acd668ca43a392f621864d956d
-P0 contract blob: 62f256574f67654d13f588e0505f63505d065907
-formal source identity: dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
+I commit: e3b2a1b794b1bd46113d496550e0ce2970ba0a5d
+I tree: 2e24c41acf7ce71ee3c8979aaad888bbfe126d53
+review material blob: c91c95e7229a98c48ad2d5511772515321110101
+review material SHA-256: 1977454018e11010f0afd6d50d91b688cf71b8c93b06c340527b450e8ec64133
+runtime reference: 8a0c2fa564d9d6abfd84e5620379af11e5f858d3
+formal source SHA-256: dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
 ```
 
-## 本轮完成的 review-binding material
+## 签名事务
 
-本轮只新增 review-only 工具、绑定材料和相关测试，没有修改任何既有 P0-P runtime 文件。
-
-生成器：
+当前远端 `main` 必须保持为父票据 `P` 的唯一授权子提交 `C`：
 
 ```text
-90_候选工作区/current/17_HF3D性能优化/review_tools/generate_p0p_review_binding.py
+I -> P -> C
 ```
 
-规范输出：
+父票据：
 
 ```text
-90_候选工作区/current/17_HF3D性能优化/artifacts/p0/p0p_static/p0p_review_binding_material.json
-90_候选工作区/current/17_HF3D性能优化/artifacts/p0/p0p_static/p0p_review_binding_material.md
+ticket_id: HF3D_P0P_PRO_TICKET_E3B2A1B7_20260901_V1
+ticket_path: 90_候选工作区/current/17_HF3D性能优化/p0p_authorization_ticket.json
+fixed schedule: HF3D_P0P_FIXED_18_V1
+fixed schedule SHA-256: 2138aea65041ff322a0cc2ce22945544d51d1e39db1929079f9f6265e494dceb
 ```
 
-相关测试：
+授权子 blob：
 
 ```text
-90_候选工作区/current/17_HF3D性能优化/tests/test_p0p_review_binding_material.py
+Git blob: 703c38e1d40883028e94e23bd5f90c7f0b083a69
+SHA-256: a8ad3f747171245772d57ebf245c98eabb72d76ec2c9aabb9ee5390998336965
+byte length: 860
+grant_nonce: 0aaf03ac79d9004f9b659c9f0e56883eb59aaafbbd7c3613befb0b0963ce872c
 ```
 
-JSON 由 Git object 和现有冻结证据确定性生成，集中包含：
-
-- `REQUIRED_IMPLEMENTATION_RELATIVE_PATHS` 的 24 个精确、有序、无重复记录；
-- 每个 runtime 文件的 path、mode、Git blob、SHA-256 和 byte length；
-- static audit、P0 contract、三份 P0-D、capability manifest 和默认拒绝授权的同类记录；
-- formal source identity；
-- 固定 18 项 schedule 完整 canonical object 与 SHA-256；
-- future ticket schema、child/claim policy、review-only path template、protected prefix 和 immutable path policy；
-- non-authorizing、ticket absent、grant absent、dynamic denied、P1 denied 和零执行计数声明。
-
-材料只记录已经存在且已复核的 runtime 参考提交 `8a0c2fa...`。它有意不记录包含材料的新提交自身 commit/tree，也不记录未来父提交 `P` 或授权子提交 `C` 的身份。新提交形成后，Pro 必须从 Git 拓扑独立观察 snapshot `I` 的 commit/tree。
-
-## 核心验证结果
+`P..C` 只能修改：
 
 ```text
-required implementation file count = 24
-all runtime records match 8a0c2fa = true
-fixed schedule item count = 18
-fixed schedule canonical SHA-256 = 2138aea65041ff322a0cc2ce22945544d51d1e39db1929079f9f6265e494dceb
-formal source identity unchanged = true
-actual Pro ticket absent = true
-authorized grant absent = true
-dynamic samples authorized = false
-HF3D time steps = 0
-warm-up samples = 0
-scored samples = 0
-profile samples = 0
-all performance samples = 0
+90_候选工作区/current/17_HF3D性能优化/p0p_execution_authorization.json
 ```
 
-已执行：
+不得在执行前再提交任何文件。任何后续提交都会使授权拓扑审计失败。
 
-- review material 专项正负测试 `17/17`；
-- 含既有 P0-D、P0-P runtime 与新增 review material 的完整候选回归 `53/53`；
-- Ruff lint 与 format check；
-- 新生成器和测试的限定 mypy；
-- 生成后 `--check` 逐字节一致；
-- 严格 JSON 解析；
-- current 的 Pandoc Markdown 验证。
+## 已完成复核
 
-未执行：
+Pro 已独立确认：
 
-- 任何 P0-P dynamic sample；
-- 任何 HF3D 时间步、warm-up、timed 或 profile 样本；
-- 新一轮 allocator、nsys 或 CUDA capability probe；
-- 数值资格、物理验证或实验验证；
-- 正式程序性能重构。
+- Codex 提交只涉及 review-binding 生成器、材料、专项测试和交接；
+- 24 个 runtime 文件在当前实现快照与 `8a0c2fa...` 上 mode/blob 完全一致；
+- static audit、P0 contract、三份 P0-D、capability、denied authorization 和 formal source 均已精确绑定；
+- 固定 18 项 schedule 的 canonical SHA-256 可独立重算；
+- ticket/grant/claim/raw 在材料生成阶段不存在；
+- HF3D 时间步、warm-up、scored、profile 计数均为 0；
+- review material 无当前提交、当前树或未来 `P/C` 自引用；
+- 现有 P0-P runtime 无需再次修改。
 
-## 复核负例覆盖
+本次签名事务没有启动动态样本，也没有修改正式理论、正式程序、D3、P0 合同、P0-D 或既有 raw。
 
-新增测试明确覆盖：
+## 下一项唯一任务：本机非消费 preflight，然后一次性执行
 
-- required implementation 缺一项、重复一项或多一项；
-- path、mode、Git blob、SHA-256 或 byte length 漂移；
-- symlink 与 gitlink/submodule；
-- fixed schedule 顺序或字段漂移；
-- static audit、contract、capability 或 denied authorization 记录漂移；
-- 自引用字段或包含材料的当前 commit/tree 值出现；
-- formal source identity 漂移；
-- dynamic authorization 或零执行计数漂移；
-- 两次构造、两次写出与 `--check` 的逐字节确定性。
+先同步且不得产生本地修改：
 
-## 下一项唯一任务：Pro review 与票据签发裁决
+```bash
+git pull --ff-only
+git status --short
+git rev-parse HEAD
+git rev-parse origin/main
+```
 
-当前必须停止交 Pro 独立复核本轮 review-only 补充。Pro 应先确认：
+必须确认：
 
 ```text
-supplement commit/tree 可从 Git 独立观察
-runtime blobs 与 8a0c2fa 完全相同
-binding material 完整且逐字节可再生
-self/future reference absent
-formal source unchanged
-ticket absent
-grant absent
-dynamic denied
-all execution counters zero
+HEAD == origin/main
+worktree/index clean
+main remains exact authorization child C
+no P0-P claim/raw/ledger/complete/failure output exists
 ```
 
-若复核通过，只有 Pro 可以按裁决生成 exact authorized grant bytes `A1`，计算其 Git blob 与 SHA-256，创建仍保持 denied authorization 的父票据提交 `P`，再创建仅修改授权文件的唯一子提交 `C`。Codex 不得自行预建 ticket、grant、`P` 或 `C`。
+运行非消费 preflight：
 
-即使 Pro 后续签发授权，运行前仍必须通过实时环境门。当前或未来出现高温、仓库外计算进程、工作树/远端漂移或任何绑定失败时，preflight 必须拒绝且不得消费 claim。
+```bash
+python3 90_候选工作区/current/17_HF3D性能优化/run_p0_performance_campaign.py --zero-step-preflight
+```
 
-## 技术债与性能路线裁决保持不变
-
-Pro 已拒绝全项目推倒重写，接受有边界的跨模块定向重构。顺序仍为：
+若 preflight 失败：
 
 ```text
-P0: 完成 P0-P baseline
-P1A: explicit GPU-resident accelerated backend
-P1B: 面向未来 campaign 的共享 evidence core
-P2: recording/archive/device boundary
-P3: GUI/forward 等仅在独立问题证据出现时处理
+原样停止
+不得修改授权文件
+不得提交新 commit
+不得创建 claim
+不得启动任何样本
+将完整失败输出交 Pro
 ```
 
-当前 CPU 和 GPU 利用均不充分。主要加速路线仍是显式 GPU-resident HF3D 新后端，默认作为 E1 新数值身份，保留现有 reference backend。不得在 P0-P baseline 冻结前修改 `02_模拟程序/**`。
+若 preflight 通过，且用户明确要求执行，则只允许一次：
+
+```bash
+python3 90_候选工作区/current/17_HF3D性能优化/run_p0_performance_campaign.py --execute
+```
+
+执行器会在首次样本环境门通过后原子创建唯一 claim。Claim 后任何失败均为永久 `FAILED_STOPPED_NO_RESUME`，禁止重试、恢复、补样、替换或删除失败证据。
+
+## 环境硬门
+
+必须继续满足：
+
+```text
+AC power online
+32 logical CPUs online
+governor records complete and equal
+no competing GPU compute process
+background CPU load within frozen threshold
+CPU Tctl <= 90 C
+GPU temperature <= 75 C
+toolchain and GPU identity exact
+```
+
+此前约 `96.875 C` 的 Tctl 必须继续被拒绝。线程环境变量不能替代这些门。
 
 ## 当前禁止
 
 ```text
-任何 P0-P dynamic sample
-任何未经 Pro 签发的 parent ticket / authorized grant / child
+执行前任何新 commit
 任何 P1 实现
 任何 02_模拟程序/** 修改
-任何 01_最终理论/** 修改
 任何 D3R1 重跑或 S3
-放宽散度、压力、CFL 或其他科学门
-删除、替换或复用既有 V1/R1 raw
+任何 schedule 改动
+任何阈值或科学门放宽
+任何旧 raw 复用
+任何未通过 preflight 的动态执行
 ```
 
-## 当前结论上限
+## 结论上限
 
 ```text
-HF3D_P0_P_ZERO_STEP_IMPLEMENTATION = STATIC_REVIEW_ACCEPTED
-HF3D_P0_P_REVIEW_BINDING_MATERIAL = IMPLEMENTED_PENDING_PRO_REVIEW
-HF3D_P0_P_DYNAMIC_SAMPLES = NOT_AUTHORIZED
-HF3D_P1_IMPLEMENTATION = NOT_AUTHORIZED
-
-PROJECT_REFACTOR = TARGETED_CROSS_MODULE_REFACTOR
-PROJECT_WIDE_REWRITE = REJECTED
-HF3D_HARDWARE_UTILIZATION = INSUFFICIENT
-PRIMARY_ACCELERATION_ROUTE = EXPLICIT_GPU_RESIDENT_E1_BACKEND
-REFERENCE_BACKEND = RETAINED
-
+HF3D_P0_P_DYNAMIC_SCHEDULE = AUTHORIZED_ONCE_NOT_STARTED
+HF3D_P0_P_RESULT = NOT_AVAILABLE
 NUMERICAL_QUALIFICATION = NOT_DEMONSTRATED
 PHYSICAL_VALIDATION = NOT_PERFORMED
 EXPERIMENTAL_VALIDATION = NOT_PERFORMED
