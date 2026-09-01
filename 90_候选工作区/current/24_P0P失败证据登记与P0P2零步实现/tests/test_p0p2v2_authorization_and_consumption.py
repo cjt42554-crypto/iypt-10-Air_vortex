@@ -11,7 +11,7 @@ import unittest
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 from unittest.mock import patch
 
 HERE = Path(__file__).resolve().parents[1]
@@ -509,11 +509,12 @@ def _claim_inputs(lock_identity: dict[str, Any]) -> dict[str, Any]:
         "formal_source_tree": {"sha256": "f" * 64},
         "implementation_files": {"synthetic": {"sha256": "e" * 64}},
     }
-    environment = {"instantaneous_start": {"snapshot": {"gpu": {"uuid": "GPU-X"}}}}
+    environment = {"instantaneous_end": {"snapshot": {"gpu": {"uuid": "GPU-X"}}}}
     return {
         "authorization": authorization,
         "execution_binding": execution_binding,
         "environment": environment,
+        "machine_identity": ticket["toolchain_binding"],
         "lock_identity": lock_identity,
     }
 
@@ -556,6 +557,90 @@ class ConsumptionTests(unittest.TestCase):
             )
             self.assertFalse(raw.exists())
 
+    def test_ticket_machine_drift_precedes_every_runtime_transaction(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            raw = root / "performance_raw"
+            lock = root / "campaign.lock"
+            expected = {"host_policy": {"governors": {"cpu0": "powersave"}}}
+            authorization = {
+                "status": AUTHORIZED_STATUS,
+                "dynamic_samples_authorized": True,
+                "observed_parent_ticket_binding": {
+                    "ticket": {"toolchain_binding": expected}
+                },
+            }
+            sequence = iter((101, 102, 103))
+
+            def probe(_benchmark: str) -> dict[str, Any]:
+                pid = next(sequence)
+                return {
+                    "gate_pass": True,
+                    "report": {
+                        "process_identity": {
+                            "pid": pid,
+                            "process_start_ticks": pid + 1000,
+                        }
+                    },
+                }
+
+            with (
+                patch.object(campaign, "RAW_ROOT", raw),
+                patch.object(campaign, "CAMPAIGN_LOCK_PATH", lock),
+                patch.object(campaign, "load_contract", return_value={"contract_id": "x"}),
+                patch.object(campaign, "numerical_quality_gates", return_value={"x": True}),
+                patch.object(campaign, "evidence_identity", return_value={"gate_pass": True}),
+                patch.object(campaign, "load_authorization", return_value=authorization),
+                patch.object(
+                    campaign,
+                    "assert_no_sample_output_root",
+                    return_value={"empty": True},
+                ),
+                patch.object(
+                    campaign,
+                    "evaluate_instantaneous_environment",
+                    return_value={"gate_pass": True, "snapshot": {}},
+                ),
+            ):
+                report = campaign.zero_step_preflight(
+                    initial_snapshot_runner=dict,
+                    probe_runner=probe,
+                    environment_runner=lambda **_kwargs: {
+                        "gate_pass": True,
+                        "instantaneous_end": {"snapshot": {}},
+                    },
+                    capability_runner=lambda _probes, _environment: {
+                        "host_policy": {"governors": {"cpu0": "performance"}}
+                    },
+                )
+            self.assertFalse(report["gate_pass"])
+            self.assertFalse(
+                report["gates"][
+                    "ticket_bound_machine_identity_exact_before_runtime_transactions"
+                ]
+            )
+            self.assertFalse(raw.exists())
+            self.assertFalse(lock.exists())
+            with (
+                patch.object(campaign, "load_authorization", return_value=authorization),
+                patch.object(campaign, "load_contract", return_value={"contract_id": "x"}),
+                patch.object(campaign, "evidence_identity", return_value={"gate_pass": True}),
+                patch.object(
+                    campaign,
+                    "assert_no_sample_output_root",
+                    return_value={"empty": True},
+                ),
+                patch.object(campaign, "zero_step_preflight", return_value=report),
+                patch.object(campaign, "_publish_preclaim_failure") as publish_failure,
+                patch.object(campaign, "execution_binding") as bind_execution,
+                patch.object(campaign, "ExclusiveCampaignLock") as acquire_lock,
+                self.assertRaises(P0PerformanceError),
+            ):
+                campaign.execute_campaign()
+            publish_failure.assert_called_once()
+            bind_execution.assert_not_called()
+            acquire_lock.assert_not_called()
+
     def test_claim_is_o_excl_and_second_claim_is_refused(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -571,6 +656,76 @@ class ConsumptionTests(unittest.TestCase):
                 self.assertTrue(first["claim_file"]["sha256"])
                 with self.assertRaises(P0PerformanceError):
                     consumption.create_claim_and_ledger(**_claim_inputs(lock.identity))
+
+    def test_each_sample_full_gate_precedes_running_and_staging(self) -> None:
+        class FakeLock:
+            def __init__(self) -> None:
+                self.identity = {"synthetic": True}
+
+            def __enter__(self) -> Self:
+                return self
+
+            def __exit__(self, *_args: object) -> None:
+                return None
+
+        with tempfile.TemporaryDirectory() as temporary:
+            raw = Path(temporary) / "performance_raw"
+            preflight = {
+                "gate_pass": True,
+                "post_probe_environment": {"gate_pass": True},
+                "observed_capability_identity": {"machine": "exact"},
+            }
+
+            def create_claim(**_kwargs: Any) -> dict[str, Any]:
+                raw.mkdir()
+                return {"claim": "synthetic"}
+
+            def publish_failure(_record: Mapping[str, Any]) -> dict[str, Any]:
+                (raw / "execution_failure.json").write_text("{}\n", encoding="utf-8")
+                return {"path": str(raw / "execution_failure.json")}
+
+            with (
+                patch.object(campaign, "RAW_ROOT", raw),
+                patch.object(
+                    campaign,
+                    "load_authorization",
+                    return_value={
+                        "observed_parent_ticket_binding": {
+                            "authorization_child_commit": "c" * 40
+                        }
+                    },
+                ),
+                patch.object(campaign, "load_contract", return_value={}),
+                patch.object(campaign, "evidence_identity", return_value={}),
+                patch.object(campaign, "assert_no_sample_output_root", return_value={}),
+                patch.object(campaign, "zero_step_preflight", return_value=preflight),
+                patch.object(campaign, "execution_binding", return_value={}),
+                patch.object(campaign, "ExclusiveCampaignLock", return_value=FakeLock()),
+                patch.object(
+                    campaign,
+                    "create_claim_and_ledger",
+                    side_effect=create_claim,
+                ),
+                patch.object(
+                    campaign,
+                    "full_environment_gate",
+                    return_value={"gate_pass": False, "stage": "synthetic"},
+                ),
+                patch.object(campaign, "mark_schedule_failed") as mark_failed,
+                patch.object(
+                    campaign,
+                    "publish_execution_failure",
+                    side_effect=publish_failure,
+                ),
+                patch.object(campaign, "mark_sample_running") as mark_running,
+                patch.object(campaign, "execute_one_sample") as execute_sample,
+                self.assertRaises(P0PerformanceError),
+            ):
+                campaign.execute_campaign()
+            mark_failed.assert_called_once()
+            mark_running.assert_not_called()
+            execute_sample.assert_not_called()
+            self.assertFalse(any(path.name.startswith(".") for path in raw.iterdir()))
 
     def test_strict_order_duplicate_skip_failure_and_no_resume(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -759,6 +914,10 @@ class ConsumptionTests(unittest.TestCase):
                     "completed_monotonic_ns": time.monotonic_ns(),
                 }
                 consumption.publish_execution_complete(completion)
+                self.assertEqual(
+                    consumption.validate_terminal_execution_state()["terminal_kind"],
+                    "COMPLETE",
+                )
                 with self.assertRaises(P0PerformanceError):
                     consumption.mark_sample_running(0, EXPANDED_EXECUTION_SCHEDULE[0])
                 with self.assertRaises(P0PerformanceError):
@@ -769,8 +928,11 @@ class ConsumptionTests(unittest.TestCase):
                             "gate_pass": False,
                         }
                     )
-                with self.assertRaises(FileExistsError):
-                    consumption.publish_execution_complete(completion)
+                self.assertTrue(
+                    consumption.publish_execution_complete(completion)[
+                        "recovered_existing"
+                    ]
+                )
                 with self.assertRaises(P0PerformanceError):
                     consumption.create_claim_and_ledger(**inputs)
 
@@ -799,6 +961,10 @@ class ConsumptionTests(unittest.TestCase):
                     failure=failure,
                 )
                 consumption.publish_execution_failure(failure)
+                self.assertEqual(
+                    consumption.validate_terminal_execution_state()["terminal_kind"],
+                    "FAILED_STOPPED",
+                )
                 with self.assertRaises(P0PerformanceError):
                     consumption.mark_sample_running(1, EXPANDED_EXECUTION_SCHEDULE[1])
                 with self.assertRaises(P0PerformanceError):
@@ -812,11 +978,260 @@ class ConsumptionTests(unittest.TestCase):
                             "completed_monotonic_ns": time.monotonic_ns(),
                         }
                     )
-                with self.assertRaises(FileExistsError):
-                    consumption.publish_execution_failure(failure)
+                self.assertTrue(
+                    consumption.publish_execution_failure(failure)[
+                        "recovered_existing"
+                    ]
+                )
                 with self.assertRaises(P0PerformanceError):
                     consumption.create_claim_and_ledger(**inputs)
 
+    def test_terminal_fault_injection_never_leaves_false_complete(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "artifacts").mkdir()
+            lock_path = root / "campaign.lock"
+            with (
+                _runtime_paths(root / "artifacts"),
+                ExclusiveCampaignLock(lock_path) as lock,
+            ):
+                inputs = _claim_inputs(lock.identity)
+                consumption.create_claim_and_ledger(**inputs)
+                last_token = ""
+                for index, sample_id in enumerate(EXPANDED_EXECUTION_SCHEDULE):
+                    token = consumption.mark_sample_running(index, sample_id)
+                    if index + 1 == len(EXPANDED_EXECUTION_SCHEDULE):
+                        last_token = token
+                        break
+                    consumption.mark_sample_pass(
+                        index,
+                        sample_id,
+                        launch_token=token,
+                        manifest_sha256="a" * 64,
+                    )
+                original_publish = consumption._publish_ledger
+                failed_once = False
+
+                def fail_last_pass_once(ledger: Mapping[str, Any]) -> None:
+                    nonlocal failed_once
+                    if (
+                        ledger.get("status")
+                        == "ALL_SAMPLES_PASS_PENDING_TERMINAL"
+                        and not failed_once
+                    ):
+                        failed_once = True
+                        raise OSError("synthetic final ledger write failure")
+                    original_publish(ledger)
+
+                with (
+                    patch.object(
+                        consumption,
+                        "_publish_ledger",
+                        side_effect=fail_last_pass_once,
+                    ),
+                    self.assertRaises(OSError),
+                ):
+                    consumption.mark_sample_pass(
+                        len(EXPANDED_EXECUTION_SCHEDULE) - 1,
+                        EXPANDED_EXECUTION_SCHEDULE[-1],
+                        launch_token=last_token,
+                        manifest_sha256="a" * 64,
+                    )
+                failure = {
+                    "schema_version": 2,
+                    "status": "HF3D_P0P2_V2_FINAL_LEDGER_WRITE_FAILED_STOPPED",
+                    "gate_pass": False,
+                }
+                consumption.mark_schedule_failed(
+                    sequence_index=len(EXPANDED_EXECUTION_SCHEDULE) - 1,
+                    sample_id=EXPANDED_EXECUTION_SCHEDULE[-1],
+                    failure=failure,
+                )
+                consumption.publish_execution_failure(failure)
+                terminal = consumption.validate_terminal_execution_state()
+                self.assertEqual(terminal["terminal_kind"], "FAILED_STOPPED")
+                self.assertFalse(consumption.COMPLETE_PATH.exists())
+
+        for mode in ("before_create", "partial_create"):
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                (root / "artifacts").mkdir()
+                lock_path = root / "campaign.lock"
+                with (
+                    _runtime_paths(root / "artifacts"),
+                    ExclusiveCampaignLock(lock_path) as lock,
+                ):
+                    inputs = _claim_inputs(lock.identity)
+                    consumption.create_claim_and_ledger(**inputs)
+                    for index, sample_id in enumerate(EXPANDED_EXECUTION_SCHEDULE):
+                        token = consumption.mark_sample_running(index, sample_id)
+                        consumption.mark_sample_pass(
+                            index,
+                            sample_id,
+                            launch_token=token,
+                            manifest_sha256="a" * 64,
+                        )
+                    child = inputs["authorization"][
+                        "observed_parent_ticket_binding"
+                    ]["authorization_child_commit"]
+                    completion = {
+                        "schema_version": 2,
+                        "status": "HF3D_P0P2_V2_FROZEN_SCHEDULE_EXECUTED_PENDING_ANALYSIS",
+                        "gate_pass": True,
+                        "authorization_child_commit": child,
+                        "completed_samples": list(EXPANDED_EXECUTION_SCHEDULE),
+                        "completed_monotonic_ns": time.monotonic_ns(),
+                    }
+                    original_create = consumption.create_exclusive_json
+
+                    def fail_completion(
+                        path: Path,
+                        value: Mapping[str, Any],
+                        test_mode: str = mode,
+                        create: Any = original_create,
+                    ) -> dict[str, Any]:
+                        if path == consumption.COMPLETE_PATH:
+                            if test_mode == "partial_create":
+                                path.write_text("{partial", encoding="utf-8")
+                            raise OSError(f"synthetic completion {test_mode}")
+                        return create(path, value)
+
+                    with (
+                        patch.object(
+                            consumption,
+                            "create_exclusive_json",
+                            side_effect=fail_completion,
+                        ),
+                        self.assertRaises(OSError),
+                    ):
+                        consumption.publish_execution_complete(completion)
+                    failure = {
+                        "schema_version": 2,
+                        "status": "HF3D_P0P2_V2_COMPLETION_WRITE_FAILED_STOPPED",
+                        "gate_pass": False,
+                    }
+                    consumption.mark_schedule_failed(
+                        sequence_index=None,
+                        sample_id=None,
+                        failure=failure,
+                    )
+                    consumption.publish_execution_failure(failure)
+                    terminal = consumption.validate_terminal_execution_state()
+                    self.assertEqual(terminal["terminal_kind"], "FAILED_STOPPED")
+                    self.assertFalse(consumption.COMPLETE_PATH.exists())
+                    if mode == "partial_create":
+                        self.assertEqual(
+                            len(list(consumption.RAW_ROOT.glob("execution_complete_aborted_*"))),
+                            1,
+                        )
+
+    def test_partial_failure_record_is_quarantined_and_retried(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "artifacts").mkdir()
+            lock_path = root / "campaign.lock"
+            with (
+                _runtime_paths(root / "artifacts"),
+                ExclusiveCampaignLock(lock_path) as lock,
+            ):
+                consumption.create_claim_and_ledger(**_claim_inputs(lock.identity))
+                sample_id = EXPANDED_EXECUTION_SCHEDULE[0]
+                consumption.mark_sample_running(0, sample_id)
+                failure = {
+                    "schema_version": 2,
+                    "status": "HF3D_P0P2_V2_SYNTHETIC_STORAGE_FAILED_STOPPED",
+                    "gate_pass": False,
+                }
+                consumption.mark_schedule_failed(
+                    sequence_index=0,
+                    sample_id=sample_id,
+                    failure=failure,
+                )
+                original = consumption.create_exclusive_json
+                injected = False
+
+                def partial_once(
+                    path: Path, value: Mapping[str, Any]
+                ) -> dict[str, Any]:
+                    nonlocal injected
+                    if path == consumption.FAILURE_PATH and not injected:
+                        injected = True
+                        path.write_text("{partial", encoding="utf-8")
+                        raise OSError("synthetic partial failure write")
+                    return original(path, value)
+
+                with patch.object(
+                    consumption,
+                    "create_exclusive_json",
+                    side_effect=partial_once,
+                ):
+                    consumption.publish_execution_failure(failure)
+                terminal = consumption.validate_terminal_execution_state()
+                self.assertEqual(terminal["terminal_kind"], "FAILED_STOPPED")
+                self.assertEqual(
+                    len(list(consumption.RAW_ROOT.glob("execution_failure_aborted_*"))),
+                    1,
+                )
+
+    def test_failed_ledger_and_failure_precreate_faults_are_retried(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "artifacts").mkdir()
+            lock_path = root / "campaign.lock"
+            with (
+                _runtime_paths(root / "artifacts"),
+                ExclusiveCampaignLock(lock_path) as lock,
+            ):
+                consumption.create_claim_and_ledger(**_claim_inputs(lock.identity))
+                sample_id = EXPANDED_EXECUTION_SCHEDULE[0]
+                consumption.mark_sample_running(0, sample_id)
+                failure = {
+                    "schema_version": 2,
+                    "status": "HF3D_P0P2_V2_RETRIED_STORAGE_FAILED_STOPPED",
+                    "gate_pass": False,
+                }
+                original_publish = consumption._publish_ledger
+                ledger_injected = False
+
+                def fail_ledger_once(ledger: Mapping[str, Any]) -> None:
+                    nonlocal ledger_injected
+                    if ledger.get("status") == "FAILED_STOPPED" and not ledger_injected:
+                        ledger_injected = True
+                        raise OSError("synthetic failed-ledger precreate fault")
+                    original_publish(ledger)
+
+                with patch.object(
+                    consumption,
+                    "_publish_ledger",
+                    side_effect=fail_ledger_once,
+                ):
+                    consumption.mark_schedule_failed(
+                        sequence_index=0,
+                        sample_id=sample_id,
+                        failure=failure,
+                    )
+                original_create = consumption.create_exclusive_json
+                failure_injected = False
+
+                def fail_failure_once(
+                    path: Path, value: Mapping[str, Any]
+                ) -> dict[str, Any]:
+                    nonlocal failure_injected
+                    if path == consumption.FAILURE_PATH and not failure_injected:
+                        failure_injected = True
+                        raise OSError("synthetic failure precreate fault")
+                    return original_create(path, value)
+
+                with patch.object(
+                    consumption,
+                    "create_exclusive_json",
+                    side_effect=fail_failure_once,
+                ):
+                    consumption.publish_execution_failure(failure)
+                self.assertEqual(
+                    consumption.validate_terminal_execution_state()["terminal_kind"],
+                    "FAILED_STOPPED",
+                )
 
 if __name__ == "__main__":
     unittest.main()

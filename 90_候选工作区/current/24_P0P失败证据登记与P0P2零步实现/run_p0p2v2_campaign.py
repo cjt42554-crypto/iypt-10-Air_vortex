@@ -12,6 +12,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import platform
+import signal
 import subprocess
 import sys
 import time
@@ -21,6 +23,7 @@ from pathlib import Path
 from typing import Any, TextIO
 
 from p0p2v2_allocation import (
+    BUILD_FLAGS,
     audit_observer_payload,
     observer_environment,
     open_observer_fd,
@@ -43,6 +46,7 @@ from p0p2v2_contract import (
     EXPECTED_BENCHMARKS,
     GPU_PYTHON,
     HERE,
+    NSYS_PATH,
     RAW_ROOT,
     STATIC_ROOT,
     P0PerformanceError,
@@ -69,11 +73,15 @@ from p0p2v2_nsys import (
 )
 from p0p2v2_telemetry import (
     ancestor_pids,
+    audit_background_records,
     audit_monitor_records,
+    audit_ticket_machine_identity,
+    cpu_model,
     evaluate_instantaneous_environment,
     full_environment_gate,
     instantaneous_environment,
     parse_monitor_jsonl,
+    process_identity,
 )
 from p0p2v2_transaction import ExclusiveCampaignLock, SampleTransaction
 
@@ -84,6 +92,81 @@ PRECLAIM_FAILURE_ROOT = STATIC_ROOT / "preclaim_failures"
 IMPLEMENTATION_PATHS = tuple(
     HERE.parents[2] / path for path in sorted(REQUIRED_IMPLEMENTATION_RELATIVE_PATHS)
 )
+
+
+def _single_version_line(command: Sequence[str], label: str) -> str:
+    completed = subprocess.run(
+        list(command),
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    lines = (completed.stdout or completed.stderr).strip().splitlines()
+    if completed.returncode != 0 or not lines:
+        raise P0PerformanceError(f"{label} version probe failed")
+    return lines[0]
+
+
+def current_capability_identity(
+    probe_results: Sequence[Mapping[str, Any]],
+    environment: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Reconstruct the complete reviewed machine identity before any lock/raw."""
+
+    toolchains = [
+        result.get("report", {}).get("toolchain") for result in probe_results
+    ]
+    if not toolchains or not all(
+        isinstance(value, Mapping) and value == toolchains[0]
+        for value in toolchains
+    ):
+        raise P0PerformanceError("fresh-process toolchain identities differ")
+    toolchain = toolchains[0]
+    if not isinstance(toolchain, Mapping):
+        raise P0PerformanceError("fresh-process toolchain identity is unavailable")
+    end = environment.get("instantaneous_end")
+    snapshot = end.get("snapshot") if isinstance(end, Mapping) else None
+    if not isinstance(snapshot, Mapping):
+        raise P0PerformanceError("post-probe environment snapshot is unavailable")
+    gpu_payload = snapshot.get("gpu")
+    gpu = gpu_payload.get("gpu") if isinstance(gpu_payload, Mapping) else None
+    if not isinstance(gpu, Mapping):
+        raise P0PerformanceError("post-probe GPU identity is unavailable")
+    return {
+        "schema_version": 2,
+        "status": "HF3D_P0P2_V2_ZERO_STEP_TOOLCHAIN_CAPABILITY_BOUND",
+        "gpu_python_and_cuda": dict(toolchain),
+        "nsys": {
+            "path": str(NSYS_PATH),
+            "version_line": _single_version_line([str(NSYS_PATH), "--version"], "nsys"),
+            "qualified_trace": "cuda,nvtx",
+            "sample": "none",
+            "cpuctxsw": "none",
+        },
+        "native_compiler": {
+            "version_line": _single_version_line(["gcc", "--version"], "gcc"),
+            "build_flags": list(BUILD_FLAGS),
+        },
+        "nvidia_smi_gpu_identity": {
+            "name": gpu.get("name"),
+            "uuid": gpu.get("uuid"),
+            "driver_version": gpu.get("driver_version"),
+        },
+        "host_policy": {
+            "expected_online_logical_cpus": 32,
+            "observed_affinity": sorted(os.sched_getaffinity(0)),
+            "cpu_model": cpu_model(),
+            "platform": {
+                "system": platform.system(),
+                "release": platform.release(),
+                "machine": platform.machine(),
+            },
+            "governors": dict(snapshot.get("governors", {})),
+            "ac_online": dict(snapshot.get("ac_online", {})),
+            "formal_selected_blas_threads": 2,
+            "omp_dynamic": "FALSE",
+        },
+    }
 
 
 def _runtime_side_effect_state() -> dict[str, Any]:
@@ -154,12 +237,14 @@ def zero_step_preflight(
     initial_snapshot_runner: Any | None = None,
     probe_runner: Any | None = None,
     environment_runner: Any | None = None,
+    capability_runner: Any | None = None,
 ) -> dict[str, Any]:
     """Run the ordered non-consuming V2 preflight without creating runtime state."""
 
     initial_snapshot_runner = initial_snapshot_runner or instantaneous_environment
     probe_runner = probe_runner or _run_zero_step_probe
     environment_runner = environment_runner or full_environment_gate
+    capability_runner = capability_runner or current_capability_identity
 
     before = _runtime_side_effect_state()
     contract = load_contract()
@@ -204,6 +289,51 @@ def zero_step_preflight(
             "stage": "not_run_due_to_initial_or_zero_step_failure",
         }
     )
+    observed_capability: dict[str, Any] | None = None
+    machine_identity_audit: dict[str, Any]
+    if all_probes and post_probe_environment.get("gate_pass") is True:
+        observed_capability = capability_runner(
+            probe_results,
+            post_probe_environment,
+        )
+    parent_binding = authorization.get("observed_parent_ticket_binding")
+    ticket = (
+        parent_binding.get("ticket")
+        if isinstance(parent_binding, Mapping)
+        else None
+    )
+    expected_capability = (
+        ticket.get("toolchain_binding") if isinstance(ticket, Mapping) else None
+    )
+    if authorization_is_dynamic:
+        if not (
+            isinstance(expected_capability, Mapping)
+            and isinstance(observed_capability, Mapping)
+        ):
+            machine_identity_audit = {
+                "schema_version": 2,
+                "status": "HF3D_P0P2_V2_TICKET_MACHINE_IDENTITY_UNAVAILABLE",
+                "gate_pass": False,
+                "mismatches": [
+                    {
+                        "path": "$",
+                        "reason": "missing_ticket_or_observed_machine_identity",
+                    }
+                ],
+            }
+        else:
+            machine_identity_audit = audit_ticket_machine_identity(
+                expected_capability,
+                observed_capability,
+            )
+    else:
+        machine_identity_audit = {
+            "schema_version": 2,
+            "status": "HF3D_P0P2_V2_TICKET_MACHINE_IDENTITY_NOT_APPLICABLE_DENIED",
+            "gate_pass": True,
+            "mismatches": [],
+            "observed": observed_capability,
+        }
     after = _runtime_side_effect_state()
     gates = {
         "contract_frozen": contract.get("contract_id") is not None,
@@ -221,6 +351,9 @@ def zero_step_preflight(
         "three_distinct_fresh_processes": fresh_processes,
         "post_probe_full_environment_30s": post_probe_environment.get("gate_pass")
         is True,
+        "ticket_bound_machine_identity_exact_before_runtime_transactions": (
+            machine_identity_audit.get("gate_pass") is True
+        ),
         "runtime_state_unchanged_by_preflight": before == after,
     }
     return {
@@ -243,6 +376,8 @@ def zero_step_preflight(
         "initial_environment": initial_environment,
         "probe_results": probe_results,
         "post_probe_environment": post_probe_environment,
+        "observed_capability_identity": observed_capability,
+        "machine_identity_audit": machine_identity_audit,
         "authorization": authorization,
         "frozen_evidence": frozen_evidence,
         "runtime_state_before": before,
@@ -411,7 +546,10 @@ def _open_new(path: Path, *, binary: bool) -> TextIO | Any:
 
 
 def _start_monitors(
-    staging: Path, worker: Mapping[str, Any]
+    staging: Path,
+    worker: Mapping[str, Any],
+    *,
+    orchestrator_pid: int,
 ) -> list[subprocess.Popen[bytes]]:
     stop_file = staging / "monitors.stop"
     commands = []
@@ -449,6 +587,38 @@ def _start_monitors(
                     stderr=subprocess.PIPE,
                 )
             )
+        excluded = sorted(
+            {
+                orchestrator_pid,
+                int(worker["pid"]),
+                *(int(process.pid) for process in processes),
+            }
+        )
+        background_command = [
+            str(GPU_PYTHON),
+            str(MONITOR),
+            "--kind",
+            "background",
+            "--pid",
+            str(worker["pid"]),
+            "--start-ticks",
+            str(worker["process_start_ticks"]),
+            "--interval-s",
+            "0.5",
+            "--stop-file",
+            str(stop_file),
+            "--output",
+            str(staging / "monitor_background.jsonl"),
+        ]
+        for pid in excluded:
+            background_command.extend(("--exclude-pid", str(pid)))
+        processes.append(
+            subprocess.Popen(
+                background_command,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+            )
+        )
     except BaseException:
         for process in processes:
             if process.poll() is None:
@@ -465,7 +635,7 @@ def _wait_for_monitor_starts(
     *,
     timeout_s: float = 30.0,
 ) -> list[dict[str, Any]]:
-    kinds = ("gpu", "tctl", "proc", "pidstat")
+    kinds = ("gpu", "tctl", "proc", "pidstat", "background")
     if len(monitors) != len(kinds):
         raise P0PerformanceError("monitor process set is incomplete")
     deadline = time.monotonic() + timeout_s
@@ -565,6 +735,54 @@ def _stop_monitors(
     return outcomes
 
 
+def _wait_for_launcher_and_worker_exit(
+    process: subprocess.Popen[bytes],
+    worker: Mapping[str, Any],
+    *,
+    poll_interval_s: float = 0.01,
+) -> dict[str, Any]:
+    """Observe the inner worker exit separately from an outer nsys launcher."""
+
+    worker_end_ns: int | None = None
+    worker_alive_at_launcher_exit = False
+    while True:
+        try:
+            observed = process_identity(int(worker["pid"]))
+            worker_alive = observed.start_ticks == int(worker["process_start_ticks"])
+        except (OSError, UnicodeError, ValueError, P0PerformanceError):
+            worker_alive = False
+        captured_ns = time.monotonic_ns()
+        if not worker_alive and worker_end_ns is None:
+            worker_end_ns = captured_ns
+        exit_code = process.poll()
+        if exit_code is not None:
+            worker_alive_at_launcher_exit = worker_alive
+            if worker_alive:
+                os.kill(int(worker["pid"]), signal.SIGTERM)
+                deadline = time.monotonic() + 10.0
+                while time.monotonic() < deadline:
+                    try:
+                        current = process_identity(int(worker["pid"]))
+                        if current.start_ticks != int(worker["process_start_ticks"]):
+                            break
+                    except (OSError, UnicodeError, ValueError, P0PerformanceError):
+                        break
+                    time.sleep(0.05)
+                else:
+                    os.kill(int(worker["pid"]), signal.SIGKILL)
+                worker_end_ns = time.monotonic_ns()
+            if worker_end_ns is None:
+                worker_end_ns = captured_ns
+            return {
+                "launcher_exit_code": exit_code,
+                "worker_exit_observed_monotonic_ns": worker_end_ns,
+                "launcher_exit_observed_monotonic_ns": captured_ns,
+                "worker_alive_at_launcher_exit": worker_alive_at_launcher_exit,
+                "poll_interval_s": poll_interval_s,
+            }
+        time.sleep(poll_interval_s)
+
+
 def _run_exports(staging: Path) -> dict[str, Path]:
     report = staging / "cuda_profile.nsys-rep"
     sqlite_path = staging / "cuda_profile.sqlite"
@@ -601,6 +819,8 @@ def _audit_monitors(
     worker: Mapping[str, Any],
     target_start_ns: int,
     target_end_ns: int,
+    orchestrator_pid: int,
+    monitor_outcomes: Sequence[Mapping[str, Any]],
 ) -> dict[str, Any]:
     output: dict[str, Any] = {}
     for kind in ("gpu", "tctl", "proc", "pidstat"):
@@ -613,8 +833,68 @@ def _audit_monitors(
             target_start_ns=target_start_ns,
             target_end_ns=target_end_ns,
         )
+    allowed_pids = {
+        orchestrator_pid,
+        int(worker["pid"]),
+        *(
+            int(outcome["pid"])
+            for outcome in monitor_outcomes
+            if isinstance(outcome.get("pid"), int)
+        ),
+    }
+    output["background"] = audit_background_records(
+        parse_monitor_jsonl(staging / "monitor_background.jsonl"),
+        target_pid=int(worker["pid"]),
+        target_start_ticks=int(worker["process_start_ticks"]),
+        target_start_ns=target_start_ns,
+        target_end_ns=target_end_ns,
+        allowed_pids=allowed_pids,
+    )
     output["gate_pass"] = all(value["gate_pass"] for value in output.values())
     return output
+
+
+def audit_worker_launcher_lifetimes(
+    *,
+    mode: str,
+    worker_start_ns: int,
+    worker_end_ns: int,
+    launcher_start_ns: int,
+    launcher_end_ns: int,
+    launcher_exit_code: int,
+) -> dict[str, Any]:
+    """Separate the worker telemetry target from an outer nsys lifetime."""
+
+    finalization_lag_ns = launcher_end_ns - worker_end_ns
+    gates = {
+        "launcher_exit_zero": launcher_exit_code == 0,
+        "launcher_lifetime_positive": launcher_end_ns > launcher_start_ns,
+        "worker_lifetime_positive": worker_end_ns > worker_start_ns,
+        "worker_within_launcher_lifetime": launcher_start_ns
+        <= worker_start_ns
+        < worker_end_ns
+        <= launcher_end_ns,
+        "cuda_finalization_lag_nonnegative": mode != "cuda"
+        or finalization_lag_ns >= 0,
+    }
+    return {
+        "gate_pass": all(gates.values()),
+        "gates": gates,
+        "mode": mode,
+        "telemetry_target": {
+            "start_monotonic_ns": worker_start_ns,
+            "end_monotonic_ns": worker_end_ns,
+            "lifetime_s": (worker_end_ns - worker_start_ns) / 1.0e9,
+        },
+        "launcher": {
+            "start_monotonic_ns": launcher_start_ns,
+            "end_monotonic_ns": launcher_end_ns,
+            "end_to_end_wall_time_s": (launcher_end_ns - launcher_start_ns)
+            / 1.0e9,
+            "exit_code": launcher_exit_code,
+            "post_worker_finalization_lag_s": finalization_lag_ns / 1.0e9,
+        },
+    }
 
 
 def audit_sample(
@@ -623,7 +903,11 @@ def audit_sample(
     launch: Mapping[str, Any],
     worker: Mapping[str, Any],
     worker_exit_code: int,
-    target_end_ns: int,
+    launcher_start_ns: int,
+    launcher_end_ns: int,
+    worker_end_ns: int,
+    worker_alive_at_launcher_exit: bool,
+    orchestrator_pid: int,
     monitor_outcomes: Sequence[Mapping[str, Any]],
 ) -> dict[str, Any]:
     if worker_exit_code != 0:
@@ -636,15 +920,30 @@ def audit_sample(
         and result.get("mode") == identity["mode"]
     ):
         raise P0PerformanceError("worker result identity or hard gate failed")
+    result_completed_ns = result.get("completed_monotonic_ns")
+    if type(result_completed_ns) is not int:
+        raise P0PerformanceError("worker completion timestamp is invalid")
+    lifetime = audit_worker_launcher_lifetimes(
+        mode=str(identity["mode"]),
+        worker_start_ns=int(worker["published_monotonic_ns"]),
+        worker_end_ns=worker_end_ns,
+        launcher_start_ns=launcher_start_ns,
+        launcher_end_ns=launcher_end_ns,
+        launcher_exit_code=worker_exit_code,
+    )
+    if not lifetime["gate_pass"]:
+        raise P0PerformanceError("worker/launcher lifetime identity failed")
     monitors = _audit_monitors(
         staging,
         worker=worker,
         target_start_ns=int(worker["published_monotonic_ns"]),
-        target_end_ns=target_end_ns,
+        target_end_ns=worker_end_ns,
+        orchestrator_pid=orchestrator_pid,
+        monitor_outcomes=monitor_outcomes,
     )
     audited_monitor_pids = {
         int(monitors[kind]["summary"]["monitor_pid"])
-        for kind in ("gpu", "tctl", "proc", "pidstat")
+        for kind in ("gpu", "tctl", "proc", "pidstat", "background")
         if isinstance(monitors[kind].get("summary"), Mapping)
         and isinstance(monitors[kind]["summary"].get("monitor_pid"), int)
     }
@@ -654,8 +953,8 @@ def audit_sample(
         if isinstance(outcome.get("pid"), int)
     }
     monitor_process_gates = {
-        "four_monitor_process_outcomes": len(monitor_outcomes) == 4,
-        "monitor_process_pids_unique": len(outcome_pids) == 4,
+        "five_monitor_process_outcomes": len(monitor_outcomes) == 5,
+        "monitor_process_pids_unique": len(outcome_pids) == 5,
         "monitor_processes_match_records": outcome_pids == audited_monitor_pids,
         "monitor_processes_exit_zero": all(
             outcome.get("exit_code") == 0 for outcome in monitor_outcomes
@@ -663,10 +962,11 @@ def audit_sample(
         "monitor_process_stderr_empty": all(
             not str(outcome.get("stderr", "")).strip() for outcome in monitor_outcomes
         ),
-        "worker_completion_within_external_lifetime": int(
-            result["completed_monotonic_ns"]
-        )
-        <= target_end_ns,
+        "worker_result_precedes_observed_exit": int(result_completed_ns)
+        <= worker_end_ns,
+        "worker_not_alive_at_launcher_exit": not worker_alive_at_launcher_exit,
+        "worker_completion_within_external_lifetime": worker_end_ns
+        <= launcher_end_ns,
     }
     monitors["process_outcomes"] = {
         "gate_pass": all(monitor_process_gates.values()),
@@ -746,6 +1046,7 @@ def audit_sample(
         "worker_exit_code": worker_exit_code,
         "monitor_outcomes": list(monitor_outcomes),
         "monitor_audit": monitors,
+        "worker_launcher_lifetime": lifetime,
         "worker_result": result,
         "profile_audit": profile,
         "canonical_numerical_payload_sha256": result["archive"][
@@ -764,7 +1065,17 @@ def execute_one_sample(
     sequence_index: int,
     launch_token: str,
     orchestrator_pid: int,
+    environment_gate: Mapping[str, Any],
 ) -> dict[str, Any]:
+    background_gates = environment_gate.get("background_gates")
+    if not (
+        environment_gate.get("gate_pass") is True
+        and isinstance(background_gates, Mapping)
+        and background_gates.get("background_window_at_least_30_s") is True
+    ):
+        raise P0PerformanceError(
+            "sample requires a complete 30 s environment gate before RUNNING"
+        )
     transaction = SampleTransaction(RAW_ROOT, sample_id)
     staging = transaction.begin()
     observer_fd: int | None = None
@@ -798,10 +1109,18 @@ def execute_one_sample(
             os.close(observer_fd)
             observer_fd = None
         worker = _wait_for_worker_identity(launch["pid_file"], process)
-        monitors = _start_monitors(staging, worker)
+        monitors = _start_monitors(
+            staging,
+            worker,
+            orchestrator_pid=orchestrator_pid,
+        )
         monitor_starts = _wait_for_monitor_starts(staging, monitors, worker)
-        exit_code = process.wait()
-        ended_ns = time.monotonic_ns()
+        exit_observation = _wait_for_launcher_and_worker_exit(process, worker)
+        exit_code = int(exit_observation["launcher_exit_code"])
+        ended_ns = int(exit_observation["launcher_exit_observed_monotonic_ns"])
+        worker_ended_ns = int(
+            exit_observation["worker_exit_observed_monotonic_ns"]
+        )
         monitor_outcomes = _stop_monitors(staging, monitors)
         stdout_stream.close()
         stderr_stream.close()
@@ -810,12 +1129,20 @@ def execute_one_sample(
             launch=launch,
             worker=worker,
             worker_exit_code=exit_code,
-            target_end_ns=ended_ns,
+            launcher_start_ns=started_ns,
+            launcher_end_ns=ended_ns,
+            worker_end_ns=worker_ended_ns,
+            worker_alive_at_launcher_exit=bool(
+                exit_observation["worker_alive_at_launcher_exit"]
+            ),
+            orchestrator_pid=orchestrator_pid,
             monitor_outcomes=monitor_outcomes,
         )
+        manifest["pre_sample_full_environment_gate"] = dict(environment_gate)
         manifest["monitor_start_records"] = monitor_starts
         manifest["external_started_monotonic_ns"] = started_ns
         manifest["external_ended_monotonic_ns"] = ended_ns
+        manifest["worker_exit_observation"] = exit_observation
         manifest["external_end_to_end_wall_time_s"] = (ended_ns - started_ns) / 1.0e9
         transaction.publish_success(manifest)
         return manifest
@@ -881,20 +1208,22 @@ def execute_campaign() -> dict[str, Any]:
         active_sample: str | None = None
         try:
             post_probe_environment = preflight.get("post_probe_environment")
+            observed_capability = preflight.get("observed_capability_identity")
             if not isinstance(post_probe_environment, Mapping):
                 raise P0PerformanceError("post-probe environment binding is absent")
+            if not isinstance(observed_capability, Mapping):
+                raise P0PerformanceError("preclaim machine identity is absent")
             create_claim_and_ledger(
                 authorization=authorization,
                 execution_binding=binding,
                 environment=post_probe_environment,
+                machine_identity=observed_capability,
                 lock_identity=campaign_lock.identity,
             )
             claimed = True
             for sequence_index, sample_id in enumerate(EXPANDED_EXECUTION_SCHEDULE):
                 validate_schedule_prefix(completed, sample_id)
-                environment = evaluate_instantaneous_environment(
-                    instantaneous_environment(), excluded_pids=ancestor_pids()
-                )
+                environment = full_environment_gate(background_duration_s=30.0)
                 if not environment["gate_pass"]:
                     failure = {
                         "schema_version": 2,
@@ -919,6 +1248,7 @@ def execute_campaign() -> dict[str, Any]:
                     sequence_index=sequence_index,
                     launch_token=launch_token,
                     orchestrator_pid=os.getpid(),
+                    environment_gate=environment,
                 )
                 manifest_path = RAW_ROOT / sample_id / "sample_manifest.json"
                 mark_sample_pass(

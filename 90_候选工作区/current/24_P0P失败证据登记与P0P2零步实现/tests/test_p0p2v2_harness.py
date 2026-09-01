@@ -16,6 +16,7 @@ HERE = Path(__file__).resolve().parents[1]
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
+import analyse_p0p2v2_campaign as analysis_module
 import p0p2v2_transaction as transaction_module
 import run_p0p2v2_campaign as campaign_module
 from p0p2v2_allocation import (
@@ -51,7 +52,10 @@ from p0p2v2_numerical import (
 )
 from p0p2v2_telemetry import (
     ProcessSample,
+    audit_background_records,
+    audit_ticket_machine_identity,
     evaluate_instantaneous_environment,
+    full_environment_gate,
     telemetry_coverage,
     verify_pid_lifetime,
 )
@@ -577,6 +581,219 @@ class TelemetryAndMemoryTests(unittest.TestCase):
         self.assertFalse(report["gate_pass"])
         self.assertFalse(report["gates"]["cpu_tctl_at_most_90_c"])
 
+    def test_ticket_machine_identity_rejects_each_governed_drift(self) -> None:
+        expected: dict[str, Any] = {
+            "host_policy": {
+                "governors": {"cpu0": "powersave"},
+                "observed_affinity": [0, 1],
+                "cpu_model": "synthetic-cpu",
+                "ac_online": {"ACAD": 1},
+            },
+            "nvidia_smi_gpu_identity": {
+                "uuid": "GPU-X",
+                "driver_version": "580.1",
+            },
+            "gpu_python_and_cuda": {
+                "cuda_runtime_version": 13020,
+                "gpu_python_realpath": "/usr/bin/python3.12",
+                "python_version": "3.12.3",
+                "packages": {"numpy": "2", "scipy": "1", "cupy-cuda13x": "14"},
+                "numerical_thread_policy": {"selected_threads": 2},
+            },
+        }
+        drifts: dict[str, tuple[str, str, str | None, Any]] = {
+            "governor": ("host_policy", "governors", "cpu0", "performance"),
+            "affinity": ("host_policy", "observed_affinity", None, [0]),
+            "cpu_model": ("host_policy", "cpu_model", None, "other"),
+            "ac": ("host_policy", "ac_online", "ACAD", 0),
+            "gpu_uuid": (
+                "nvidia_smi_gpu_identity",
+                "uuid",
+                None,
+                "GPU-Y",
+            ),
+            "cuda_runtime": (
+                "gpu_python_and_cuda",
+                "cuda_runtime_version",
+                None,
+                13010,
+            ),
+            "gpu_python": (
+                "gpu_python_and_cuda",
+                "gpu_python_realpath",
+                None,
+                "/tmp/python",
+            ),
+            "python": (
+                "gpu_python_and_cuda",
+                "python_version",
+                None,
+                "3.13.0",
+            ),
+            "thread_policy": (
+                "gpu_python_and_cuda",
+                "numerical_thread_policy",
+                "selected_threads",
+                1,
+            ),
+        }
+        self.assertTrue(audit_ticket_machine_identity(expected, expected)["gate_pass"])
+        for name, (section, field, child, value) in drifts.items():
+            observed = copy.deepcopy(expected)
+            if child is None:
+                observed[section][field] = value
+            else:
+                observed[section][field][child] = value
+            with self.subTest(name=name):
+                report = audit_ticket_machine_identity(expected, observed)
+                self.assertFalse(report["gate_pass"])
+                self.assertTrue(report["mismatches"])
+
+    def test_full_30s_environment_gate_and_short_window_rejection(self) -> None:
+        snapshot = {
+            "online_logical_cpus": 32,
+            "governors": {f"cpu{index}": "powersave" for index in range(32)},
+            "ac_online": {"ACAD": 1},
+            "tctl_sources": [
+                {"chip": "k10temp", "label": "Tctl", "temperature_c": 60.0}
+            ],
+            "gpu": {
+                "gpu": {"temperature.gpu": "50"},
+                "compute_processes": [],
+            },
+        }
+        processes = {7: ProcessSample(7, 1, 0, "orchestrator", None)}
+        for seconds, expected_pass in ((30, True), (29, False)):
+            clock = iter((0, seconds * 1_000_000_000))
+            next_clock = clock.__next__
+            report = full_environment_gate(
+                background_duration_s=float(seconds),
+                sleep=lambda _duration: None,
+                environment_capture=lambda: copy.deepcopy(snapshot),
+                process_capture=lambda: dict(processes),
+                monotonic_ns=next_clock,
+            )
+            with self.subTest(seconds=seconds):
+                self.assertIs(report["gate_pass"], expected_pass)
+                self.assertIs(
+                    report["background_gates"]["background_window_at_least_30_s"],
+                    expected_pass,
+                )
+
+    def test_background_lifetime_monitor_detects_cpu_and_compute_pollution(self) -> None:
+        clock_ticks = os.sysconf("SC_CLK_TCK")
+
+        def payload(target_ticks: int, other_ticks: int = 0) -> list[dict[str, Any]]:
+            rows = [
+                asdict(ProcessSample(7, 1, target_ticks, "worker", "/worker", 99)),
+                asdict(ProcessSample(50, 1, 0, "monitor", "/monitor", 99)),
+            ]
+            if other_ticks:
+                rows.append(
+                    asdict(
+                        ProcessSample(
+                            80,
+                            1,
+                            other_ticks,
+                            "python competing.py",
+                            "/usr/bin/python",
+                            1,
+                        )
+                    )
+                )
+            return rows
+
+        def records(*, polluted: bool) -> list[dict[str, Any]]:
+            samples = []
+            for index in range(3):
+                target_ticks = index * clock_ticks
+                other_ticks = index * 10 if polluted else 0
+                busy = index * (clock_ticks + (50 if polluted else 0))
+                samples.append(
+                    {
+                        "record_type": "sample",
+                        "kind": "background",
+                        "monotonic_ns": index * 1_000_000_000,
+                        "target_pid": 7,
+                        "target_start_ticks": 1,
+                        "value": {
+                            "processes": payload(target_ticks, other_ticks),
+                            "system_cpu": {
+                                "total_ticks": 1000 + index * 3200,
+                                "busy_ticks": 100 + busy,
+                            },
+                        },
+                    }
+                )
+            return [
+                {
+                    "record_type": "monitor_start",
+                    "kind": "background",
+                    "monitor_pid": 50,
+                    "target_pid": 7,
+                    "target_start_ticks": 1,
+                    "monotonic_ns": 0,
+                    "excluded_pids": [7, 99],
+                },
+                *samples,
+                {
+                    "record_type": "monitor_summary",
+                    "kind": "background",
+                    "monitor_pid": 50,
+                    "target_pid": 7,
+                    "target_start_ticks": 1,
+                    "first_monotonic_ns": 0,
+                    "last_monotonic_ns": 2_000_000_000,
+                    "sample_count": 3,
+                    "stop_file_seen": True,
+                    "target_alive_at_stop": False,
+                },
+            ]
+
+        passing = audit_background_records(
+            records(polluted=False),
+            target_pid=7,
+            target_start_ticks=1,
+            target_start_ns=0,
+            target_end_ns=2_000_000_000,
+            allowed_pids={7, 99, 50},
+        )
+        self.assertTrue(passing["gate_pass"])
+        failing = audit_background_records(
+            records(polluted=True),
+            target_pid=7,
+            target_start_ticks=1,
+            target_start_ns=0,
+            target_end_ns=2_000_000_000,
+            allowed_pids={7, 99, 50},
+        )
+        self.assertFalse(failing["gate_pass"])
+        self.assertTrue(failing["other_compute_processes"])
+
+    def test_cuda_worker_lifetime_allows_nsys_finalization_lag(self) -> None:
+        second = 1_000_000_000
+        passing = campaign_module.audit_worker_launcher_lifetimes(
+            mode="cuda",
+            worker_start_ns=second,
+            worker_end_ns=10 * second,
+            launcher_start_ns=0,
+            launcher_end_ns=15 * second,
+            launcher_exit_code=0,
+        )
+        self.assertTrue(passing["gate_pass"])
+        self.assertEqual(
+            passing["launcher"]["post_worker_finalization_lag_s"], 5.0
+        )
+        nonzero = campaign_module.audit_worker_launcher_lifetimes(
+            mode="cuda",
+            worker_start_ns=second,
+            worker_end_ns=10 * second,
+            launcher_start_ns=0,
+            launcher_end_ns=15 * second,
+            launcher_exit_code=2,
+        )
+        self.assertFalse(nonzero["gate_pass"])
+
     def test_native_allocator_known_exit_overflow_and_device_crosscheck(self) -> None:
         build_native_artifacts()
         with tempfile.TemporaryDirectory() as temporary:
@@ -624,6 +841,101 @@ class TelemetryAndMemoryTests(unittest.TestCase):
 
 
 class NumericalAndTransactionTests(unittest.TestCase):
+    def test_analysis_snapshot_binds_claim_commit_and_parser_blobs(self) -> None:
+        contract_hash = "f" * 64
+        files = {
+            "analyser.py": {"sha256": "a" * 64, "git_blob_sha": "b" * 40},
+            analysis_module.relative(analysis_module.CONTRACT_PATH): {
+                "sha256": contract_hash,
+                "git_blob_sha": "e" * 40,
+            },
+        }
+        source = {"sha256": "c" * 64}
+        observed = {
+            "symbolic_head": "refs/heads/main",
+            "execution_commit": "d" * 40,
+            "worktree_clean": True,
+            "contract_sha256": contract_hash,
+            "implementation_files": files,
+            "formal_source_tree": source,
+            "preclaim_machine_identity": {"machine": "exact"},
+            "toolchain_binding": {"machine": "exact"},
+        }
+        claim = {
+            "authorization_child_commit": "d" * 40,
+            "implementation_files": files,
+            "formal_source_tree": source,
+        }
+        with patch.object(
+            analysis_module,
+            "execution_binding",
+            return_value=observed,
+        ):
+            self.assertTrue(analysis_module.analysis_git_snapshot(claim)["gate_pass"])
+        for field, value in (
+            ("authorization_child_commit", "e" * 40),
+            ("implementation_files", {"analyser.py": {"sha256": "0" * 64}}),
+        ):
+            malformed = {**claim, field: value}
+            with (
+                self.subTest(field=field),
+                patch.object(
+                    analysis_module,
+                    "execution_binding",
+                    return_value=observed,
+                ),
+                self.assertRaises(P0PerformanceError),
+            ):
+                analysis_module.analysis_git_snapshot(malformed)
+
+    def test_analysis_stale_staging_is_retained_with_explicit_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary) / "analysis"
+            transaction = DirectoryPublicationTransaction(parent, "compact_evidence")
+            staging = transaction.begin()
+            (staging / "retained.txt").write_text("retained\n", encoding="utf-8")
+            with self.assertRaises(P0PerformanceError) as raised:
+                DirectoryPublicationTransaction(parent, "compact_evidence").begin()
+            with patch.multiple(
+                analysis_module,
+                OUTPUT_PARENT=parent,
+                OUTPUT_ROOT=parent / "compact_evidence",
+                ANALYSIS_FAILURE_PATH=parent / "analysis_failure.json",
+            ):
+                failure = analysis_module.publish_analysis_failure(raised.exception)
+            self.assertTrue(Path(failure["path"]).is_file())
+            self.assertEqual(failure["record"]["retained_staging"], [staging.name])
+            self.assertTrue((staging / "retained.txt").is_file())
+
+    def test_analysis_rename_failure_retains_terminal_staging_and_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary) / "analysis"
+            transaction = DirectoryPublicationTransaction(parent, "compact_evidence")
+            staging = transaction.begin()
+            (staging / "report.json").write_text("{}\n", encoding="utf-8")
+            with (
+                patch.object(
+                    transaction_module,
+                    "_rename_directory_noreplace",
+                    side_effect=P0PerformanceError("synthetic analysis rename failure"),
+                ),
+                self.assertRaises(P0PerformanceError) as raised,
+            ):
+                transaction.publish_terminal(
+                    "publication_complete.json",
+                    {"schema_version": 2, "status": "COMPLETE", "gate_pass": True},
+                )
+            with patch.multiple(
+                analysis_module,
+                OUTPUT_PARENT=parent,
+                OUTPUT_ROOT=parent / "compact_evidence",
+                ANALYSIS_FAILURE_PATH=parent / "analysis_failure.json",
+            ):
+                failure = analysis_module.publish_analysis_failure(raised.exception)
+            self.assertTrue((staging / "publication_complete.json").is_file())
+            self.assertTrue(Path(failure["path"]).is_file())
+            self.assertFalse((parent / "compact_evidence").exists())
+
     def test_numerical_hash_is_layout_stable_and_metadata_files_are_excluded(
         self,
     ) -> None:

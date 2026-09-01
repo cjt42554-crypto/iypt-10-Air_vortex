@@ -266,15 +266,29 @@ def run_probe(benchmark: str) -> dict[str, Any]:
         "config_identity": computed_identity,
         "formal_source_identity": source_identity,
         "toolchain": {
-            "versions": versions,
-            "numerical_thread_policy": thread_policy,
+            "gpu_python_realpath": str(Path(sys.executable).resolve()),
+            "python_version": platform.python_version(),
+            "python_implementation": platform.python_implementation(),
+            "packages": {
+                "numpy": versions["numpy"],
+                "scipy": versions["scipy"],
+                "cupy-cuda13x": versions["cupy_distribution"],
+            },
+            "cupy_version": versions["cupy"],
             "cuda_runtime_version": int(cp.cuda.runtime.runtimeGetVersion()),
             "cuda_driver_version": int(cp.cuda.runtime.driverGetVersion()),
-            "device_name": device_name,
-            "compute_capability": (
-                f"{int(properties.get('major', 0))}.{int(properties.get('minor', 0))}"
+            "cuda_device_count": int(cp.cuda.runtime.getDeviceCount()),
+            "cuda_device_index": 0,
+            "cuda_device_name": device_name,
+            "cuda_compute_capability": str(cp.cuda.Device(0).compute_capability),
+            "cuda_total_global_memory_bytes": int(
+                properties.get("totalGlobalMem", 0)
             ),
-            "total_global_memory_bytes": int(properties.get("totalGlobalMem", 0)),
+            "numerical_thread_policy": thread_policy,
+            "omp_dynamic": os.environ.get("OMP_DYNAMIC"),
+            "affinity": sorted(os.sched_getaffinity(0)),
+            "machine": platform.machine(),
+            "system": platform.system(),
         },
         "grid": {"shape": list(grid.shape)},
         "pressure_engine": {

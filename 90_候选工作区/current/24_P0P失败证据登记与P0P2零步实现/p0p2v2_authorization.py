@@ -37,6 +37,7 @@ HISTORY_RELATIVE_PATH = "90_候选工作区/交接说明_history.md"
 REQUIRED_IMPLEMENTATION_RELATIVE_PATHS = frozenset(
     relative(HERE / name)
     for name in (
+        ".gitignore",
         "analyse_p0p2v2_campaign.py",
         "audit_p0p2v2_harness.py",
         "p0p2v2_contract.py",
@@ -471,6 +472,7 @@ def _validate_production_static_audit(
         "native_allocator_build_and_probes",
         "nsys_minimal_trace_and_parsers",
         "ordered_v2_zero_step_preflight_static_pass_default_denied",
+        "preclaim_machine_identity_rebuild_exact",
         "p0d_and_pro_evidence_bound",
         "p1_not_implemented",
         "performance_samples_started_zero",

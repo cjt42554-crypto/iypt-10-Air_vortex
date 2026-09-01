@@ -548,6 +548,8 @@ def audit(output_root: Path) -> dict[str, Any]:
         numerical=numerical,
         current_preflight=current_preflight,
     )
+    preflight_capability = current_preflight.get("observed_capability_identity")
+    capability_rebuild_exact = preflight_capability == capabilities
     atomic_json(output_root / "p0p2v2_capability_manifest.json", capabilities)
     synthetic_environment = synthetic_invalid_environment_gate()
     source_after = formal_source_identity()
@@ -581,6 +583,7 @@ def audit(output_root: Path) -> dict[str, Any]:
         "instrumentation_numerical_equivalence": numerical["gate_pass"],
         "nsys_minimal_trace_and_parsers": nsys["gate_pass"],
         "toolchain_capability_manifest_bound": bool(capabilities),
+        "preclaim_machine_identity_rebuild_exact": capability_rebuild_exact,
         "ordered_v2_zero_step_preflight_static_pass_default_denied": current_preflight[
             "static_qualification"
         ]["gate_pass"]

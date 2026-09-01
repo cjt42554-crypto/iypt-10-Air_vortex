@@ -36,6 +36,7 @@ class ProcessSample:
     cpu_ticks: int
     command: str
     executable: str | None
+    parent_pid: int = -1
 
 
 def _strict_float(value: str) -> float:
@@ -71,6 +72,7 @@ def process_identity(pid: int) -> ProcessSample:
         cpu_ticks=int(fields[11]) + int(fields[12]),
         command=command,
         executable=executable,
+        parent_pid=int(fields[1]),
     )
 
 
@@ -85,6 +87,72 @@ def process_snapshot() -> dict[int, ProcessSample]:
         except (OSError, UnicodeError, ValueError, P0PerformanceError):
             continue
     return samples
+
+
+def process_snapshot_payload() -> list[dict[str, Any]]:
+    """Return one JSON-safe, PID-sorted snapshot for the background monitor."""
+
+    return [asdict(value) for _pid, value in sorted(process_snapshot().items())]
+
+
+def process_snapshot_from_payload(
+    value: object,
+) -> dict[int, ProcessSample]:
+    if not isinstance(value, list):
+        raise P0PerformanceError("background process snapshot is not a list")
+    output: dict[int, ProcessSample] = {}
+    expected = {field.name for field in ProcessSample.__dataclass_fields__.values()}
+    for index, item in enumerate(value):
+        if not isinstance(item, Mapping) or set(item) != expected:
+            raise P0PerformanceError(
+                f"background process snapshot row schema differs: {index}"
+            )
+        try:
+            sample = ProcessSample(
+                pid=int(item["pid"]),
+                start_ticks=int(item["start_ticks"]),
+                cpu_ticks=int(item["cpu_ticks"]),
+                command=str(item["command"]),
+                executable=(
+                    str(item["executable"])
+                    if item["executable"] is not None
+                    else None
+                ),
+                parent_pid=int(item["parent_pid"]),
+            )
+        except (KeyError, TypeError, ValueError) as exc:
+            raise P0PerformanceError(
+                f"background process snapshot row is invalid: {index}"
+            ) from exc
+        if sample.pid <= 0 or sample.pid in output:
+            raise P0PerformanceError("background process snapshot PID is invalid")
+        output[sample.pid] = sample
+    return output
+
+
+def system_cpu_snapshot() -> dict[str, int]:
+    """Capture aggregate Linux CPU ticks, retaining busy and total identities."""
+
+    line = _read_text(Path("/proc/stat")).splitlines()[0]
+    fields = line.split()
+    if not fields or fields[0] != "cpu" or len(fields) < 9:
+        raise P0PerformanceError("aggregate /proc/stat CPU record is invalid")
+    try:
+        values = [int(value) for value in fields[1:]]
+    except ValueError as exc:
+        raise P0PerformanceError("aggregate /proc/stat CPU ticks are invalid") from exc
+    total = sum(values)
+    idle = values[3] + (values[4] if len(values) > 4 else 0)
+    return {"total_ticks": total, "busy_ticks": total - idle}
+
+
+def background_snapshot() -> dict[str, Any]:
+    """Capture process and aggregate CPU state in one monitor record."""
+
+    return {
+        "processes": process_snapshot_payload(),
+        "system_cpu": system_cpu_snapshot(),
+    }
 
 
 def ancestor_pids(pid: int | None = None) -> set[int]:
@@ -112,6 +180,13 @@ def cpu_delta_report(
     if elapsed_s <= 0.0:
         raise ValueError("elapsed_s must be positive")
     excluded = set(excluded_pids)
+    changed = True
+    while changed:
+        changed = False
+        for sample in end.values():
+            if sample.parent_pid in excluded and sample.pid not in excluded:
+                excluded.add(sample.pid)
+                changed = True
     clock_ticks = os.sysconf("SC_CLK_TCK")
     rows: list[dict[str, Any]] = []
     for pid, finish in end.items():
@@ -150,7 +225,31 @@ def cpu_delta_report(
         "background_cpu_percent": background_percent,
         "other_compute_processes": other_compute,
         "top_processes": rows[:64],
+        "excluded_pids_with_descendants": sorted(excluded),
+        "excluded_cpu_delta_ticks": sum(
+            int(row["cpu_delta_ticks"]) for row in rows if row["excluded"]
+        ),
     }
+
+
+def _system_background_cpu_percent(
+    start: Mapping[str, Any],
+    end: Mapping[str, Any],
+    *,
+    elapsed_s: float,
+    excluded_process_cpu_ticks: int,
+) -> float:
+    try:
+        busy_delta = int(end["busy_ticks"]) - int(start["busy_ticks"])
+        total_delta = int(end["total_ticks"]) - int(start["total_ticks"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise P0PerformanceError("background system CPU snapshot is invalid") from exc
+    if busy_delta < 0 or total_delta <= 0:
+        raise P0PerformanceError("background system CPU ticks did not advance")
+    clock_ticks = os.sysconf("SC_CLK_TCK")
+    return 100.0 * max(0, busy_delta - excluded_process_cpu_ticks) / (
+        clock_ticks * elapsed_s
+    )
 
 
 def online_cpu_count() -> int:
@@ -164,6 +263,13 @@ def online_cpu_count() -> int:
             int(token)
             count += 1
     return count
+
+
+def cpu_model() -> str:
+    for line in Path("/proc/cpuinfo").read_text(encoding="utf-8").splitlines():
+        if line.startswith("model name") and ":" in line:
+            return line.split(":", 1)[1].strip()
+    raise P0PerformanceError("CPU model is unavailable")
 
 
 def cpu_governors() -> dict[str, str]:
@@ -350,11 +456,14 @@ def full_environment_gate(
     *,
     background_duration_s: float = 30.0,
     sleep: Callable[[float], None] = time.sleep,
+    environment_capture: Callable[[], dict[str, Any]] = instantaneous_environment,
+    process_capture: Callable[[], dict[int, ProcessSample]] = process_snapshot,
+    monotonic_ns: Callable[[], int] = time.monotonic_ns,
 ) -> dict[str, Any]:
     """Evaluate frozen gates without creating the performance raw root."""
 
     excluded = ancestor_pids()
-    first_environment = instantaneous_environment()
+    first_environment = environment_capture()
     first_gate = evaluate_instantaneous_environment(
         first_environment, excluded_pids=excluded
     )
@@ -365,11 +474,11 @@ def full_environment_gate(
             "instantaneous": first_gate,
             "background": None,
         }
-    start = process_snapshot()
-    start_ns = time.monotonic_ns()
+    start = process_capture()
+    start_ns = monotonic_ns()
     sleep(background_duration_s)
-    end_ns = time.monotonic_ns()
-    end = process_snapshot()
+    end_ns = monotonic_ns()
+    end = process_capture()
     elapsed = (end_ns - start_ns) / 1.0e9
     background = cpu_delta_report(
         start,
@@ -378,7 +487,7 @@ def full_environment_gate(
         excluded_pids=excluded,
     )
     second_gate = evaluate_instantaneous_environment(
-        instantaneous_environment(), excluded_pids=excluded
+        environment_capture(), excluded_pids=excluded
     )
     background_gates = {
         "background_window_at_least_30_s": elapsed >= 30.0,
@@ -395,6 +504,83 @@ def full_environment_gate(
         "instantaneous_end": second_gate,
         "background": background,
         "background_gates": background_gates,
+    }
+
+
+def nested_identity_mismatches(
+    expected: object,
+    observed: object,
+    *,
+    path: str = "$",
+) -> list[dict[str, Any]]:
+    """Return deterministic exact-identity differences without relaxing fields."""
+
+    if isinstance(expected, Mapping) and isinstance(observed, Mapping):
+        differences: list[dict[str, Any]] = []
+        keys = sorted(set(expected) | set(observed), key=str)
+        for key in keys:
+            child = f"{path}.{key}"
+            if key not in expected:
+                differences.append(
+                    {"path": child, "reason": "unexpected", "observed": observed[key]}
+                )
+            elif key not in observed:
+                differences.append(
+                    {"path": child, "reason": "missing", "expected": expected[key]}
+                )
+            else:
+                differences.extend(
+                    nested_identity_mismatches(expected[key], observed[key], path=child)
+                )
+        return differences
+    if (
+        isinstance(expected, Sequence)
+        and not isinstance(expected, (str, bytes, bytearray))
+        and isinstance(observed, Sequence)
+        and not isinstance(observed, (str, bytes, bytearray))
+    ):
+        differences = []
+        if len(expected) != len(observed):
+            differences.append(
+                {
+                    "path": path,
+                    "reason": "length",
+                    "expected": len(expected),
+                    "observed": len(observed),
+                }
+            )
+        for index, (left, right) in enumerate(zip(expected, observed)):
+            differences.extend(
+                nested_identity_mismatches(left, right, path=f"{path}[{index}]")
+            )
+        return differences
+    if type(expected) is not type(observed) or expected != observed:
+        return [
+            {
+                "path": path,
+                "reason": "value_or_type",
+                "expected": expected,
+                "observed": observed,
+            }
+        ]
+    return []
+
+
+def audit_ticket_machine_identity(
+    expected: Mapping[str, Any], observed: Mapping[str, Any]
+) -> dict[str, Any]:
+    mismatches = nested_identity_mismatches(expected, observed)
+    return {
+        "schema_version": 2,
+        "status": (
+            "HF3D_P0P2_V2_TICKET_MACHINE_IDENTITY_EXACT"
+            if not mismatches
+            else "HF3D_P0P2_V2_TICKET_MACHINE_IDENTITY_DRIFT"
+        ),
+        "gate_pass": not mismatches,
+        "mismatches": mismatches,
+        "expected": dict(expected),
+        "observed": dict(observed),
     }
 
 
@@ -736,6 +922,114 @@ def audit_monitor_records(
     }
 
 
+def audit_background_records(
+    records: Sequence[Mapping[str, Any]],
+    *,
+    target_pid: int,
+    target_start_ticks: int,
+    target_start_ns: int,
+    target_end_ns: int,
+    allowed_pids: Iterable[int],
+) -> dict[str, Any]:
+    """Independently reject process or aggregate CPU pollution for a sample."""
+
+    base = audit_monitor_records(
+        records,
+        kind="background",
+        target_pid=target_pid,
+        target_start_ticks=target_start_ticks,
+        target_start_ns=target_start_ns,
+        target_end_ns=target_end_ns,
+    )
+    samples = [
+        record for record in records if record.get("record_type") == "sample"
+    ]
+    start = base.get("start")
+    monitor_pid = (
+        int(start["monitor_pid"])
+        if isinstance(start, Mapping) and isinstance(start.get("monitor_pid"), int)
+        else -1
+    )
+    declared = (
+        {int(value) for value in start.get("excluded_pids", [])}
+        if isinstance(start, Mapping) and isinstance(start.get("excluded_pids"), list)
+        else set()
+    )
+    expected_allowed = {int(value) for value in allowed_pids} | {monitor_pid}
+    intervals: list[dict[str, Any]] = []
+    for left, right in itertools.pairwise(samples):
+        left_ns = left.get("monotonic_ns")
+        right_ns = right.get("monotonic_ns")
+        left_value = left.get("value")
+        right_value = right.get("value")
+        if not (
+            isinstance(left_ns, int)
+            and isinstance(right_ns, int)
+            and right_ns > left_ns
+            and isinstance(left_value, Mapping)
+            and isinstance(right_value, Mapping)
+        ):
+            raise P0PerformanceError("background monitor interval is invalid")
+        elapsed_s = (right_ns - left_ns) / 1.0e9
+        first_processes = process_snapshot_from_payload(left_value.get("processes"))
+        second_processes = process_snapshot_from_payload(right_value.get("processes"))
+        process_report = cpu_delta_report(
+            first_processes,
+            second_processes,
+            elapsed_s=elapsed_s,
+            excluded_pids=expected_allowed,
+        )
+        excluded_ticks = int(process_report["excluded_cpu_delta_ticks"])
+        system_percent = _system_background_cpu_percent(
+            left_value.get("system_cpu", {}),
+            right_value.get("system_cpu", {}),
+            elapsed_s=elapsed_s,
+            excluded_process_cpu_ticks=excluded_ticks,
+        )
+        intervals.append(
+            {
+                "start_monotonic_ns": left_ns,
+                "end_monotonic_ns": right_ns,
+                "elapsed_s": elapsed_s,
+                "system_background_cpu_percent_one_logical_cpu_basis": system_percent,
+                "process_report": process_report,
+                "gate_pass": system_percent <= BACKGROUND_CPU_MAX_PERCENT
+                and not process_report["other_compute_processes"],
+            }
+        )
+    background_gates = {
+        "declared_allowed_pids_exact": declared == expected_allowed - {monitor_pid},
+        "at_least_two_intervals": len(intervals) >= 2,
+        "all_intervals_background_cpu_at_most_25_percent": bool(intervals)
+        and all(
+            float(item["system_background_cpu_percent_one_logical_cpu_basis"])
+            <= BACKGROUND_CPU_MAX_PERCENT
+            for item in intervals
+        ),
+        "no_other_compute_process_during_sample": bool(intervals)
+        and all(not item["process_report"]["other_compute_processes"] for item in intervals),
+    }
+    return {
+        **base,
+        "gate_pass": base["gate_pass"] and all(background_gates.values()),
+        "background_gates": background_gates,
+        "allowed_pids": sorted(expected_allowed),
+        "intervals": intervals,
+        "maximum_system_background_cpu_percent": max(
+            (
+                float(item["system_background_cpu_percent_one_logical_cpu_basis"])
+                for item in intervals
+            ),
+            default=None,
+        ),
+        "other_compute_processes": [
+            process
+            for item in intervals
+            for process in item["process_report"]["other_compute_processes"]
+        ],
+    }
+
+
 def pidstat_text_from_records(records: Sequence[Mapping[str, Any]]) -> str:
     return "\n".join(
         str(record["raw"])
@@ -773,12 +1067,17 @@ __all__ = [
     "TELEMETRY_MAX_GAP_S",
     "ProcessSample",
     "ancestor_pids",
+    "audit_background_records",
     "audit_monitor_records",
+    "audit_ticket_machine_identity",
+    "background_snapshot",
     "cpu_delta_report",
+    "cpu_model",
     "evaluate_instantaneous_environment",
     "full_environment_gate",
     "gpu_snapshot",
     "instantaneous_environment",
+    "nested_identity_mismatches",
     "parse_monitor_jsonl",
     "parse_nvidia_smi_csv",
     "parse_pidstat_blocks",
@@ -786,6 +1085,9 @@ __all__ = [
     "pidstat_text_from_records",
     "process_identity",
     "process_snapshot",
+    "process_snapshot_from_payload",
+    "process_snapshot_payload",
+    "system_cpu_snapshot",
     "tctl_sources",
     "telemetry_coverage",
     "verify_pid_lifetime",

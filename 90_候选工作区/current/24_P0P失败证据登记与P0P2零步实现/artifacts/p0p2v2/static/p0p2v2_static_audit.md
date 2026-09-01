@@ -16,6 +16,7 @@
 | instrumentation_numerical_equivalence | PASS |
 | nsys_minimal_trace_and_parsers | PASS |
 | toolchain_capability_manifest_bound | PASS |
+| preclaim_machine_identity_rebuild_exact | PASS |
 | ordered_v2_zero_step_preflight_static_pass_default_denied | PASS |
 | synthetic_96c_environment_rejected | PASS |
 | formal_source_unchanged | PASS |

@@ -308,10 +308,11 @@
       "quality_gates_bound": true,
       "raw_root_absent_or_empty": true,
       "runtime_state_unchanged_by_preflight": true,
-      "three_distinct_fresh_processes": true
+      "three_distinct_fresh_processes": true,
+      "ticket_bound_machine_identity_exact_before_runtime_transactions": true
     },
     "initial_environment": {
-      "cpu_tctl_max_c": 75.625,
+      "cpu_tctl_max_c": 74.75,
       "gate_pass": true,
       "gates": {
         "ac_power_online": true,
@@ -323,7 +324,7 @@
         "online_logical_cpus_32": true,
         "reliable_tctl_available": true
       },
-      "gpu_temperature_c": 49.0,
+      "gpu_temperature_c": 45.0,
       "other_gpu_compute_processes": [],
       "snapshot": {
         "ac_online": {
@@ -331,7 +332,7 @@
           "ucsi-source-psy-USBC000:001": 0,
           "ucsi-source-psy-USBC000:002": 0
         },
-        "captured_monotonic_ns": 13219095771115,
+        "captured_monotonic_ns": 22698442335707,
         "governors": {
           "cpu0": "powersave",
           "cpu1": "powersave",
@@ -369,18 +370,18 @@
         "gpu": {
           "compute_processes": [],
           "gpu": {
-            "clocks.current.memory": "9001",
+            "clocks.current.memory": "810",
             "clocks.current.sm": "1672",
             "clocks_throttle_reasons.active": "0x0000000000000000",
             "driver_version": "580.173.02",
             "memory.total": "8151",
-            "memory.used": "585",
+            "memory.used": "703",
             "name": "NVIDIA GeForce RTX 5060 Laptop GPU",
-            "power.draw": "9.66",
+            "power.draw": "8.95",
             "power.limit": "[N/A]",
-            "pstate": "P4",
-            "temperature.gpu": "49",
-            "timestamp": "2026/09/01 16:17:56.233",
+            "pstate": "P5",
+            "temperature.gpu": "45",
+            "timestamp": "2026/09/01 18:55:55.572",
             "utilization.gpu": "0",
             "utilization.memory": "0",
             "uuid": "GPU-dc6a96b5-fcac-d5a9-f9a6-720d53fb3f0e"
@@ -393,171 +394,719 @@
             "input_path": "/sys/devices/pci0000:00/0000:00:18.3/hwmon/hwmon6/temp1_input",
             "label": "Tctl",
             "label_path": "/sys/devices/pci0000:00/0000:00:18.3/hwmon/hwmon6/temp1_label",
-            "temperature_c": 75.625
+            "temperature_c": 74.75
           }
         ]
       }
+    },
+    "machine_identity_audit": {
+      "gate_pass": true,
+      "mismatches": [],
+      "observed": {
+        "gpu_python_and_cuda": {
+          "affinity": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+          ],
+          "cuda_compute_capability": "120",
+          "cuda_device_count": 1,
+          "cuda_device_index": 0,
+          "cuda_device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+          "cuda_driver_version": 13000,
+          "cuda_runtime_version": 13020,
+          "cuda_total_global_memory_bytes": 8053915648,
+          "cupy_version": "14.2.0",
+          "gpu_python_realpath": "/usr/bin/python3.12",
+          "machine": "x86_64",
+          "numerical_thread_policy": {
+            "affinity_logical_cpus": 32,
+            "applied": [
+              [
+                "OPENBLAS_NUM_THREADS",
+                "2"
+              ],
+              [
+                "OMP_NUM_THREADS",
+                "2"
+              ],
+              [
+                "MKL_NUM_THREADS",
+                "2"
+              ],
+              [
+                "BLIS_NUM_THREADS",
+                "2"
+              ],
+              [
+                "VECLIB_MAXIMUM_THREADS",
+                "2"
+              ],
+              [
+                "NUMEXPR_NUM_THREADS",
+                "2"
+              ]
+            ],
+            "explicitly_overrode_library_environment": false,
+            "preserved": [],
+            "requested": "auto",
+            "selected_threads": 2
+          },
+          "omp_dynamic": "FALSE",
+          "packages": {
+            "cupy-cuda13x": "14.2.0",
+            "numpy": "2.5.2",
+            "scipy": "1.17.1"
+          },
+          "python_implementation": "CPython",
+          "python_version": "3.12.3",
+          "system": "Linux"
+        },
+        "host_policy": {
+          "ac_online": {
+            "ACAD": 1,
+            "ucsi-source-psy-USBC000:001": 0,
+            "ucsi-source-psy-USBC000:002": 0
+          },
+          "cpu_model": "AMD Ryzen 9 9955HX 16-Core Processor",
+          "expected_online_logical_cpus": 32,
+          "formal_selected_blas_threads": 2,
+          "governors": {
+            "cpu0": "powersave",
+            "cpu1": "powersave",
+            "cpu10": "powersave",
+            "cpu11": "powersave",
+            "cpu12": "powersave",
+            "cpu13": "powersave",
+            "cpu14": "powersave",
+            "cpu15": "powersave",
+            "cpu16": "powersave",
+            "cpu17": "powersave",
+            "cpu18": "powersave",
+            "cpu19": "powersave",
+            "cpu2": "powersave",
+            "cpu20": "powersave",
+            "cpu21": "powersave",
+            "cpu22": "powersave",
+            "cpu23": "powersave",
+            "cpu24": "powersave",
+            "cpu25": "powersave",
+            "cpu26": "powersave",
+            "cpu27": "powersave",
+            "cpu28": "powersave",
+            "cpu29": "powersave",
+            "cpu3": "powersave",
+            "cpu30": "powersave",
+            "cpu31": "powersave",
+            "cpu4": "powersave",
+            "cpu5": "powersave",
+            "cpu6": "powersave",
+            "cpu7": "powersave",
+            "cpu8": "powersave",
+            "cpu9": "powersave"
+          },
+          "observed_affinity": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+          ],
+          "omp_dynamic": "FALSE",
+          "platform": {
+            "machine": "x86_64",
+            "release": "7.0.0-28-generic",
+            "system": "Linux"
+          }
+        },
+        "native_compiler": {
+          "build_flags": [
+            "-O2",
+            "-std=c11",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-fno-omit-frame-pointer"
+          ],
+          "version_line": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+        },
+        "nsys": {
+          "cpuctxsw": "none",
+          "path": "/opt/nvidia/hpc_sdk/Linux_x86_64/26.5/compilers/bin/nsys",
+          "qualified_trace": "cuda,nvtx",
+          "sample": "none",
+          "version_line": "NVIDIA Nsight Systems version 2026.2.1.210-262137639646v0"
+        },
+        "nvidia_smi_gpu_identity": {
+          "driver_version": "580.173.02",
+          "name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+          "uuid": "GPU-dc6a96b5-fcac-d5a9-f9a6-720d53fb3f0e"
+        },
+        "schema_version": 2,
+        "status": "HF3D_P0P2_V2_ZERO_STEP_TOOLCHAIN_CAPABILITY_BOUND"
+      },
+      "schema_version": 2,
+      "status": "HF3D_P0P2_V2_TICKET_MACHINE_IDENTITY_NOT_APPLICABLE_DENIED"
+    },
+    "observed_capability_identity": {
+      "gpu_python_and_cuda": {
+        "affinity": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "cuda_compute_capability": "120",
+        "cuda_device_count": 1,
+        "cuda_device_index": 0,
+        "cuda_device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+        "cuda_driver_version": 13000,
+        "cuda_runtime_version": 13020,
+        "cuda_total_global_memory_bytes": 8053915648,
+        "cupy_version": "14.2.0",
+        "gpu_python_realpath": "/usr/bin/python3.12",
+        "machine": "x86_64",
+        "numerical_thread_policy": {
+          "affinity_logical_cpus": 32,
+          "applied": [
+            [
+              "OPENBLAS_NUM_THREADS",
+              "2"
+            ],
+            [
+              "OMP_NUM_THREADS",
+              "2"
+            ],
+            [
+              "MKL_NUM_THREADS",
+              "2"
+            ],
+            [
+              "BLIS_NUM_THREADS",
+              "2"
+            ],
+            [
+              "VECLIB_MAXIMUM_THREADS",
+              "2"
+            ],
+            [
+              "NUMEXPR_NUM_THREADS",
+              "2"
+            ]
+          ],
+          "explicitly_overrode_library_environment": false,
+          "preserved": [],
+          "requested": "auto",
+          "selected_threads": 2
+        },
+        "omp_dynamic": "FALSE",
+        "packages": {
+          "cupy-cuda13x": "14.2.0",
+          "numpy": "2.5.2",
+          "scipy": "1.17.1"
+        },
+        "python_implementation": "CPython",
+        "python_version": "3.12.3",
+        "system": "Linux"
+      },
+      "host_policy": {
+        "ac_online": {
+          "ACAD": 1,
+          "ucsi-source-psy-USBC000:001": 0,
+          "ucsi-source-psy-USBC000:002": 0
+        },
+        "cpu_model": "AMD Ryzen 9 9955HX 16-Core Processor",
+        "expected_online_logical_cpus": 32,
+        "formal_selected_blas_threads": 2,
+        "governors": {
+          "cpu0": "powersave",
+          "cpu1": "powersave",
+          "cpu10": "powersave",
+          "cpu11": "powersave",
+          "cpu12": "powersave",
+          "cpu13": "powersave",
+          "cpu14": "powersave",
+          "cpu15": "powersave",
+          "cpu16": "powersave",
+          "cpu17": "powersave",
+          "cpu18": "powersave",
+          "cpu19": "powersave",
+          "cpu2": "powersave",
+          "cpu20": "powersave",
+          "cpu21": "powersave",
+          "cpu22": "powersave",
+          "cpu23": "powersave",
+          "cpu24": "powersave",
+          "cpu25": "powersave",
+          "cpu26": "powersave",
+          "cpu27": "powersave",
+          "cpu28": "powersave",
+          "cpu29": "powersave",
+          "cpu3": "powersave",
+          "cpu30": "powersave",
+          "cpu31": "powersave",
+          "cpu4": "powersave",
+          "cpu5": "powersave",
+          "cpu6": "powersave",
+          "cpu7": "powersave",
+          "cpu8": "powersave",
+          "cpu9": "powersave"
+        },
+        "observed_affinity": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31
+        ],
+        "omp_dynamic": "FALSE",
+        "platform": {
+          "machine": "x86_64",
+          "release": "7.0.0-28-generic",
+          "system": "Linux"
+        }
+      },
+      "native_compiler": {
+        "build_flags": [
+          "-O2",
+          "-std=c11",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-fno-omit-frame-pointer"
+        ],
+        "version_line": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+      },
+      "nsys": {
+        "cpuctxsw": "none",
+        "path": "/opt/nvidia/hpc_sdk/Linux_x86_64/26.5/compilers/bin/nsys",
+        "qualified_trace": "cuda,nvtx",
+        "sample": "none",
+        "version_line": "NVIDIA Nsight Systems version 2026.2.1.210-262137639646v0"
+      },
+      "nvidia_smi_gpu_identity": {
+        "driver_version": "580.173.02",
+        "name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+        "uuid": "GPU-dc6a96b5-fcac-d5a9-f9a6-720d53fb3f0e"
+      },
+      "schema_version": 2,
+      "status": "HF3D_P0P2_V2_ZERO_STEP_TOOLCHAIN_CAPABILITY_BOUND"
     },
     "p0p2v2_dynamic_authorization": "NOT_AUTHORIZED",
     "p1_implemented": false,
     "post_probe_environment": {
       "background": {
-        "background_cpu_percent": 18.63324697630801,
+        "background_cpu_percent": 2.166658256782643,
         "clock_ticks_per_s": 100,
-        "elapsed_s": 30.000139037,
+        "elapsed_s": 30.000116445,
+        "excluded_cpu_delta_ticks": 1333,
+        "excluded_pids_with_descendants": [
+          1978,
+          1986,
+          2104,
+          2105,
+          2107,
+          2108,
+          2116,
+          2220,
+          2245,
+          2254,
+          2341,
+          2796,
+          2803,
+          2809,
+          2810,
+          2824,
+          2832,
+          2835,
+          2867,
+          2916,
+          2919,
+          2958,
+          2967,
+          2975,
+          2998,
+          2999,
+          3001,
+          3003,
+          3004,
+          3006,
+          3008,
+          3009,
+          3014,
+          3018,
+          3021,
+          3025,
+          3026,
+          3028,
+          3032,
+          3033,
+          3073,
+          3086,
+          3089,
+          3102,
+          3135,
+          3139,
+          3148,
+          3154,
+          3231,
+          3251,
+          3260,
+          3283,
+          3293,
+          3300,
+          3308,
+          3328,
+          3357,
+          3366,
+          3374,
+          3397,
+          3514,
+          3535,
+          3548,
+          3571,
+          3603,
+          3612,
+          3731,
+          3807,
+          3895,
+          3901,
+          3903,
+          3907,
+          3908,
+          3910,
+          3948,
+          3950,
+          3965,
+          4014,
+          4019,
+          4166,
+          4167,
+          4185,
+          4894,
+          4908,
+          5236,
+          5237,
+          5697,
+          6057,
+          6234,
+          6323,
+          6373,
+          6374,
+          6580,
+          6810,
+          10726,
+          22044,
+          22045,
+          22148,
+          180889,
+          181937,
+          181938,
+          200159,
+          200160,
+          201738,
+          201739,
+          202064,
+          204111,
+          204118,
+          204119,
+          204121,
+          204123,
+          204129,
+          204130,
+          204132,
+          204156,
+          204158,
+          204169,
+          204190,
+          204333,
+          204342,
+          204406,
+          204731,
+          204741,
+          209951,
+          209952,
+          212779,
+          249248
+        ],
         "other_compute_processes": [],
         "top_processes": [
           {
+            "command": "/usr/lib/chatgpt/ChatGPT --type=renderer --crashpad-handler-pid=3901 --enable-crash-reporter=, --user-data-dir=/home/cjt/.config/Codex --owl-electron-scheme-replay --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox,sentry-ipc --bypasscsp-schemes=sentry-ipc --fetch-schemes=app,codex-sandbox,sentry-ipc --cors-schemes=codex-sandbox,sentry-ipc --streaming-schemes=app,codex-sandbox --owl-scoped-user-agent-additional-hosts=openai.com,chatgpt.com,chatgpt.site,chatgpt-team.site --owl-scoped-user-agent-prefix=CodexBrowser --change-stack-guard-on-fork=enable --ozone-platform=x11 --disable-blink-features=ReplacedNormalFlowStackingInlinePaint --lang=en-US --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=9 --time-ticks-at-unix-epoch=-1788237457157462 --launch-time-ticks=51047453 --shared-files=v8_context_snapshot_data:100 --metrics-shmem-handle=4,i,4632973539889680805,18433305874071255676,2097152 --field-trial-handle=3,i,14315980350573368566,15412770274977756660,262144 --enable-features=ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=7,i,4042301806870045077,206942775137069381,4 --trace-process-track-uuid=3190708994745248135",
+            "compute_name_match": false,
+            "cpu_delta_ticks": 914,
+            "cpu_percent_one_logical_cpu_basis": 30.46654841075901,
+            "cpu_ticks": 116816,
+            "excluded": true,
+            "executable": "/usr/lib/chatgpt/ChatGPT",
+            "parent_pid": 3910,
+            "pid": 5697,
+            "start_ticks": 5104
+          },
+          {
             "command": "/usr/lib/chatgpt/ChatGPT --type=renderer --crashpad-handler-pid=3901 --enable-crash-reporter=, --user-data-dir=/home/cjt/.config/Codex --owl-electron-scheme-replay --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox,sentry-ipc --bypasscsp-schemes=sentry-ipc --fetch-schemes=app,codex-sandbox,sentry-ipc --cors-schemes=codex-sandbox,sentry-ipc --streaming-schemes=app,codex-sandbox --owl-scoped-user-agent-additional-hosts=openai.com,chatgpt.com,chatgpt.site,chatgpt-team.site --owl-scoped-user-agent-prefix=CodexBrowser --change-stack-guard-on-fork=enable --ozone-platform=x11 --disable-blink-features=ReplacedNormalFlowStackingInlinePaint --lang=en-US --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=5 --time-ticks-at-unix-epoch=-1788237457157462 --launch-time-ticks=26496534 --shared-files=v8_context_snapshot_data:100 --metrics-shmem-handle=4,i,4738439136765438194,13905065971321437635,2097152 --field-trial-handle=3,i,14315980350573368566,15412770274977756660,262144 --enable-features=ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=7,i,4042301806870045077,206942775137069381,4 --trace-process-track-uuid=3190708990997080739",
             "compute_name_match": false,
-            "cpu_delta_ticks": 272,
-            "cpu_percent_one_logical_cpu_basis": 9.0666246467903,
-            "cpu_ticks": 72705,
-            "excluded": false,
+            "cpu_delta_ticks": 197,
+            "cpu_percent_one_logical_cpu_basis": 6.566641178248934,
+            "cpu_ticks": 207520,
+            "excluded": true,
             "executable": "/usr/lib/chatgpt/ChatGPT",
+            "parent_pid": 3910,
             "pid": 4167,
             "start_ticks": 2649
           },
           {
             "command": "/usr/lib/chatgpt/ChatGPT --type=gpu-process --ozone-platform=x11 --crashpad-handler-pid=3901 --enable-crash-reporter=, --user-data-dir=/home/cjt/.config/Codex --change-stack-guard-on-fork=enable --gpu-preferences=YAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAASAAAAAAAAAABAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAwAAAAAAAAAAEAAAAAAAAACAAAAAAAAAAMAAAAAQAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --shared-files --metrics-shmem-handle=4,i,8711946753622752837,7142782979598311900,262144 --field-trial-handle=3,i,14315980350573368566,15412770274977756660,262144 --enable-features=ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=7,i,4042301806870045077,206942775137069381,4 --trace-process-track-uuid=3190708988185955192",
             "compute_name_match": false,
-            "cpu_delta_ticks": 94,
-            "cpu_percent_one_logical_cpu_basis": 3.1333188117584125,
-            "cpu_ticks": 102355,
-            "excluded": false,
+            "cpu_delta_ticks": 87,
+            "cpu_percent_one_logical_cpu_basis": 2.8999887436936915,
+            "cpu_ticks": 487333,
+            "excluded": true,
             "executable": "/usr/lib/chatgpt/ChatGPT",
+            "parent_pid": 3907,
             "pid": 3948,
             "start_ticks": 2601
           },
           {
             "command": "/usr/lib/chatgpt/resources/codex -c features.code_mode_host=true app-server --analytics-default-enabled -c mcp_servers.codex_app={\"command\"=\"/usr/lib/chatgpt/resources/plugins/openai-bundled/plugins/codex-app-tools/scripts/launch_codex_app_tools_mcp\",\"args\"=[\"./server.mjs\"],\"cwd\"=\"/usr/lib/chatgpt/resources/plugins/openai-bundled/plugins/codex-app-tools\",\"enabled\"=true,\"default_tools_approval_mode\"=\"approve\",\"tools\"={\"automation_update\"={\"approval_mode\"=\"prompt\"},\"create_thread\"={\"approval_mode\"=\"prompt\"},\"send_message_to_thread\"={\"approval_mode\"=\"prompt\"},\"fork_thread\"={\"approval_mode\"=\"prompt\"},\"handoff_thread\"={\"approval_mode\"=\"prompt\"}},\"env_vars\"=[\"CODEX_APP_TOOLS_PIPE_PATH\",\"CODEX_MCP_NODE_PATH\",\"CODEX_BROWSER_USE_NODE_PATH\",\"CODEX_ELECTRON_RESOURCES_PATH\",\"CODEX_CLI_PATH\",\"XDG_CACHE_HOME\",\"HOME\",\"USERPROFILE\",\"LOCALAPPDATA\",\"PATH\"],\"startup_timeout_sec\"=10,\"tool_timeout_sec\"=3600,\"omit_tools_from\"=[\"deferred\"],\"env\"={\"CODEX_APP_TOOLS_PIPE_PATH\"=\"/tmp/codex-browser-use/5272bd0b-0f4b-413b-942e-54a7245988a0.sock\",\"CODEX_MCP_NODE_PATH\"=\"/usr/lib/chatgpt/resources/cua_node/bin/node\"}}",
             "compute_name_match": true,
-            "cpu_delta_ticks": 86,
-            "cpu_percent_one_logical_cpu_basis": 2.8666533809704626,
-            "cpu_ticks": 32943,
+            "cpu_delta_ticks": 48,
+            "cpu_percent_one_logical_cpu_basis": 1.5999937896241057,
+            "cpu_ticks": 51546,
             "excluded": true,
             "executable": "/usr/lib/chatgpt/resources/codex",
+            "parent_pid": 3895,
             "pid": 4185,
             "start_ticks": 2655
           },
           {
-            "command": "/usr/bin/verge-mihomo -d /home/cjt/.local/share/io.github.clash-verge-rev.clash-verge-rev -f /home/cjt/.local/share/io.github.clash-verge-rev.clash-verge-rev/clash-verge.yaml -ext-ctl-unix /tmp/verge/verge-mihomo.sock",
-            "compute_name_match": false,
-            "cpu_delta_ticks": 53,
-            "cpu_percent_one_logical_cpu_basis": 1.7666584789701687,
-            "cpu_ticks": 19456,
-            "excluded": false,
-            "executable": null,
-            "pid": 3647,
-            "start_ticks": 1153
-          },
-          {
-            "command": "/usr/lib/chatgpt/ChatGPT --type=renderer --crashpad-handler-pid=3901 --enable-crash-reporter=, --user-data-dir=/home/cjt/.config/Codex --owl-electron-scheme-replay --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox,sentry-ipc --bypasscsp-schemes=sentry-ipc --fetch-schemes=app,codex-sandbox,sentry-ipc --cors-schemes=codex-sandbox,sentry-ipc --streaming-schemes=app,codex-sandbox --owl-scoped-user-agent-additional-hosts=openai.com,chatgpt.com,chatgpt.site,chatgpt-team.site --owl-scoped-user-agent-prefix=CodexBrowser --change-stack-guard-on-fork=enable --ozone-platform=x11 --disable-blink-features=ReplacedNormalFlowStackingInlinePaint --lang=en-US --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=6 --time-ticks-at-unix-epoch=-1788237457157462 --launch-time-ticks=26495322 --shared-files=v8_context_snapshot_data:100 --metrics-shmem-handle=4,i,11639211844358772222,1622307827409448774,2097152 --field-trial-handle=3,i,14315980350573368566,15412770274977756660,262144 --enable-features=ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=7,i,4042301806870045077,206942775137069381,4 --trace-process-track-uuid=3190708991934122588",
-            "compute_name_match": false,
-            "cpu_delta_ticks": 36,
-            "cpu_percent_one_logical_cpu_basis": 1.199994438545775,
-            "cpu_ticks": 5003,
-            "excluded": false,
-            "executable": "/usr/lib/chatgpt/ChatGPT",
-            "pid": 4166,
-            "start_ticks": 2649
-          },
-          {
-            "command": "",
-            "compute_name_match": false,
-            "cpu_delta_ticks": 30,
-            "cpu_percent_one_logical_cpu_basis": 0.9999953654548125,
-            "cpu_ticks": 15861,
-            "excluded": false,
-            "executable": null,
-            "pid": 1048,
-            "start_ticks": 199
-          },
-          {
             "command": "/usr/lib/chatgpt/ChatGPT",
             "compute_name_match": false,
-            "cpu_delta_ticks": 24,
-            "cpu_percent_one_logical_cpu_basis": 0.79999629236385,
-            "cpu_ticks": 15951,
+            "cpu_delta_ticks": 29,
+            "cpu_percent_one_logical_cpu_basis": 0.9666629145645639,
+            "cpu_ticks": 28153,
             "excluded": true,
             "executable": "/usr/lib/chatgpt/ChatGPT",
+            "parent_pid": 2867,
             "pid": 3895,
             "start_ticks": 2548
           },
           {
-            "command": "/usr/lib/chatgpt/ChatGPT --type=renderer --crashpad-handler-pid=3901 --enable-crash-reporter=, --user-data-dir=/home/cjt/.config/Codex --owl-electron-scheme-replay --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox,sentry-ipc --bypasscsp-schemes=sentry-ipc --fetch-schemes=app,codex-sandbox,sentry-ipc --cors-schemes=codex-sandbox,sentry-ipc --streaming-schemes=app,codex-sandbox --owl-scoped-user-agent-additional-hosts=openai.com,chatgpt.com,chatgpt.site,chatgpt-team.site --owl-scoped-user-agent-prefix=CodexBrowser --change-stack-guard-on-fork=enable --ozone-platform=x11 --disable-blink-features=ReplacedNormalFlowStackingInlinePaint --lang=en-US --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=13 --time-ticks-at-unix-epoch=-1788237457157462 --launch-time-ticks=67205612 --shared-files=v8_context_snapshot_data:100 --metrics-shmem-handle=4,i,2849237021417741162,4753398294074390887,2097152 --field-trial-handle=3,i,14315980350573368566,15412770274977756660,262144 --enable-features=ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=7,i,4042301806870045077,206942775137069381,4 --trace-process-track-uuid=3190708998493415531",
+            "command": "/usr/bin/verge-mihomo -d /home/cjt/.local/share/io.github.clash-verge-rev.clash-verge-rev -f /home/cjt/.local/share/io.github.clash-verge-rev.clash-verge-rev/clash-verge.yaml -ext-ctl-unix /tmp/verge/verge-mihomo.sock",
             "compute_name_match": false,
-            "cpu_delta_ticks": 13,
-            "cpu_percent_one_logical_cpu_basis": 0.4333313250304187,
-            "cpu_ticks": 42756,
+            "cpu_delta_ticks": 28,
+            "cpu_percent_one_logical_cpu_basis": 0.9333297106140617,
+            "cpu_ticks": 29788,
             "excluded": false,
-            "executable": "/usr/lib/chatgpt/ChatGPT",
-            "pid": 6308,
-            "start_ticks": 6720
+            "executable": null,
+            "parent_pid": 1961,
+            "pid": 3647,
+            "start_ticks": 1153
+          },
+          {
+            "command": "",
+            "compute_name_match": false,
+            "cpu_delta_ticks": 24,
+            "cpu_percent_one_logical_cpu_basis": 0.7999968948120528,
+            "cpu_ticks": 25166,
+            "excluded": false,
+            "executable": null,
+            "parent_pid": 2,
+            "pid": 1048,
+            "start_ticks": 199
           },
           {
             "command": "/usr/lib/chatgpt/ChatGPT --type=renderer --crashpad-handler-pid=3901 --enable-crash-reporter=, --user-data-dir=/home/cjt/.config/Codex --owl-electron-scheme-replay --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox,sentry-ipc --bypasscsp-schemes=sentry-ipc --fetch-schemes=app,codex-sandbox,sentry-ipc --cors-schemes=codex-sandbox,sentry-ipc --streaming-schemes=app,codex-sandbox --owl-scoped-user-agent-additional-hosts=openai.com,chatgpt.com,chatgpt.site,chatgpt-team.site --owl-scoped-user-agent-prefix=CodexBrowser --change-stack-guard-on-fork=enable --ozone-platform=x11 --disable-blink-features=ReplacedNormalFlowStackingInlinePaint --lang=en-US --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=11 --time-ticks-at-unix-epoch=-1788237457157462 --launch-time-ticks=54191945 --shared-files=v8_context_snapshot_data:100 --metrics-shmem-handle=4,i,3729247941054528340,13406417546619984429,2097152 --field-trial-handle=3,i,14315980350573368566,15412770274977756660,262144 --enable-features=ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=7,i,4042301806870045077,206942775137069381,4 --trace-process-track-uuid=3190708996619331833",
             "compute_name_match": false,
-            "cpu_delta_ticks": 11,
-            "cpu_percent_one_logical_cpu_basis": 0.36666496733343124,
-            "cpu_ticks": 30477,
-            "excluded": false,
+            "cpu_delta_ticks": 14,
+            "cpu_percent_one_logical_cpu_basis": 0.46666485530703083,
+            "cpu_ticks": 58443,
+            "excluded": true,
             "executable": "/usr/lib/chatgpt/ChatGPT",
+            "parent_pid": 3910,
             "pid": 6057,
             "start_ticks": 5419
           },
           {
-            "command": "/usr/lib/chatgpt/ChatGPT --type=renderer --crashpad-handler-pid=3901 --enable-crash-reporter=, --user-data-dir=/home/cjt/.config/Codex --owl-electron-scheme-replay --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox,sentry-ipc --bypasscsp-schemes=sentry-ipc --fetch-schemes=app,codex-sandbox,sentry-ipc --cors-schemes=codex-sandbox,sentry-ipc --streaming-schemes=app,codex-sandbox --owl-scoped-user-agent-additional-hosts=openai.com,chatgpt.com,chatgpt.site,chatgpt-team.site --owl-scoped-user-agent-prefix=CodexBrowser --change-stack-guard-on-fork=enable --ozone-platform=x11 --disable-blink-features=ReplacedNormalFlowStackingInlinePaint --lang=en-US --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=9 --time-ticks-at-unix-epoch=-1788237457157462 --launch-time-ticks=51047453 --shared-files=v8_context_snapshot_data:100 --metrics-shmem-handle=4,i,4632973539889680805,18433305874071255676,2097152 --field-trial-handle=3,i,14315980350573368566,15412770274977756660,262144 --enable-features=ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=7,i,4042301806870045077,206942775137069381,4 --trace-process-track-uuid=3190708994745248135",
+            "command": "/usr/lib/chatgpt/ChatGPT --type=renderer --crashpad-handler-pid=3901 --enable-crash-reporter=, --user-data-dir=/home/cjt/.config/Codex --owl-electron-scheme-replay --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox,sentry-ipc --bypasscsp-schemes=sentry-ipc --fetch-schemes=app,codex-sandbox,sentry-ipc --cors-schemes=codex-sandbox,sentry-ipc --streaming-schemes=app,codex-sandbox --owl-scoped-user-agent-additional-hosts=openai.com,chatgpt.com,chatgpt.site,chatgpt-team.site --owl-scoped-user-agent-prefix=CodexBrowser --change-stack-guard-on-fork=enable --ozone-platform=x11 --disable-blink-features=ReplacedNormalFlowStackingInlinePaint --lang=en-US --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=22 --time-ticks-at-unix-epoch=-1788237457157462 --launch-time-ticks=17185309896 --shared-files=v8_context_snapshot_data:100 --metrics-shmem-handle=4,i,3740775641289252988,17146750896731459687,2097152 --field-trial-handle=3,i,14315980350573368566,15412770274977756660,262144 --enable-features=ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=7,i,4042301806870045077,206942775137069381,4 --trace-process-track-uuid=3190709006926792172",
             "compute_name_match": false,
-            "cpu_delta_ticks": 10,
-            "cpu_percent_one_logical_cpu_basis": 0.3333317884849375,
-            "cpu_ticks": 25553,
-            "excluded": false,
+            "cpu_delta_ticks": 12,
+            "cpu_percent_one_logical_cpu_basis": 0.3999984474060264,
+            "cpu_ticks": 72160,
+            "excluded": true,
             "executable": "/usr/lib/chatgpt/ChatGPT",
-            "pid": 5697,
-            "start_ticks": 5104
+            "parent_pid": 3910,
+            "pid": 180889,
+            "start_ticks": 1718531
           },
           {
             "command": "/usr/lib/chatgpt/ChatGPT --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=none --owl-scoped-user-agent-additional-hosts=openai.com,chatgpt.com,chatgpt.site,chatgpt-team.site --owl-scoped-user-agent-prefix=CodexBrowser --crashpad-handler-pid=3901 --enable-crash-reporter=, --user-data-dir=/home/cjt/.config/Codex --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox,sentry-ipc --bypasscsp-schemes=sentry-ipc --fetch-schemes=app,codex-sandbox,sentry-ipc --cors-schemes=codex-sandbox,sentry-ipc --streaming-schemes=app,codex-sandbox --change-stack-guard-on-fork=enable --shared-files=v8_context_snapshot_data:100 --metrics-shmem-handle=4,i,9071574892310108060,9997424397615895967,524288 --field-trial-handle=3,i,14315980350573368566,15412770274977756660,262144 --enable-features=ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=7,i,4042301806870045077,206942775137069381,4 --trace-process-track-uuid=3190708989122997041",
             "compute_name_match": false,
-            "cpu_delta_ticks": 5,
-            "cpu_percent_one_logical_cpu_basis": 0.16666589424246875,
-            "cpu_ticks": 2700,
-            "excluded": false,
+            "cpu_delta_ticks": 8,
+            "cpu_percent_one_logical_cpu_basis": 0.26666563160401763,
+            "cpu_ticks": 4675,
+            "excluded": true,
             "executable": "/usr/lib/chatgpt/ChatGPT",
+            "parent_pid": 3895,
             "pid": 3950,
             "start_ticks": 2602
           },
           {
-            "command": "/usr/lib/chatgpt/ChatGPT --type=utility --utility-sub-type=storage.mojom.StorageService --lang=en-US --service-sandbox-type=utility --crashpad-handler-pid=3901 --enable-crash-reporter=, --user-data-dir=/home/cjt/.config/Codex --owl-electron-scheme-replay --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox,sentry-ipc --bypasscsp-schemes=sentry-ipc --fetch-schemes=app,codex-sandbox,sentry-ipc --cors-schemes=codex-sandbox,sentry-ipc --streaming-schemes=app,codex-sandbox --change-stack-guard-on-fork=enable --shared-files=v8_context_snapshot_data:100 --metrics-shmem-handle=4,i,7832094933717131234,898670423698954554,524288 --field-trial-handle=3,i,14315980350573368566,15412770274977756660,262144 --enable-features=ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=7,i,4042301806870045077,206942775137069381,4 --trace-process-track-uuid=3190708990060038890",
+            "command": "/usr/lib/chatgpt/ChatGPT --type=renderer --crashpad-handler-pid=3901 --enable-crash-reporter=, --user-data-dir=/home/cjt/.config/Codex --owl-electron-scheme-replay --standard-schemes=app,codex-sandbox --service-worker-schemes=codex-sandbox --secure-schemes=app,codex-sandbox,sentry-ipc --bypasscsp-schemes=sentry-ipc --fetch-schemes=app,codex-sandbox,sentry-ipc --cors-schemes=codex-sandbox,sentry-ipc --streaming-schemes=app,codex-sandbox --owl-scoped-user-agent-additional-hosts=openai.com,chatgpt.com,chatgpt.site,chatgpt-team.site --owl-scoped-user-agent-prefix=CodexBrowser --change-stack-guard-on-fork=enable --ozone-platform=x11 --disable-blink-features=ReplacedNormalFlowStackingInlinePaint --lang=en-US --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=6 --time-ticks-at-unix-epoch=-1788237457157462 --launch-time-ticks=26495322 --shared-files=v8_context_snapshot_data:100 --metrics-shmem-handle=4,i,11639211844358772222,1622307827409448774,2097152 --field-trial-handle=3,i,14315980350573368566,15412770274977756660,262144 --enable-features=ReportStuckThrottle --disable-features=DropInputEventsWhilePaintHolding,WebUIOmniboxAimPopup,WebUIOmniboxPopup --variations-seed-version --pseudonymization-salt-handle=7,i,4042301806870045077,206942775137069381,4 --trace-process-track-uuid=3190708991934122588",
             "compute_name_match": false,
-            "cpu_delta_ticks": 5,
-            "cpu_percent_one_logical_cpu_basis": 0.16666589424246875,
-            "cpu_ticks": 247,
-            "excluded": false,
+            "cpu_delta_ticks": 7,
+            "cpu_percent_one_logical_cpu_basis": 0.23333242765351542,
+            "cpu_ticks": 7931,
+            "excluded": true,
             "executable": "/usr/lib/chatgpt/ChatGPT",
-            "pid": 3965,
-            "start_ticks": 2606
+            "parent_pid": 3910,
+            "pid": 4166,
+            "start_ticks": 2649
           },
           {
             "command": "/usr/bin/clash-verge",
             "compute_name_match": false,
-            "cpu_delta_ticks": 4,
-            "cpu_percent_one_logical_cpu_basis": 0.133332715393975,
-            "cpu_ticks": 1469,
-            "excluded": false,
+            "cpu_delta_ticks": 3,
+            "cpu_percent_one_logical_cpu_basis": 0.0999996118515066,
+            "cpu_ticks": 2055,
+            "excluded": true,
             "executable": "/usr/bin/clash-verge",
+            "parent_pid": 2835,
             "pid": 3102,
             "start_ticks": 997
+          },
+          {
+            "command": "/usr/sbin/tailscaled --state=/var/lib/tailscale/tailscaled.state --socket=/run/tailscale/tailscaled.sock --port=41641",
+            "compute_name_match": false,
+            "cpu_delta_ticks": 2,
+            "cpu_percent_one_logical_cpu_basis": 0.06666640790100441,
+            "cpu_ticks": 1350,
+            "excluded": false,
+            "executable": null,
+            "parent_pid": 1,
+            "pid": 1968,
+            "start_ticks": 408
           },
           {
             "command": "/usr/bin/gnome-shell",
             "compute_name_match": false,
             "cpu_delta_ticks": 2,
-            "cpu_percent_one_logical_cpu_basis": 0.0666663576969875,
-            "cpu_ticks": 12443,
+            "cpu_percent_one_logical_cpu_basis": 0.06666640790100441,
+            "cpu_ticks": 81212,
             "excluded": true,
             "executable": "/usr/bin/gnome-shell",
+            "parent_pid": 1978,
             "pid": 2867,
             "start_ticks": 839
           },
@@ -565,252 +1114,227 @@
             "command": "/usr/lib/chatgpt/resources/codex-code-mode-host",
             "compute_name_match": false,
             "cpu_delta_ticks": 2,
-            "cpu_percent_one_logical_cpu_basis": 0.0666663576969875,
-            "cpu_ticks": 989,
-            "excluded": false,
+            "cpu_percent_one_logical_cpu_basis": 0.06666640790100441,
+            "cpu_ticks": 1543,
+            "excluded": true,
             "executable": "/usr/lib/chatgpt/resources/codex-code-mode-host",
+            "parent_pid": 4185,
             "pid": 6234,
             "start_ticks": 6673
           },
           {
-            "command": "",
-            "compute_name_match": false,
-            "cpu_delta_ticks": 2,
-            "cpu_percent_one_logical_cpu_basis": 0.0666663576969875,
-            "cpu_ticks": 45,
-            "excluded": false,
-            "executable": null,
-            "pid": 119861,
-            "start_ticks": 1151081
-          },
-          {
-            "command": "",
-            "compute_name_match": false,
-            "cpu_delta_ticks": 2,
-            "cpu_percent_one_logical_cpu_basis": 0.0666663576969875,
-            "cpu_ticks": 42,
-            "excluded": false,
-            "executable": null,
-            "pid": 124034,
-            "start_ticks": 1193388
-          },
-          {
-            "command": "",
-            "compute_name_match": false,
-            "cpu_delta_ticks": 2,
-            "cpu_percent_one_logical_cpu_basis": 0.0666663576969875,
-            "cpu_ticks": 15,
-            "excluded": false,
-            "executable": null,
-            "pid": 139149,
-            "start_ticks": 1285273
-          },
-          {
-            "command": "",
-            "compute_name_match": false,
-            "cpu_delta_ticks": 2,
-            "cpu_percent_one_logical_cpu_basis": 0.0666663576969875,
-            "cpu_ticks": 11,
-            "excluded": false,
-            "executable": null,
-            "pid": 140171,
-            "start_ticks": 1294852
-          },
-          {
-            "command": "python3 audit_p0p2v2_harness.py",
+            "command": "/usr/lib/chatgpt/resources/cua_node/bin/node /tmp/.tmprki8QZ/trusted-worker.js /home/cjt/股票",
             "compute_name_match": true,
             "cpu_delta_ticks": 2,
-            "cpu_percent_one_logical_cpu_basis": 0.0666663576969875,
-            "cpu_ticks": 19,
+            "cpu_percent_one_logical_cpu_basis": 0.06666640790100441,
+            "cpu_ticks": 263,
+            "excluded": true,
+            "executable": "/usr/lib/chatgpt/resources/cua_node/bin/node",
+            "parent_pid": 6374,
+            "pid": 181938,
+            "start_ticks": 1731837
+          },
+          {
+            "command": "",
+            "compute_name_match": false,
+            "cpu_delta_ticks": 2,
+            "cpu_percent_one_logical_cpu_basis": 0.06666640790100441,
+            "cpu_ticks": 77,
+            "excluded": false,
+            "executable": null,
+            "parent_pid": 2,
+            "pid": 217659,
+            "start_ticks": 2090652
+          },
+          {
+            "command": "",
+            "compute_name_match": false,
+            "cpu_delta_ticks": 2,
+            "cpu_percent_one_logical_cpu_basis": 0.06666640790100441,
+            "cpu_ticks": 3,
+            "excluded": false,
+            "executable": null,
+            "parent_pid": 2,
+            "pid": 238976,
+            "start_ticks": 2235707
+          },
+          {
+            "command": "python3 90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/audit_p0p2v2_harness.py",
+            "compute_name_match": true,
+            "cpu_delta_ticks": 2,
+            "cpu_percent_one_logical_cpu_basis": 0.06666640790100441,
+            "cpu_ticks": 20,
             "excluded": true,
             "executable": "/usr/bin/python3.12",
-            "pid": 145669,
-            "start_ticks": 1320968
+            "parent_pid": 4185,
+            "pid": 249248,
+            "start_ticks": 2268830
           },
           {
             "command": "",
             "compute_name_match": false,
             "cpu_delta_ticks": 1,
-            "cpu_percent_one_logical_cpu_basis": 0.03333317884849375,
-            "cpu_ticks": 444,
+            "cpu_percent_one_logical_cpu_basis": 0.033333203950502203,
+            "cpu_ticks": 764,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 15,
             "start_ticks": 19
-          },
-          {
-            "command": "",
-            "compute_name_match": false,
-            "cpu_delta_ticks": 1,
-            "cpu_percent_one_logical_cpu_basis": 0.03333317884849375,
-            "cpu_ticks": 19,
-            "excluded": false,
-            "executable": null,
-            "pid": 157,
-            "start_ticks": 19
-          },
-          {
-            "command": "",
-            "compute_name_match": false,
-            "cpu_delta_ticks": 1,
-            "cpu_percent_one_logical_cpu_basis": 0.03333317884849375,
-            "cpu_ticks": 78,
-            "excluded": false,
-            "executable": null,
-            "pid": 221,
-            "start_ticks": 20
-          },
-          {
-            "command": "",
-            "compute_name_match": false,
-            "cpu_delta_ticks": 1,
-            "cpu_percent_one_logical_cpu_basis": 0.03333317884849375,
-            "cpu_ticks": 17,
-            "excluded": false,
-            "executable": null,
-            "pid": 542,
-            "start_ticks": 115
           },
           {
             "command": "/usr/lib/systemd/systemd-oomd",
             "compute_name_match": false,
             "cpu_delta_ticks": 1,
-            "cpu_percent_one_logical_cpu_basis": 0.03333317884849375,
-            "cpu_ticks": 425,
+            "cpu_percent_one_logical_cpu_basis": 0.033333203950502203,
+            "cpu_ticks": 696,
             "excluded": false,
             "executable": null,
+            "parent_pid": 1,
             "pid": 1220,
             "start_ticks": 324
+          },
+          {
+            "command": "/usr/lib/systemd/systemd-resolved",
+            "compute_name_match": false,
+            "cpu_delta_ticks": 1,
+            "cpu_percent_one_logical_cpu_basis": 0.033333203950502203,
+            "cpu_ticks": 398,
+            "excluded": false,
+            "executable": null,
+            "parent_pid": 1,
+            "pid": 1222,
+            "start_ticks": 326
           },
           {
             "command": "/usr/sbin/NetworkManager --no-daemon",
             "compute_name_match": false,
             "cpu_delta_ticks": 1,
-            "cpu_percent_one_logical_cpu_basis": 0.03333317884849375,
-            "cpu_ticks": 195,
+            "cpu_percent_one_logical_cpu_basis": 0.033333203950502203,
+            "cpu_ticks": 314,
             "excluded": false,
             "executable": null,
+            "parent_pid": 1,
             "pid": 1796,
             "start_ticks": 346
-          },
-          {
-            "command": "/usr/sbin/tailscaled --state=/var/lib/tailscale/tailscaled.state --socket=/run/tailscale/tailscaled.sock --port=41641",
-            "compute_name_match": false,
-            "cpu_delta_ticks": 1,
-            "cpu_percent_one_logical_cpu_basis": 0.03333317884849375,
-            "cpu_ticks": 836,
-            "excluded": false,
-            "executable": null,
-            "pid": 1968,
-            "start_ticks": 408
-          },
-          {
-            "command": "/usr/lib/xorg/Xorg vt2 -displayfd 3 -auth /run/user/1000/gdm/Xauthority -nolisten tcp -background none -noreset -keeptty -novtswitch -verbose 3",
-            "compute_name_match": false,
-            "cpu_delta_ticks": 1,
-            "cpu_percent_one_logical_cpu_basis": 0.03333317884849375,
-            "cpu_ticks": 3750,
-            "excluded": false,
-            "executable": "/usr/lib/xorg/Xorg",
-            "pid": 2687,
-            "start_ticks": 542
-          },
-          {
-            "command": "/usr/libexec/gvfs-afc-volume-monitor",
-            "compute_name_match": false,
-            "cpu_delta_ticks": 1,
-            "cpu_percent_one_logical_cpu_basis": 0.03333317884849375,
-            "cpu_ticks": 58,
-            "excluded": false,
-            "executable": "/usr/libexec/gvfs-afc-volume-monitor",
-            "pid": 3293,
-            "start_ticks": 1003
           },
           {
             "command": "/usr/libexec/tracker-miner-fs-3",
             "compute_name_match": false,
             "cpu_delta_ticks": 1,
-            "cpu_percent_one_logical_cpu_basis": 0.03333317884849375,
-            "cpu_ticks": 661,
-            "excluded": false,
+            "cpu_percent_one_logical_cpu_basis": 0.033333203950502203,
+            "cpu_ticks": 1021,
+            "excluded": true,
             "executable": "/usr/libexec/tracker-miner-fs-3",
+            "parent_pid": 1978,
             "pid": 3357,
             "start_ticks": 1012
           },
           {
-            "command": "/usr/lib/chatgpt/resources/cua_node/bin/node ./server.mjs",
-            "compute_name_match": true,
+            "command": "/usr/lib/x86_64-linux-gnu/webkit2gtk-4.1/WebKitWebProcess 4 36",
+            "compute_name_match": false,
             "cpu_delta_ticks": 1,
-            "cpu_percent_one_logical_cpu_basis": 0.03333317884849375,
-            "cpu_ticks": 24,
-            "excluded": false,
-            "executable": "/usr/lib/chatgpt/resources/cua_node/bin/node",
-            "pid": 5236,
-            "start_ticks": 4839
-          },
-          {
-            "command": "/usr/lib/chatgpt/resources/cua_node/bin/node ./server.mjs",
-            "compute_name_match": true,
-            "cpu_delta_ticks": 1,
-            "cpu_percent_one_logical_cpu_basis": 0.03333317884849375,
-            "cpu_ticks": 23,
-            "excluded": false,
-            "executable": "/usr/lib/chatgpt/resources/cua_node/bin/node",
-            "pid": 5462,
-            "start_ticks": 4877
-          },
-          {
-            "command": "/usr/lib/chatgpt/resources/cua_node/bin/node /tmp/.tmprki8QZ/trusted-worker.js /home/cjt/股票",
-            "compute_name_match": true,
-            "cpu_delta_ticks": 1,
-            "cpu_percent_one_logical_cpu_basis": 0.03333317884849375,
-            "cpu_ticks": 388,
-            "excluded": false,
-            "executable": "/usr/lib/chatgpt/resources/cua_node/bin/node",
-            "pid": 10590,
-            "start_ticks": 11972
-          },
-          {
-            "command": "/usr/lib/chatgpt/resources/cua_node/bin/node /tmp/.tmpjo2uWw/trusted-worker.js /home/cjt/Desktop/iypt/13 涡流摆",
-            "compute_name_match": true,
-            "cpu_delta_ticks": 1,
-            "cpu_percent_one_logical_cpu_basis": 0.03333317884849375,
-            "cpu_ticks": 276,
-            "excluded": false,
-            "executable": "/usr/lib/chatgpt/resources/cua_node/bin/node",
-            "pid": 22045,
-            "start_ticks": 42244
+            "cpu_percent_one_logical_cpu_basis": 0.033333203950502203,
+            "cpu_ticks": 459,
+            "excluded": true,
+            "executable": "/usr/lib/x86_64-linux-gnu/webkit2gtk-4.1/WebKitWebProcess",
+            "parent_pid": 3102,
+            "pid": 4908,
+            "start_ticks": 4474
           },
           {
             "command": "/usr/lib/chatgpt/resources/codex app-server --listen stdio://",
             "compute_name_match": false,
             "cpu_delta_ticks": 1,
-            "cpu_percent_one_logical_cpu_basis": 0.03333317884849375,
-            "cpu_ticks": 306,
-            "excluded": false,
+            "cpu_percent_one_logical_cpu_basis": 0.033333203950502203,
+            "cpu_ticks": 554,
+            "excluded": true,
             "executable": "/usr/lib/chatgpt/resources/codex",
+            "parent_pid": 5237,
             "pid": 22148,
             "start_ticks": 43034
+          },
+          {
+            "command": "/usr/lib/chatgpt/resources/cua_node/bin/node /tmp/.tmpzQzMb6/trusted-worker.js /home/cjt/Desktop/iypt/10 空气涡流",
+            "compute_name_match": true,
+            "cpu_delta_ticks": 1,
+            "cpu_percent_one_logical_cpu_basis": 0.033333203950502203,
+            "cpu_ticks": 102,
+            "excluded": true,
+            "executable": "/usr/lib/chatgpt/resources/cua_node/bin/node",
+            "parent_pid": 200160,
+            "pid": 201739,
+            "start_ticks": 1977435
+          },
+          {
+            "command": "/opt/google/chrome/chrome",
+            "compute_name_match": false,
+            "cpu_delta_ticks": 1,
+            "cpu_percent_one_logical_cpu_basis": 0.033333203950502203,
+            "cpu_ticks": 623,
+            "excluded": true,
+            "executable": "/opt/google/chrome/chrome",
+            "parent_pid": 2867,
+            "pid": 204111,
+            "start_ticks": 1987709
+          },
+          {
+            "command": "/opt/google/chrome/chrome --type=renderer --crashpad-handler-pid=204121 --enable-crash-reporter=2231065a-0284-455f-8e22-62a0e7bfeaf4, --extension-process --change-stack-guard-on-fork=enable --ozone-platform=x11 --lang=en-US --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=14 --time-ticks-at-unix-epoch=-1788237457157462 --launch-time-ticks=19889846573 --shared-files=v8_context_snapshot_data:100 --metrics-shmem-handle=4,i,5758388873458630849,12974548918780776155,2097152 --field-trial-handle=3,i,14610416161284496420,14672660210476401395,262144 --variations-seed-version=20260831-010033.148000-production --pseudonymization-salt-handle=7,i,4937117448855715593,1551946948619987963,4 --trace-process-track-uuid=3190708999430457380",
+            "compute_name_match": false,
+            "cpu_delta_ticks": 1,
+            "cpu_percent_one_logical_cpu_basis": 0.033333203950502203,
+            "cpu_ticks": 70,
+            "excluded": true,
+            "executable": "/opt/google/chrome/chrome",
+            "parent_pid": 204132,
+            "pid": 204731,
+            "start_ticks": 1988984
           },
           {
             "command": "",
             "compute_name_match": false,
             "cpu_delta_ticks": 1,
-            "cpu_percent_one_logical_cpu_basis": 0.03333317884849375,
-            "cpu_ticks": 20,
+            "cpu_percent_one_logical_cpu_basis": 0.033333203950502203,
+            "cpu_ticks": 7,
             "excluded": false,
             "executable": null,
-            "pid": 114785,
-            "start_ticks": 1094359
+            "parent_pid": 2,
+            "pid": 210426,
+            "start_ticks": 2037128
+          },
+          {
+            "command": "",
+            "compute_name_match": false,
+            "cpu_delta_ticks": 1,
+            "cpu_percent_one_logical_cpu_basis": 0.033333203950502203,
+            "cpu_ticks": 37,
+            "excluded": false,
+            "executable": null,
+            "parent_pid": 2,
+            "pid": 227572,
+            "start_ticks": 2182930
+          },
+          {
+            "command": "",
+            "compute_name_match": false,
+            "cpu_delta_ticks": 1,
+            "cpu_percent_one_logical_cpu_basis": 0.033333203950502203,
+            "cpu_ticks": 6,
+            "excluded": false,
+            "executable": null,
+            "parent_pid": 2,
+            "pid": 244544,
+            "start_ticks": 2253984
           },
           {
             "command": "/sbin/init splash",
             "compute_name_match": false,
             "cpu_delta_ticks": 0,
             "cpu_percent_one_logical_cpu_basis": 0.0,
-            "cpu_ticks": 237,
+            "cpu_ticks": 343,
             "excluded": false,
             "executable": null,
+            "parent_pid": 0,
             "pid": 1,
             "start_ticks": 8
           },
@@ -819,9 +1343,10 @@
             "compute_name_match": false,
             "cpu_delta_ticks": 0,
             "cpu_percent_one_logical_cpu_basis": 0.0,
-            "cpu_ticks": 2,
+            "cpu_ticks": 4,
             "excluded": false,
             "executable": null,
+            "parent_pid": 0,
             "pid": 2,
             "start_ticks": 8
           },
@@ -833,6 +1358,7 @@
             "cpu_ticks": 0,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 3,
             "start_ticks": 19
           },
@@ -844,6 +1370,7 @@
             "cpu_ticks": 0,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 4,
             "start_ticks": 19
           },
@@ -855,6 +1382,7 @@
             "cpu_ticks": 0,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 5,
             "start_ticks": 19
           },
@@ -866,6 +1394,7 @@
             "cpu_ticks": 0,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 6,
             "start_ticks": 19
           },
@@ -877,6 +1406,7 @@
             "cpu_ticks": 0,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 7,
             "start_ticks": 19
           },
@@ -888,6 +1418,7 @@
             "cpu_ticks": 0,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 8,
             "start_ticks": 19
           },
@@ -899,6 +1430,7 @@
             "cpu_ticks": 0,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 10,
             "start_ticks": 19
           },
@@ -907,9 +1439,10 @@
             "compute_name_match": false,
             "cpu_delta_ticks": 0,
             "cpu_percent_one_logical_cpu_basis": 0.0,
-            "cpu_ticks": 6,
+            "cpu_ticks": 9,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 12,
             "start_ticks": 19
           },
@@ -921,6 +1454,7 @@
             "cpu_ticks": 0,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 13,
             "start_ticks": 19
           },
@@ -929,21 +1463,11 @@
             "compute_name_match": false,
             "cpu_delta_ticks": 0,
             "cpu_percent_one_logical_cpu_basis": 0.0,
-            "cpu_ticks": 7,
+            "cpu_ticks": 24,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 14,
-            "start_ticks": 19
-          },
-          {
-            "command": "",
-            "compute_name_match": false,
-            "cpu_delta_ticks": 0,
-            "cpu_percent_one_logical_cpu_basis": 0.0,
-            "cpu_ticks": 1,
-            "excluded": false,
-            "executable": null,
-            "pid": 16,
             "start_ticks": 19
           },
           {
@@ -954,6 +1478,19 @@
             "cpu_ticks": 2,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
+            "pid": 16,
+            "start_ticks": 19
+          },
+          {
+            "command": "",
+            "compute_name_match": false,
+            "cpu_delta_ticks": 0,
+            "cpu_percent_one_logical_cpu_basis": 0.0,
+            "cpu_ticks": 3,
+            "excluded": false,
+            "executable": null,
+            "parent_pid": 2,
             "pid": 17,
             "start_ticks": 19
           },
@@ -962,9 +1499,10 @@
             "compute_name_match": false,
             "cpu_delta_ticks": 0,
             "cpu_percent_one_logical_cpu_basis": 0.0,
-            "cpu_ticks": 18,
+            "cpu_ticks": 64,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 18,
             "start_ticks": 19
           },
@@ -976,6 +1514,7 @@
             "cpu_ticks": 0,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 19,
             "start_ticks": 19
           },
@@ -987,6 +1526,7 @@
             "cpu_ticks": 0,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 20,
             "start_ticks": 19
           },
@@ -998,6 +1538,7 @@
             "cpu_ticks": 0,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 21,
             "start_ticks": 19
           },
@@ -1009,6 +1550,7 @@
             "cpu_ticks": 0,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 22,
             "start_ticks": 19
           },
@@ -1020,6 +1562,7 @@
             "cpu_ticks": 0,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 23,
             "start_ticks": 19
           },
@@ -1028,9 +1571,10 @@
             "compute_name_match": false,
             "cpu_delta_ticks": 0,
             "cpu_percent_one_logical_cpu_basis": 0.0,
-            "cpu_ticks": 65,
+            "cpu_ticks": 177,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 24,
             "start_ticks": 19
           },
@@ -1039,9 +1583,10 @@
             "compute_name_match": false,
             "cpu_delta_ticks": 0,
             "cpu_percent_one_logical_cpu_basis": 0.0,
-            "cpu_ticks": 3,
+            "cpu_ticks": 14,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 25,
             "start_ticks": 19
           },
@@ -1053,6 +1598,7 @@
             "cpu_ticks": 0,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 27,
             "start_ticks": 19
           },
@@ -1064,6 +1610,7 @@
             "cpu_ticks": 0,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 28,
             "start_ticks": 19
           },
@@ -1075,6 +1622,7 @@
             "cpu_ticks": 0,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 29,
             "start_ticks": 19
           },
@@ -1083,9 +1631,10 @@
             "compute_name_match": false,
             "cpu_delta_ticks": 0,
             "cpu_percent_one_logical_cpu_basis": 0.0,
-            "cpu_ticks": 49,
+            "cpu_ticks": 157,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 30,
             "start_ticks": 19
           },
@@ -1094,9 +1643,10 @@
             "compute_name_match": false,
             "cpu_delta_ticks": 0,
             "cpu_percent_one_logical_cpu_basis": 0.0,
-            "cpu_ticks": 1,
+            "cpu_ticks": 5,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 31,
             "start_ticks": 19
           },
@@ -1105,10 +1655,59 @@
             "compute_name_match": false,
             "cpu_delta_ticks": 0,
             "cpu_percent_one_logical_cpu_basis": 0.0,
-            "cpu_ticks": 40,
+            "cpu_ticks": 64,
             "excluded": false,
             "executable": null,
+            "parent_pid": 2,
             "pid": 32,
+            "start_ticks": 19
+          },
+          {
+            "command": "",
+            "compute_name_match": false,
+            "cpu_delta_ticks": 0,
+            "cpu_percent_one_logical_cpu_basis": 0.0,
+            "cpu_ticks": 0,
+            "excluded": false,
+            "executable": null,
+            "parent_pid": 2,
+            "pid": 33,
+            "start_ticks": 19
+          },
+          {
+            "command": "",
+            "compute_name_match": false,
+            "cpu_delta_ticks": 0,
+            "cpu_percent_one_logical_cpu_basis": 0.0,
+            "cpu_ticks": 0,
+            "excluded": false,
+            "executable": null,
+            "parent_pid": 2,
+            "pid": 34,
+            "start_ticks": 19
+          },
+          {
+            "command": "",
+            "compute_name_match": false,
+            "cpu_delta_ticks": 0,
+            "cpu_percent_one_logical_cpu_basis": 0.0,
+            "cpu_ticks": 0,
+            "excluded": false,
+            "executable": null,
+            "parent_pid": 2,
+            "pid": 35,
+            "start_ticks": 19
+          },
+          {
+            "command": "",
+            "compute_name_match": false,
+            "cpu_delta_ticks": 0,
+            "cpu_percent_one_logical_cpu_basis": 0.0,
+            "cpu_ticks": 64,
+            "excluded": false,
+            "executable": null,
+            "parent_pid": 2,
+            "pid": 36,
             "start_ticks": 19
           }
         ]
@@ -1120,7 +1719,7 @@
       },
       "gate_pass": true,
       "instantaneous_end": {
-        "cpu_tctl_max_c": 54.375,
+        "cpu_tctl_max_c": 53.125,
         "gate_pass": true,
         "gates": {
           "ac_power_online": true,
@@ -1132,7 +1731,7 @@
           "online_logical_cpus_32": true,
           "reliable_tctl_available": true
         },
-        "gpu_temperature_c": 47.0,
+        "gpu_temperature_c": 46.0,
         "other_gpu_compute_processes": [],
         "snapshot": {
           "ac_online": {
@@ -1140,7 +1739,7 @@
             "ucsi-source-psy-USBC000:001": 0,
             "ucsi-source-psy-USBC000:002": 0
           },
-          "captured_monotonic_ns": 13261058476050,
+          "captured_monotonic_ns": 22740267587129,
           "governors": {
             "cpu0": "powersave",
             "cpu1": "powersave",
@@ -1183,13 +1782,13 @@
               "clocks_throttle_reasons.active": "0x0000000000000000",
               "driver_version": "580.173.02",
               "memory.total": "8151",
-              "memory.used": "589",
+              "memory.used": "671",
               "name": "NVIDIA GeForce RTX 5060 Laptop GPU",
-              "power.draw": "5.72",
+              "power.draw": "5.63",
               "power.limit": "[N/A]",
               "pstate": "P8",
-              "temperature.gpu": "47",
-              "timestamp": "2026/09/01 16:18:38.181",
+              "temperature.gpu": "46",
+              "timestamp": "2026/09/01 18:56:37.390",
               "utilization.gpu": "0",
               "utilization.memory": "0",
               "uuid": "GPU-dc6a96b5-fcac-d5a9-f9a6-720d53fb3f0e"
@@ -1202,13 +1801,13 @@
               "input_path": "/sys/devices/pci0000:00/0000:00:18.3/hwmon/hwmon6/temp1_input",
               "label": "Tctl",
               "label_path": "/sys/devices/pci0000:00/0000:00:18.3/hwmon/hwmon6/temp1_label",
-              "temperature_c": 54.375
+              "temperature_c": 53.125
             }
           ]
         }
       },
       "instantaneous_start": {
-        "cpu_tctl_max_c": 74.5,
+        "cpu_tctl_max_c": 73.5,
         "gate_pass": true,
         "gates": {
           "ac_power_online": true,
@@ -1220,7 +1819,7 @@
           "online_logical_cpus_32": true,
           "reliable_tctl_available": true
         },
-        "gpu_temperature_c": 51.0,
+        "gpu_temperature_c": 47.0,
         "other_gpu_compute_processes": [],
         "snapshot": {
           "ac_online": {
@@ -1228,7 +1827,7 @@
             "ucsi-source-psy-USBC000:001": 0,
             "ucsi-source-psy-USBC000:002": 0
           },
-          "captured_monotonic_ns": 13230971372020,
+          "captured_monotonic_ns": 22710179425810,
           "governors": {
             "cpu0": "powersave",
             "cpu1": "powersave",
@@ -1271,13 +1870,13 @@
               "clocks_throttle_reasons.active": "0x0000000000000000",
               "driver_version": "580.173.02",
               "memory.total": "8151",
-              "memory.used": "610",
+              "memory.used": "688",
               "name": "NVIDIA GeForce RTX 5060 Laptop GPU",
-              "power.draw": "9.78",
+              "power.draw": "9.52",
               "power.limit": "[N/A]",
               "pstate": "P4",
-              "temperature.gpu": "51",
-              "timestamp": "2026/09/01 16:18:08.108",
+              "temperature.gpu": "47",
+              "timestamp": "2026/09/01 18:56:07.314",
               "utilization.gpu": "0",
               "utilization.memory": "0",
               "uuid": "GPU-dc6a96b5-fcac-d5a9-f9a6-720d53fb3f0e"
@@ -1290,7 +1889,7 @@
               "input_path": "/sys/devices/pci0000:00/0000:00:18.3/hwmon/hwmon6/temp1_input",
               "label": "Tctl",
               "label_path": "/sys/devices/pci0000:00/0000:00:18.3/hwmon/hwmon6/temp1_label",
-              "temperature_c": 74.5
+              "temperature_c": 73.5
             }
           ]
         }
@@ -1317,8 +1916,8 @@
             "source_file_sha256": "602dead5fa6b8b4485103bf91adb53b1bb17b6b3e3f9c8f7c0578be4242d0cd0",
             "source_path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G6_DT0.json"
           },
-          "elapsed_wall_s_before_teardown": 0.8696487,
-          "elapsed_wall_s_total": 0.883275375,
+          "elapsed_wall_s_before_teardown": 0.854227609,
+          "elapsed_wall_s_total": 0.868385293,
           "formal_source_identity": {
             "absolute_root_stored": false,
             "algorithm": "sha256",
@@ -1450,19 +2049,19 @@
             },
             "class": "airvortex.numerics.projection3d_gpu.CuPyVariableDensityProjection3D",
             "cuda_memory": {
-              "free_after_projection_bytes": 7186219008,
-              "free_before_projection_bytes": 7326138368,
+              "free_after_projection_bytes": 7060914176,
+              "free_before_projection_bytes": 7197229056,
               "total_bytes": 8053915648
             }
           },
           "process_identity": {
-            "pid": 148292,
+            "pid": 251892,
             "platform": {
               "machine": "x86_64",
               "release": "7.0.0-28-generic",
               "system": "Linux"
             },
-            "process_start_ticks": 1321909,
+            "process_start_ticks": 2269844,
             "python_executable": "/usr/bin/python3.12"
           },
           "runtime_inputs": {
@@ -1488,10 +2087,50 @@
             "pool_used_bytes_after_free_all_blocks": 0
           },
           "toolchain": {
-            "compute_capability": "12.0",
+            "affinity": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              25,
+              26,
+              27,
+              28,
+              29,
+              30,
+              31
+            ],
+            "cuda_compute_capability": "120",
+            "cuda_device_count": 1,
+            "cuda_device_index": 0,
+            "cuda_device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
             "cuda_driver_version": 13000,
             "cuda_runtime_version": 13020,
-            "device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+            "cuda_total_global_memory_bytes": 8053915648,
+            "cupy_version": "14.2.0",
+            "gpu_python_realpath": "/usr/bin/python3.12",
+            "machine": "x86_64",
             "numerical_thread_policy": {
               "affinity_logical_cpus": 32,
               "applied": [
@@ -1525,14 +2164,15 @@
               "requested": "auto",
               "selected_threads": 2
             },
-            "total_global_memory_bytes": 8053915648,
-            "versions": {
-              "cupy": "14.2.0",
-              "cupy_distribution": "14.2.0",
+            "omp_dynamic": "FALSE",
+            "packages": {
+              "cupy-cuda13x": "14.2.0",
               "numpy": "2.5.2",
-              "python": "3.12.3",
               "scipy": "1.17.1"
-            }
+            },
+            "python_implementation": "CPython",
+            "python_version": "3.12.3",
+            "system": "Linux"
           },
           "zero_step_diagnostics": {
             "actual_bar_rpm": 0.0,
@@ -1632,8 +2272,8 @@
             "source_file_sha256": "64bf8553b88e546b3bd18a8867fd9ed5455be475bb77f467f8c45c157353b86d",
             "source_path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G9_DT0.json"
           },
-          "elapsed_wall_s_before_teardown": 4.855178068,
-          "elapsed_wall_s_total": 4.874576972,
+          "elapsed_wall_s_before_teardown": 4.815177607,
+          "elapsed_wall_s_total": 4.837540718,
           "formal_source_identity": {
             "absolute_root_stored": false,
             "algorithm": "sha256",
@@ -1765,19 +2405,19 @@
             },
             "class": "airvortex.numerics.projection3d_gpu.CuPyVariableDensityProjection3D",
             "cuda_memory": {
-              "free_after_projection_bytes": 6884884480,
-              "free_before_projection_bytes": 7323058176,
+              "free_after_projection_bytes": 6755057664,
+              "free_before_projection_bytes": 7183859712,
               "total_bytes": 8053915648
             }
           },
           "process_identity": {
-            "pid": 148305,
+            "pid": 251944,
             "platform": {
               "machine": "x86_64",
               "release": "7.0.0-28-generic",
               "system": "Linux"
             },
-            "process_start_ticks": 1322042,
+            "process_start_ticks": 2269970,
             "python_executable": "/usr/bin/python3.12"
           },
           "runtime_inputs": {
@@ -1803,10 +2443,50 @@
             "pool_used_bytes_after_free_all_blocks": 0
           },
           "toolchain": {
-            "compute_capability": "12.0",
+            "affinity": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              25,
+              26,
+              27,
+              28,
+              29,
+              30,
+              31
+            ],
+            "cuda_compute_capability": "120",
+            "cuda_device_count": 1,
+            "cuda_device_index": 0,
+            "cuda_device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
             "cuda_driver_version": 13000,
             "cuda_runtime_version": 13020,
-            "device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+            "cuda_total_global_memory_bytes": 8053915648,
+            "cupy_version": "14.2.0",
+            "gpu_python_realpath": "/usr/bin/python3.12",
+            "machine": "x86_64",
             "numerical_thread_policy": {
               "affinity_logical_cpus": 32,
               "applied": [
@@ -1840,14 +2520,15 @@
               "requested": "auto",
               "selected_threads": 2
             },
-            "total_global_memory_bytes": 8053915648,
-            "versions": {
-              "cupy": "14.2.0",
-              "cupy_distribution": "14.2.0",
+            "omp_dynamic": "FALSE",
+            "packages": {
+              "cupy-cuda13x": "14.2.0",
               "numpy": "2.5.2",
-              "python": "3.12.3",
               "scipy": "1.17.1"
-            }
+            },
+            "python_implementation": "CPython",
+            "python_version": "3.12.3",
+            "system": "Linux"
           },
           "zero_step_diagnostics": {
             "actual_bar_rpm": 0.0,
@@ -1947,8 +2628,8 @@
             "source_file_sha256": "c924a225d4d35b25217318c0bdbe7728bceb637f5474e0eb9e2cbffac6ccdb37",
             "source_path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G9_DT2.json"
           },
-          "elapsed_wall_s_before_teardown": 4.709447744,
-          "elapsed_wall_s_total": 4.729073745,
+          "elapsed_wall_s_before_teardown": 4.779779905,
+          "elapsed_wall_s_total": 4.797720546,
           "formal_source_identity": {
             "absolute_root_stored": false,
             "algorithm": "sha256",
@@ -2080,19 +2761,19 @@
             },
             "class": "airvortex.numerics.projection3d_gpu.CuPyVariableDensityProjection3D",
             "cuda_memory": {
-              "free_after_projection_bytes": 6832652288,
-              "free_before_projection_bytes": 7351435264,
+              "free_after_projection_bytes": 6750273536,
+              "free_before_projection_bytes": 7223967744,
               "total_bytes": 8053915648
             }
           },
           "process_identity": {
-            "pid": 148396,
+            "pid": 252045,
             "platform": {
               "machine": "x86_64",
               "release": "7.0.0-28-generic",
               "system": "Linux"
             },
-            "process_start_ticks": 1322575,
+            "process_start_ticks": 2270494,
             "python_executable": "/usr/bin/python3.12"
           },
           "runtime_inputs": {
@@ -2118,10 +2799,50 @@
             "pool_used_bytes_after_free_all_blocks": 0
           },
           "toolchain": {
-            "compute_capability": "12.0",
+            "affinity": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23,
+              24,
+              25,
+              26,
+              27,
+              28,
+              29,
+              30,
+              31
+            ],
+            "cuda_compute_capability": "120",
+            "cuda_device_count": 1,
+            "cuda_device_index": 0,
+            "cuda_device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
             "cuda_driver_version": 13000,
             "cuda_runtime_version": 13020,
-            "device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+            "cuda_total_global_memory_bytes": 8053915648,
+            "cupy_version": "14.2.0",
+            "gpu_python_realpath": "/usr/bin/python3.12",
+            "machine": "x86_64",
             "numerical_thread_policy": {
               "affinity_logical_cpus": 32,
               "applied": [
@@ -2155,14 +2876,15 @@
               "requested": "auto",
               "selected_threads": 2
             },
-            "total_global_memory_bytes": 8053915648,
-            "versions": {
-              "cupy": "14.2.0",
-              "cupy_distribution": "14.2.0",
+            "omp_dynamic": "FALSE",
+            "packages": {
+              "cupy-cuda13x": "14.2.0",
               "numpy": "2.5.2",
-              "python": "3.12.3",
               "scipy": "1.17.1"
-            }
+            },
+            "python_implementation": "CPython",
+            "python_version": "3.12.3",
+            "system": "Linux"
           },
           "zero_step_diagnostics": {
             "actual_bar_rpm": 0.0,
@@ -2293,7 +3015,8 @@
         "quality_gates_bound": true,
         "raw_root_absent_or_empty": true,
         "runtime_state_unchanged_by_preflight": true,
-        "three_distinct_fresh_processes": true
+        "three_distinct_fresh_processes": true,
+        "ticket_bound_machine_identity_exact_before_runtime_transactions": true
       }
     },
     "status": "HF3D_P0P2_V2_ZERO_STEP_STATIC_PASS_DYNAMIC_EXECUTION_DENIED"
@@ -2324,6 +3047,7 @@
     "p0d_and_pro_evidence_bound": true,
     "p1_not_implemented": true,
     "performance_samples_started_zero": true,
+    "preclaim_machine_identity_rebuild_exact": true,
     "ruff_mypy_and_python_compile": true,
     "runtime_raw_lock_claim_ledger_sample_absent": true,
     "self_referential_authorization_fields_absent": true,
@@ -2595,7 +3319,7 @@
           "mmap_tracking_capacity": 65536,
           "overflow_events": 0,
           "page_size_bytes": 4096,
-          "pid": 148062,
+          "pid": 251681,
           "public_symbols_resolved": true,
           "schema_version": 2,
           "status": "P0P2V2_ALLOC_OBSERVER_COMPLETE",
@@ -2605,7 +3329,7 @@
           "untracked_munmap_events": 0,
           "untracked_realloc_events": 1
         },
-        "sha256": "647ebc0d21bd2672a60719c959cf92eeeaa350185cf41d5aaef324928a1430de",
+        "sha256": "6e49eefb017d85ea7b447e0632684b0760321e7ca38864de1125de2ff3c637e3",
         "size_bytes": 1437
       },
       "known": {
@@ -2757,7 +3481,7 @@
           "mmap_tracking_capacity": 65536,
           "overflow_events": 0,
           "page_size_bytes": 4096,
-          "pid": 148059,
+          "pid": 251678,
           "public_symbols_resolved": true,
           "schema_version": 2,
           "status": "P0P2V2_ALLOC_OBSERVER_COMPLETE",
@@ -2767,7 +3491,7 @@
           "untracked_munmap_events": 0,
           "untracked_realloc_events": 1
         },
-        "sha256": "71f88f982d15e80bb67c22e3629f11af0972d75eefe576fac2b8446f7a3b7369",
+        "sha256": "db555636d17831b950db31f5394eefd06329162c04aa234518d202ffb03c18bb",
         "size_bytes": 1437
       },
       "overflow": {
@@ -2888,7 +3612,7 @@
           "mmap_tracking_capacity": 65536,
           "overflow_events": 1,
           "page_size_bytes": 4096,
-          "pid": 148065,
+          "pid": 251684,
           "public_symbols_resolved": true,
           "schema_version": 2,
           "status": "P0P2V2_ALLOC_OBSERVER_COMPLETE",
@@ -2898,7 +3622,7 @@
           "untracked_munmap_events": 0,
           "untracked_realloc_events": 0
         },
-        "sha256": "b306024ae527ff1cf23a2fd5d6548a411dddff24b7ee8ef6e61d40ac54540c7b",
+        "sha256": "13beab08f7ddd2febbed24a591f1d08ed646222ee6845992c153b70f94591629",
         "size_bytes": 1397
       }
     }
@@ -2937,9 +3661,9 @@
       "cudaStreamSynchronize_v3020": 1
     },
     "device_allocation_scope": {
-      "end_ns": 701900142,
-      "global_tid": 283960303305385,
-      "start_ns": 207749497,
+      "end_ns": 549992576,
+      "global_tid": 285698976634746,
+      "start_ns": 177630094,
       "text": "P0P2V2_DEVICE_ALLOCATION_SCOPE|call_id=2"
     },
     "direction_summary": {
@@ -2949,7 +3673,7 @@
         "size_histogram": {
           "8192": 1
         },
-        "time_ns": 1504
+        "time_ns": 1472
       },
       "Host-to-Device": {
         "bytes": 8192,
@@ -3018,22 +3742,22 @@
     "files": {
       "nsys_report": {
         "path": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/artifacts/p0p2v2/static/nsys_probe.nsys-rep",
-        "sha256": "4b18a9325f914329e02aedf8b245331f0b79040149566df4ca77147a8a813972",
-        "size_bytes": 139070
+        "sha256": "2a09f1dbac691b57a18301981a5296f5daddeb82a6282adaf8c116b3eb41e6dd",
+        "size_bytes": 149310
       },
       "sqlite": {
         "path": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/artifacts/p0p2v2/static/nsys_probe.sqlite",
-        "sha256": "1fbf8bb59667674230efc58abd9464f7b70a4ce8dd4500d2403cd5194842150f",
-        "size_bytes": 503808
+        "sha256": "30678a5d2aad93e38379e6528ff235b28a9dde4964e32114e6a269775cb6aebc",
+        "size_bytes": 520192
       },
       "stats_cuda_api_sum": {
         "path": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/artifacts/p0p2v2/static/cuda_api_sum_cuda_api_sum.csv",
-        "sha256": "f54f56ad921d2dddcab72e482527651af1c3eb63bbc23a3570ba8f7446be06c2",
-        "size_bytes": 1085
+        "sha256": "24def991401d691deeb79032be9367b46893b5a69c9f47a34c8cd82fa3b74ed8",
+        "size_bytes": 1062
       },
       "stats_cuda_gpu_kern_sum": {
         "path": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/artifacts/p0p2v2/static/cuda_gpu_kern_sum_cuda_gpu_kern_sum.csv",
-        "sha256": "f662dc63620fe302b357044126ba4b69215e1c7547b9f440ed57ce9d01df3be1",
+        "sha256": "1cbe97f69a8db34a5a7053c091ec4372299674c64c9f8e95e11cf8d7574ab29d",
         "size_bytes": 232
       },
       "stats_cuda_gpu_mem_size_sum": {
@@ -3043,12 +3767,12 @@
       },
       "stats_cuda_gpu_mem_time_sum": {
         "path": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/artifacts/p0p2v2/static/cuda_gpu_mem_time_sum_cuda_gpu_mem_time_sum.csv",
-        "sha256": "6f58af7d9286c47675e1c6f4e08cb6fefee1acb957105d64871ca85fe96cce2b",
+        "sha256": "96eb32bc23dfc14bbc1338f313fe775f22a051910f7587c9641e1fa9946bcc8b",
         "size_bytes": 227
       },
       "stats_p0p2v2_cuda_mem_exact": {
         "path": "/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/artifacts/p0p2v2/static/p0p2v2_cuda_mem_exact_p0p2v2_cuda_mem_exact.csv",
-        "sha256": "21bd1e8cc0a18cb853179b04f3795ab669fc6790bec4e7f6e642d830f6719da9",
+        "sha256": "d569f6102cff81f702e55abfff196d9df12fb2f98e50dfe472438cbb6f628c4b",
         "size_bytes": 98
       }
     },
@@ -3085,27 +3809,27 @@
     },
     "nvtx_ranges": [
       {
-        "end_ns": 705346786,
-        "global_tid": 283960303305385,
-        "start_ns": 207742083,
+        "end_ns": 553568744,
+        "global_tid": 285698976634746,
+        "start_ns": 177623552,
         "text": "P0P2V2_PROCESS_START|call_id=1"
       },
       {
-        "end_ns": 701900142,
-        "global_tid": 283960303305385,
-        "start_ns": 207749497,
+        "end_ns": 549992576,
+        "global_tid": 285698976634746,
+        "start_ns": 177630094,
         "text": "P0P2V2_DEVICE_ALLOCATION_SCOPE|call_id=2"
       },
       {
-        "end_ns": 701858563,
-        "global_tid": 283960303305385,
-        "start_ns": 207753064,
+        "end_ns": 549943433,
+        "global_tid": 285698976634746,
+        "start_ns": 177634152,
         "text": "pressure.project|call_id=3"
       },
       {
-        "end_ns": 701895423,
-        "global_tid": 283960303305385,
-        "start_ns": 701890824,
+        "end_ns": 549987847,
+        "global_tid": 285698976634746,
+        "start_ns": 549982828,
         "text": "P0P2V2_FINAL_SYNC_END|call_id=4"
       }
     ],
@@ -3118,7 +3842,7 @@
             "size_histogram": {
               "8192": 1
             },
-            "time_ns": 1504
+            "time_ns": 1472
           },
           "Host-to-Device": {
             "bytes": 8192,
@@ -3130,9 +3854,9 @@
           }
         },
         "range": {
-          "end_ns": 701858563,
-          "global_tid": 283960303305385,
-          "start_ns": 207753064,
+          "end_ns": 549943433,
+          "global_tid": 285698976634746,
+          "start_ns": 177634152,
           "text": "pressure.project|call_id=3"
         },
         "transfer_count": 2
@@ -3838,8 +4562,8 @@
           0
         ]
       ],
-      "global_pid": 283960303157248,
-      "pid": 148137
+      "global_pid": 285698976382976,
+      "pid": 251770
     }
   },
   "numerical_equivalence": {
@@ -3862,95 +4586,95 @@
         "device_allocation_recorder": {
           "boundaries": [
             {
-              "device_free_bytes": 7320829952,
+              "device_free_bytes": 7195459584,
               "device_total_bytes": 8053915648,
-              "device_used_bytes": 733085696,
+              "device_used_bytes": 858456064,
               "label": "before",
               "pool_total_bytes": 0,
               "pool_used_bytes": 0
             },
             {
-              "device_free_bytes": 7318732800,
+              "device_free_bytes": 7193362432,
               "device_total_bytes": 8053915648,
-              "device_used_bytes": 735182848,
+              "device_used_bytes": 860553216,
               "label": "alloc_postprocess",
               "pool_total_bytes": 8192,
               "pool_used_bytes": 0
             },
             {
-              "device_free_bytes": 7318732800,
+              "device_free_bytes": 7193362432,
               "device_total_bytes": 8053915648,
-              "device_used_bytes": 735182848,
+              "device_used_bytes": 860553216,
               "label": "malloc_postprocess",
               "pool_total_bytes": 8192,
               "pool_used_bytes": 8192
             },
             {
-              "device_free_bytes": 7318732800,
+              "device_free_bytes": 7193362432,
               "device_total_bytes": 8053915648,
-              "device_used_bytes": 735182848,
+              "device_used_bytes": 860553216,
               "label": "alloc_postprocess",
               "pool_total_bytes": 16384,
               "pool_used_bytes": 8192
             },
             {
-              "device_free_bytes": 7318732800,
+              "device_free_bytes": 7193362432,
               "device_total_bytes": 8053915648,
-              "device_used_bytes": 735182848,
+              "device_used_bytes": 860553216,
               "label": "malloc_postprocess",
               "pool_total_bytes": 16384,
               "pool_used_bytes": 16384
             },
             {
-              "device_free_bytes": 7316635648,
+              "device_free_bytes": 7193624576,
               "device_total_bytes": 8053915648,
-              "device_used_bytes": 737280000,
+              "device_used_bytes": 860291072,
               "label": "alloc_postprocess",
               "pool_total_bytes": 24576,
               "pool_used_bytes": 16384
             },
             {
-              "device_free_bytes": 7316635648,
+              "device_free_bytes": 7193624576,
               "device_total_bytes": 8053915648,
-              "device_used_bytes": 737280000,
+              "device_used_bytes": 860291072,
               "label": "malloc_postprocess",
               "pool_total_bytes": 24576,
               "pool_used_bytes": 24576
             },
             {
-              "device_free_bytes": 7316635648,
+              "device_free_bytes": 7193755648,
               "device_total_bytes": 8053915648,
-              "device_used_bytes": 737280000,
+              "device_used_bytes": 860160000,
               "label": "free_postprocess",
               "pool_total_bytes": 24576,
               "pool_used_bytes": 16384
             },
             {
-              "device_free_bytes": 7316635648,
+              "device_free_bytes": 7193755648,
               "device_total_bytes": 8053915648,
-              "device_used_bytes": 737280000,
+              "device_used_bytes": 860160000,
               "label": "free_postprocess",
               "pool_total_bytes": 24576,
               "pool_used_bytes": 8192
             },
             {
-              "device_free_bytes": 7316635648,
+              "device_free_bytes": 7193755648,
               "device_total_bytes": 8053915648,
-              "device_used_bytes": 737280000,
+              "device_used_bytes": 860160000,
               "label": "free_postprocess",
               "pool_total_bytes": 24576,
               "pool_used_bytes": 0
             },
             {
-              "device_free_bytes": 7316635648,
+              "device_free_bytes": 7193755648,
               "device_total_bytes": 8053915648,
-              "device_used_bytes": 737280000,
+              "device_used_bytes": 860160000,
               "label": "after",
               "pool_total_bytes": 24576,
               "pool_used_bytes": 0
             }
           ],
-          "device_used_high_water_bytes": 737280000,
+          "device_used_high_water_bytes": 860553216,
           "pool_free_count": 3,
           "pool_request_count": 3,
           "pool_requested_bytes": 24576,
@@ -3965,7 +4689,7 @@
         "mode": "device-memory",
         "numerical_sha256": "34d46acc7352c3bf9a9a44e36573061209f2e0fa9f2398d0f847fd90d87c4a19",
         "output_nbytes": 8192,
-        "pid": 148086,
+        "pid": 251720,
         "schema_version": 2,
         "semantic_ranges": null,
         "status": "P0P2V2_ZERO_STEP_CAPABILITY_PROBE_PASS",
@@ -4066,7 +4790,7 @@
         "mode": "semantic",
         "numerical_sha256": "34d46acc7352c3bf9a9a44e36573061209f2e0fa9f2398d0f847fd90d87c4a19",
         "output_nbytes": 8192,
-        "pid": 148077,
+        "pid": 251711,
         "schema_version": 2,
         "semantic_ranges": [
           {
@@ -4077,18 +4801,18 @@
               "source_inside_repository": true,
               "source_path": "90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/p0p2v2_capability_probe.py",
               "source_regular_file_not_symlink": true,
-              "source_sha256": "70d33e0ccdc65c05f25bff1a70b9597aaacfe979eed06f2be38e35c163219ff8"
+              "source_sha256": "90d447b5b89ef0d1190637023ae1855ed460cf84b3b948d8bbafe21662176043"
             },
             "call_id": 1,
             "child_ns": 0,
-            "end_ns": 13215248433560,
-            "exclusive_ns": 204840715,
-            "inclusive_ns": 204840715,
+            "end_ns": 22695285696133,
+            "exclusive_ns": 200982217,
+            "inclusive_ns": 200982217,
             "name": "synthetic_numpy_cupy_operator",
             "parent_call_id": null,
-            "start_ns": 13215043592845,
+            "start_ns": 22695084713916,
             "status": "returned",
-            "thread_id": 148077
+            "thread_id": 251711
           }
         ],
         "status": "P0P2V2_ZERO_STEP_CAPABILITY_PROBE_PASS",
@@ -4189,7 +4913,7 @@
         "mode": "uninstrumented",
         "numerical_sha256": "34d46acc7352c3bf9a9a44e36573061209f2e0fa9f2398d0f847fd90d87c4a19",
         "output_nbytes": 8192,
-        "pid": 148066,
+        "pid": 251685,
         "schema_version": 2,
         "semantic_ranges": null,
         "status": "P0P2V2_ZERO_STEP_CAPABILITY_PROBE_PASS",
@@ -4542,14 +5266,14 @@
       {
         "exit_code": 0,
         "failed_marker_absent": true,
-        "observed_test_count": 16,
+        "observed_test_count": 21,
         "test_path": "tests/test_p0p2v2_authorization_and_consumption.py",
         "unittest_ok_marker": true
       },
       {
         "exit_code": 0,
         "failed_marker_absent": true,
-        "observed_test_count": 18,
+        "observed_test_count": 25,
         "test_path": "tests/test_p0p2v2_harness.py",
         "unittest_ok_marker": true
       },
@@ -4561,7 +5285,7 @@
         "unittest_ok_marker": true
       }
     ],
-    "total_tests": 46
+    "total_tests": 58
   },
   "worker_ast_gate": {
     "authorization_line": 230,

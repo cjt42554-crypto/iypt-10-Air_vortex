@@ -1,18 +1,22 @@
 from __future__ import annotations
 
 import copy
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
+HERE = Path(__file__).resolve().parents[1]
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+
+from p0p2v2_authorization import validate_authorized_grant, validate_ticket
+from p0p2v2_contract import CONTRACT_ID, P0PerformanceError
 from test_p0p2v2_authorization_and_consumption import (
     SyntheticAuthorizationRepository,
     _run,
     _text,
 )
-
-from p0p2v2_authorization import validate_authorized_grant, validate_ticket
-from p0p2v2_contract import CONTRACT_ID, P0PerformanceError
 
 
 class CompleteGitTopologyTests(unittest.TestCase):

@@ -6,7 +6,7 @@
   "mode": "semantic",
   "numerical_sha256": "34d46acc7352c3bf9a9a44e36573061209f2e0fa9f2398d0f847fd90d87c4a19",
   "output_nbytes": 8192,
-  "pid": 148077,
+  "pid": 251711,
   "schema_version": 2,
   "semantic_ranges": [
     {
@@ -17,18 +17,18 @@
         "source_inside_repository": true,
         "source_path": "90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/p0p2v2_capability_probe.py",
         "source_regular_file_not_symlink": true,
-        "source_sha256": "70d33e0ccdc65c05f25bff1a70b9597aaacfe979eed06f2be38e35c163219ff8"
+        "source_sha256": "90d447b5b89ef0d1190637023ae1855ed460cf84b3b948d8bbafe21662176043"
       },
       "call_id": 1,
       "child_ns": 0,
-      "end_ns": 13215248433560,
-      "exclusive_ns": 204840715,
-      "inclusive_ns": 204840715,
+      "end_ns": 22695285696133,
+      "exclusive_ns": 200982217,
+      "inclusive_ns": 200982217,
       "name": "synthetic_numpy_cupy_operator",
       "parent_call_id": null,
-      "start_ns": 13215043592845,
+      "start_ns": 22695084713916,
       "status": "returned",
-      "thread_id": 148077
+      "thread_id": 251711
     }
   ],
   "status": "P0P2V2_ZERO_STEP_CAPABILITY_PROBE_PASS",

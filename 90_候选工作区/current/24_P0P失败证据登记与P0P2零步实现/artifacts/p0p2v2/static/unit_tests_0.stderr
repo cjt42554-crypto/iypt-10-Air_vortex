@@ -8,14 +8,19 @@ test_wrong_denied_or_authorized_blob_fails_closed (__main__.AuthorizationTests.t
 test_wrong_review_or_child_deltas_fail_closed (__main__.AuthorizationTests.test_wrong_review_or_child_deltas_fail_closed) ... ok
 test_claim_is_o_excl_and_second_claim_is_refused (__main__.ConsumptionTests.test_claim_is_o_excl_and_second_claim_is_refused) ... ok
 test_complete_and_failed_terminal_states_cannot_be_reused (__main__.ConsumptionTests.test_complete_and_failed_terminal_states_cannot_be_reused) ... ok
+test_each_sample_full_gate_precedes_running_and_staging (__main__.ConsumptionTests.test_each_sample_full_gate_precedes_running_and_staging) ... ok
+test_failed_ledger_and_failure_precreate_faults_are_retried (__main__.ConsumptionTests.test_failed_ledger_and_failure_precreate_faults_are_retried) ... ok
 test_invalid_zero_step_preflight_does_not_consume_or_create_raw (__main__.ConsumptionTests.test_invalid_zero_step_preflight_does_not_consume_or_create_raw) ... ok
 test_ledger_initialization_failure_retains_claim_and_terminal_evidence (__main__.ConsumptionTests.test_ledger_initialization_failure_retains_claim_and_terminal_evidence) ... ok
 test_partial_claim_write_is_consumed_and_not_replaced (__main__.ConsumptionTests.test_partial_claim_write_is_consumed_and_not_replaced) ... ok
+test_partial_failure_record_is_quarantined_and_retried (__main__.ConsumptionTests.test_partial_failure_record_is_quarantined_and_retried) ... ok
 test_stale_lock_file_does_not_override_live_flock (__main__.ConsumptionTests.test_stale_lock_file_does_not_override_live_flock) ... ok
 test_strict_order_duplicate_skip_failure_and_no_resume (__main__.ConsumptionTests.test_strict_order_duplicate_skip_failure_and_no_resume) ... ok
+test_terminal_fault_injection_never_leaves_false_complete (__main__.ConsumptionTests.test_terminal_fault_injection_never_leaves_false_complete) ... ok
+test_ticket_machine_drift_precedes_every_runtime_transaction (__main__.ConsumptionTests.test_ticket_machine_drift_precedes_every_runtime_transaction) ... ok
 test_valid_worker_token_and_direct_or_pid_reuse_rejection (__main__.ConsumptionTests.test_valid_worker_token_and_direct_or_pid_reuse_rejection) ... ok
 
 ----------------------------------------------------------------------
-Ran 16 tests in 1.321s
+Ran 21 tests in 2.313s
 
 OK

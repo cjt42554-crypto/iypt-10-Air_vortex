@@ -4,29 +4,37 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
+import os
 import statistics
+import time
+import traceback
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
 from p0p2v2_allocation import audit_observer_payload, device_allocation_crosscheck
+from p0p2v2_authorization import REQUIRED_IMPLEMENTATION_RELATIVE_PATHS
 from p0p2v2_consumption import (
     CLAIM_PATH,
     COMPLETE_PATH,
     LEDGER_PATH,
     validate_claim,
-    validate_ledger,
+    validate_terminal_execution_state,
 )
 from p0p2v2_contract import (
+    CONTRACT_PATH,
     EXPANDED_EXECUTION_SCHEDULE,
     HERE,
     RAW_ROOT,
     P0PerformanceError,
     atomic_json,
     atomic_text,
+    execution_binding,
+    relative,
     sample_identity,
     sha256_file,
     strict_json,
@@ -34,8 +42,13 @@ from p0p2v2_contract import (
 from p0p2v2_instrumentation import audit_host_semantic_evidence, parse_pstats
 from p0p2v2_nsys import REQUIRED_STATS, audit_nsys_evidence
 from p0p2v2_numerical import archive_numerical_payload, compare_payloads
-from p0p2v2_telemetry import audit_monitor_records, parse_monitor_jsonl
-from p0p2v2_transaction import DirectoryPublicationTransaction
+from p0p2v2_telemetry import (
+    audit_background_records,
+    audit_monitor_records,
+    parse_monitor_jsonl,
+)
+from p0p2v2_transaction import DirectoryPublicationTransaction, ExclusiveCampaignLock
+from run_p0p2v2_campaign import audit_worker_launcher_lifetimes
 
 OUTPUT_PARENT = HERE / "artifacts" / "p0p2v2"
 OUTPUT_ROOT = OUTPUT_PARENT / "compact_evidence"
@@ -45,6 +58,42 @@ BASELINE_MD_NAME = "performance_baseline.md"
 PROFILER_JSON_NAME = "profiler_summary.json"
 PROFILER_MD_NAME = "profiler_summary.md"
 TERMINAL_NAME = "publication_complete.json"
+ANALYSIS_LOCK_PATH = OUTPUT_PARENT / ".analysis.lock"
+ANALYSIS_FAILURE_PATH = OUTPUT_PARENT / "analysis_failure.json"
+IMPLEMENTATION_PATHS = tuple(
+    HERE.parents[2] / path for path in sorted(REQUIRED_IMPLEMENTATION_RELATIVE_PATHS)
+)
+
+
+def analysis_git_snapshot(claim: Mapping[str, Any]) -> dict[str, Any]:
+    """Bind the analyzer and every parser to the claimed clean C2 snapshot."""
+
+    observed = execution_binding(IMPLEMENTATION_PATHS)
+    implementation = claim.get("implementation_files")
+    contract_record = (
+        implementation.get(relative(CONTRACT_PATH))
+        if isinstance(implementation, Mapping)
+        else None
+    )
+    gates = {
+        "symbolic_main": observed.get("symbolic_head") == "refs/heads/main",
+        "head_is_claim_authorization_child": observed.get("execution_commit")
+        == claim.get("authorization_child_commit"),
+        "worktree_clean": observed.get("worktree_clean") is True,
+        "implementation_blobs_equal_claim": observed.get("implementation_files")
+        == claim.get("implementation_files"),
+        "contract_blob_and_hash_equal_claim": isinstance(contract_record, Mapping)
+        and contract_record.get("sha256") == observed.get("contract_sha256"),
+        "formal_source_equal_claim": observed.get("formal_source_tree")
+        == claim.get("formal_source_tree"),
+        "capability_equal_preclaim_and_ticket": claim.get(
+            "preclaim_machine_identity"
+        )
+        == claim.get("toolchain_binding"),
+    }
+    if not all(gates.values()):
+        raise P0PerformanceError("analysis Git/claim snapshot binding failed")
+    return {"gate_pass": True, "gates": gates, "observed": observed}
 
 
 def robust_statistics(values: Sequence[float]) -> dict[str, float]:
@@ -79,6 +128,11 @@ def _recompute_monitor_audits(
     sample_root: Path, manifest: Mapping[str, Any]
 ) -> dict[str, Any]:
     worker = manifest["worker"]
+    result = manifest["worker_result"]
+    exit_observation = manifest.get("worker_exit_observation")
+    if not isinstance(exit_observation, Mapping):
+        raise P0PerformanceError("worker exit observation is unavailable")
+    worker_end_ns = int(exit_observation["worker_exit_observed_monotonic_ns"])
     recomputed: dict[str, Any] = {}
     for kind in ("gpu", "tctl", "proc", "pidstat"):
         recomputed[kind] = audit_monitor_records(
@@ -87,12 +141,58 @@ def _recompute_monitor_audits(
             target_pid=int(worker["pid"]),
             target_start_ticks=int(worker["process_start_ticks"]),
             target_start_ns=int(worker["published_monotonic_ns"]),
-            target_end_ns=int(manifest["external_ended_monotonic_ns"]),
+            target_end_ns=worker_end_ns,
         )
         if recomputed[kind] != manifest["monitor_audit"][kind]:
             raise P0PerformanceError(
                 f"monitor audit does not independently recompute: {manifest['sample_id']}:{kind}"
             )
+    outcomes = manifest.get("monitor_outcomes")
+    if not isinstance(outcomes, list):
+        raise P0PerformanceError("sample monitor process outcomes are unavailable")
+    launch_binding = worker.get("launch_binding")
+    if not isinstance(launch_binding, Mapping):
+        raise P0PerformanceError("sample orchestrator identity is unavailable")
+    allowed_pids = {
+        int(worker["pid"]),
+        int(launch_binding["orchestrator_pid"]),
+        *(
+            int(outcome["pid"])
+            for outcome in outcomes
+            if isinstance(outcome, Mapping) and isinstance(outcome.get("pid"), int)
+        ),
+    }
+    recomputed["background"] = audit_background_records(
+        parse_monitor_jsonl(sample_root / "monitor_background.jsonl"),
+        target_pid=int(worker["pid"]),
+        target_start_ticks=int(worker["process_start_ticks"]),
+        target_start_ns=int(worker["published_monotonic_ns"]),
+        target_end_ns=worker_end_ns,
+        allowed_pids=allowed_pids,
+    )
+    if recomputed["background"] != manifest["monitor_audit"]["background"]:
+        raise P0PerformanceError(
+            f"background audit does not independently recompute: {manifest['sample_id']}"
+        )
+    lifetime = audit_worker_launcher_lifetimes(
+        mode=str(manifest["mode"]),
+        worker_start_ns=int(worker["published_monotonic_ns"]),
+        worker_end_ns=worker_end_ns,
+        launcher_start_ns=int(manifest["external_started_monotonic_ns"]),
+        launcher_end_ns=int(manifest["external_ended_monotonic_ns"]),
+        launcher_exit_code=int(manifest["worker_exit_code"]),
+    )
+    if lifetime != manifest.get("worker_launcher_lifetime"):
+        raise P0PerformanceError(
+            f"worker/launcher lifetime does not recompute: {manifest['sample_id']}"
+        )
+    if not (
+        int(result["completed_monotonic_ns"]) <= worker_end_ns
+        and exit_observation.get("worker_alive_at_launcher_exit") is False
+    ):
+        raise P0PerformanceError(
+            f"worker exit observation is inconsistent: {manifest['sample_id']}"
+        )
     return recomputed
 
 
@@ -163,34 +263,12 @@ def load_manifests() -> list[dict[str, Any]]:
         raise P0PerformanceError(
             "raw root differs from the frozen schedule plus completion controls"
         )
-    claim = strict_json(CLAIM_PATH)
-    validate_claim(claim)
-    ledger = strict_json(LEDGER_PATH)
-    validate_ledger(ledger)
-    completion = strict_json(COMPLETE_PATH)
-    if not (
-        ledger.get("status") == "COMPLETE"
-        and ledger.get("claim_sha256") == sha256_file(CLAIM_PATH)
-        and set(completion)
-        == {
-            "schema_version",
-            "status",
-            "gate_pass",
-            "authorization_child_commit",
-            "completed_samples",
-            "completed_monotonic_ns",
-        }
-        and completion.get("schema_version") == 2
-        and completion.get("status")
-        == "HF3D_P0P2_V2_FROZEN_SCHEDULE_EXECUTED_PENDING_ANALYSIS"
-        and completion.get("gate_pass") is True
-        and completion.get("authorization_child_commit")
-        == claim.get("authorization_child_commit")
-        and completion.get("completed_samples") == list(EXPANDED_EXECUTION_SCHEDULE)
-        and type(completion.get("completed_monotonic_ns")) is int
-        and int(completion["completed_monotonic_ns"]) > 0
-    ):
-        raise P0PerformanceError("claim/ledger/completion controls are inconsistent")
+    terminal = validate_terminal_execution_state()
+    if terminal.get("terminal_kind") != "COMPLETE":
+        raise P0PerformanceError("failed execution cannot be analyzed")
+    ledger = terminal["ledger"]
+    if ledger.get("claim_sha256") != sha256_file(CLAIM_PATH):
+        raise P0PerformanceError("claim/ledger hash binding is inconsistent")
     for sample_id in EXPANDED_EXECUTION_SCHEDULE:
         sample_root = RAW_ROOT / sample_id
         if not sample_root.is_dir() or sample_root.is_symlink():
@@ -202,6 +280,19 @@ def load_manifests() -> list[dict[str, Any]]:
             and all(manifest.get(key) == value for key, value in identity.items())
         ):
             raise P0PerformanceError(f"sample manifest failed identity: {sample_id}")
+        pre_sample_environment = manifest.get("pre_sample_full_environment_gate")
+        if not (
+            isinstance(pre_sample_environment, Mapping)
+            and pre_sample_environment.get("gate_pass") is True
+            and isinstance(pre_sample_environment.get("background_gates"), Mapping)
+            and pre_sample_environment["background_gates"].get(
+                "background_window_at_least_30_s"
+            )
+            is True
+        ):
+            raise P0PerformanceError(
+                f"sample lacks a complete pre-RUNNING 30 s gate: {sample_id}"
+            )
         sequence_index = EXPANDED_EXECUTION_SCHEDULE.index(sample_id)
         ledger_entry = ledger["entries"][sequence_index]
         if not (
@@ -612,7 +703,7 @@ def markdown_profiler(report: Mapping[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def analyse() -> dict[str, Any]:
+def _analyse_locked(snapshot_binding: Mapping[str, Any]) -> dict[str, Any]:
     manifests = load_manifests()
     identity = cross_mode_identity(manifests)
     baseline = baseline_summary(manifests)
@@ -620,6 +711,7 @@ def analyse() -> dict[str, Any]:
     resources = resource_summary(manifests)
     raw = raw_manifest(manifests)
     gates = {
+        "analysis_git_snapshot_bound": snapshot_binding.get("gate_pass") is True,
         "schedule_exact": [item["sample_id"] for item in manifests]
         == list(EXPANDED_EXECUTION_SCHEDULE),
         "cross_mode_numerical_identity": identity["gate_pass"],
@@ -662,6 +754,9 @@ def analyse() -> dict[str, Any]:
         PROFILER_MD_NAME,
     }:
         raise P0PerformanceError("compact evidence staging file set is incomplete")
+    final_snapshot = analysis_git_snapshot(strict_json(CLAIM_PATH))
+    if final_snapshot != dict(snapshot_binding):
+        raise P0PerformanceError("analysis Git snapshot changed during recomputation")
     terminal = {
         "schema_version": 2,
         "status": "HF3D_P0P2_V2_COMPACT_EVIDENCE_PUBLISHED",
@@ -669,6 +764,9 @@ def analyse() -> dict[str, Any]:
         "gates": gates,
         "files_before_terminal": files_before_terminal,
         "terminal_record_written_last": True,
+        "analyzer_snapshot": final_snapshot["observed"],
+        "claim_sha256": sha256_file(CLAIM_PATH),
+        "raw_manifest_sha256": sha256_file(staging / MANIFEST_NAME),
     }
     published = transaction.publish_terminal(TERMINAL_NAME, terminal)
     reloaded_terminal = strict_json(published / TERMINAL_NAME)
@@ -691,10 +789,81 @@ def analyse() -> dict[str, Any]:
     }
 
 
+def analyse() -> dict[str, Any]:
+    claim = strict_json(CLAIM_PATH)
+    validate_claim(claim)
+    snapshot = analysis_git_snapshot(claim)
+    with ExclusiveCampaignLock(ANALYSIS_LOCK_PATH):
+        report = _analyse_locked(snapshot)
+    return report
+
+
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--execute-analysis", action="store_true", required=True)
     return parser.parse_args(argv)
+
+
+def publish_analysis_failure(exc: BaseException) -> dict[str, Any]:
+    """Persist one explicit failure while retaining every staging directory."""
+
+    if OUTPUT_PARENT.is_symlink():
+        raise P0PerformanceError("analysis output parent must not be a symlink")
+    OUTPUT_PARENT.mkdir(parents=True, exist_ok=True)
+    staging = sorted(
+        path.name for path in OUTPUT_PARENT.glob(f".{OUTPUT_ROOT.name}.staging.*")
+    )
+    record = {
+        "schema_version": 2,
+        "status": "HF3D_P0P2_V2_ANALYSIS_FAILED_STOPPED_RETAINED",
+        "gate_pass": False,
+        "exception_type": type(exc).__name__,
+        "message": str(exc),
+        "traceback": "".join(traceback.format_exception(exc)),
+        "retained_staging": staging,
+        "failed_monotonic_ns": time.monotonic_ns(),
+    }
+    payload = (
+        json.dumps(
+            record,
+            ensure_ascii=False,
+            sort_keys=True,
+            indent=2,
+            allow_nan=False,
+        ).encode("utf-8")
+        + b"\n"
+    )
+    descriptor = os.open(
+        ANALYSIS_FAILURE_PATH,
+        os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_CLOEXEC | os.O_NOFOLLOW,
+        0o600,
+    )
+    try:
+        offset = 0
+        while offset < len(payload):
+            written = os.write(descriptor, payload[offset:])
+            if written <= 0:
+                raise P0PerformanceError("analysis failure write stopped")
+            offset += written
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+    parent_descriptor = os.open(
+        OUTPUT_PARENT,
+        os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW,
+    )
+    try:
+        os.fsync(parent_descriptor)
+    finally:
+        os.close(parent_descriptor)
+    if strict_json(ANALYSIS_FAILURE_PATH) != record:
+        raise P0PerformanceError("analysis failure strict reload changed")
+    return {
+        "path": str(ANALYSIS_FAILURE_PATH),
+        "sha256": hashlib.sha256(payload).hexdigest(),
+        "size_bytes": len(payload),
+        "record": record,
+    }
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -702,7 +871,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         report = analyse()
     except Exception as exc:  # noqa: BLE001 - analysis must fail closed at its CLI boundary.
-        print(f"P0-P analysis failed: {type(exc).__name__}: {exc}")
+        try:
+            failure = publish_analysis_failure(exc)
+            suffix = f"; failure={failure['path']}"
+        except Exception as publication_error:  # noqa: BLE001
+            suffix = (
+                "; failure publication also failed: "
+                f"{type(publication_error).__name__}: {publication_error}"
+            )
+        print(f"P0-P analysis failed: {type(exc).__name__}: {exc}{suffix}")
         return 2
     print(json.dumps(report, ensure_ascii=False, sort_keys=True))
     return 0

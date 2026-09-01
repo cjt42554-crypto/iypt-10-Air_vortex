@@ -160,9 +160,9 @@ def _wait_for_monitor_release(
                 and ready.get("target_start_ticks") == worker["process_start_ticks"]
                 and isinstance(ready.get("published_monotonic_ns"), int)
                 and isinstance(starts, list)
-                and len(starts) == 4
+                and len(starts) == 5
                 and {item.get("kind") for item in starts if isinstance(item, Mapping)}
-                == {"gpu", "tctl", "proc", "pidstat"}
+                == {"gpu", "tctl", "proc", "pidstat", "background"}
                 and all(
                     isinstance(item, Mapping)
                     and item.get("record_type") == "monitor_start"

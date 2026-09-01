@@ -35,7 +35,12 @@ FAILURE_PATH = RAW_ROOT / "execution_failure.json"
 COMPLETE_PATH = RAW_ROOT / "execution_complete.json"
 CAMPAIGN_LOCK_PATH = LOCK_PATH
 _ENTRY_STATES = {"NOT_STARTED", "RUNNING", "PASS", "FAILED_STOPPED"}
-_LEDGER_STATUSES = {"CLAIMED_NOT_STARTED", "IN_PROGRESS", "COMPLETE", "FAILED_STOPPED"}
+_LEDGER_STATUSES = {
+    "CLAIMED_NOT_STARTED",
+    "IN_PROGRESS",
+    "ALL_SAMPLES_PASS_PENDING_TERMINAL",
+    "FAILED_STOPPED",
+}
 _LEDGER_FIELDS = frozenset(
     {
         "schema_version",
@@ -80,6 +85,7 @@ _CLAIM_FIELDS = frozenset(
         "formal_source_tree",
         "implementation_files",
         "toolchain_binding",
+        "preclaim_machine_identity",
         "gpu_identity",
         "claim_created_at_utc",
         "claim_monotonic_ns",
@@ -229,9 +235,14 @@ def validate_claim(claim: Mapping[str, Any]) -> None:
                 "formal_source_tree",
                 "implementation_files",
                 "toolchain_binding",
+                "preclaim_machine_identity",
                 "gpu_identity",
             )
         ),
+        "preclaim_machine_equals_ticket_toolchain": claim.get(
+            "preclaim_machine_identity"
+        )
+        == claim.get("toolchain_binding"),
         "claim_monotonic_ns": type(claim.get("claim_monotonic_ns")) is int
         and int(claim["claim_monotonic_ns"]) > 0,
         "lock_identity_schema": isinstance(lock, Mapping)
@@ -254,6 +265,7 @@ def build_claim(
     authorization: Mapping[str, Any],
     execution_binding: Mapping[str, Any],
     environment: Mapping[str, Any],
+    machine_identity: Mapping[str, Any],
     lock_identity: Mapping[str, Any],
 ) -> dict[str, Any]:
     parent_binding = authorization.get("observed_parent_ticket_binding")
@@ -266,6 +278,18 @@ def build_claim(
     ticket = parent_binding.get("ticket")
     if not isinstance(ticket, Mapping):
         raise P0PerformanceError("parent ticket is missing from authorization binding")
+    if machine_identity != ticket.get("toolchain_binding"):
+        raise P0PerformanceError(
+            "preclaim machine identity differs from ticket toolchain binding"
+        )
+    environment_end = environment.get("instantaneous_end")
+    end_snapshot = (
+        environment_end.get("snapshot")
+        if isinstance(environment_end, Mapping)
+        else None
+    )
+    if not isinstance(end_snapshot, Mapping):
+        raise P0PerformanceError("preclaim environment end snapshot is unavailable")
     claim = {
         "schema_version": 2,
         "claim_namespace": CLAIM_NAMESPACE,
@@ -284,7 +308,8 @@ def build_claim(
         "formal_source_tree": execution_binding["formal_source_tree"],
         "implementation_files": execution_binding["implementation_files"],
         "toolchain_binding": ticket["toolchain_binding"],
-        "gpu_identity": environment["instantaneous_start"]["snapshot"]["gpu"],
+        "preclaim_machine_identity": dict(machine_identity),
+        "gpu_identity": end_snapshot["gpu"],
         "claim_created_at_utc": datetime.now(timezone.utc).isoformat(),
         "claim_monotonic_ns": time.monotonic_ns(),
         "single_writer_lock_identity": dict(lock_identity),
@@ -302,6 +327,7 @@ def create_claim_and_ledger(
     authorization: Mapping[str, Any],
     execution_binding: Mapping[str, Any],
     environment: Mapping[str, Any],
+    machine_identity: Mapping[str, Any],
     lock_identity: Mapping[str, Any],
 ) -> dict[str, Any]:
     """Consume the authorization once, then initialize the immutable-order ledger."""
@@ -316,6 +342,7 @@ def create_claim_and_ledger(
         authorization=authorization,
         execution_binding=execution_binding,
         environment=environment,
+        machine_identity=machine_identity,
         lock_identity=lock_identity,
     )
     claim_file = create_exclusive_json(CLAIM_PATH, claim)
@@ -477,15 +504,18 @@ def validate_ledger(ledger: Mapping[str, Any]) -> None:
                 and all(state == "NOT_STARTED" for state in suffix[1:])
             )
         )
-    elif status == "COMPLETE":
+    elif status == "ALL_SAMPLES_PASS_PENDING_TERMINAL":
         shape_pass = pass_count == len(states) and not suffix
     else:
-        shape_pass = pass_count < len(states) and (
-            all(state == "NOT_STARTED" for state in suffix)
-            or (
-                bool(suffix)
-                and suffix[0] == "FAILED_STOPPED"
-                and all(state == "NOT_STARTED" for state in suffix[1:])
+        shape_pass = (pass_count == len(states) and not suffix) or (
+            pass_count < len(states)
+            and (
+                all(state == "NOT_STARTED" for state in suffix)
+                or (
+                    bool(suffix)
+                    and suffix[0] == "FAILED_STOPPED"
+                    and all(state == "NOT_STARTED" for state in suffix[1:])
+                )
             )
         )
     if not shape_pass:
@@ -579,7 +609,7 @@ def mark_sample_pass(
     entry["completed_monotonic_ns"] = time.monotonic_ns()
     entry["manifest_sha256"] = manifest_sha256
     ledger["status"] = (
-        "COMPLETE"
+        "ALL_SAMPLES_PASS_PENDING_TERMINAL"
         if sequence_index + 1 == len(EXPANDED_EXECUTION_SCHEDULE)
         else "IN_PROGRESS"
     )
@@ -596,7 +626,7 @@ def mark_schedule_failed(
     if not failure:
         raise P0PerformanceError("schedule failure record must be non-empty")
     ledger = load_ledger()
-    if ledger.get("status") in {"COMPLETE", "FAILED_STOPPED"}:
+    if ledger.get("status") == "FAILED_STOPPED":
         raise P0PerformanceError("terminal schedule state cannot be replaced")
     if sequence_index is not None:
         if not (0 <= sequence_index < len(EXPANDED_EXECUTION_SCHEDULE)):
@@ -613,7 +643,15 @@ def mark_schedule_failed(
         raise P0PerformanceError("global failure omitted the RUNNING sample identity")
     ledger["status"] = "FAILED_STOPPED"
     ledger["failure"] = dict(failure)
-    _publish_ledger(ledger)
+    try:
+        _publish_ledger(ledger)
+    except BaseException:  # noqa: BLE001 - interrupted terminal writes are recovered.
+        try:
+            observed = strict_json(LEDGER_PATH)
+        except (OSError, UnicodeError, P0PerformanceError, ValueError):
+            observed = None
+        if observed != ledger:
+            _publish_ledger(ledger)
     return ledger
 
 
@@ -828,6 +866,7 @@ def validate_worker_launch(
         "orchestrator_start_ticks": lock["process_start_ticks"],
         "claim_gpu_identity": claim["gpu_identity"],
         "claim_toolchain_binding": claim["toolchain_binding"],
+        "claim_preclaim_machine_identity": claim["preclaim_machine_identity"],
         "worker_launch_receipt": receipt,
     }
 
@@ -847,16 +886,47 @@ def publish_execution_failure(record: Mapping[str, Any]) -> dict[str, Any]:
         and bool(record["status"])
     ):
         raise P0PerformanceError("execution failure record identity is invalid")
-    return create_exclusive_json(FAILURE_PATH, record)
+    if FAILURE_PATH.is_file() and not FAILURE_PATH.is_symlink():
+        if strict_json(FAILURE_PATH) != dict(record):
+            raise P0PerformanceError("another execution failure record already exists")
+        payload = FAILURE_PATH.read_bytes()
+        return {
+            "path": str(FAILURE_PATH),
+            "sha256": hashlib.sha256(payload).hexdigest(),
+            "size_bytes": len(payload),
+            "recovered_existing": True,
+        }
+    try:
+        return create_exclusive_json(FAILURE_PATH, record)
+    except BaseException as exc:
+        if FAILURE_PATH.is_file() and not FAILURE_PATH.is_symlink():
+            try:
+                observed = strict_json(FAILURE_PATH)
+            except (OSError, UnicodeError, P0PerformanceError, ValueError):
+                observed = None
+            if observed == dict(record):
+                payload = FAILURE_PATH.read_bytes()
+                return {
+                    "path": str(FAILURE_PATH),
+                    "sha256": hashlib.sha256(payload).hexdigest(),
+                    "size_bytes": len(payload),
+                    "recovered_existing": True,
+                }
+            quarantine = RAW_ROOT / (
+                f"execution_failure_aborted_{time.monotonic_ns()}_{os.getpid()}.json"
+            )
+            if quarantine.exists() or quarantine.is_symlink():
+                raise P0PerformanceError("failure quarantine path collision") from exc
+            os.rename(FAILURE_PATH, quarantine)
+            _fsync_directory(RAW_ROOT)
+            exc.add_note(f"incomplete failure preserved at {quarantine}")
+            return create_exclusive_json(FAILURE_PATH, record)
+        return create_exclusive_json(FAILURE_PATH, record)
 
 
-def publish_execution_complete(record: Mapping[str, Any]) -> dict[str, Any]:
-    ledger = load_ledger()
-    if ledger.get("status") != "COMPLETE":
-        raise P0PerformanceError("execution cannot complete before all 18 PASS")
-    if FAILURE_PATH.exists() or FAILURE_PATH.is_symlink():
-        raise P0PerformanceError("failure evidence already exists")
-    claim = strict_json(CLAIM_PATH)
+def _validate_completion_record(
+    record: Mapping[str, Any], claim: Mapping[str, Any]
+) -> None:
     if not (
         set(record)
         == {
@@ -878,7 +948,93 @@ def publish_execution_complete(record: Mapping[str, Any]) -> dict[str, Any]:
         and int(record["completed_monotonic_ns"]) > 0
     ):
         raise P0PerformanceError("execution completion record identity is invalid")
-    return create_exclusive_json(COMPLETE_PATH, record)
+
+
+def _quarantine_incomplete_completion() -> Path | None:
+    if not (COMPLETE_PATH.exists() or COMPLETE_PATH.is_symlink()):
+        return None
+    if COMPLETE_PATH.is_symlink() or not COMPLETE_PATH.is_file():
+        raise P0PerformanceError("invalid completion object cannot be quarantined")
+    quarantine = RAW_ROOT / (
+        f"execution_complete_aborted_{time.monotonic_ns()}_{os.getpid()}.json"
+    )
+    if quarantine.exists() or quarantine.is_symlink():
+        raise P0PerformanceError("completion quarantine path collision")
+    os.rename(COMPLETE_PATH, quarantine)
+    _fsync_directory(RAW_ROOT)
+    return quarantine
+
+
+def publish_execution_complete(record: Mapping[str, Any]) -> dict[str, Any]:
+    ledger = load_ledger()
+    if ledger.get("status") != "ALL_SAMPLES_PASS_PENDING_TERMINAL":
+        raise P0PerformanceError("execution cannot complete before all 18 PASS")
+    if FAILURE_PATH.exists() or FAILURE_PATH.is_symlink():
+        raise P0PerformanceError("failure evidence already exists")
+    claim = strict_json(CLAIM_PATH)
+    validate_claim(claim)
+    _validate_completion_record(record, claim)
+    try:
+        return create_exclusive_json(COMPLETE_PATH, record)
+    except BaseException as exc:
+        if COMPLETE_PATH.is_file() and not COMPLETE_PATH.is_symlink():
+            try:
+                observed = strict_json(COMPLETE_PATH)
+            except (OSError, UnicodeError, P0PerformanceError, ValueError):
+                observed = None
+            if observed == dict(record):
+                payload = COMPLETE_PATH.read_bytes()
+                return {
+                    "path": str(COMPLETE_PATH),
+                    "sha256": hashlib.sha256(payload).hexdigest(),
+                    "size_bytes": len(payload),
+                    "recovered_existing": True,
+                }
+            quarantine = _quarantine_incomplete_completion()
+            if quarantine is not None:
+                exc.add_note(f"incomplete completion preserved at {quarantine}")
+        raise
+
+
+def validate_terminal_execution_state() -> dict[str, Any]:
+    """Accept only unique success or coherent failed-stop terminal state."""
+
+    claim = strict_json(CLAIM_PATH)
+    validate_claim(claim)
+    ledger = load_ledger()
+    completion_present = COMPLETE_PATH.is_file() and not COMPLETE_PATH.is_symlink()
+    failure_present = FAILURE_PATH.is_file() and not FAILURE_PATH.is_symlink()
+    if completion_present and not failure_present:
+        completion = strict_json(COMPLETE_PATH)
+        _validate_completion_record(completion, claim)
+        if ledger.get("status") != "ALL_SAMPLES_PASS_PENDING_TERMINAL":
+            raise P0PerformanceError("completion and ledger terminal states differ")
+        return {
+            "gate_pass": True,
+            "terminal_kind": "COMPLETE",
+            "claim": claim,
+            "ledger": ledger,
+            "completion": completion,
+            "failure": None,
+        }
+    if failure_present and not completion_present:
+        failure = strict_json(FAILURE_PATH)
+        if not (
+            ledger.get("status") == "FAILED_STOPPED"
+            and failure == ledger.get("failure")
+            and failure.get("schema_version") == 2
+            and failure.get("gate_pass") is False
+        ):
+            raise P0PerformanceError("failed-stop terminal controls are incoherent")
+        return {
+            "gate_pass": True,
+            "terminal_kind": "FAILED_STOPPED",
+            "claim": claim,
+            "ledger": ledger,
+            "completion": None,
+            "failure": failure,
+        }
+    raise P0PerformanceError("execution has no unique valid terminal state")
 
 
 def claim_payload_sha256(value: Mapping[str, Any]) -> str:
@@ -905,5 +1061,6 @@ __all__ = [
     "publish_execution_failure",
     "validate_claim",
     "validate_ledger",
+    "validate_terminal_execution_state",
     "validate_worker_launch",
 ]

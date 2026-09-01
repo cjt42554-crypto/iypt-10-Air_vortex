@@ -1,6 +1,6 @@
 # 当前交接
 
-当前状态：
+当前结论是：P0-P2 V2 的五项执行前阻断补丁已经在候选工作区实现，并通过本机最终静态审计；这只形成新的 Pro 静态复核候选，不签发 P2 父票据或 C2 授权，不允许任何动态性能样本。
 
 ```text
 HF3D_P0P_V1_CLAIM = CONSUMED
@@ -9,183 +9,22 @@ HF3D_P0P_V1_MEASURED_PERFORMANCE_RESULT = NOT_AVAILABLE
 
 HF3D_P0P_V1_E0_FAILURE_EVIDENCE_REGISTRATION = ACCEPTED
 HF3D_P0P2_I2_EFFECTIVE_CONFIG_AND_ZERO_STEP_QUALIFICATION = ACCEPTED
-HF3D_P0P2_V2_DYNAMIC_HARNESS_STATIC_REVIEW = CONDITIONAL_PASS_WITH_BLOCKING_FINDINGS
-HF3D_P0P2_V2_PRECLAIM_TERMINAL_AND_ANALYSIS_PATCH = REQUIRED
+HF3D_P0P2_V2_PRECLAIM_TERMINAL_AND_ANALYSIS_PATCH = IMPLEMENTED_FOR_PRO_STATIC_REVIEW
+HF3D_P0P2_V2_STATIC_AUDIT = PASS
 HF3D_P0P2_V2_PARENT_TICKET = NOT_ISSUED
 HF3D_P0P2_V2_AUTHORIZATION_CHILD = NOT_ISSUED
 HF3D_P0P2_V2_DYNAMIC_EXECUTION = NOT_AUTHORIZED
-HF3D_P0P2_V2_PATCH_IMPLEMENTATION = AUTHORIZED
 HF3D_P1 = PROHIBITED
 
 PROJECT_REFACTOR = TARGETED_CROSS_MODULE_REFACTOR_AFTER_BASELINE
 PROJECT_WIDE_REWRITE = REJECTED
 HF3D_HARDWARE_UTILIZATION = INSUFFICIENT
-PRIMARY_ACCELERATION_ROUTE = EXPLICIT_GPU_RESIDENT_E1_BACKEND_AFTER_P0P2
-REFERENCE_BACKEND = RETAINED
-
-D3R1_S2 = FAILED_STOPPED
-D3R1_SCIENTIFIC_CLASSIFICATION = NOT_FORMED
+TRUSTWORTHY_P0P2_BASELINE = NOT_AVAILABLE
 ```
 
-## 最新 Pro 裁决
+## 本轮复核对象
 
-```text
-90_候选工作区/current/26_P0P2V2动态基线静态复核与执行前补丁裁决.md
-```
-
-复核对象：
-
-```text
-Codex implementation commit = 6ce05eed96ce59a94d79dc2a49c9e012f3afb1f5
-implementation tree = 24a867e53929bfb36d9da7b353737441504fe4bd
-formal source SHA-256 = dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
-```
-
-## 已接受并保留
-
-以下主体无需回退或重新复制：
-
-- E0 的 15 文件 V1 失败 snapshot、manifest 和语义审计；
-- 三份 `0.005 s` 配置的正式 round-trip 和真实 CUDA 零步构造；
-- V2 独立 contract/schedule/authorization/claim/ledger/sample namespace；
-- 固定 18 项顺序和无 skip/retry/resume/replacement CLI；
-- 精确父票据、NUL-safe raw diff、blob/mode/parent/branch/fetch 授权审计；
-- fresh-process worker、正式 HF3D stepper、索引式登记时刻和 D3R1 硬门；
-- archive write、strict reload 和 canonical numerical payload；
-- HOST、CUDA、MEMORY 三类 profile 框架；
-- sample staging、`RENAME_NOREPLACE` 和一次性 token/ledger 状态机主体。
-
-当前配置和零步资格仍为 PASS；没有动态 raw、claim 或样本。
-
-## 为什么没有签发父票据
-
-本轮发现五项会在一次性 claim 后造成不可恢复失败、受污染基线或未授权分析的阻塞问题。
-
-### P0-1：ticket-bound 当前机器身份未在 claim 前完整比较
-
-Preflight 只验证票据绑定的 capability 文件本身，并检查当前环境满足一般门。当前 governor、affinity、driver、CPU model、AC record 或线程策略可以在仍满足一般门的情况下与 ticket 漂移；第一个 worker 才在 claim 后发现。
-
-必须把当前 probe/toolchain/environment 与 ticket capability 的逐字段同一检查移到 lock/raw/claim/ledger 之前。Worker 保留重复检查。
-
-### P0-2：后续样本和样本内部缺少 CPU 背景污染证明
-
-Claim 前只有一次 30 秒完整环境门。Claim 后每个样本前只做瞬时门，样本内 monitor 只跟踪 target；数小时日程中后来出现的仓库外 CPU 作业可能污染 scored wall time而不被发现。
-
-必须：
-
-- 每个样本开始前重新执行完整 30 秒环境门；
-- 样本生命周期内记录系统背景 CPU 和其他计算进程，排除 target/orchestrator/monitor PID；
-- 任何污染使日程永久 FAILED_STOPPED；
-- analyser 独立复算该门。
-
-### P0-3：CUDA profile telemetry 的终点使用外层 nsys 退出时刻
-
-Monitor target 是内部 Python worker，worker 退出时 monitor 停止；但 coverage 终点是外层 `nsys` 收尾后的退出时刻。只要 Nsight finalization 超过 2 秒，完整 worker telemetry 会被误判为缺口。
-
-必须分离：
-
-```text
-worker target lifetime -> telemetry coverage
-outer nsys lifetime -> profile end-to-end wall and finalization gate
-```
-
-并增加人工 finalization lag 正负测试。
-
-### P0-4：第 18 项先把 ledger 设为 COMPLETE，再写 completion
-
-当前最后一个 `mark_sample_pass()` 先令 ledger `COMPLETE`。若 `execution_complete.json` 的 open/write/fsync/reload 失败，ledger 已不可转为 FAILED，而 failure publication 又要求 FAILED ledger，可能留下：
-
-```text
-ledger COMPLETE
-completion absent/corrupt
-failure absent
-```
-
-必须增加 `ALL_SAMPLES_PASS_PENDING_TERMINAL` 或等价状态，使最终只能为：
-
-```text
-18 PASS + 唯一完整 completion
-或
-自洽 FAILED_STOPPED + 唯一 failure
-```
-
-并覆盖全部 terminal 写入故障。
-
-### P0-5：analyser 未绑定 claim 快照且无完整分析事务
-
-当前 analyser 可以在日程完成后于另一 Git 提交或脏工作树上读取旧 raw；它没有校验当前 analyser/parser blobs 等于 claim implementation files，也没有 analysis lock、staging recovery 或 analysis failure record。
-
-必须：
-
-- 从 claim 重建授权 child/review parent/reviewed snapshot；
-- 要求 clean symbolic main 和 analyser 全依赖 blob 精确匹配 claim；
-- 核验 formal source、contract、capability 和 raw controls；
-- 建立 analysis 单写入者与可恢复 publication；
-- compact terminal 记录 analyser commit/blob set、claim hash 和 raw manifest hash。
-
-## 下一项唯一任务
-
-只在：
-
-```text
-90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/**
-```
-
-修复上述五项，更新 current/history，保持 V2 默认拒绝。因为尚无 P2/C2/claim/dynamic output，不强制改成 V3，也不得复制另一套活动 harness。
-
-### 必须新增的负例
-
-至少覆盖：
-
-```text
-governor all-equal but differs from ticket
-affinity / CPU model / driver / UUID / thread policy drift
-second sample before a new 30 s environment gate
-sample lifetime中出现其他 CPU compute process
-worker完整 telemetry + 5 s nsys finalization lag
-worker telemetry真正截断
-18th PASS 后 completion open/write/fsync/reload failure
-ledger terminal transition failure
-HEAD/analyser blob changed before analysis
-dirty worktree analysis
-concurrent analyser
-unknown stale analysis staging
-analysis terminal write/rename failure
-raw changed after completion
-```
-
-### 返回 Pro 前静态门
-
-必须重新执行并固化：
-
-```text
-完整 V2 tests
-Ruff
-strict mypy
-Python compile
-allocator probes
-qualified nsys probe/export/parser
-三份 fresh-process CUDA zero-step probes
-Git topology synthetic positive/negative tests
-static audit and deterministic rebuild
-```
-
-并明确：
-
-```text
-HF3D time_steps_advanced = 0
-warmup/timed/profile started = 0
-claims consumed = 0
-performance raw absent
-compact evidence absent
-parent ticket absent
-authorized grant absent
-P1 not implemented
-```
-
-完成后 commit、push `main` 并立即停止交 Pro。当前 `6ce05eed...` 不能作为父票据 reviewed snapshot。
-
-## 允许修改
+请拉取 `origin/main`，以拉取后的 tip 作为唯一静态复核候选。补丁只修改：
 
 ```text
 90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/**
@@ -193,49 +32,133 @@ P1 not implemented
 90_候选工作区/交接说明_history.md
 ```
 
-## 只读
+Pro 上一轮五项阻断裁决仍保存在：
 
 ```text
-01_最终理论/**
-02_模拟程序/**
-90_候选工作区/current/07_D3跨网格时间步响应诊断/**
-90_候选工作区/current/17_HF3D性能优化/**
-V1 raw/claim/ledger/failure
-E0 snapshot/manifest/audit
-AGENTS.md
 90_候选工作区/current/26_P0P2V2动态基线静态复核与执行前补丁裁决.md
 ```
+
+该裁决提交为 `2611fbd5468f5f2015214da3302e03c3fcc7a36a`，补丁候选以它为直接父提交。正式理论、正式程序、D3、V1/E0 冻结证据、旧 P0-P 路径和裁决文件均未修改。
+
+## 五项阻断的处理
+
+### 1. Claim 前完整机器身份绑定
+
+- 三个 fresh-process 零步报告现在登记完整 GPU Python、包版本、CUDA runtime/driver、设备、总显存、compute capability、进程 affinity、线程策略和平台身份。
+- orchestrator 在创建 campaign lock、raw、claim、ledger 或 staging 前，重新构造当前完整 capability manifest，并与未来 ticket 的 `toolchain_binding` 逐字段精确比较。
+- claim 再次登记 `preclaim_machine_identity`，且必须与 ticket 和当前重建身份完全相同。
+- governor、affinity、CPU model、driver、GPU UUID 和线程策略漂移均有负例；身份不同时验证不会触及 lock/raw/claim/ledger。
+
+### 2. 每个样本前的完整环境门及样本全生命周期背景监控
+
+- 每个样本在进入 `RUNNING` 前都重新执行完整 30 秒环境门，而非只做瞬时检查。
+- 新增第五个 background monitor，每 0.5 秒记录系统总体 CPU 与进程快照。
+- 独立 analyser 从原始记录重算仓库外 CPU/其他 compute 污染，并排除 worker、orchestrator、monitor 及其后代；发现污染即永久失败闭锁。
+- 已覆盖第二个样本缺少新环境门、样本中途出现其他 CPU compute 和 monitor 数量不完整等负例。
+
+### 3. 内层 CUDA worker 与外层 Nsight 生命周期分离
+
+- telemetry coverage 的终点改为独立观察到的内层 worker PID 退出时刻。
+- 外层 `nsys` 退出只用于端到端 profile wall time、收尾延迟和非零退出门。
+- 内层 worker 退出后允许 5 秒人工 Nsight finalization lag；真正的 worker telemetry 截断仍失败。
+- 若外层 launcher 退出而 worker 仍存活，worker 会被终止并使日程失败。
+
+### 4. 第 18 项后的唯一终态事务
+
+- 第 18 项 PASS 只把 ledger 置为 `ALL_SAMPLES_PASS_PENDING_TERMINAL`，不再提前写成 COMPLETE。
+- 合法成功终态只有 `18 PASS + 唯一完整 execution_complete.json`；合法失败终态只有自洽 `FAILED_STOPPED + 唯一 execution_failure.json`。
+- completion/failure 的 open、write、fsync、reload、rename 和 ledger transition 故障均有注入测试；部分文件会隔离为 aborted 记录，不被后续逻辑误认成合法终态。
+
+### 5. Claim 绑定的独立 analyser 与完整分析事务
+
+- analyser 要求 clean symbolic `main`，HEAD 等于 claim 中的授权 child，并逐项验证 analyser 依赖 blob、formal source、contract、capability 和 raw controls。
+- 新增独占 `.analysis.lock`、未知旧 staging 拒绝、显式 `analysis_failure.json` 和目录级发布事务。
+- compact terminal 绑定 analyser commit/blob set、claim SHA-256 和 raw manifest SHA-256。
+- HEAD/blob 漂移、脏工作树、并发 analyser、旧 staging、raw 后改和 terminal write/rename 故障均有负例。
+
+## 最终静态证据
+
+最终规范审计：
+
+```text
+status = HF3D_P0P2_V2_ZERO_STEP_HARNESS_STATIC_AUDIT_PASS
+gate_pass = true
+failed gates = none
+specialized tests = 58/58 PASS
+Ruff = PASS
+strict mypy = PASS, 21 source files
+Python compile = PASS
+contract deterministic check = PASS
+allocator probes = PASS
+qualified Nsight probe/export/parser = PASS
+fresh-process CUDA zero-step B1/B2/B3 = PASS
+post-probe full environment gate 30 s = PASS
+Git topology synthetic positive/negative tests = PASS
+formal source before/after = byte-identical
+```
+
+规范文件身份：
+
+```text
+static audit JSON SHA-256 = 4dbd09d3274570f6f41b94cea5cd779d751d92d32dee8d663d83e921742ae764
+contract JSON SHA-256 = 57f6b1989023ff21f7d6755110ea2569d3f3c597070d8270f7ad7c9c5d25a98b
+capability manifest SHA-256 = fe387801233abbfab939391b5015719352abd8c6075f2bae90965f0ebe04edea
+default-denial authorization SHA-256 = 6ffc5243f417f05b8f7b164f9f671213c9e940ae1fbdc5ce78c4809305d46774
+formal source SHA-256 = dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
+```
+
+执行计数和输出边界：
+
+```text
+HF3D time_steps_advanced = 0
+warmup samples started = 0
+timed/scored samples started = 0
+profile samples started = 0
+claims consumed = 0
+V2 performance raw = absent
+V2 campaign lock = absent
+V2 compact evidence = absent
+V2 analysis failure = absent
+P2 parent ticket = absent
+C2 authorized child = absent
+P1 implemented = false
+```
+
+第一次全量静态审计曾因测试文件的独立导入路径暴露错误而失败；该失败输出已经保留到本机临时备份，导入问题修复后从头重跑，以上 hash 和 PASS 状态只对应最终重跑。没有把失败运行覆盖成通过，也没有在任何一次静态审计中推进 HF3D 时间步。
+
+## 下一项唯一动作
+
+请 Pro 对拉取后的 `origin/main` 候选实现和最终静态证据进行独立复核，并作完整最终裁决：
+
+1. 若仍有阻断，只列出证据充分的最小修补范围；不要签发 P2/C2，动态执行继续拒绝。
+2. 若静态复核通过，可在独立裁决提交中绑定精确 reviewed snapshot 并签发 P2 父票据；C2 授权仍必须是该父票据的合法、单一授权 child。
+3. 在 P2 与 C2 均实际存在并通过本机 claim 前预检以前，不得创建 claim/raw/ledger，不得运行 warm-up、timed、profile 或 analyser。
+4. 继续结合项目现状复核技术债和硬件利用路线；当前仍没有可信 P0-P2 baseline，不得把旧低利用率观察写成已验证的优化加速比，也不得提前整体重写或修改正式程序。
 
 ## 当前禁止
 
 ```text
-P2 ticket
-C2 grant
+自行签发 P2 ticket
+自行签发 C2 grant
 authorization=true
 --execute
-warm-up/timed/profile
+任何 warm-up/timed/profile 样本
 动态 analyser
 P1
 02_模拟程序/** 修改
-环境、质量、覆盖率、数值同一或事务门放宽
+放宽环境、质量、覆盖率、数值同一或事务门
 ```
 
-## 技术债与性能路线
-
-全项目仍采用定向跨模块重构，不做整体重写。正式 HF3D 的 backend/stepper/pressure/recording/archive 边界应保留。
-
-旧真实运行证明 CPU/GPU 利用不足，但 P0-P V1 没有性能样本，P0-P2 V2 尚未合法执行。必须先完成本补丁并取得一次可信 baseline，再决定 E0 小优化或显式 GPU-resident E1 后端。任何正式提升都必须以数值等价、实测 CPU/GPU 利用率和端到端加速比共同验收。
-
-## 结论上限
+## 当前结论上限
 
 ```text
 P0-P V1 measured result = NOT AVAILABLE
 E0 = ACCEPTED
 P0-P2 zero-step = ACCEPTED
-P0-P2 V2 harness = CONDITIONAL_STATIC_PASS
+P0-P2 V2 five-blocker patch = STATIC_AUDIT_PASS_AWAITING_PRO_REVIEW
 P0-P2 V2 dynamic execution = NOT AUTHORIZED
-P0-P2 V2 patch implementation = AUTHORIZED
 P1 = PROHIBITED
+hardware utilization baseline = NOT DEMONSTRATED
 numerical qualification = NOT DEMONSTRATED
 physical validation = NOT PERFORMED
 experimental validation = NOT PERFORMED

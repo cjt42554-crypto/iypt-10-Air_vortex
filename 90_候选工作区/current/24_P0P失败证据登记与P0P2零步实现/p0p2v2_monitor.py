@@ -13,7 +13,12 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any, TextIO
 
-from p0p2v2_telemetry import gpu_snapshot, process_identity, tctl_sources
+from p0p2v2_telemetry import (
+    background_snapshot,
+    gpu_snapshot,
+    process_identity,
+    tctl_sources,
+)
 
 
 def emit(stream: TextIO, payload: Mapping[str, Any]) -> None:
@@ -58,6 +63,8 @@ def monitor_periodic(
                     if rollup.is_file()
                     else None,
                 }
+            elif kind == "background":
+                value = background_snapshot()
             else:
                 raise ValueError(f"unknown periodic monitor kind: {kind}")
             emit(
@@ -202,13 +209,16 @@ def monitor_pidstat(
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--kind", choices=("gpu", "tctl", "proc", "pidstat"), required=True
+        "--kind",
+        choices=("gpu", "tctl", "proc", "pidstat", "background"),
+        required=True,
     )
     parser.add_argument("--pid", type=int, required=True)
     parser.add_argument("--start-ticks", type=int, required=True)
     parser.add_argument("--interval-s", type=float, default=0.5)
     parser.add_argument("--stop-file", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--exclude-pid", type=int, action="append", default=[])
     return parser.parse_args(argv)
 
 
@@ -224,17 +234,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         0o600,
     )
     with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as stream:
-        emit(
-            stream,
-            {
-                "record_type": "monitor_start",
-                "kind": args.kind,
-                "monitor_pid": os.getpid(),
-                "target_pid": args.pid,
-                "target_start_ticks": args.start_ticks,
-                "monotonic_ns": time.monotonic_ns(),
-            },
-        )
+        start_record = {
+            "record_type": "monitor_start",
+            "kind": args.kind,
+            "monitor_pid": os.getpid(),
+            "target_pid": args.pid,
+            "target_start_ticks": args.start_ticks,
+            "monotonic_ns": time.monotonic_ns(),
+        }
+        if args.kind == "background":
+            start_record["excluded_pids"] = sorted(set(args.exclude_pid))
+        emit(stream, start_record)
         if not target_alive(args.pid, args.start_ticks):
             emit(
                 stream,

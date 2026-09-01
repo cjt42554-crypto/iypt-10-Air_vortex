@@ -24,7 +24,6 @@ import airvortex  # noqa: F401
 import cupy as cp
 import numpy as np
 from airvortex._hardware import NUMERICAL_THREAD_POLICY
-
 from p0p2v2_instrumentation import (
     DeviceAllocationRecorder,
     IntervalRegistry,

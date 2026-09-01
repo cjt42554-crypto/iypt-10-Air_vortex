@@ -63,6 +63,17 @@
     "role": "NUMERICAL_HARD_GATES_ONLY__NO_RESULT_REUSE"
   },
   "p0_p": {
+    "analysis_transaction_policy": {
+      "analyzer_and_parser_blobs_equal_claim": true,
+      "exclusive_analysis_lock": true,
+      "stale_staging": "RETAIN_AND_PUBLISH_ANALYSIS_FAILURE",
+      "symbolic_clean_main_at_claim_authorization_child": true,
+      "terminal_record_fields": [
+        "analyzer_commit_and_blob_set",
+        "claim_sha256",
+        "raw_manifest_sha256"
+      ]
+    },
     "benchmark_definitions": {
       "B1": {
         "duration_s": 0.005,
@@ -166,7 +177,9 @@
       "no_other_compute_or_HF3D_process": true,
       "nvidia_gpu_start_max_c": 75.0,
       "online_logical_cpus": 32,
-      "post_probe_background_observation_s": 30.0
+      "per_sample_full_environment_observation_before_RUNNING_s": 30.0,
+      "post_probe_background_observation_s": 30.0,
+      "ticket_bound_complete_machine_identity_before_lock_raw_claim_ledger_staging": true
     },
     "execution_schedule": [
       "P0P2V2_WARMUP_B1",
@@ -616,13 +629,37 @@
       0.004,
       0.005
     ],
+    "sample_lifetime_environment_policy": {
+      "excluded_processes": [
+        "target_worker",
+        "orchestrator",
+        "external_monitors",
+        "their_descendants"
+      ],
+      "other_compute_processes_recomputed": true,
+      "periodic_interval_s": 0.5,
+      "pollution_result": "FAILED_STOPPED_NO_RESUME",
+      "system_background_cpu_recomputed": true
+    },
     "scored_policy": {
       "external_read_only_telemetry": "REQUIRED",
       "outlier_exclusion": "PROHIBITED",
       "per_benchmark_n": 3,
       "profiler_or_allocator_interposer": "PROHIBITED"
     },
-    "static_output_root": "90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/artifacts/p0p2v2/static"
+    "static_output_root": "90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/artifacts/p0p2v2/static",
+    "terminal_transaction_policy": {
+      "after_18_PASS": "ALL_SAMPLES_PASS_PENDING_TERMINAL",
+      "failure_authority": "coherent_FAILED_STOPPED_plus_unique_execution_failure",
+      "partial_terminal_records": "PRESERVE_AS_ABORTED_AND_FAIL_STOPPED",
+      "success_authority": "unique_valid_execution_complete"
+    },
+    "worker_launcher_lifetime_policy": {
+      "end_to_end_target": "outer_launcher_start_to_exit_including_nsys_finalization",
+      "nonzero_outer_exit": "FAILED_STOPPED_NO_RESUME",
+      "post_worker_nsys_finalization_lag": "ALLOWED_AND_RECORDED",
+      "telemetry_target": "inner_worker_PID_start_to_independently_observed_PID_exit"
+    }
   },
   "paths": {
     "authorization": "90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/p0p2v2_execution_authorization.json",

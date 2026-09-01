@@ -205,6 +205,12 @@ class DirectoryPublicationTransaction:
         if self.parent.is_symlink():
             raise P0PerformanceError("publication parent must not be a symlink")
         self.parent.mkdir(parents=True, exist_ok=True)
+        stale = sorted(self.parent.glob(f".{self.name}.staging.*"))
+        if stale:
+            raise P0PerformanceError(
+                "publication has retained stale staging: "
+                + ", ".join(path.name for path in stale)
+            )
         if not self.parent.is_dir() or self.target.exists() or self.target.is_symlink():
             raise P0PerformanceError("publication target is not uniquely available")
         staging = Path(
