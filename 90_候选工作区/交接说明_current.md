@@ -1,70 +1,67 @@
 # 当前交接
 
-项目是个人短期科研工具，科学预测准确性优先；现有性能没有明显妨碍使用。P0-Lite 已按用户判断终止，reference baseline 保持 `INCOMPLETE/PARTIAL`，不得重跑、补齐或转入性能重构。
+当前没有已授权的待续任务。项目已经推进到“真正开展实验之前可以安全暂停”的阶段；未经用户明确授权，不得搭建、校准或执行实际实验。
 
     PROJECT_MODE = PERSONAL_SHORT_TERM_RESEARCH_TOOL
     PRIMARY_OBJECTIVE = ACCURATE_EXPERIMENTAL_PHENOMENON_PREDICTION
 
-    P0LITE_EXECUTION = TERMINATED
-    TIMED_R1_B3 = NO_VALID_SAMPLE
-    FURTHER_PERFORMANCE_EXECUTION = NO_GO
+    PROJECT_STATE = READY_TO_PAUSE_BEFORE_EXPERIMENT
+    READY_FOR_QUANTITATIVE_APPARATUS_PREDICTION = false
+    DYNAMIC_STEPS_EXECUTED_THIS_STAGE = 0
+    experiment_started = false
 
-## 实际科学状态
+## 科学状态
 
-- HF3D reference backend 已实现且具有较丰富诊断，但尚不是经过数值资格与物理验证的预测求解器。
-- Q1R3 三层空间归档完整；六个必需平滑观测量全部没有通过空间收敛，状态仍为 `Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED`。
-- D3R1 六个冻结算例中五个完成；`G9_DT2` 在接受步 `6695`、模拟时刻 `0.009196624999999948 s` 因投影后最大散度门失败。
-- 数值资格未建立；物理验证和实验验证未执行；装置级预测仍被禁止。
+- Q1R3 六个必需平滑观测量全部未通过空间收敛，保持 `Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED`。
+- D3R1 的 `G9_DT2` 在接受步 `6695`、模拟时刻 `0.009196624999999948 s` 因投影后最大散度门失败。
+- 结果盲、只读的失败步审计已完成；最大投影散度独立重算为 `1.0249185899624536e-4 s^-1`，与归档逐位相同。压力代数残差携带几乎全部失败散度，但冻结 H-A/H-B/H-C 门没有识别唯一因果机制。
+- 冻结终态保持：
 
-## G9_DT2 失败步审计结果
+      MECHANISM_NOT_IDENTIFIED__NO_FIX_AUTHORIZED
 
-结果盲合同和独立实现已经分别在读取数值数组前提交并 push。审计实现提交为：
+- Pro 独立复核接受该审计为合同忠实，并明确拒绝事后把结果追认为 H-A。当前关闭投影取证，不开展第二轮审计、求解器修复、动态重跑、D3 S3 或更细网格 campaign。
+- P0-Lite 已按用户“短期个人使用性能足够、科学准确性优先”的判断终止；reference baseline 保持 `INCOMPLETE/PARTIAL`，不得重跑、补齐或转入性能重构。
 
-    08f67b950bba9b2820a4ff7b9c43acc1c78bcb28
+## 实验前准备包
 
-证据入口：
+唯一 E0 交付为：
 
-    90_候选工作区/current/07_D3跨网格时间步响应诊断/diagnostics/g9_dt2_projection_closure/projection_closure_preregistration.json
-    90_候选工作区/current/07_D3跨网格时间步响应诊断/diagnostics/g9_dt2_projection_closure/audit_projection_closure.py
-    90_候选工作区/current/07_D3跨网格时间步响应诊断/diagnostics/g9_dt2_projection_closure/artifacts/projection_closure_audit.json
-    90_候选工作区/current/07_D3跨网格时间步响应诊断/diagnostics/g9_dt2_projection_closure/artifacts/projection_closure_audit.md
+    90_候选工作区/current/31_实验前可证伪预测与测量接口.md
 
-审计只读取了预注册的 12 个状态、掩膜与步级压力诊断成员；`observable_*` 读取数为零，动态步数为零，partial 前后 SHA-256 均为 `8f1e0973eda48c2ecc54f10001f28b988d353e85a728a16ec24f74582527cbcc`。
+E0-V1 冻结了：
 
-冻结终态为：
+- 第一条可反驳链：实测磁子本体转速到贯通前的方位平均自由液面轮廓，再到派生漏斗深度；
+- HF3D 的 $\alpha=0.5$ 列高度、径向分箱、实验全场重建与同一坐标/时间算子；
+- 不加染料或粒子的扩展视角自由液面合成纹影（FS-SS）路线，以及遮挡、折射、焦散、近壁和中心覆盖硬门；
+- 所有几何、物性、湿润、实际转速、光学与时基输入的单位、测量方法和不确定度合同；
+- 只允许静态仪器数据进入 `calibration`，所有磁力驱动液面按完整 run 进入 `sealed_validation`；
+- 原始数据、哈希、二维时间—半径载荷、主误差指标、参数/数值/测量/模型四类不确定度和失败闭锁。
 
-    MECHANISM_NOT_IDENTIFIED__NO_FIX_AUTHORIZED
+正式分析接口目前只支持一维标量时序，不能自动承载完整时间—半径轮廓；这一点已在 E0 中明示。若以后授权实验，任何桥接实现都必须留在候选区、先用合成场验证，并在解封 holdout 前冻结。
 
-判别细节必须完整保留：
+## 恢复条件
 
-- 独立重算最大投影散度与冻结值逐位相同，均为 `1.0249185899624536e-4 s^-1`，故 H-C 归档对齐假设不成立。
-- 独立重算压力相对残差 $L_2=9.830838356012649\times10^{-8}$，与归档诊断 `9.830838356083504\times10^{-8}` 一致；$L_\infty=7.789472723500224\times10^{-9}$。
-- 代数残差分量在最大格点和全局 $L_\infty$ 上分别解释 `0.9999999988175134` 与 `0.9999998103085352`，且最大值共位。
-- 算子缺陷最大值为 `1.9441830861506717e-11 s^-1`，远小于失败散度，但大于预注册舍入尺度 `1.0249185899624535e-12 s^-1`；因此 H-A 的全部冻结门没有同时通过。
-- 算子缺陷既不与主热点共位，也不能达到 90% 解释门，故 H-B 不成立。
-- 全局通量闭合相对误差为 `2.2690411167966486e-10`。
-- 主热点位于索引 `[11, 100, 104]`，50% 热点连通分量只有一个格点；该格点不直接邻接开顶、闭合容器或磁子，也不在界面带内，距界面带一个横向网格间距。两格扩展区含 40 个界面带格点并邻接闭合边界。
+只有用户明确授权进入实验阶段后才继续。恢复时第一项动作是按 E0-V1 搭建并校准测量系统、实测输入，不直接采集或查看磁力驱动 holdout。
 
-上述终态不能事后改阈值、追认为 H-A 或授权修复。它只说明冻结 H-A/H-B/H-C 判别没有给出唯一机制。
+真正形成装置定量预测之前还必须另行满足：
 
-## 下一项唯一任务
+- 同一模型身份、参数区间、观测量和运行时长的数值资格；
+- 本装置 FS-SS、磁子本体转速和共同触发的留出校准；
+- 在液面数据仍密封时提交不可追溯修改的 prediction manifest；
+- 明确且有限的模型适用域/结构差异处理。
 
-把预注册、实现和完整结果交 ChatGPT Pro 独立复核，请其从当前全局科学目标出发裁决下一项最小充分任务。复核完成前停止：不得修改正式或候选求解器、不得启动动态重算、不得建立第二轮诊断或进入实验预测准备。
+若用户只授权搭建或校准，不得据此扩大到磁力驱动实验。若用户授权动态实验，也不得把未资格预测或已解封数据写成盲验证。
 
-若 Pro 认为需要新审计，必须在看到新结果前另立不可追溯修改的预注册；不得改写本轮合同或终态。若 Pro 裁决候选修正，仍须先明确候选范围、验证矩阵和从零重跑义务，正式树保持只读，除非用户另行给出文件级授权。
+## 保护范围与当前结论上限
 
-## 当前禁止
+未获新的文件级授权时，继续保持只读：
 
-- 不修改 `01_最终理论/**`、`02_模拟程序/**`、顶层 `AGENTS.md` 或既有冻结证据。
-- 不运行 HF3D 动态步，不恢复 partial，不生成 D3 物理量或分类值。
-- 不修改 P0-Lite attempt 上限，不继续任何性能样本或 profiling。
-- 不把实现、归档、Pro 裁决或离散闭合诊断写成数值资格、物理验证或实验验证。
+    01_最终理论/**
+    02_模拟程序/**
+    AGENTS.md
+    既有 Q1R3、D3、投影审计和 P0-Lite 冻结证据
 
-## 长期完成点
-
-项目持续推进到真正开展实验之前可以安全暂停的阶段：数值可信度缺口按最小充分原则关闭或明确保持 `NO-GO`，并冻结可测输入、预测量、参数不确定性、实验对照指标、测量与数据记录方案、停止条件和可复现交接。未经用户明确授权不得实际开始实验。
-
-## 当前结论上限
+当前结论上限：
 
     numerical qualification = NOT DEMONSTRATED
     physical validation = NOT PERFORMED
