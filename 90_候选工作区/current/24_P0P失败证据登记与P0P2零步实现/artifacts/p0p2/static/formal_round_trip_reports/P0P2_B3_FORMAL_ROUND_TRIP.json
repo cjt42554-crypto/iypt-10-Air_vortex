@@ -1,0 +1,54 @@
+{
+  "benchmark_id": "B3",
+  "formal_source_identity": {
+    "absolute_root_stored": false,
+    "algorithm": "sha256",
+    "available": true,
+    "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+    "file_count": 58,
+    "reason": null,
+    "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+    "total_bytes": 1004894,
+    "unit": null,
+    "value": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8"
+  },
+  "fresh_process_identity": {
+    "pid": 96251,
+    "platform": {
+      "machine": "x86_64",
+      "release": "7.0.0-28-generic",
+      "system": "Linux"
+    },
+    "process_start_ticks": 876418,
+    "python_executable": "/usr/bin/python3.12"
+  },
+  "gate_pass": true,
+  "gates": {
+    "duration_ramp_output_schedule_compatible": true,
+    "effective_canonical_hash_exact": true,
+    "formal_simulation_config_from_dict_and_exact_to_dict": true,
+    "formal_source_tree_exact": true,
+    "generated_effective_config_exact": true,
+    "zero_hf3d_time_steps": true
+  },
+  "hf3d_time_steps_advanced": 0,
+  "round_trip_evidence_source": "90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/artifacts/p0p2/static/probe_reports/P0P2_B3_ZERO_STEP.json",
+  "schema_version": 1,
+  "source_and_effective_config_identity": {
+    "benchmark_id": "B3",
+    "effective_canonical_sha256": "2c3ac702a5e85762eecf2f15bb908f538c697058604d1e5edddad051564618e3",
+    "effective_config_path": "90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/generated_effective_configs/P0P2_B3.json",
+    "formal_round_trip_required": true,
+    "only_difference": {
+      "run.duration_s": {
+        "baseline": 0.01,
+        "effective": 0.005
+      }
+    },
+    "source_canonical_sha256": "c097b5303d026c12b822a9888920350f0cf2b458d905a29bf40a86d450a16208",
+    "source_case": "G9_DT2",
+    "source_file_sha256": "c924a225d4d35b25217318c0bdbe7728bceb637f5474e0eb9e2cbffac6ccdb37",
+    "source_path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G9_DT2.json"
+  },
+  "status": "HF3D_P0P2_FORMAL_CONFIG_ROUND_TRIP_PASS"
+}

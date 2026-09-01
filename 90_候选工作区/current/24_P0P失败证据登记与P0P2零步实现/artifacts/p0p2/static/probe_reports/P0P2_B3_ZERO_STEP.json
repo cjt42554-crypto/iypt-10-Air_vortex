@@ -1,0 +1,473 @@
+{
+  "benchmark_id": "B3",
+  "config_identity": {
+    "benchmark_id": "B3",
+    "effective_canonical_sha256": "2c3ac702a5e85762eecf2f15bb908f538c697058604d1e5edddad051564618e3",
+    "effective_config_path": "90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/generated_effective_configs/P0P2_B3.json",
+    "formal_round_trip_required": true,
+    "only_difference": {
+      "run.duration_s": {
+        "baseline": 0.01,
+        "effective": 0.005
+      }
+    },
+    "source_canonical_sha256": "c097b5303d026c12b822a9888920350f0cf2b458d905a29bf40a86d450a16208",
+    "source_case": "G9_DT2",
+    "source_file_sha256": "c924a225d4d35b25217318c0bdbe7728bceb637f5474e0eb9e2cbffac6ccdb37",
+    "source_path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G9_DT2.json"
+  },
+  "elapsed_wall_s_before_teardown": 4.757868245,
+  "elapsed_wall_s_total": 4.77710833,
+  "formal_source_identity": {
+    "absolute_root_stored": false,
+    "algorithm": "sha256",
+    "available": true,
+    "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+    "file_count": 58,
+    "reason": null,
+    "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+    "total_bytes": 1004894,
+    "unit": null,
+    "value": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8"
+  },
+  "gate_pass": true,
+  "gates": {
+    "actual_cuda_without_fallback": true,
+    "diagnostic_buffer_empty_no_accepted_step": true,
+    "duration_ramp_and_output_schedule_compatible": true,
+    "effective_config_canonical_hash_exact": true,
+    "event_tracker_initialised_without_events": true,
+    "expected_gpu_identity": true,
+    "expected_toolchain_versions": true,
+    "explicit_cupy_pool_teardown": true,
+    "formal_config_from_dict_and_exact_round_trip": true,
+    "formal_source_tree_exact": true,
+    "generated_effective_config_exact": true,
+    "grid_constructed_exact_shape": true,
+    "hf3d_time_steps_advanced_exactly_zero": true,
+    "initial_frame_recorded_exactly_once": true,
+    "initial_state_zero_steps": true,
+    "pressure_engine_constructed_on_device": true,
+    "runtime_inputs_separated_from_v1_and_e0": true,
+    "state_and_grid_arrays_finite": true,
+    "zero_step_diagnostics_finite": true
+  },
+  "grid": {
+    "active_cell_count": 1741608,
+    "arrays": {
+      "active_mask": {
+        "all_finite": true,
+        "byte_length": 2219520,
+        "c_contiguous": true,
+        "dtype": "|b1",
+        "maximum": 1.0,
+        "minimum": 0.0,
+        "sha256_c_order_bytes": "ad14ca9caf06d15f4209ec8da903b5d28865b0300ba53e290ed5d30442a81f94",
+        "shape": [
+          136,
+          136,
+          120
+        ]
+      },
+      "bar_mask": {
+        "all_finite": true,
+        "byte_length": 2219520,
+        "c_contiguous": true,
+        "dtype": "|b1",
+        "maximum": 1.0,
+        "minimum": 0.0,
+        "sha256_c_order_bytes": "760d53a80f4443b354dd1e0db42dc61c057f4f3a48af38850db33c68baeaefad",
+        "shape": [
+          136,
+          136,
+          120
+        ]
+      }
+    },
+    "bar_cell_count": 2712,
+    "maximum_spacing_m": 0.0006666666666666666,
+    "minimum_spacing_m": 0.0006617647058823529,
+    "shape": [
+      136,
+      136,
+      120
+    ]
+  },
+  "hf3d_time_steps_advanced": 0,
+  "initial_frame": {
+    "arrays": {
+      "phase": {
+        "all_finite": true,
+        "byte_length": 65280,
+        "c_contiguous": true,
+        "dtype": "<f8",
+        "maximum": 1.0,
+        "minimum": 0.0,
+        "sha256_c_order_bytes": "853f6e03afb2ebe9b10511ea3d4812717613b27a087d93791d7d8ac2e815ea3c",
+        "shape": [
+          68,
+          120
+        ]
+      },
+      "pressure": {
+        "all_finite": true,
+        "byte_length": 65280,
+        "c_contiguous": true,
+        "dtype": "<f8",
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "sha256_c_order_bytes": "d5ebf1b7b54e7dc914c34c1b00390bb1e1bc3924914b03db78d47c687eb747fa",
+        "shape": [
+          68,
+          120
+        ]
+      },
+      "ur": {
+        "all_finite": true,
+        "byte_length": 65280,
+        "c_contiguous": true,
+        "dtype": "<f8",
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "sha256_c_order_bytes": "d5ebf1b7b54e7dc914c34c1b00390bb1e1bc3924914b03db78d47c687eb747fa",
+        "shape": [
+          68,
+          120
+        ]
+      },
+      "utheta": {
+        "all_finite": true,
+        "byte_length": 65280,
+        "c_contiguous": true,
+        "dtype": "<f8",
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "sha256_c_order_bytes": "d5ebf1b7b54e7dc914c34c1b00390bb1e1bc3924914b03db78d47c687eb747fa",
+        "shape": [
+          68,
+          120
+        ]
+      },
+      "uz": {
+        "all_finite": true,
+        "byte_length": 65280,
+        "c_contiguous": true,
+        "dtype": "<f8",
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "sha256_c_order_bytes": "d5ebf1b7b54e7dc914c34c1b00390bb1e1bc3924914b03db78d47c687eb747fa",
+        "shape": [
+          68,
+          120
+        ]
+      }
+    },
+    "observable_count": 41,
+    "observable_names": [
+      "actual_bar_rpm",
+      "angular_momentum_z_kg_m2_s",
+      "axisymmetry_error",
+      "bar_angle_rad",
+      "bar_gas_contact_area_m2",
+      "cfl_advective",
+      "cfl_capillary",
+      "cfl_viscous",
+      "connection_candidate",
+      "connection_minimum_throat_radius_m",
+      "connection_required_throat_radius_m",
+      "divergence_before_projection",
+      "equivalent_bar_rpm",
+      "finite_channel_candidate",
+      "first_contact_proxy",
+      "funnel_depth_m",
+      "isolated_gas_volume_m3",
+      "kinetic_energy_j",
+      "kinetic_energy_lab_j",
+      "kinetic_energy_rotating_j",
+      "liquid_mass_error_relative",
+      "liquid_volume_balance_error_relative",
+      "liquid_volume_error",
+      "liquid_volume_error_m3",
+      "liquid_volume_m3",
+      "max_divergence",
+      "min_gap_to_bar",
+      "min_gap_to_bar_m",
+      "minimum_gap_m",
+      "nominal_central_depression_m",
+      "pressure_iterations",
+      "pressure_residual",
+      "rotation_increment_rad",
+      "surface_depth",
+      "surface_depth_m",
+      "surface_min_z_m",
+      "surface_profile_m",
+      "surface_profile_maximum_m",
+      "surface_profile_minimum_m",
+      "surface_profile_range_m",
+      "viscous_dissipation_w"
+    ],
+    "times_s": [
+      0.0
+    ]
+  },
+  "initial_state": {
+    "arrays": {
+      "phase": {
+        "all_finite": true,
+        "byte_length": 17756160,
+        "c_contiguous": true,
+        "dtype": "<f8",
+        "maximum": 1.0,
+        "minimum": 0.0,
+        "sha256_c_order_bytes": "e7f50f0a7bd313d91f3a24a7a075b9249029a3443c1020954f70030c601f3bb1",
+        "shape": [
+          136,
+          136,
+          120
+        ]
+      },
+      "pressure_pa": {
+        "all_finite": true,
+        "byte_length": 17756160,
+        "c_contiguous": true,
+        "dtype": "<f8",
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "sha256_c_order_bytes": "4c04bf8625dc093f3e5422eae7aba356174337b0dfaa52a6ecadc19eb907a398",
+        "shape": [
+          136,
+          136,
+          120
+        ]
+      },
+      "u_x_face": {
+        "all_finite": true,
+        "byte_length": 17886720,
+        "c_contiguous": true,
+        "dtype": "<f8",
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "sha256_c_order_bytes": "41ba37dca633461701970e9b1c73a5b12fb97c60a37f96bdf1bdd549991f68f1",
+        "shape": [
+          137,
+          136,
+          120
+        ]
+      },
+      "u_y_face": {
+        "all_finite": true,
+        "byte_length": 17886720,
+        "c_contiguous": true,
+        "dtype": "<f8",
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "sha256_c_order_bytes": "08ab73a5159b86c5015f6c7a62b95b5c893c19ad3be3fc8bbfc23bed1cb1f4a7",
+        "shape": [
+          136,
+          137,
+          120
+        ]
+      },
+      "u_z_face": {
+        "all_finite": true,
+        "byte_length": 17904128,
+        "c_contiguous": true,
+        "dtype": "<f8",
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "sha256_c_order_bytes": "d90b6337daafe59f668c575b12473ad1988300e7ee82b89735c2ebe980d70aac",
+        "shape": [
+          136,
+          136,
+          121
+        ]
+      }
+    },
+    "bar_angle_rad": 0.0,
+    "initial_liquid_volume_m3": 0.0003809118260624552,
+    "step": 0,
+    "time_s": 0.0
+  },
+  "pressure_engine": {
+    "accelerator": {
+      "compute_capability": "12.0",
+      "detail": "CuPy FP64 device operation passed",
+      "device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+      "fallback": false,
+      "host_device_transfer_each_solve": true,
+      "requested": "cuda",
+      "selected": "cuda",
+      "total_memory_bytes": 8053915648
+    },
+    "class": "airvortex.numerics.projection3d_gpu.CuPyVariableDensityProjection3D",
+    "cuda_memory": {
+      "allocated_by_projection_bytes_lower_bound": 467533824,
+      "free_after_projection_bytes": 6885015552,
+      "free_before_projection_bytes": 7352549376,
+      "total_bytes": 8053915648
+    }
+  },
+  "process_identity": {
+    "pid": 96251,
+    "platform": {
+      "machine": "x86_64",
+      "release": "7.0.0-28-generic",
+      "system": "Linux"
+    },
+    "process_start_ticks": 876418,
+    "python_executable": "/usr/bin/python3.12"
+  },
+  "runtime_inputs": {
+    "contract": "90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/p0p2_contract.json",
+    "formal_source_tree": "02_模拟程序/src",
+    "generated_effective_config": "90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/generated_effective_configs/P0P2_B3.json",
+    "separation_gates": {
+      "e0_snapshot_not_runtime_input": true,
+      "runtime_input_set_nonempty": true,
+      "v1_file_byte_identities_not_runtime_input": true,
+      "v1_raw_not_runtime_input": true
+    },
+    "source_config": "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G9_DT2.json",
+    "v1_raw_or_e0_snapshot_used": false
+  },
+  "schema_version": 1,
+  "status": "HF3D_P0P2_EXACT_CASE_ZERO_STEP_PROBE_PASS",
+  "teardown": {
+    "device_free_after_teardown_bytes": 7350583296,
+    "gate_pass": true,
+    "pinned_pool_free_blocks_after_free_all_blocks": 0,
+    "pool_before": {
+      "total_bytes": 0,
+      "used_bytes": 0
+    },
+    "pool_total_bytes_after_free_all_blocks": 0,
+    "pool_used_bytes_after_free_all_blocks": 0
+  },
+  "toolchain": {
+    "compute_capability": "12.0",
+    "cuda_driver_version": 13000,
+    "cuda_runtime_version": 13020,
+    "device_name": "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "numerical_thread_policy": {
+      "affinity_logical_cpus": 32,
+      "applied": [
+        [
+          "OPENBLAS_NUM_THREADS",
+          "2"
+        ],
+        [
+          "OMP_NUM_THREADS",
+          "2"
+        ],
+        [
+          "MKL_NUM_THREADS",
+          "2"
+        ],
+        [
+          "BLIS_NUM_THREADS",
+          "2"
+        ],
+        [
+          "VECLIB_MAXIMUM_THREADS",
+          "2"
+        ],
+        [
+          "NUMEXPR_NUM_THREADS",
+          "2"
+        ]
+      ],
+      "explicitly_overrode_library_environment": false,
+      "preserved": [],
+      "requested": "auto",
+      "selected_threads": 2
+    },
+    "total_global_memory_bytes": 8053915648,
+    "versions": {
+      "cupy": "14.2.0",
+      "cupy-cuda13x": "14.2.0",
+      "numpy": "2.5.2",
+      "python": "3.12.3",
+      "scipy": "1.17.1"
+    }
+  },
+  "zero_step_diagnostics": {
+    "scalars": {
+      "actual_bar_rpm": 0.0,
+      "advective_cfl": 0.0,
+      "angular_acceleration_rad_s2": 6283.185307179587,
+      "angular_momentum_z_kg_m2_s": 0.0,
+      "angular_velocity_rad_s": 0.0,
+      "boundary_rotating_energy_change_j": 0.0,
+      "capillary_cfl": 0.0,
+      "cfl_retry_count": 0,
+      "divergence_after_s_inv": 0.0,
+      "divergence_before_s_inv": 0.0,
+      "dt_s": 0.0,
+      "expected_liquid_volume_m3": 0.0003809118260624552,
+      "gravity_acceleration_m_s2": 9.80665,
+      "initial_attempt_dt_s": 0.0,
+      "kinetic_energy_lab_j": 0.0,
+      "kinetic_energy_rotating_j": 0.0,
+      "liquid_volume_balance_error_m3": 1.0842021724855044e-19,
+      "liquid_volume_m3": 0.0003809118260624553,
+      "maximum_boundary_acceleration_m_s2": 0.0,
+      "maximum_momentum_advection_acceleration_m_s2": 0.0,
+      "maximum_pressure_projection_acceleration_m_s2": 0.0,
+      "maximum_rejected_post_projection_cfl": 0.0,
+      "maximum_rotating_frame_acceleration_m_s2": 0.0,
+      "maximum_surface_tension_acceleration_m_s2": 0.0,
+      "maximum_viscous_acceleration_m_s2": 0.0,
+      "phase_clip_absolute_volume_m3": 0.0,
+      "phase_repair_absolute_volume_m3": 0.0,
+      "phase_top_outward_flux_m3_s": 0.0,
+      "pre_projection_advective_cfl": 0.0,
+      "pre_source_advective_cfl": 0.0,
+      "pressure_iterations": 0,
+      "pressure_relative_residual": 0.0,
+      "rotation_increment_rad": 0.0,
+      "starting_advective_cfl": 0.0,
+      "time_step_limiter": "initial_state",
+      "viscous_cfl": 0.0,
+      "viscous_dissipation_w": 0.0
+    },
+    "topology": {
+      "scalars": {
+        "bar_gas_contact_area_m2": 0.0,
+        "finite_channel_candidate": false,
+        "isolated_gas_volume_m3": 0.0,
+        "minimum_gap_to_bar_m": 0.052259790164473595,
+        "minimum_throat_radius_m": 0.0,
+        "required_resolved_radius_m": 0.0033088235294117647,
+        "resolved_channel": false,
+        "top_connected_gas_volume_m3": 0.00012731574394463666,
+        "touches_bar": false
+      },
+      "throat_radius_by_height_m": {
+        "all_finite": true,
+        "byte_length": 960,
+        "c_contiguous": true,
+        "dtype": "<f8",
+        "maximum": 0.04501436435429358,
+        "minimum": 0.0,
+        "sha256_c_order_bytes": "aa2886d5a316f5220c710924c47e88554280209ef7b2de763b717c5406230265",
+        "shape": [
+          120
+        ]
+      },
+      "top_connected_gas_mask": {
+        "all_finite": true,
+        "byte_length": 2219520,
+        "c_contiguous": true,
+        "dtype": "|b1",
+        "maximum": 1.0,
+        "minimum": 0.0,
+        "sha256_c_order_bytes": "93f92d5b89e0a8d18306edef66d98b229f20af795bc0467b787fe106b664daf4",
+        "shape": [
+          136,
+          136,
+          120
+        ]
+      }
+    }
+  }
+}

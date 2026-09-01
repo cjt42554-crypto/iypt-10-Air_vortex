@@ -1,0 +1,5 @@
+__pycache__/
+*.py[cod]
+artifacts/p0p2/.p0p2-static-*/
+artifacts/p0p2/.p0p2_campaign.lock
+artifacts/p0p2/performance_raw/
