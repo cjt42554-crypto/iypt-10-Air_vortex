@@ -1,59 +1,57 @@
 # 当前交接
 
-项目是个人短期科研工具，优先级是科学预测准确性；现有性能没有明显妨碍使用。P0-Lite 性能路线已经终止，不再重跑、补齐基线、profiling 或选择性能重构。
+项目是个人短期科研工具，科学预测准确性优先；现有性能没有明显妨碍使用。P0-Lite 已按用户判断终止，reference baseline 保持 `INCOMPLETE/PARTIAL`，不得重跑、补齐或转入性能重构。
 
     PROJECT_MODE = PERSONAL_SHORT_TERM_RESEARCH_TOOL
     PRIMARY_OBJECTIVE = ACCURATE_EXPERIMENTAL_PHENOMENON_PREDICTION
 
     P0LITE_EXECUTION = TERMINATED
-    P0LITE_REFERENCE_BASELINE = INCOMPLETE
-    P0LITE_VALID_SAMPLES = PARTIAL
-    P0LITE_DECISION_NEED = SUPERSEDED_BY_USER_OPERATIONAL_JUDGMENT
     TIMED_R1_B3 = NO_VALID_SAMPLE
-    ATTEMPT_LIMIT = UNCHANGED
     FURTHER_PERFORMANCE_EXECUTION = NO_GO
 
 ## 实际科学状态
 
 - HF3D reference backend 已实现且具有较丰富诊断，但尚不是经过数值资格与物理验证的预测求解器。
 - Q1R3 三层空间归档完整；六个必需平滑观测量全部没有通过空间收敛，状态仍为 `Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED`。
-- D3R1 六个冻结算例中五个完成；`G9_DT2` 在接受步 `6695`、模拟时刻 `0.009196624999999948 s` 因投影后最大散度门失败，冻结 partial 的 SHA-256 为 `8f1e0973eda48c2ecc54f10001f28b988d353e85a728a16ec24f74582527cbcc`。
+- D3R1 六个冻结算例中五个完成；`G9_DT2` 在接受步 `6695`、模拟时刻 `0.009196624999999948 s` 因投影后最大散度门失败。
 - 数值资格未建立；物理验证和实验验证未执行；装置级预测仍被禁止。
 
-## 唯一活动任务
+## G9_DT2 失败步审计结果
 
-对冻结 `G9_DT2/partial.npz` 做一次结果盲、只读的失败步离散投影闭合与空间热点审计。预注册合同位于：
+结果盲合同和独立实现已经分别在读取数值数组前提交并 push。审计实现提交为：
+
+    08f67b950bba9b2820a4ff7b9c43acc1c78bcb28
+
+证据入口：
 
     90_候选工作区/current/07_D3跨网格时间步响应诊断/diagnostics/g9_dt2_projection_closure/projection_closure_preregistration.json
+    90_候选工作区/current/07_D3跨网格时间步响应诊断/diagnostics/g9_dt2_projection_closure/audit_projection_closure.py
+    90_候选工作区/current/07_D3跨网格时间步响应诊断/diagnostics/g9_dt2_projection_closure/artifacts/projection_closure_audit.json
+    90_候选工作区/current/07_D3跨网格时间步响应诊断/diagnostics/g9_dt2_projection_closure/artifacts/projection_closure_audit.md
 
-必须在加载合同白名单中的任何数值数组之前提交并 push 该合同。审计只允许读取：
+审计只读取了预注册的 12 个状态、掩膜与步级压力诊断成员；`observable_*` 读取数为零，动态步数为零，partial 前后 SHA-256 均为 `8f1e0973eda48c2ecc54f10001f28b988d353e85a728a16ec24f74582527cbcc`。
 
-    state_u_x_face
-    state_u_y_face
-    state_u_z_face
-    state_pressure_pa
-    state_phase
-    grid_active_mask
-    grid_bar_mask
-    diagnostic_step_time
-    diagnostic_step_dt
-    diagnostic_step_divergence
-    diagnostic_step_pressure_residual
-    diagnostic_step_pressure_iterations
+冻结终态为：
 
-所有未列出的 NPZ 成员均不得访问，尤其禁止读取任何 `observable_*`。空间场只有失败步 `6695` 的单份末态；步级标量上下文只使用 `6683--6695`，不得声称存在 13 份空间帧。
-
-## 冻结判别
-
-候选审计必须独立重建 $D_h$、面密度系数、$A=-V D_h\beta G$、$r_A=Ap-b$、代数散度分量和算子缺陷，并检查全局通量闭合。热点固定为满足 $\lvert D_hu\rvert\geq 0.5\max\lvert D_hu\rvert$ 且包含最大值格点的六邻域连通分量，再向各轴扩展两格；同时标记开顶边界、闭合容器或磁子边界及界面带。
-
-审计只能结束于以下三种状态之一：
-
-    ALGEBRAIC_RESIDUAL_LOCALIZATION_HYPOTHESIS_SUPPORTED
-    DISCRETE_OPERATOR_OR_BOUNDARY_MISMATCH_HYPOTHESIS_SUPPORTED
     MECHANISM_NOT_IDENTIFIED__NO_FIX_AUTHORIZED
 
-无论结果为何，本轮都不得自动修求解器。结果形成后停止并交独立复核；只有后续明确裁决才可讨论候选修正。
+判别细节必须完整保留：
+
+- 独立重算最大投影散度与冻结值逐位相同，均为 `1.0249185899624536e-4 s^-1`，故 H-C 归档对齐假设不成立。
+- 独立重算压力相对残差 $L_2=9.830838356012649\times10^{-8}$，与归档诊断 `9.830838356083504\times10^{-8}` 一致；$L_\infty=7.789472723500224\times10^{-9}$。
+- 代数残差分量在最大格点和全局 $L_\infty$ 上分别解释 `0.9999999988175134` 与 `0.9999998103085352`，且最大值共位。
+- 算子缺陷最大值为 `1.9441830861506717e-11 s^-1`，远小于失败散度，但大于预注册舍入尺度 `1.0249185899624535e-12 s^-1`；因此 H-A 的全部冻结门没有同时通过。
+- 算子缺陷既不与主热点共位，也不能达到 90% 解释门，故 H-B 不成立。
+- 全局通量闭合相对误差为 `2.2690411167966486e-10`。
+- 主热点位于索引 `[11, 100, 104]`，50% 热点连通分量只有一个格点；该格点不直接邻接开顶、闭合容器或磁子，也不在界面带内，距界面带一个横向网格间距。两格扩展区含 40 个界面带格点并邻接闭合边界。
+
+上述终态不能事后改阈值、追认为 H-A 或授权修复。它只说明冻结 H-A/H-B/H-C 判别没有给出唯一机制。
+
+## 下一项唯一任务
+
+把预注册、实现和完整结果交 ChatGPT Pro 独立复核，请其从当前全局科学目标出发裁决下一项最小充分任务。复核完成前停止：不得修改正式或候选求解器、不得启动动态重算、不得建立第二轮诊断或进入实验预测准备。
+
+若 Pro 认为需要新审计，必须在看到新结果前另立不可追溯修改的预注册；不得改写本轮合同或终态。若 Pro 裁决候选修正，仍须先明确候选范围、验证矩阵和从零重跑义务，正式树保持只读，除非用户另行给出文件级授权。
 
 ## 当前禁止
 
