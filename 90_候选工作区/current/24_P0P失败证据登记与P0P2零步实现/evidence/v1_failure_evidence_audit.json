@@ -1,0 +1,241 @@
+{
+  "conclusion_ceiling": {
+    "p0p2_dynamic_execution": "NOT_AUTHORIZED",
+    "v1_claim": "CONSUMED",
+    "v1_measured_performance_result": "NOT_AVAILABLE",
+    "v1_schedule": "TERMINAL_FAILED_STOPPED_NO_RESUME"
+  },
+  "gate_pass": true,
+  "gates": {
+    "snapshot_path_mode_size_and_bytes_match_source": true,
+    "snapshot_semantics_independently_pass": true,
+    "source_and_snapshot_are_disjoint": true,
+    "source_bytes_and_modes_unchanged_during_registration": true,
+    "source_semantics_pass_before_copy": true
+  },
+  "immutability_statement": "The ignored source was opened read-only, scanned before and after copying, and was not moved, edited, reformatted, or augmented. The tracked snapshot is evidence only and is not a P0-P2 runtime input.",
+  "schema_version": 1,
+  "snapshot_semantics": {
+    "derived_fact": {
+      "basis": "ConfigError in SimulationConfig.from_dict before runtime setup, partial_evidence=null, empty worker stdout, and no completion, sample manifest, partial state, or archive",
+      "claim_consumed": true,
+      "hf3d_time_steps_advanced": 0,
+      "measured_performance_result_available": false
+    },
+    "gate_pass": true,
+    "gates": {
+      "all_json_and_jsonl_parse_strictly": true,
+      "claim_identity_and_schedule_exact": true,
+      "completion_and_dynamic_result_files_absent": true,
+      "effective_config_conflict_exact": true,
+      "hf3d_time_steps_advanced_zero_from_preruntime_failure": true,
+      "known_five_hashes_match": true,
+      "ledger_and_failures_terminal_no_resume": true,
+      "ledger_claim_cross_reference_exact": true,
+      "partial_evidence_null": true,
+      "remaining_17_permanently_not_started": true,
+      "warmup_b1_terminal_start_exact": true,
+      "worker_config_error_exact_before_runtime": true,
+      "worker_stdout_empty": true
+    },
+    "known_hashes": {
+      "WARMUP_B1/sample_failure.json": {
+        "actual_sha256": "81145152ab792a763596cbdc4859040fee47c31cc0546f033d7805cdfa2cee1b",
+        "expected_sha256": "81145152ab792a763596cbdc4859040fee47c31cc0546f033d7805cdfa2cee1b",
+        "gate_pass": true
+      },
+      "WARMUP_B1/worker.stderr.log": {
+        "actual_sha256": "944c1cdd60c47f9315d20453e27a541c07f6cf98c5f8419d2b6d79d28d21e894",
+        "expected_sha256": "944c1cdd60c47f9315d20453e27a541c07f6cf98c5f8419d2b6d79d28d21e894",
+        "gate_pass": true
+      },
+      "execution_claim.json": {
+        "actual_sha256": "ecd7cf0e9dfa4e3d609f22e205c95261cc1505a255776dc56a29b3532ad94d80",
+        "expected_sha256": "ecd7cf0e9dfa4e3d609f22e205c95261cc1505a255776dc56a29b3532ad94d80",
+        "gate_pass": true
+      },
+      "execution_failure.json": {
+        "actual_sha256": "749ecd452c3958e6320de4e39fe9ea04d2cf4aadd8e4488f105a1cbdc5ab5262",
+        "expected_sha256": "749ecd452c3958e6320de4e39fe9ea04d2cf4aadd8e4488f105a1cbdc5ab5262",
+        "gate_pass": true
+      },
+      "schedule_ledger.json": {
+        "actual_sha256": "089d91578f89d083f3552f4dfdfaac464bc32842a4f7945f13e9e00903817948",
+        "expected_sha256": "089d91578f89d083f3552f4dfdfaac464bc32842a4f7945f13e9e00903817948",
+        "gate_pass": true
+      }
+    },
+    "schema_version": 1,
+    "status": "HF3D_P0P_V1_FAILURE_EVIDENCE_SEMANTICS_PASS",
+    "strict_json_audit": {
+      "gate_pass": true,
+      "strict_machine_file_count": 13,
+      "strict_machine_files": [
+        {
+          "path": "WARMUP_B1/effective_config.json",
+          "records": 1
+        },
+        {
+          "path": "WARMUP_B1/monitor_gpu.jsonl",
+          "records": 6
+        },
+        {
+          "path": "WARMUP_B1/monitor_pidstat.jsonl",
+          "records": 11
+        },
+        {
+          "path": "WARMUP_B1/monitor_proc.jsonl",
+          "records": 6
+        },
+        {
+          "path": "WARMUP_B1/monitor_tctl.jsonl",
+          "records": 6
+        },
+        {
+          "path": "WARMUP_B1/monitors_ready.json",
+          "records": 1
+        },
+        {
+          "path": "WARMUP_B1/sample_failure.json",
+          "records": 1
+        },
+        {
+          "path": "WARMUP_B1/worker.stdout.jsonl",
+          "records": 0
+        },
+        {
+          "path": "WARMUP_B1/worker_launch_claim.json",
+          "records": 1
+        },
+        {
+          "path": "WARMUP_B1/worker_pid.json",
+          "records": 1
+        },
+        {
+          "path": "execution_claim.json",
+          "records": 1
+        },
+        {
+          "path": "execution_failure.json",
+          "records": 1
+        },
+        {
+          "path": "schedule_ledger.json",
+          "records": 1
+        }
+      ]
+    }
+  },
+  "source_semantics": {
+    "derived_fact": {
+      "basis": "ConfigError in SimulationConfig.from_dict before runtime setup, partial_evidence=null, empty worker stdout, and no completion, sample manifest, partial state, or archive",
+      "claim_consumed": true,
+      "hf3d_time_steps_advanced": 0,
+      "measured_performance_result_available": false
+    },
+    "gate_pass": true,
+    "gates": {
+      "all_json_and_jsonl_parse_strictly": true,
+      "claim_identity_and_schedule_exact": true,
+      "completion_and_dynamic_result_files_absent": true,
+      "effective_config_conflict_exact": true,
+      "hf3d_time_steps_advanced_zero_from_preruntime_failure": true,
+      "known_five_hashes_match": true,
+      "ledger_and_failures_terminal_no_resume": true,
+      "ledger_claim_cross_reference_exact": true,
+      "partial_evidence_null": true,
+      "remaining_17_permanently_not_started": true,
+      "warmup_b1_terminal_start_exact": true,
+      "worker_config_error_exact_before_runtime": true,
+      "worker_stdout_empty": true
+    },
+    "known_hashes": {
+      "WARMUP_B1/sample_failure.json": {
+        "actual_sha256": "81145152ab792a763596cbdc4859040fee47c31cc0546f033d7805cdfa2cee1b",
+        "expected_sha256": "81145152ab792a763596cbdc4859040fee47c31cc0546f033d7805cdfa2cee1b",
+        "gate_pass": true
+      },
+      "WARMUP_B1/worker.stderr.log": {
+        "actual_sha256": "944c1cdd60c47f9315d20453e27a541c07f6cf98c5f8419d2b6d79d28d21e894",
+        "expected_sha256": "944c1cdd60c47f9315d20453e27a541c07f6cf98c5f8419d2b6d79d28d21e894",
+        "gate_pass": true
+      },
+      "execution_claim.json": {
+        "actual_sha256": "ecd7cf0e9dfa4e3d609f22e205c95261cc1505a255776dc56a29b3532ad94d80",
+        "expected_sha256": "ecd7cf0e9dfa4e3d609f22e205c95261cc1505a255776dc56a29b3532ad94d80",
+        "gate_pass": true
+      },
+      "execution_failure.json": {
+        "actual_sha256": "749ecd452c3958e6320de4e39fe9ea04d2cf4aadd8e4488f105a1cbdc5ab5262",
+        "expected_sha256": "749ecd452c3958e6320de4e39fe9ea04d2cf4aadd8e4488f105a1cbdc5ab5262",
+        "gate_pass": true
+      },
+      "schedule_ledger.json": {
+        "actual_sha256": "089d91578f89d083f3552f4dfdfaac464bc32842a4f7945f13e9e00903817948",
+        "expected_sha256": "089d91578f89d083f3552f4dfdfaac464bc32842a4f7945f13e9e00903817948",
+        "gate_pass": true
+      }
+    },
+    "schema_version": 1,
+    "status": "HF3D_P0P_V1_FAILURE_EVIDENCE_SEMANTICS_PASS",
+    "strict_json_audit": {
+      "gate_pass": true,
+      "strict_machine_file_count": 13,
+      "strict_machine_files": [
+        {
+          "path": "WARMUP_B1/effective_config.json",
+          "records": 1
+        },
+        {
+          "path": "WARMUP_B1/monitor_gpu.jsonl",
+          "records": 6
+        },
+        {
+          "path": "WARMUP_B1/monitor_pidstat.jsonl",
+          "records": 11
+        },
+        {
+          "path": "WARMUP_B1/monitor_proc.jsonl",
+          "records": 6
+        },
+        {
+          "path": "WARMUP_B1/monitor_tctl.jsonl",
+          "records": 6
+        },
+        {
+          "path": "WARMUP_B1/monitors_ready.json",
+          "records": 1
+        },
+        {
+          "path": "WARMUP_B1/sample_failure.json",
+          "records": 1
+        },
+        {
+          "path": "WARMUP_B1/worker.stdout.jsonl",
+          "records": 0
+        },
+        {
+          "path": "WARMUP_B1/worker_launch_claim.json",
+          "records": 1
+        },
+        {
+          "path": "WARMUP_B1/worker_pid.json",
+          "records": 1
+        },
+        {
+          "path": "execution_claim.json",
+          "records": 1
+        },
+        {
+          "path": "execution_failure.json",
+          "records": 1
+        },
+        {
+          "path": "schedule_ledger.json",
+          "records": 1
+        }
+      ]
+    }
+  },
+  "status": "HF3D_P0P_V1_E0_REGISTRATION_PASS"
+}

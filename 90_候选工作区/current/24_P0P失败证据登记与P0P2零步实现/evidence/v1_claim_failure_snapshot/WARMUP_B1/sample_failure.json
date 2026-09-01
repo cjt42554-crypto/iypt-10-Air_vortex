@@ -1,0 +1,9 @@
+{
+  "exception_type": "P0PerformanceError",
+  "gate_pass": false,
+  "message": "sample worker/profiler exited 2",
+  "sample_id": "WARMUP_B1",
+  "schema_version": 1,
+  "status": "HF3D_P0P_SAMPLE_FAILED_STOPPED_NO_RETRY",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/17_HF3D性能优化/run_p0_performance_campaign.py\", line 700, in execute_one_sample\n    manifest = audit_sample(\n               ^^^^^^^^^^^^^\n  File \"/home/cjt/Desktop/iypt/10 空气涡流/90_候选工作区/current/17_HF3D性能优化/run_p0_performance_campaign.py\", line 522, in audit_sample\n    raise P0PerformanceError(f\"sample worker/profiler exited {worker_exit_code}\")\np0_performance_contract.P0PerformanceError: sample worker/profiler exited 2\n"
+}
