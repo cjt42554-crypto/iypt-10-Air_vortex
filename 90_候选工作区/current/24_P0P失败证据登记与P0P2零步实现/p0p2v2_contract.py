@@ -548,6 +548,8 @@ def build_contract() -> dict[str, Any]:
                 "no_other_GPU_compute_process": True,
                 "ac_power_online": True,
                 "online_logical_cpus": 32,
+                "preclaim_failure_retained_in_exact_ignored_runtime_evidence": True,
+                "preclaim_failure_keeps_authorized_worktree_clean_and_reusable": True,
             },
             "sample_lifetime_environment_policy": {
                 "periodic_interval_s": 0.5,
@@ -576,7 +578,17 @@ def build_contract() -> dict[str, Any]:
             "analysis_transaction_policy": {
                 "symbolic_clean_main_at_claim_authorization_child": True,
                 "analyzer_and_parser_blobs_equal_claim": True,
+                "parent_ticket_and_authorization_reaudit_before_lock_or_output": True,
+                "current_parser_python_numpy_scipy_platform_equal_ticket": True,
+                "claim_ledger_completion_raw_controls_bound_before_output": True,
                 "exclusive_analysis_lock": True,
+                "only_lock_owner_may_publish_global_failure": True,
+                "lock_loser_and_repeated_invocation": "SIDE_EFFECT_FREE_REFUSAL",
+                "terminal_classes": [
+                    "unique_complete_compact_success_without_failure",
+                    "unique_analysis_failure_without_accepted_success",
+                ],
+                "strict_terminal_reload_and_hash_check": "IN_STAGING_BEFORE_RENAME",
                 "stale_staging": "RETAIN_AND_PUBLISH_ANALYSIS_FAILURE",
                 "terminal_record_fields": [
                     "analyzer_commit_and_blob_set",

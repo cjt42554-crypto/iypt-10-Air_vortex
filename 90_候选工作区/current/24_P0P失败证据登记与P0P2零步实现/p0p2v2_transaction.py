@@ -200,6 +200,7 @@ class DirectoryPublicationTransaction:
         self.target = self.parent / name
         self.staging: Path | None = None
         self._published = False
+        self._prepared_terminal: str | None = None
 
     def begin(self) -> Path:
         if self.parent.is_symlink():
@@ -224,7 +225,7 @@ class DirectoryPublicationTransaction:
         self.staging = staging
         return staging
 
-    def publish_terminal(
+    def prepare_terminal(
         self, filename: str, terminal_record: Mapping[str, Any]
     ) -> Path:
         if (
@@ -239,10 +240,35 @@ class DirectoryPublicationTransaction:
             raise P0PerformanceError("terminal publication record already exists")
         atomic_json(terminal, terminal_record)
         _fsync_directory(self.staging)
+        self._prepared_terminal = filename
+        return terminal
+
+    def publish_prepared_terminal(self, filename: str) -> Path:
+        if (
+            self.staging is None
+            or self._published
+            or self._prepared_terminal != filename
+            or not filename
+            or Path(filename).name != filename
+        ):
+            raise P0PerformanceError("prepared publication is not publishable")
+        terminal = self.staging / filename
+        if not terminal.is_file() or terminal.is_symlink():
+            raise P0PerformanceError("prepared terminal record is unavailable")
+        _fsync_directory(self.staging)
         _rename_directory_noreplace(self.staging, self.target)
-        _fsync_directory(self.parent)
+        # After the atomic rename the target is already the unique visible
+        # terminal.  Record that fact before the parent fsync so a caller can
+        # recover a valid success if the fsync reports an error after rename.
         self._published = True
+        _fsync_directory(self.parent)
         return self.target
+
+    def publish_terminal(
+        self, filename: str, terminal_record: Mapping[str, Any]
+    ) -> Path:
+        self.prepare_terminal(filename, terminal_record)
+        return self.publish_prepared_terminal(filename)
 
 
 __all__ = [

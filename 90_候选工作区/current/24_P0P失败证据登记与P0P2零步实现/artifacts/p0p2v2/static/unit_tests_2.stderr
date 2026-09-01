@@ -12,6 +12,6 @@ test_wrong_denied_and_authorized_blobs_are_rejected (__main__.CompleteGitTopolog
 test_wrong_symbolic_branch_is_rejected (__main__.CompleteGitTopologyTests.test_wrong_symbolic_branch_is_rejected) ... ok
 
 ----------------------------------------------------------------------
-Ran 12 tests in 0.886s
+Ran 12 tests in 0.928s
 
 OK

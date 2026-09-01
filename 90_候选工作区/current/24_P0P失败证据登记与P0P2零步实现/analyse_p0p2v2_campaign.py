@@ -5,10 +5,13 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.metadata
 import json
 import math
 import os
+import platform
 import statistics
+import sys
 import time
 import traceback
 from collections import defaultdict
@@ -17,7 +20,10 @@ from pathlib import Path
 from typing import Any
 
 from p0p2v2_allocation import audit_observer_payload, device_allocation_crosscheck
-from p0p2v2_authorization import REQUIRED_IMPLEMENTATION_RELATIVE_PATHS
+from p0p2v2_authorization import (
+    REQUIRED_IMPLEMENTATION_RELATIVE_PATHS,
+    load_authorization,
+)
 from p0p2v2_consumption import (
     CLAIM_PATH,
     COMPLETE_PATH,
@@ -47,7 +53,11 @@ from p0p2v2_telemetry import (
     audit_monitor_records,
     parse_monitor_jsonl,
 )
-from p0p2v2_transaction import DirectoryPublicationTransaction, ExclusiveCampaignLock
+from p0p2v2_transaction import (
+    DirectoryPublicationTransaction,
+    ExclusiveCampaignLock,
+    _rename_directory_noreplace,
+)
 from run_p0p2v2_campaign import audit_worker_launcher_lifetimes
 
 OUTPUT_PARENT = HERE / "artifacts" / "p0p2v2"
@@ -65,9 +75,123 @@ IMPLEMENTATION_PATHS = tuple(
 )
 
 
+class AnalysisSideEffectFreeRefusal(P0PerformanceError):
+    """A non-owner or already-terminal invocation that must write nothing."""
+
+
+def current_parser_toolchain_identity() -> dict[str, Any]:
+    """Observe the interpreter and packages that decode and analyse the raw data."""
+
+    packages: dict[str, str] = {}
+    for distribution in ("numpy", "scipy"):
+        try:
+            packages[distribution] = importlib.metadata.version(distribution)
+        except importlib.metadata.PackageNotFoundError as exc:
+            raise P0PerformanceError(
+                f"analysis parser distribution is unavailable: {distribution}"
+            ) from exc
+    return {
+        "python_executable_realpath": str(Path(sys.executable).resolve()),
+        "python_version": platform.python_version(),
+        "python_implementation": platform.python_implementation(),
+        "packages": packages,
+        "system": platform.system(),
+        "machine": platform.machine(),
+    }
+
+
+def expected_parser_toolchain_identity(
+    ticket_toolchain: Mapping[str, Any],
+) -> dict[str, Any]:
+    gpu_python = ticket_toolchain.get("gpu_python_and_cuda")
+    if not isinstance(gpu_python, Mapping):
+        raise P0PerformanceError("ticket GPU Python identity is unavailable")
+    packages = gpu_python.get("packages")
+    if not isinstance(packages, Mapping):
+        raise P0PerformanceError("ticket parser package identity is unavailable")
+    expected_packages = {}
+    for distribution in ("numpy", "scipy"):
+        value = packages.get(distribution)
+        if not isinstance(value, str) or not value:
+            raise P0PerformanceError(
+                f"ticket parser package is unavailable: {distribution}"
+            )
+        expected_packages[distribution] = value
+    expected = {
+        "python_executable_realpath": gpu_python.get("gpu_python_realpath"),
+        "python_version": gpu_python.get("python_version"),
+        "python_implementation": gpu_python.get("python_implementation"),
+        "packages": expected_packages,
+        "system": gpu_python.get("system"),
+        "machine": gpu_python.get("machine"),
+    }
+    if any(value is None for key, value in expected.items() if key != "packages"):
+        raise P0PerformanceError("ticket parser toolchain identity is incomplete")
+    return expected
+
+
+def _authorization_claim_binding(claim: Mapping[str, Any]) -> dict[str, Any]:
+    """Independently rebuild current C2/P2/ticket and parser identities."""
+
+    authorization = load_authorization(require_dynamic=True)
+    binding = authorization.get("observed_parent_ticket_binding")
+    if not isinstance(binding, Mapping) or binding.get("gate_pass") is not True:
+        raise P0PerformanceError("analysis parent-ticket re-audit is unavailable")
+    ticket = binding.get("ticket")
+    if not isinstance(ticket, Mapping):
+        raise P0PerformanceError("analysis parent ticket is unavailable")
+    current_parser = current_parser_toolchain_identity()
+    expected_parser = expected_parser_toolchain_identity(ticket["toolchain_binding"])
+    authorized_record = ticket.get("authorized_child_blob")
+    if not isinstance(authorized_record, Mapping):
+        raise P0PerformanceError("analysis authorized-blob record is unavailable")
+    gates = {
+        "authorization_child_commit": binding.get("authorization_child_commit")
+        == claim.get("authorization_child_commit"),
+        "review_parent_commit": binding.get("review_parent_commit")
+        == claim.get("review_parent_commit"),
+        "reviewed_snapshot_commit": binding.get("reviewed_snapshot_commit")
+        == claim.get("reviewed_snapshot_commit"),
+        "ticket_id": ticket.get("ticket_id") == claim.get("ticket_id"),
+        "ticket_blob": binding.get("ticket_blob") == claim.get("ticket_blob"),
+        "ticket_sha256": binding.get("ticket_sha256")
+        == claim.get("ticket_sha256"),
+        "authorized_blob": binding.get("authorized_child_blob")
+        == claim.get("authorized_blob"),
+        "authorized_content_sha256": authorized_record.get("content_sha256")
+        == claim.get("authorized_content_sha256"),
+        "grant_nonce": authorization.get("grant_nonce") == claim.get("grant_nonce"),
+        "fixed_schedule": binding.get("fixed_schedule")
+        == claim.get("fixed_schedule"),
+        "ticket_toolchain_equals_claim": ticket.get("toolchain_binding")
+        == claim.get("toolchain_binding")
+        == claim.get("preclaim_machine_identity"),
+        "current_parser_toolchain_exact": current_parser == expected_parser,
+    }
+    failed = [name for name, passed in gates.items() if not passed]
+    if failed:
+        raise P0PerformanceError(
+            "analysis authorization/parser binding failed: " + ", ".join(failed)
+        )
+    return {
+        "gate_pass": True,
+        "gates": gates,
+        "authorization_child_commit": binding["authorization_child_commit"],
+        "review_parent_commit": binding["review_parent_commit"],
+        "reviewed_snapshot_commit": binding["reviewed_snapshot_commit"],
+        "ticket_id": ticket["ticket_id"],
+        "ticket_blob": binding["ticket_blob"],
+        "ticket_sha256": binding["ticket_sha256"],
+        "authorized_blob": binding["authorized_child_blob"],
+        "authorized_content_sha256": authorized_record["content_sha256"],
+        "parser_toolchain": current_parser,
+    }
+
+
 def analysis_git_snapshot(claim: Mapping[str, Any]) -> dict[str, Any]:
     """Bind the analyzer and every parser to the claimed clean C2 snapshot."""
 
+    authorization_binding = _authorization_claim_binding(claim)
     observed = execution_binding(IMPLEMENTATION_PATHS)
     implementation = claim.get("implementation_files")
     contract_record = (
@@ -86,14 +210,57 @@ def analysis_git_snapshot(claim: Mapping[str, Any]) -> dict[str, Any]:
         and contract_record.get("sha256") == observed.get("contract_sha256"),
         "formal_source_equal_claim": observed.get("formal_source_tree")
         == claim.get("formal_source_tree"),
-        "capability_equal_preclaim_and_ticket": claim.get(
-            "preclaim_machine_identity"
-        )
-        == claim.get("toolchain_binding"),
+        "authorization_parent_ticket_rebuilt": authorization_binding.get("gate_pass")
+        is True,
     }
     if not all(gates.values()):
         raise P0PerformanceError("analysis Git/claim snapshot binding failed")
-    return {"gate_pass": True, "gates": gates, "observed": observed}
+    return {
+        "gate_pass": True,
+        "gates": gates,
+        "observed": {
+            **observed,
+            "authorization_reaudit": authorization_binding,
+            "parser_toolchain": authorization_binding["parser_toolchain"],
+        },
+    }
+
+
+def analysis_input_controls(claim: Mapping[str, Any]) -> dict[str, Any]:
+    """Bind claim, ledger, completion, and the raw root before any output."""
+
+    terminal = validate_terminal_execution_state()
+    if terminal.get("terminal_kind") != "COMPLETE" or terminal.get("claim") != dict(
+        claim
+    ):
+        raise P0PerformanceError("analysis execution terminal differs from claim")
+    ledger = terminal["ledger"]
+    expected_root = {
+        CLAIM_PATH.name,
+        LEDGER_PATH.name,
+        COMPLETE_PATH.name,
+        *EXPANDED_EXECUTION_SCHEDULE,
+    }
+    if not RAW_ROOT.is_dir() or RAW_ROOT.is_symlink():
+        raise P0PerformanceError("analysis raw root is unavailable")
+    actual_root = {path.name for path in RAW_ROOT.iterdir()}
+    claim_sha256 = sha256_file(CLAIM_PATH)
+    gates = {
+        "unique_complete_execution_terminal": True,
+        "claim_file_equals_terminal_claim": terminal["claim"] == dict(claim),
+        "ledger_claim_sha256": ledger.get("claim_sha256") == claim_sha256,
+        "raw_root_controls_and_schedule_exact": actual_root == expected_root,
+    }
+    if not all(gates.values()):
+        raise P0PerformanceError("analysis claim/ledger/completion/raw controls failed")
+    return {
+        "gate_pass": True,
+        "gates": gates,
+        "claim_sha256": claim_sha256,
+        "ledger_sha256": sha256_file(LEDGER_PATH),
+        "completion_sha256": sha256_file(COMPLETE_PATH),
+        "raw_root_children": sorted(actual_root),
+    }
 
 
 def robust_statistics(values: Sequence[float]) -> dict[str, float]:
@@ -703,7 +870,106 @@ def markdown_profiler(report: Mapping[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _analyse_locked(snapshot_binding: Mapping[str, Any]) -> dict[str, Any]:
+def _validate_compact_success() -> dict[str, Any]:
+    if not OUTPUT_ROOT.is_dir() or OUTPUT_ROOT.is_symlink():
+        raise P0PerformanceError("compact success root is not one real directory")
+    terminal_path = OUTPUT_ROOT / TERMINAL_NAME
+    terminal = strict_json(terminal_path)
+    records = terminal.get("files_before_terminal")
+    if not (
+        terminal.get("schema_version") == 3
+        and terminal.get("status") == "HF3D_P0P2_V2_COMPACT_EVIDENCE_PUBLISHED"
+        and terminal.get("gate_pass") is True
+        and isinstance(records, Mapping)
+    ):
+        raise P0PerformanceError("compact success terminal identity is invalid")
+    expected_files = {
+        MANIFEST_NAME,
+        BASELINE_JSON_NAME,
+        BASELINE_MD_NAME,
+        PROFILER_JSON_NAME,
+        PROFILER_MD_NAME,
+    }
+    if set(records) != expected_files:
+        raise P0PerformanceError("compact success file manifest is incomplete")
+    actual_names = {path.name for path in OUTPUT_ROOT.iterdir()}
+    if actual_names != {*expected_files, TERMINAL_NAME}:
+        raise P0PerformanceError("compact success root contains an unknown object")
+    observed: dict[str, dict[str, Any]] = {}
+    for name in sorted(expected_files):
+        path = OUTPUT_ROOT / name
+        if not path.is_file() or path.is_symlink():
+            raise P0PerformanceError("compact success contains a non-regular file")
+        observed[name] = {
+            "sha256": sha256_file(path),
+            "size_bytes": path.stat().st_size,
+        }
+    if observed != records:
+        raise P0PerformanceError("compact success hash/size manifest changed")
+    return terminal
+
+
+def _validate_analysis_failure() -> dict[str, Any]:
+    if not ANALYSIS_FAILURE_PATH.is_file() or ANALYSIS_FAILURE_PATH.is_symlink():
+        raise P0PerformanceError("analysis failure terminal is not one regular file")
+    failure = strict_json(ANALYSIS_FAILURE_PATH)
+    if not (
+        failure.get("schema_version") == 3
+        and failure.get("status")
+        == "HF3D_P0P2_V2_ANALYSIS_FAILED_STOPPED_RETAINED"
+        and failure.get("gate_pass") is False
+        and isinstance(failure.get("analysis_lock_owner"), Mapping)
+    ):
+        raise P0PerformanceError("analysis failure terminal identity is invalid")
+    return failure
+
+
+def analysis_terminal_state() -> dict[str, Any]:
+    """Accept exactly one analysis terminal class, or a pristine absent state."""
+
+    success_object = OUTPUT_ROOT.exists() or OUTPUT_ROOT.is_symlink()
+    failure_object = ANALYSIS_FAILURE_PATH.exists() or ANALYSIS_FAILURE_PATH.is_symlink()
+    if success_object and failure_object:
+        raise P0PerformanceError("analysis success and failure terminals coexist")
+    if success_object:
+        return {
+            "terminal_kind": "SUCCESS",
+            "terminal": _validate_compact_success(),
+        }
+    if failure_object:
+        return {
+            "terminal_kind": "FAILED_STOPPED",
+            "terminal": _validate_analysis_failure(),
+        }
+    return {"terminal_kind": "ABSENT", "terminal": None}
+
+
+def _success_report(*, recovered_after_publish: bool) -> dict[str, Any]:
+    terminal = _validate_compact_success()
+    return {
+        "schema_version": 3,
+        "status": "HF3D_P0P2_V2_COMPACT_EVIDENCE_PUBLISHED",
+        "gate_pass": True,
+        "gates": terminal["gates"],
+        "output_root": str(OUTPUT_ROOT),
+        "outputs": sorted(
+            {
+                MANIFEST_NAME,
+                BASELINE_JSON_NAME,
+                BASELINE_MD_NAME,
+                PROFILER_JSON_NAME,
+                PROFILER_MD_NAME,
+                TERMINAL_NAME,
+            }
+        ),
+        "recovered_after_visible_atomic_publish": recovered_after_publish,
+    }
+
+
+def _analyse_locked(
+    snapshot_binding: Mapping[str, Any],
+    input_controls: Mapping[str, Any],
+) -> dict[str, Any]:
     manifests = load_manifests()
     identity = cross_mode_identity(manifests)
     baseline = baseline_summary(manifests)
@@ -754,48 +1020,86 @@ def _analyse_locked(snapshot_binding: Mapping[str, Any]) -> dict[str, Any]:
         PROFILER_MD_NAME,
     }:
         raise P0PerformanceError("compact evidence staging file set is incomplete")
-    final_snapshot = analysis_git_snapshot(strict_json(CLAIM_PATH))
+    final_claim = strict_json(CLAIM_PATH)
+    final_snapshot = analysis_git_snapshot(final_claim)
     if final_snapshot != dict(snapshot_binding):
         raise P0PerformanceError("analysis Git snapshot changed during recomputation")
+    final_controls = analysis_input_controls(final_claim)
+    if final_controls != dict(input_controls):
+        raise P0PerformanceError("analysis execution controls changed during recomputation")
     terminal = {
-        "schema_version": 2,
+        "schema_version": 3,
         "status": "HF3D_P0P2_V2_COMPACT_EVIDENCE_PUBLISHED",
         "gate_pass": True,
         "gates": gates,
         "files_before_terminal": files_before_terminal,
         "terminal_record_written_last": True,
         "analyzer_snapshot": final_snapshot["observed"],
-        "claim_sha256": sha256_file(CLAIM_PATH),
+        "analysis_input_controls": final_controls,
+        "claim_sha256": final_controls["claim_sha256"],
         "raw_manifest_sha256": sha256_file(staging / MANIFEST_NAME),
     }
-    published = transaction.publish_terminal(TERMINAL_NAME, terminal)
-    reloaded_terminal = strict_json(published / TERMINAL_NAME)
+    prepared_terminal = transaction.prepare_terminal(TERMINAL_NAME, terminal)
+    reloaded_terminal = strict_json(prepared_terminal)
     observed = {
         name: {
-            "sha256": sha256_file(published / name),
-            "size_bytes": (published / name).stat().st_size,
+            "sha256": sha256_file(staging / name),
+            "size_bytes": (staging / name).stat().st_size,
         }
         for name in files_before_terminal
     }
     if reloaded_terminal != terminal or observed != files_before_terminal:
-        raise P0PerformanceError("published compact evidence failed hash/size reload")
+        raise P0PerformanceError("staged compact evidence failed hash/size reload")
+    transaction.publish_prepared_terminal(TERMINAL_NAME)
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "status": "HF3D_P0P2_V2_COMPACT_EVIDENCE_PUBLISHED",
         "gate_pass": True,
         "gates": gates,
-        "output_root": str(published),
-        "outputs": sorted(path.name for path in published.iterdir()),
+        "output_root": str(OUTPUT_ROOT),
+        "outputs": sorted({*files_before_terminal, TERMINAL_NAME}),
+        "recovered_after_visible_atomic_publish": False,
     }
 
 
 def analyse() -> dict[str, Any]:
+    if analysis_terminal_state()["terminal_kind"] != "ABSENT":
+        raise AnalysisSideEffectFreeRefusal(
+            "analysis already has a unique terminal; invocation refused"
+        )
     claim = strict_json(CLAIM_PATH)
     validate_claim(claim)
     snapshot = analysis_git_snapshot(claim)
-    with ExclusiveCampaignLock(ANALYSIS_LOCK_PATH):
-        report = _analyse_locked(snapshot)
-    return report
+    input_controls = analysis_input_controls(claim)
+    lock = ExclusiveCampaignLock(ANALYSIS_LOCK_PATH)
+    try:
+        lock.__enter__()
+    except BaseException as exc:
+        raise AnalysisSideEffectFreeRefusal(
+            "analysis lock is held; non-owner invocation refused without output"
+        ) from exc
+    try:
+        if analysis_terminal_state()["terminal_kind"] != "ABSENT":
+            raise AnalysisSideEffectFreeRefusal(
+                "analysis terminal appeared before lock ownership"
+            )
+        try:
+            return _analyse_locked(snapshot, input_controls)
+        except AnalysisSideEffectFreeRefusal:
+            raise
+        except BaseException as exc:
+            state = analysis_terminal_state()
+            if state["terminal_kind"] == "SUCCESS":
+                return _success_report(recovered_after_publish=True)
+            if state["terminal_kind"] == "FAILED_STOPPED":
+                raise AnalysisSideEffectFreeRefusal(
+                    "analysis failure terminal already exists"
+                ) from exc
+            failure = publish_analysis_failure(exc, lock=lock)
+            exc.add_note(f"analysis failure retained at {failure['path']}")
+            raise
+    finally:
+        lock.__exit__(None, None, None)
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -804,9 +1108,34 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def publish_analysis_failure(exc: BaseException) -> dict[str, Any]:
+def _fsync_output_parent() -> None:
+    descriptor = os.open(
+        OUTPUT_PARENT,
+        os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW,
+    )
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def publish_analysis_failure(
+    exc: BaseException,
+    *,
+    lock: ExclusiveCampaignLock,
+) -> dict[str, Any]:
     """Persist one explicit failure while retaining every staging directory."""
 
+    lock_identity = lock.identity
+    if not (
+        lock_identity.get("pid") == os.getpid()
+        and lock_identity.get("lock_path") == str(ANALYSIS_LOCK_PATH.absolute())
+    ):
+        raise P0PerformanceError("analysis failure publisher does not own the lock")
+    if analysis_terminal_state()["terminal_kind"] != "ABSENT":
+        raise AnalysisSideEffectFreeRefusal(
+            "analysis terminal already exists; failure publication refused"
+        )
     if OUTPUT_PARENT.is_symlink():
         raise P0PerformanceError("analysis output parent must not be a symlink")
     OUTPUT_PARENT.mkdir(parents=True, exist_ok=True)
@@ -814,9 +1143,10 @@ def publish_analysis_failure(exc: BaseException) -> dict[str, Any]:
         path.name for path in OUTPUT_PARENT.glob(f".{OUTPUT_ROOT.name}.staging.*")
     )
     record = {
-        "schema_version": 2,
+        "schema_version": 3,
         "status": "HF3D_P0P2_V2_ANALYSIS_FAILED_STOPPED_RETAINED",
         "gate_pass": False,
+        "analysis_lock_owner": lock_identity,
         "exception_type": type(exc).__name__,
         "message": str(exc),
         "traceback": "".join(traceback.format_exception(exc)),
@@ -833,31 +1163,54 @@ def publish_analysis_failure(exc: BaseException) -> dict[str, Any]:
         ).encode("utf-8")
         + b"\n"
     )
-    descriptor = os.open(
-        ANALYSIS_FAILURE_PATH,
-        os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_CLOEXEC | os.O_NOFOLLOW,
-        0o600,
-    )
+    staging_path: Path | None = None
+    for attempt in range(2):
+        candidate = OUTPUT_PARENT / (
+            f".analysis_failure.staging.{os.getpid()}."
+            f"{time.monotonic_ns()}.{attempt}.json"
+        )
+        try:
+            descriptor = os.open(
+                candidate,
+                os.O_WRONLY
+                | os.O_CREAT
+                | os.O_EXCL
+                | os.O_CLOEXEC
+                | os.O_NOFOLLOW,
+                0o600,
+            )
+            try:
+                offset = 0
+                while offset < len(payload):
+                    written = os.write(descriptor, payload[offset:])
+                    if written <= 0:
+                        raise P0PerformanceError("analysis failure write stopped")
+                    offset += written
+                os.fsync(descriptor)
+            finally:
+                os.close(descriptor)
+            _fsync_output_parent()
+            if strict_json(candidate) != record:
+                raise P0PerformanceError(
+                    "staged analysis failure strict reload changed"
+                )
+        except BaseException:
+            if attempt == 0:
+                continue
+            raise
+        staging_path = candidate
+        break
+    if staging_path is None:
+        raise P0PerformanceError("analysis failure staging did not complete")
     try:
-        offset = 0
-        while offset < len(payload):
-            written = os.write(descriptor, payload[offset:])
-            if written <= 0:
-                raise P0PerformanceError("analysis failure write stopped")
-            offset += written
-        os.fsync(descriptor)
-    finally:
-        os.close(descriptor)
-    parent_descriptor = os.open(
-        OUTPUT_PARENT,
-        os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW,
-    )
-    try:
-        os.fsync(parent_descriptor)
-    finally:
-        os.close(parent_descriptor)
-    if strict_json(ANALYSIS_FAILURE_PATH) != record:
-        raise P0PerformanceError("analysis failure strict reload changed")
+        _rename_directory_noreplace(staging_path, ANALYSIS_FAILURE_PATH)
+    except P0PerformanceError:
+        # A transient injected rename error is recoverable without changing the
+        # record or creating a second terminal candidate.
+        if ANALYSIS_FAILURE_PATH.exists() or ANALYSIS_FAILURE_PATH.is_symlink():
+            raise
+        _rename_directory_noreplace(staging_path, ANALYSIS_FAILURE_PATH)
+    _fsync_output_parent()
     return {
         "path": str(ANALYSIS_FAILURE_PATH),
         "sha256": hashlib.sha256(payload).hexdigest(),
@@ -871,14 +1224,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         report = analyse()
     except Exception as exc:  # noqa: BLE001 - analysis must fail closed at its CLI boundary.
-        try:
-            failure = publish_analysis_failure(exc)
-            suffix = f"; failure={failure['path']}"
-        except Exception as publication_error:  # noqa: BLE001
-            suffix = (
-                "; failure publication also failed: "
-                f"{type(publication_error).__name__}: {publication_error}"
-            )
+        suffix = (
+            f"; failure={ANALYSIS_FAILURE_PATH}"
+            if ANALYSIS_FAILURE_PATH.is_file()
+            and not ANALYSIS_FAILURE_PATH.is_symlink()
+            else "; no global failure written by this non-owner/refused invocation"
+        )
         print(f"P0-P analysis failed: {type(exc).__name__}: {exc}{suffix}")
         return 2
     print(json.dumps(report, ensure_ascii=False, sort_keys=True))

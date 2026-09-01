@@ -59,7 +59,11 @@ from p0p2v2_telemetry import (
     telemetry_coverage,
     verify_pid_lifetime,
 )
-from p0p2v2_transaction import DirectoryPublicationTransaction, SampleTransaction
+from p0p2v2_transaction import (
+    DirectoryPublicationTransaction,
+    ExclusiveCampaignLock,
+    SampleTransaction,
+)
 from run_p0p2v2_campaign import parse_args, sample_launch_spec
 
 
@@ -87,6 +91,114 @@ def _range(
         status="returned",
         binding=None,
     )
+
+
+def _analysis_binding_fixture() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    contract_hash = "f" * 64
+    files = {
+        "analyser.py": {"sha256": "a" * 64, "git_blob_sha": "b" * 40},
+        analysis_module.relative(analysis_module.CONTRACT_PATH): {
+            "sha256": contract_hash,
+            "git_blob_sha": "e" * 40,
+        },
+    }
+    source = {"sha256": "c" * 64}
+    parser = {
+        "python_executable_realpath": "/usr/bin/python3.12",
+        "python_version": "3.12.3",
+        "python_implementation": "CPython",
+        "packages": {"numpy": "2.5.2", "scipy": "1.17.1"},
+        "system": "Linux",
+        "machine": "x86_64",
+    }
+    toolchain = {
+        "gpu_python_and_cuda": {
+            "gpu_python_realpath": parser["python_executable_realpath"],
+            "python_version": parser["python_version"],
+            "python_implementation": parser["python_implementation"],
+            "packages": {"numpy": "2.5.2", "scipy": "1.17.1"},
+            "system": parser["system"],
+            "machine": parser["machine"],
+        }
+    }
+    schedule = {"schedule_id": "synthetic"}
+    claim = {
+        "authorization_child_commit": "d" * 40,
+        "review_parent_commit": "1" * 40,
+        "reviewed_snapshot_commit": "2" * 40,
+        "ticket_id": "ticket",
+        "ticket_blob": "3" * 40,
+        "ticket_sha256": "4" * 64,
+        "authorized_blob": "5" * 40,
+        "authorized_content_sha256": "6" * 64,
+        "grant_nonce": "nonce",
+        "fixed_schedule": schedule,
+        "implementation_files": files,
+        "formal_source_tree": source,
+        "toolchain_binding": toolchain,
+        "preclaim_machine_identity": toolchain,
+    }
+    authorization = {
+        "grant_nonce": "nonce",
+        "observed_parent_ticket_binding": {
+            "gate_pass": True,
+            "authorization_child_commit": claim["authorization_child_commit"],
+            "review_parent_commit": claim["review_parent_commit"],
+            "reviewed_snapshot_commit": claim["reviewed_snapshot_commit"],
+            "ticket_blob": claim["ticket_blob"],
+            "ticket_sha256": claim["ticket_sha256"],
+            "authorized_child_blob": claim["authorized_blob"],
+            "fixed_schedule": schedule,
+            "ticket": {
+                "ticket_id": claim["ticket_id"],
+                "toolchain_binding": toolchain,
+                "authorized_child_blob": {
+                    "content_sha256": claim["authorized_content_sha256"]
+                },
+            },
+        },
+    }
+    observed = {
+        "symbolic_head": "refs/heads/main",
+        "execution_commit": claim["authorization_child_commit"],
+        "worktree_clean": True,
+        "contract_sha256": contract_hash,
+        "implementation_files": files,
+        "formal_source_tree": source,
+    }
+    return claim, authorization, {"execution": observed, "parser": parser}
+
+
+def _write_synthetic_analysis_success(parent: Path) -> Path:
+    output = parent / "compact_evidence"
+    output.mkdir(parents=True)
+    names = {
+        analysis_module.MANIFEST_NAME,
+        analysis_module.BASELINE_JSON_NAME,
+        analysis_module.BASELINE_MD_NAME,
+        analysis_module.PROFILER_JSON_NAME,
+        analysis_module.PROFILER_MD_NAME,
+    }
+    for name in names:
+        (output / name).write_text(f"{name}\n", encoding="utf-8")
+    records = {
+        name: {
+            "sha256": analysis_module.sha256_file(output / name),
+            "size_bytes": (output / name).stat().st_size,
+        }
+        for name in names
+    }
+    analysis_module.atomic_json(
+        output / analysis_module.TERMINAL_NAME,
+        {
+            "schema_version": 3,
+            "status": "HF3D_P0P2_V2_COMPACT_EVIDENCE_PUBLISHED",
+            "gate_pass": True,
+            "gates": {"synthetic": True},
+            "files_before_terminal": records,
+        },
+    )
+    return output
 
 
 class InstrumentationTests(unittest.TestCase):
@@ -842,38 +954,31 @@ class TelemetryAndMemoryTests(unittest.TestCase):
 
 class NumericalAndTransactionTests(unittest.TestCase):
     def test_analysis_snapshot_binds_claim_commit_and_parser_blobs(self) -> None:
-        contract_hash = "f" * 64
-        files = {
-            "analyser.py": {"sha256": "a" * 64, "git_blob_sha": "b" * 40},
-            analysis_module.relative(analysis_module.CONTRACT_PATH): {
-                "sha256": contract_hash,
-                "git_blob_sha": "e" * 40,
-            },
-        }
-        source = {"sha256": "c" * 64}
-        observed = {
-            "symbolic_head": "refs/heads/main",
-            "execution_commit": "d" * 40,
-            "worktree_clean": True,
-            "contract_sha256": contract_hash,
-            "implementation_files": files,
-            "formal_source_tree": source,
-            "preclaim_machine_identity": {"machine": "exact"},
-            "toolchain_binding": {"machine": "exact"},
-        }
-        claim = {
-            "authorization_child_commit": "d" * 40,
-            "implementation_files": files,
-            "formal_source_tree": source,
-        }
-        with patch.object(
-            analysis_module,
-            "execution_binding",
-            return_value=observed,
+        claim, authorization, identities = _analysis_binding_fixture()
+        with (
+            patch.object(
+                analysis_module,
+                "execution_binding",
+                return_value=identities["execution"],
+            ),
+            patch.object(
+                analysis_module,
+                "load_authorization",
+                return_value=authorization,
+            ),
+            patch.object(
+                analysis_module,
+                "current_parser_toolchain_identity",
+                return_value=identities["parser"],
+            ),
         ):
             self.assertTrue(analysis_module.analysis_git_snapshot(claim)["gate_pass"])
         for field, value in (
             ("authorization_child_commit", "e" * 40),
+            ("review_parent_commit", "7" * 40),
+            ("reviewed_snapshot_commit", "8" * 40),
+            ("ticket_blob", "9" * 40),
+            ("authorized_blob", "a" * 40),
             ("implementation_files", {"analyser.py": {"sha256": "0" * 64}}),
         ):
             malformed = {**claim, field: value}
@@ -882,11 +987,74 @@ class NumericalAndTransactionTests(unittest.TestCase):
                 patch.object(
                     analysis_module,
                     "execution_binding",
-                    return_value=observed,
+                    return_value=identities["execution"],
+                ),
+                patch.object(
+                    analysis_module,
+                    "load_authorization",
+                    return_value=authorization,
+                ),
+                patch.object(
+                    analysis_module,
+                    "current_parser_toolchain_identity",
+                    return_value=identities["parser"],
                 ),
                 self.assertRaises(P0PerformanceError),
             ):
                 analysis_module.analysis_git_snapshot(malformed)
+
+        wrong_parsers = {
+            "python": {**identities["parser"], "python_version": "0.0.0"},
+            "numpy": {
+                **identities["parser"],
+                "packages": {
+                    **identities["parser"]["packages"],
+                    "numpy": "0.0.0",
+                },
+            },
+        }
+        for label, wrong_parser in wrong_parsers.items():
+            with (
+                self.subTest(label=label),
+                patch.object(
+                    analysis_module,
+                    "execution_binding",
+                    return_value=identities["execution"],
+                ),
+                patch.object(
+                    analysis_module,
+                    "load_authorization",
+                    return_value=authorization,
+                ),
+                patch.object(
+                    analysis_module,
+                    "current_parser_toolchain_identity",
+                    return_value=wrong_parser,
+                ),
+                self.assertRaises(P0PerformanceError),
+            ):
+                analysis_module.analysis_git_snapshot(claim)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary) / "analysis"
+            with (
+                patch.multiple(
+                    analysis_module,
+                    OUTPUT_PARENT=parent,
+                    OUTPUT_ROOT=parent / "compact_evidence",
+                    ANALYSIS_FAILURE_PATH=parent / "analysis_failure.json",
+                ),
+                patch.object(
+                    analysis_module,
+                    "load_authorization",
+                    side_effect=P0PerformanceError(
+                        "synthetic HEAD match with invalid P2/C2 parent chain"
+                    ),
+                ),
+                self.assertRaises(P0PerformanceError),
+            ):
+                analysis_module.analysis_git_snapshot(claim)
+            self.assertFalse(parent.exists())
 
     def test_analysis_stale_staging_is_retained_with_explicit_failure(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -900,9 +1068,12 @@ class NumericalAndTransactionTests(unittest.TestCase):
                 analysis_module,
                 OUTPUT_PARENT=parent,
                 OUTPUT_ROOT=parent / "compact_evidence",
+                ANALYSIS_LOCK_PATH=parent / ".analysis.lock",
                 ANALYSIS_FAILURE_PATH=parent / "analysis_failure.json",
-            ):
-                failure = analysis_module.publish_analysis_failure(raised.exception)
+            ), ExclusiveCampaignLock(parent / ".analysis.lock") as lock:
+                failure = analysis_module.publish_analysis_failure(
+                    raised.exception, lock=lock
+                )
             self.assertTrue(Path(failure["path"]).is_file())
             self.assertEqual(failure["record"]["retained_staging"], [staging.name])
             self.assertTrue((staging / "retained.txt").is_file())
@@ -929,12 +1100,310 @@ class NumericalAndTransactionTests(unittest.TestCase):
                 analysis_module,
                 OUTPUT_PARENT=parent,
                 OUTPUT_ROOT=parent / "compact_evidence",
+                ANALYSIS_LOCK_PATH=parent / ".analysis.lock",
                 ANALYSIS_FAILURE_PATH=parent / "analysis_failure.json",
-            ):
-                failure = analysis_module.publish_analysis_failure(raised.exception)
+            ), ExclusiveCampaignLock(parent / ".analysis.lock") as lock:
+                failure = analysis_module.publish_analysis_failure(
+                    raised.exception, lock=lock
+                )
             self.assertTrue((staging / "publication_complete.json").is_file())
             self.assertTrue(Path(failure["path"]).is_file())
             self.assertFalse((parent / "compact_evidence").exists())
+
+    def test_analysis_lock_loser_is_side_effect_free(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary) / "analysis"
+            lock_path = parent / ".analysis.lock"
+            claim_path = parent / "claim.json"
+            parent.mkdir()
+            claim_path.write_text("{}\n", encoding="utf-8")
+            with (
+                patch.multiple(
+                    analysis_module,
+                    OUTPUT_PARENT=parent,
+                    OUTPUT_ROOT=parent / "compact_evidence",
+                    ANALYSIS_LOCK_PATH=lock_path,
+                    ANALYSIS_FAILURE_PATH=parent / "analysis_failure.json",
+                    CLAIM_PATH=claim_path,
+                ),
+                patch.object(analysis_module, "validate_claim"),
+                patch.object(
+                    analysis_module,
+                    "analysis_git_snapshot",
+                    return_value={"gate_pass": True},
+                ),
+                patch.object(
+                    analysis_module,
+                    "analysis_input_controls",
+                    return_value={"gate_pass": True},
+                ),
+                ExclusiveCampaignLock(lock_path),
+                self.assertRaises(analysis_module.AnalysisSideEffectFreeRefusal),
+            ):
+                analysis_module.analyse()
+            self.assertFalse((parent / "analysis_failure.json").exists())
+            self.assertFalse((parent / "compact_evidence").exists())
+
+    def test_analysis_repeat_after_success_is_side_effect_free(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary) / "analysis"
+            output = _write_synthetic_analysis_success(parent)
+            terminal_before = (output / analysis_module.TERMINAL_NAME).read_bytes()
+            with (
+                patch.multiple(
+                    analysis_module,
+                    OUTPUT_PARENT=parent,
+                    OUTPUT_ROOT=output,
+                    ANALYSIS_LOCK_PATH=parent / ".analysis.lock",
+                    ANALYSIS_FAILURE_PATH=parent / "analysis_failure.json",
+                ),
+                self.assertRaises(analysis_module.AnalysisSideEffectFreeRefusal),
+            ):
+                analysis_module.analyse()
+            self.assertEqual(
+                (output / analysis_module.TERMINAL_NAME).read_bytes(), terminal_before
+            )
+            self.assertFalse((parent / "analysis_failure.json").exists())
+
+    def test_preexisting_analysis_failure_refuses_success(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary) / "analysis"
+            parent.mkdir()
+            failure_path = parent / "analysis_failure.json"
+            analysis_module.atomic_json(
+                failure_path,
+                {
+                    "schema_version": 3,
+                    "status": "HF3D_P0P2_V2_ANALYSIS_FAILED_STOPPED_RETAINED",
+                    "gate_pass": False,
+                    "analysis_lock_owner": {"pid": 1},
+                },
+            )
+            failure_before = failure_path.read_bytes()
+            with (
+                patch.multiple(
+                    analysis_module,
+                    OUTPUT_PARENT=parent,
+                    OUTPUT_ROOT=parent / "compact_evidence",
+                    ANALYSIS_LOCK_PATH=parent / ".analysis.lock",
+                    ANALYSIS_FAILURE_PATH=failure_path,
+                ),
+                self.assertRaises(analysis_module.AnalysisSideEffectFreeRefusal),
+            ):
+                analysis_module.analyse()
+            self.assertEqual(failure_path.read_bytes(), failure_before)
+            self.assertFalse((parent / "compact_evidence").exists())
+
+    def test_analysis_owner_failure_publishes_one_terminal(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary) / "analysis"
+            parent.mkdir()
+            claim_path = parent / "claim.json"
+            claim_path.write_text("{}\n", encoding="utf-8")
+            with (
+                patch.multiple(
+                    analysis_module,
+                    OUTPUT_PARENT=parent,
+                    OUTPUT_ROOT=parent / "compact_evidence",
+                    ANALYSIS_LOCK_PATH=parent / ".analysis.lock",
+                    ANALYSIS_FAILURE_PATH=parent / "analysis_failure.json",
+                    CLAIM_PATH=claim_path,
+                ),
+                patch.object(analysis_module, "validate_claim"),
+                patch.object(
+                    analysis_module,
+                    "analysis_git_snapshot",
+                    return_value={"gate_pass": True},
+                ),
+                patch.object(
+                    analysis_module,
+                    "analysis_input_controls",
+                    return_value={"gate_pass": True},
+                ),
+                patch.object(
+                    analysis_module,
+                    "_analyse_locked",
+                    side_effect=P0PerformanceError("synthetic owned failure"),
+                ),
+                self.assertRaises(P0PerformanceError),
+            ):
+                analysis_module.analyse()
+            with patch.multiple(
+                analysis_module,
+                OUTPUT_PARENT=parent,
+                OUTPUT_ROOT=parent / "compact_evidence",
+                ANALYSIS_FAILURE_PATH=parent / "analysis_failure.json",
+            ):
+                self.assertEqual(
+                    analysis_module.analysis_terminal_state()["terminal_kind"],
+                    "FAILED_STOPPED",
+                )
+            self.assertFalse((parent / "compact_evidence").exists())
+
+    def test_analysis_terminal_reload_fault_yields_only_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary) / "analysis"
+            transaction = DirectoryPublicationTransaction(parent, "compact_evidence")
+            staging = transaction.begin()
+            (staging / "report.json").write_text("{}\n", encoding="utf-8")
+            transaction.prepare_terminal(
+                "publication_complete.json",
+                {"schema_version": 3, "status": "COMPLETE", "gate_pass": True},
+            )
+            with (
+                patch.object(
+                    analysis_module,
+                    "strict_json",
+                    side_effect=P0PerformanceError(
+                        "synthetic staged terminal reload failure"
+                    ),
+                ),
+                self.assertRaises(P0PerformanceError) as caught,
+            ):
+                analysis_module.strict_json(staging / "publication_complete.json")
+            with (
+                patch.multiple(
+                    analysis_module,
+                    OUTPUT_PARENT=parent,
+                    OUTPUT_ROOT=parent / "compact_evidence",
+                    ANALYSIS_LOCK_PATH=parent / ".analysis.lock",
+                    ANALYSIS_FAILURE_PATH=parent / "analysis_failure.json",
+                ),
+                ExclusiveCampaignLock(parent / ".analysis.lock") as lock,
+            ):
+                failure = analysis_module.publish_analysis_failure(
+                    caught.exception, lock=lock
+                )
+            self.assertTrue((staging / "publication_complete.json").is_file())
+            self.assertTrue(Path(failure["path"]).is_file())
+            self.assertFalse((parent / "compact_evidence").exists())
+
+    def test_analysis_terminal_write_fault_yields_only_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary) / "analysis"
+            transaction = DirectoryPublicationTransaction(parent, "compact_evidence")
+            staging = transaction.begin()
+            with (
+                patch.object(
+                    transaction_module,
+                    "atomic_json",
+                    side_effect=P0PerformanceError(
+                        "synthetic analysis terminal write failure"
+                    ),
+                ),
+                self.assertRaises(P0PerformanceError) as caught,
+            ):
+                transaction.prepare_terminal(
+                    "publication_complete.json",
+                    {"schema_version": 3, "status": "COMPLETE", "gate_pass": True},
+                )
+            with (
+                patch.multiple(
+                    analysis_module,
+                    OUTPUT_PARENT=parent,
+                    OUTPUT_ROOT=parent / "compact_evidence",
+                    ANALYSIS_LOCK_PATH=parent / ".analysis.lock",
+                    ANALYSIS_FAILURE_PATH=parent / "analysis_failure.json",
+                ),
+                ExclusiveCampaignLock(parent / ".analysis.lock") as lock,
+            ):
+                failure = analysis_module.publish_analysis_failure(
+                    caught.exception, lock=lock
+                )
+            self.assertTrue(staging.is_dir())
+            self.assertFalse((staging / "publication_complete.json").exists())
+            self.assertTrue(Path(failure["path"]).is_file())
+            self.assertFalse((parent / "compact_evidence").exists())
+
+    def test_analysis_failure_write_fault_retries_without_success(self) -> None:
+        original_write = os.write
+        calls = 0
+
+        def fail_once(descriptor: int, payload: bytes) -> int:
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise OSError("synthetic first analysis-failure write fault")
+            return original_write(descriptor, payload)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary) / "analysis"
+            with (
+                patch.multiple(
+                    analysis_module,
+                    OUTPUT_PARENT=parent,
+                    OUTPUT_ROOT=parent / "compact_evidence",
+                    ANALYSIS_LOCK_PATH=parent / ".analysis.lock",
+                    ANALYSIS_FAILURE_PATH=parent / "analysis_failure.json",
+                ),
+                ExclusiveCampaignLock(parent / ".analysis.lock") as lock,
+                patch.object(analysis_module.os, "write", side_effect=fail_once),
+            ):
+                failure = analysis_module.publish_analysis_failure(
+                    P0PerformanceError("synthetic owned failure"), lock=lock
+                )
+            self.assertGreaterEqual(calls, 2)
+            self.assertTrue(Path(failure["path"]).is_file())
+            self.assertTrue(
+                any(parent.glob(".analysis_failure.staging.*.0.json"))
+            )
+            self.assertFalse((parent / "compact_evidence").exists())
+
+    def test_analysis_post_rename_fsync_fault_recovers_visible_success(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary) / "analysis"
+            transaction = DirectoryPublicationTransaction(parent, "compact_evidence")
+            staging = transaction.begin()
+            names = {
+                analysis_module.MANIFEST_NAME,
+                analysis_module.BASELINE_JSON_NAME,
+                analysis_module.BASELINE_MD_NAME,
+                analysis_module.PROFILER_JSON_NAME,
+                analysis_module.PROFILER_MD_NAME,
+            }
+            for name in names:
+                (staging / name).write_text(f"{name}\n", encoding="utf-8")
+            records = {
+                name: {
+                    "sha256": analysis_module.sha256_file(staging / name),
+                    "size_bytes": (staging / name).stat().st_size,
+                }
+                for name in names
+            }
+            transaction.prepare_terminal(
+                analysis_module.TERMINAL_NAME,
+                {
+                    "schema_version": 3,
+                    "status": "HF3D_P0P2_V2_COMPACT_EVIDENCE_PUBLISHED",
+                    "gate_pass": True,
+                    "gates": {"synthetic": True},
+                    "files_before_terminal": records,
+                },
+            )
+            with (
+                patch.object(
+                    transaction_module,
+                    "_fsync_directory",
+                    side_effect=[
+                        None,
+                        P0PerformanceError("synthetic post-rename fsync failure"),
+                    ],
+                ),
+                self.assertRaises(P0PerformanceError),
+            ):
+                transaction.publish_prepared_terminal(analysis_module.TERMINAL_NAME)
+            output = parent / "compact_evidence"
+            with patch.multiple(
+                analysis_module,
+                OUTPUT_PARENT=parent,
+                OUTPUT_ROOT=output,
+                ANALYSIS_FAILURE_PATH=parent / "analysis_failure.json",
+            ):
+                self.assertEqual(
+                    analysis_module.analysis_terminal_state()["terminal_kind"],
+                    "SUCCESS",
+                )
+            self.assertFalse((parent / "analysis_failure.json").exists())
 
     def test_numerical_hash_is_layout_stable_and_metadata_files_are_excluded(
         self,

@@ -14,12 +14,20 @@ test_nested_exclusive_coverage_thresholds (__main__.InstrumentationTests.test_ne
 test_serialized_host_ranges_are_strictly_reparsed_and_recomputed (__main__.InstrumentationTests.test_serialized_host_ranges_are_strictly_reparsed_and_recomputed) ... ok
 test_transparent_wrapper_preserves_arguments_result_and_exception (__main__.InstrumentationTests.test_transparent_wrapper_preserves_arguments_result_and_exception) ... ok
 test_synthetic_nsys_positive_and_negative_gates (__main__.NsysAuditTests.test_synthetic_nsys_positive_and_negative_gates) ... ok
+test_analysis_failure_write_fault_retries_without_success (__main__.NumericalAndTransactionTests.test_analysis_failure_write_fault_retries_without_success) ... ok
+test_analysis_lock_loser_is_side_effect_free (__main__.NumericalAndTransactionTests.test_analysis_lock_loser_is_side_effect_free) ... ok
+test_analysis_owner_failure_publishes_one_terminal (__main__.NumericalAndTransactionTests.test_analysis_owner_failure_publishes_one_terminal) ... ok
+test_analysis_post_rename_fsync_fault_recovers_visible_success (__main__.NumericalAndTransactionTests.test_analysis_post_rename_fsync_fault_recovers_visible_success) ... ok
 test_analysis_rename_failure_retains_terminal_staging_and_failure (__main__.NumericalAndTransactionTests.test_analysis_rename_failure_retains_terminal_staging_and_failure) ... ok
+test_analysis_repeat_after_success_is_side_effect_free (__main__.NumericalAndTransactionTests.test_analysis_repeat_after_success_is_side_effect_free) ... ok
 test_analysis_snapshot_binds_claim_commit_and_parser_blobs (__main__.NumericalAndTransactionTests.test_analysis_snapshot_binds_claim_commit_and_parser_blobs) ... ok
 test_analysis_stale_staging_is_retained_with_explicit_failure (__main__.NumericalAndTransactionTests.test_analysis_stale_staging_is_retained_with_explicit_failure) ... ok
+test_analysis_terminal_reload_fault_yields_only_failure (__main__.NumericalAndTransactionTests.test_analysis_terminal_reload_fault_yields_only_failure) ... ok
+test_analysis_terminal_write_fault_yields_only_failure (__main__.NumericalAndTransactionTests.test_analysis_terminal_write_fault_yields_only_failure) ... ok
 test_directory_publication_writes_terminal_last_and_never_replaces (__main__.NumericalAndTransactionTests.test_directory_publication_writes_terminal_last_and_never_replaces) ... ok
 test_monitor_start_and_stop_failures_are_observable (__main__.NumericalAndTransactionTests.test_monitor_start_and_stop_failures_are_observable) ... ok
 test_numerical_hash_is_layout_stable_and_metadata_files_are_excluded (__main__.NumericalAndTransactionTests.test_numerical_hash_is_layout_stable_and_metadata_files_are_excluded) ... ok
+test_preexisting_analysis_failure_refuses_success (__main__.NumericalAndTransactionTests.test_preexisting_analysis_failure_refuses_success) ... ok
 test_sample_publication_failure_retains_staging_and_no_target (__main__.NumericalAndTransactionTests.test_sample_publication_failure_retains_staging_and_no_target) ... ok
 test_sample_transaction_no_replace_and_symlink_rejection (__main__.NumericalAndTransactionTests.test_sample_transaction_no_replace_and_symlink_rejection) ... ok
 test_background_lifetime_monitor_detects_cpu_and_compute_pollution (__main__.TelemetryAndMemoryTests.test_background_lifetime_monitor_detects_cpu_and_compute_pollution) ... ok
@@ -31,6 +39,6 @@ test_telemetry_coverage_truncation_and_gap (__main__.TelemetryAndMemoryTests.tes
 test_ticket_machine_identity_rejects_each_governed_drift (__main__.TelemetryAndMemoryTests.test_ticket_machine_identity_rejects_each_governed_drift) ... ok
 
 ----------------------------------------------------------------------
-Ran 25 tests in 0.927s
+Ran 33 tests in 1.013s
 
 OK

@@ -6,7 +6,7 @@
   "mode": "semantic",
   "numerical_sha256": "34d46acc7352c3bf9a9a44e36573061209f2e0fa9f2398d0f847fd90d87c4a19",
   "output_nbytes": 8192,
-  "pid": 251711,
+  "pid": 291598,
   "schema_version": 2,
   "semantic_ranges": [
     {
@@ -21,14 +21,14 @@
       },
       "call_id": 1,
       "child_ns": 0,
-      "end_ns": 22695285696133,
-      "exclusive_ns": 200982217,
-      "inclusive_ns": 200982217,
+      "end_ns": 25931849563995,
+      "exclusive_ns": 204701443,
+      "inclusive_ns": 204701443,
       "name": "synthetic_numpy_cupy_operator",
       "parent_call_id": null,
-      "start_ns": 22695084713916,
+      "start_ns": 25931644862552,
       "status": "returned",
-      "thread_id": 251711
+      "thread_id": 291598
     }
   ],
   "status": "P0P2V2_ZERO_STEP_CAPABILITY_PROBE_PASS",

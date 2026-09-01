@@ -14,6 +14,7 @@ import json
 import os
 import platform
 import signal
+import stat
 import subprocess
 import sys
 import time
@@ -48,6 +49,7 @@ from p0p2v2_contract import (
     HERE,
     NSYS_PATH,
     RAW_ROOT,
+    REPOSITORY_ROOT,
     STATIC_ROOT,
     P0PerformanceError,
     assert_no_sample_output_root,
@@ -400,6 +402,8 @@ def zero_step_preflight(
 
 
 def _publish_preclaim_failure(record: Mapping[str, Any]) -> Path:
+    """Retain one ignored O_EXCL failure without consuming or dirtying C2."""
+
     parent = PRECLAIM_FAILURE_ROOT.parent
     if not parent.is_dir() or parent.is_symlink():
         raise P0PerformanceError("preclaim evidence parent is unavailable")
@@ -411,7 +415,63 @@ def _publish_preclaim_failure(record: Mapping[str, Any]) -> Path:
     )
     if path.exists() or path.is_symlink():
         raise P0PerformanceError("preclaim failure path collision")
-    atomic_json(path, record)
+    payload = (
+        json.dumps(
+            dict(record),
+            ensure_ascii=False,
+            sort_keys=True,
+            indent=2,
+            allow_nan=False,
+        ).encode("utf-8")
+        + b"\n"
+    )
+    descriptor = os.open(
+        path,
+        os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_CLOEXEC | os.O_NOFOLLOW,
+        0o600,
+    )
+    try:
+        opened = os.fstat(descriptor)
+        if not stat.S_ISREG(opened.st_mode) or opened.st_nlink != 1:
+            raise P0PerformanceError(
+                "preclaim failure must be one regular non-hardlinked file"
+            )
+        offset = 0
+        while offset < len(payload):
+            written = os.write(descriptor, payload[offset:])
+            if written <= 0:
+                raise P0PerformanceError("preclaim failure write stopped")
+            offset += written
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+    parent_descriptor = os.open(
+        PRECLAIM_FAILURE_ROOT,
+        os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC | os.O_NOFOLLOW,
+    )
+    try:
+        os.fsync(parent_descriptor)
+    finally:
+        os.close(parent_descriptor)
+    if strict_json(path) != dict(record):
+        raise P0PerformanceError("preclaim failure strict reload changed")
+    status = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(REPOSITORY_ROOT),
+            "status",
+            "--porcelain=v2",
+            "-z",
+            "--untracked-files=all",
+        ],
+        check=False,
+        capture_output=True,
+    )
+    if status.returncode != 0 or status.stdout:
+        raise P0PerformanceError(
+            "preclaim failure evidence dirtied the authorized worktree"
+        )
     return path
 
 

@@ -14,6 +14,7 @@ test_invalid_zero_step_preflight_does_not_consume_or_create_raw (__main__.Consum
 test_ledger_initialization_failure_retains_claim_and_terminal_evidence (__main__.ConsumptionTests.test_ledger_initialization_failure_retains_claim_and_terminal_evidence) ... ok
 test_partial_claim_write_is_consumed_and_not_replaced (__main__.ConsumptionTests.test_partial_claim_write_is_consumed_and_not_replaced) ... ok
 test_partial_failure_record_is_quarantined_and_retried (__main__.ConsumptionTests.test_partial_failure_record_is_quarantined_and_retried) ... ok
+test_preclaim_failure_is_retained_while_authorized_tree_stays_clean (__main__.ConsumptionTests.test_preclaim_failure_is_retained_while_authorized_tree_stays_clean) ... ok
 test_stale_lock_file_does_not_override_live_flock (__main__.ConsumptionTests.test_stale_lock_file_does_not_override_live_flock) ... ok
 test_strict_order_duplicate_skip_failure_and_no_resume (__main__.ConsumptionTests.test_strict_order_duplicate_skip_failure_and_no_resume) ... ok
 test_terminal_fault_injection_never_leaves_false_complete (__main__.ConsumptionTests.test_terminal_fault_injection_never_leaves_false_complete) ... ok
@@ -21,6 +22,6 @@ test_ticket_machine_drift_precedes_every_runtime_transaction (__main__.Consumpti
 test_valid_worker_token_and_direct_or_pid_reuse_rejection (__main__.ConsumptionTests.test_valid_worker_token_and_direct_or_pid_reuse_rejection) ... ok
 
 ----------------------------------------------------------------------
-Ran 21 tests in 2.313s
+Ran 22 tests in 2.411s
 
 OK

@@ -520,6 +520,119 @@ def _claim_inputs(lock_identity: dict[str, Any]) -> dict[str, Any]:
 
 
 class ConsumptionTests(unittest.TestCase):
+    def test_preclaim_failure_is_retained_while_authorized_tree_stays_clean(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            repository = Path(temporary) / "repository"
+            repository.mkdir()
+            _run(repository, "init", "-b", "main")
+            _run(repository, "config", "user.name", "Synthetic")
+            _run(repository, "config", "user.email", "synthetic@example.invalid")
+            (repository / ".gitignore").write_text(
+                "artifacts/p0p2v2/static/preclaim_failures/\n",
+                encoding="utf-8",
+            )
+            (repository / "tracked.txt").write_text("clean\n", encoding="utf-8")
+            _commit(repository, "synthetic authorized child")
+            static_root = repository / "artifacts" / "p0p2v2" / "static"
+            static_root.mkdir(parents=True)
+            failure_root = static_root / "preclaim_failures"
+            record = {
+                "schema_version": 2,
+                "status": "HF3D_P0P2_V2_PREFLIGHT_FAILED_BEFORE_CLAIM",
+                "gate_pass": False,
+            }
+            with (
+                patch.object(campaign, "REPOSITORY_ROOT", repository),
+                patch.object(campaign, "PRECLAIM_FAILURE_ROOT", failure_root),
+            ):
+                first = campaign._publish_preclaim_failure(record)
+                second = campaign._publish_preclaim_failure(
+                    {**record, "status": "SECOND_NONCONSUMING_PREFLIGHT_FAILURE"}
+                )
+            self.assertNotEqual(first, second)
+            self.assertEqual(strict_json(first), record)
+            self.assertEqual(
+                strict_json(second)["status"],
+                "SECOND_NONCONSUMING_PREFLIGHT_FAILURE",
+            )
+            self.assertEqual(
+                _run(
+                    repository,
+                    "status",
+                    "--porcelain=v2",
+                    "-z",
+                    "--untracked-files=all",
+                ),
+                b"",
+            )
+            self.assertEqual(
+                _text(repository, "rev-parse", "HEAD"),
+                _text(repository, "rev-parse", "main"),
+            )
+            self.assertFalse(
+                (repository / "artifacts/p0p2v2/performance_raw").exists()
+            )
+            self.assertFalse(
+                (repository / "artifacts/p0p2v2/.p0p2v2_campaign.lock").exists()
+            )
+
+            class ReachedClaim(RuntimeError):
+                pass
+
+            class FakeLock:
+                def __init__(self) -> None:
+                    self.identity = {"synthetic": True}
+
+                def __enter__(self) -> Self:
+                    return self
+
+                def __exit__(self, *_args: object) -> None:
+                    return None
+
+            valid_preflight = {
+                "gate_pass": True,
+                "post_probe_environment": {"gate_pass": True},
+                "observed_capability_identity": {"machine": "exact"},
+            }
+            with (
+                patch.object(campaign, "REPOSITORY_ROOT", repository),
+                patch.object(campaign, "PRECLAIM_FAILURE_ROOT", failure_root),
+                patch.object(
+                    campaign,
+                    "RAW_ROOT",
+                    repository / "artifacts/p0p2v2/performance_raw",
+                ),
+                patch.object(campaign, "load_authorization", return_value={}),
+                patch.object(campaign, "load_contract", return_value={}),
+                patch.object(campaign, "evidence_identity", return_value={}),
+                patch.object(campaign, "assert_no_sample_output_root", return_value={}),
+                patch.object(
+                    campaign, "zero_step_preflight", return_value=valid_preflight
+                ),
+                patch.object(campaign, "execution_binding", return_value={}),
+                patch.object(campaign, "ExclusiveCampaignLock", return_value=FakeLock()),
+                patch.object(
+                    campaign,
+                    "create_claim_and_ledger",
+                    side_effect=ReachedClaim("same clean C2 reached claim boundary"),
+                ) as create_claim,
+                self.assertRaises(ReachedClaim),
+            ):
+                campaign.execute_campaign()
+            create_claim.assert_called_once()
+            self.assertEqual(
+                _run(
+                    repository,
+                    "status",
+                    "--porcelain=v2",
+                    "-z",
+                    "--untracked-files=all",
+                ),
+                b"",
+            )
+
     def test_invalid_zero_step_preflight_does_not_consume_or_create_raw(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             raw = Path(temporary) / "performance_raw"
