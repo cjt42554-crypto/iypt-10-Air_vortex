@@ -12,6 +12,7 @@ import secrets
 import stat
 import time
 from collections.abc import Mapping
+from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -556,11 +557,98 @@ def _publish_ledger(ledger: Mapping[str, Any]) -> None:
         raise P0PerformanceError("schedule ledger strict reload changed")
 
 
+class LedgerTransitionNotCommitted(P0PerformanceError):
+    """A bounded ledger transition left the exact expected state in place."""
+
+
+class LedgerTransitionStateUncertain(P0PerformanceError):
+    """A ledger transition could not classify the durable path safely."""
+
+
+def _reload_transition_ledger(transition_label: str) -> dict[str, Any]:
+    """Strictly reload a transition result, tolerating one transient read fault."""
+
+    errors: list[BaseException] = []
+    for _attempt in range(2):
+        try:
+            return load_ledger()
+        except (OSError, UnicodeError, P0PerformanceError, ValueError) as exc:
+            errors.append(exc)
+    failure = LedgerTransitionStateUncertain(
+        f"{transition_label} ledger state remained unreadable after two strict reloads"
+    )
+    for error in errors:
+        failure.add_note(f"strict reload fault: {type(error).__name__}: {error}")
+    raise failure from errors[-1]
+
+
+def _commit_ledger_transition(
+    *,
+    expected_before: Mapping[str, Any],
+    candidate_after: Mapping[str, Any],
+    transition_label: str,
+) -> dict[str, Any]:
+    """Commit one exact ledger candidate and classify the durable result.
+
+    A publication exception is not itself evidence that the atomic replacement
+    failed.  The final path is therefore strictly reloaded after every attempt.
+    Only the exact old ledger may be retried, and only once, using the bytewise
+    same logical candidate (including token, timestamps and start count).
+    """
+
+    expected = deepcopy(dict(expected_before))
+    candidate = deepcopy(dict(candidate_after))
+    validate_ledger(expected)
+    validate_ledger(candidate)
+    if expected == candidate:
+        raise P0PerformanceError(
+            f"{transition_label} candidate does not change the schedule ledger"
+        )
+    observed_before = _reload_transition_ledger(
+        f"{transition_label} pre-publication"
+    )
+    if observed_before != expected:
+        raise LedgerTransitionStateUncertain(
+            f"{transition_label} expected-before ledger drifted before publication"
+        )
+
+    publication_errors: list[BaseException] = []
+    for attempt in range(2):
+        try:
+            _publish_ledger(candidate)
+        except BaseException as exc:  # noqa: BLE001 - classify durable state below.
+            publication_errors.append(exc)
+
+        observed = _reload_transition_ledger(
+            f"{transition_label} post-publication attempt {attempt + 1}"
+        )
+        if observed == candidate:
+            return candidate
+        if observed != expected:
+            uncertain = LedgerTransitionStateUncertain(
+                f"{transition_label} durable ledger is neither expected nor candidate"
+            )
+            for error in publication_errors:
+                uncertain.add_note(
+                    f"publication fault: {type(error).__name__}: {error}"
+                )
+            raise uncertain
+
+    failure = LedgerTransitionNotCommitted(
+        f"{transition_label} was not committed after two same-candidate attempts"
+    )
+    for error in publication_errors:
+        failure.add_note(f"publication fault: {type(error).__name__}: {error}")
+    if publication_errors:
+        raise failure from publication_errors[-1]
+    raise failure
+
+
 def mark_sample_running(sequence_index: int, sample_id: str) -> str:
-    ledger = load_ledger()
-    if ledger.get("status") not in {"CLAIMED_NOT_STARTED", "IN_PROGRESS"}:
+    expected_before = load_ledger()
+    if expected_before.get("status") not in {"CLAIMED_NOT_STARTED", "IN_PROGRESS"}:
         raise P0PerformanceError("consumed/terminal schedule cannot start a sample")
-    entries = ledger["entries"]
+    entries = expected_before["entries"]
     if not (0 <= sequence_index < len(entries)):
         raise P0PerformanceError("sample sequence index is outside frozen schedule")
     expected = EXPANDED_EXECUTION_SCHEDULE[sequence_index]
@@ -573,13 +661,18 @@ def mark_sample_running(sequence_index: int, sample_id: str) -> str:
     if any(entry["state"] != "NOT_STARTED" for entry in entries[sequence_index + 1 :]):
         raise P0PerformanceError("future ledger suffix was already modified")
     token = secrets.token_urlsafe(48)
-    entry = entries[sequence_index]
+    candidate_after = deepcopy(expected_before)
+    entry = candidate_after["entries"][sequence_index]
     entry["state"] = "RUNNING"
     entry["start_count"] = 1
     entry["launch_token_sha256"] = hashlib.sha256(token.encode("utf-8")).hexdigest()
     entry["started_monotonic_ns"] = time.monotonic_ns()
-    ledger["status"] = "IN_PROGRESS"
-    _publish_ledger(ledger)
+    candidate_after["status"] = "IN_PROGRESS"
+    _commit_ledger_transition(
+        expected_before=expected_before,
+        candidate_after=candidate_after,
+        transition_label=f"sample {sequence_index} RUNNING",
+    )
     return token
 
 
@@ -590,12 +683,12 @@ def mark_sample_pass(
     launch_token: str,
     manifest_sha256: str,
 ) -> dict[str, Any]:
-    ledger = load_ledger()
+    expected_before = load_ledger()
     if not (0 <= sequence_index < len(EXPANDED_EXECUTION_SCHEDULE)):
         raise P0PerformanceError("sample PASS sequence index is invalid")
     if not _is_sha256(manifest_sha256):
         raise P0PerformanceError("sample manifest SHA-256 is invalid")
-    entry = ledger["entries"][sequence_index]
+    entry = expected_before["entries"][sequence_index]
     token_sha = hashlib.sha256(launch_token.encode("utf-8")).hexdigest()
     if not (
         entry["sample_id"] == sample_id
@@ -605,16 +698,21 @@ def mark_sample_pass(
         raise P0PerformanceError(
             "sample PASS transition lacks its one-time launch token"
         )
-    entry["state"] = "PASS"
-    entry["completed_monotonic_ns"] = time.monotonic_ns()
-    entry["manifest_sha256"] = manifest_sha256
-    ledger["status"] = (
+    candidate_after = deepcopy(expected_before)
+    candidate_entry = candidate_after["entries"][sequence_index]
+    candidate_entry["state"] = "PASS"
+    candidate_entry["completed_monotonic_ns"] = time.monotonic_ns()
+    candidate_entry["manifest_sha256"] = manifest_sha256
+    candidate_after["status"] = (
         "ALL_SAMPLES_PASS_PENDING_TERMINAL"
         if sequence_index + 1 == len(EXPANDED_EXECUTION_SCHEDULE)
         else "IN_PROGRESS"
     )
-    _publish_ledger(ledger)
-    return ledger
+    return _commit_ledger_transition(
+        expected_before=expected_before,
+        candidate_after=candidate_after,
+        transition_label=f"sample {sequence_index} PASS",
+    )
 
 
 def mark_schedule_failed(
@@ -625,13 +723,14 @@ def mark_schedule_failed(
 ) -> dict[str, Any]:
     if not failure:
         raise P0PerformanceError("schedule failure record must be non-empty")
-    ledger = load_ledger()
-    if ledger.get("status") == "FAILED_STOPPED":
+    expected_before = load_ledger()
+    if expected_before.get("status") == "FAILED_STOPPED":
         raise P0PerformanceError("terminal schedule state cannot be replaced")
+    candidate_after = deepcopy(expected_before)
     if sequence_index is not None:
         if not (0 <= sequence_index < len(EXPANDED_EXECUTION_SCHEDULE)):
             raise P0PerformanceError("failed sample sequence index is invalid")
-        entry = ledger["entries"][sequence_index]
+        entry = candidate_after["entries"][sequence_index]
         if entry["sample_id"] != sample_id or entry["state"] != "RUNNING":
             raise P0PerformanceError(
                 "failed sample does not match RUNNING ledger entry"
@@ -639,20 +738,17 @@ def mark_schedule_failed(
         entry["state"] = "FAILED_STOPPED"
         entry["completed_monotonic_ns"] = time.monotonic_ns()
         entry["failure"] = dict(failure)
-    elif any(entry["state"] == "RUNNING" for entry in ledger["entries"]):
+    elif any(
+        entry["state"] == "RUNNING" for entry in candidate_after["entries"]
+    ):
         raise P0PerformanceError("global failure omitted the RUNNING sample identity")
-    ledger["status"] = "FAILED_STOPPED"
-    ledger["failure"] = dict(failure)
-    try:
-        _publish_ledger(ledger)
-    except BaseException:  # noqa: BLE001 - interrupted terminal writes are recovered.
-        try:
-            observed = strict_json(LEDGER_PATH)
-        except (OSError, UnicodeError, P0PerformanceError, ValueError):
-            observed = None
-        if observed != ledger:
-            _publish_ledger(ledger)
-    return ledger
+    candidate_after["status"] = "FAILED_STOPPED"
+    candidate_after["failure"] = dict(failure)
+    return _commit_ledger_transition(
+        expected_before=expected_before,
+        candidate_after=candidate_after,
+        transition_label="schedule FAILED_STOPPED",
+    )
 
 
 def _process_start_ticks(pid: int) -> int:
@@ -1049,6 +1145,8 @@ __all__ = [
     "COMPLETE_PATH",
     "FAILURE_PATH",
     "LEDGER_PATH",
+    "LedgerTransitionNotCommitted",
+    "LedgerTransitionStateUncertain",
     "build_claim",
     "claim_payload_sha256",
     "create_claim_and_ledger",

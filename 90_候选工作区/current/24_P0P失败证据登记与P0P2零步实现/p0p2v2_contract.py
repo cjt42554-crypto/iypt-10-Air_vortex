@@ -574,6 +574,12 @@ def build_contract() -> dict[str, Any]:
                 "success_authority": "unique_valid_execution_complete",
                 "failure_authority": "coherent_FAILED_STOPPED_plus_unique_execution_failure",
                 "partial_terminal_records": "PRESERVE_AS_ABORTED_AND_FAIL_STOPPED",
+                "ledger_transition_candidate_created_once_before_write": True,
+                "ledger_transition_post_write_strict_reload": True,
+                "observed_candidate_after": "RECOVER_COMMITTED",
+                "observed_exact_expected_before": "RETRY_ONCE_WITH_SAME_CANDIDATE",
+                "observed_neither_or_unreadable": "STOP_UNCERTAIN_NO_WORKER_OR_LATER_SAMPLE",
+                "outer_handler_reloads_actual_ledger_before_terminalization": True,
             },
             "analysis_transaction_policy": {
                 "symbolic_clean_main_at_claim_authorization_child": True,

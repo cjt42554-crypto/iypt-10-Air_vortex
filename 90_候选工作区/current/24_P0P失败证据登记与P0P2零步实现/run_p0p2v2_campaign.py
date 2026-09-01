@@ -36,6 +36,7 @@ from p0p2v2_authorization import (
 from p0p2v2_consumption import (
     CAMPAIGN_LOCK_PATH,
     create_claim_and_ledger,
+    load_ledger,
     mark_sample_pass,
     mark_sample_running,
     mark_schedule_failed,
@@ -94,6 +95,64 @@ PRECLAIM_FAILURE_ROOT = STATIC_ROOT / "preclaim_failures"
 IMPLEMENTATION_PATHS = tuple(
     HERE.parents[2] / path for path in sorted(REQUIRED_IMPLEMENTATION_RELATIVE_PATHS)
 )
+
+
+def _completed_prefix_from_ledger(ledger: Mapping[str, Any]) -> list[str]:
+    entries = ledger.get("entries")
+    if not isinstance(entries, list):
+        raise P0PerformanceError("terminalization ledger entries are unavailable")
+    completed: list[str] = []
+    for entry in entries:
+        if not isinstance(entry, Mapping):
+            raise P0PerformanceError("terminalization ledger entry is invalid")
+        if entry.get("state") != "PASS":
+            break
+        sample_id = entry.get("sample_id")
+        if not isinstance(sample_id, str):
+            raise P0PerformanceError("terminalization PASS sample ID is invalid")
+        completed.append(sample_id)
+    return completed
+
+
+def _terminalize_consumed_claim_failure(record: dict[str, Any]) -> None:
+    """Use the durable ledger, not stale loop locals, to publish one failure."""
+
+    ledger = load_ledger()
+    completed = _completed_prefix_from_ledger(ledger)
+    running: list[tuple[int, str]] = []
+    entries = ledger.get("entries")
+    if not isinstance(entries, list):
+        raise P0PerformanceError("terminalization ledger entries are unavailable")
+    for entry in entries:
+        if not isinstance(entry, Mapping):
+            raise P0PerformanceError("terminalization ledger entry is invalid")
+        if entry.get("state") == "RUNNING":
+            sequence_index = entry.get("sequence_index")
+            sample_id = entry.get("sample_id")
+            if type(sequence_index) is not int or not isinstance(sample_id, str):
+                raise P0PerformanceError("terminalization RUNNING identity is invalid")
+            running.append((sequence_index, sample_id))
+    if len(running) > 1:
+        raise P0PerformanceError("terminalization found multiple RUNNING samples")
+
+    if ledger.get("status") == "FAILED_STOPPED":
+        durable_failure = ledger.get("failure")
+        if not isinstance(durable_failure, Mapping) or not durable_failure:
+            raise P0PerformanceError("failed ledger lacks its durable failure record")
+        publish_execution_failure(durable_failure)
+        return
+
+    actual_index, actual_sample = running[0] if running else (None, None)
+    record["active_sequence_index"] = actual_index
+    record["active_sample"] = actual_sample
+    record["completed_samples"] = completed
+    record["observed_ledger_status"] = ledger.get("status")
+    mark_schedule_failed(
+        sequence_index=actual_index,
+        sample_id=actual_sample,
+        failure=record,
+    )
+    publish_execution_failure(record)
 
 
 def _single_version_line(command: Sequence[str], label: str) -> str:
@@ -1350,13 +1409,13 @@ def execute_campaign() -> dict[str, Any]:
                     "failed_monotonic_ns": time.monotonic_ns(),
                 }
                 try:
-                    mark_schedule_failed(
-                        sequence_index=active_index,
-                        sample_id=active_sample,
-                        failure=terminal_failure,
+                    _terminalize_consumed_claim_failure(terminal_failure)
+                except BaseException as terminalization_error:  # noqa: BLE001
+                    exc.add_note(
+                        "consumed-claim terminalization also failed: "
+                        f"{type(terminalization_error).__name__}: "
+                        f"{terminalization_error}"
                     )
-                finally:
-                    publish_execution_failure(terminal_failure)
             raise
         return {
             "schema_version": 2,

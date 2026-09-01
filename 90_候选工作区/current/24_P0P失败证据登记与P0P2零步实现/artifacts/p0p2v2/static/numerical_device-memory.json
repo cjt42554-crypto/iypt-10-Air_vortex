@@ -2,95 +2,95 @@
   "device_allocation_recorder": {
     "boundaries": [
       {
-        "device_free_bytes": 7318405120,
+        "device_free_bytes": 7317749760,
         "device_total_bytes": 8053915648,
-        "device_used_bytes": 735510528,
+        "device_used_bytes": 736165888,
         "label": "before",
         "pool_total_bytes": 0,
         "pool_used_bytes": 0
       },
       {
-        "device_free_bytes": 7316307968,
+        "device_free_bytes": 7315652608,
         "device_total_bytes": 8053915648,
-        "device_used_bytes": 737607680,
+        "device_used_bytes": 738263040,
         "label": "alloc_postprocess",
         "pool_total_bytes": 8192,
         "pool_used_bytes": 0
       },
       {
-        "device_free_bytes": 7316307968,
+        "device_free_bytes": 7315652608,
         "device_total_bytes": 8053915648,
-        "device_used_bytes": 737607680,
+        "device_used_bytes": 738263040,
         "label": "malloc_postprocess",
         "pool_total_bytes": 8192,
         "pool_used_bytes": 8192
       },
       {
-        "device_free_bytes": 7316307968,
+        "device_free_bytes": 7315652608,
         "device_total_bytes": 8053915648,
-        "device_used_bytes": 737607680,
+        "device_used_bytes": 738263040,
         "label": "alloc_postprocess",
         "pool_total_bytes": 16384,
         "pool_used_bytes": 8192
       },
       {
-        "device_free_bytes": 7316307968,
+        "device_free_bytes": 7315652608,
         "device_total_bytes": 8053915648,
-        "device_used_bytes": 737607680,
+        "device_used_bytes": 738263040,
         "label": "malloc_postprocess",
         "pool_total_bytes": 16384,
         "pool_used_bytes": 16384
       },
       {
-        "device_free_bytes": 7314210816,
+        "device_free_bytes": 7313555456,
         "device_total_bytes": 8053915648,
-        "device_used_bytes": 739704832,
+        "device_used_bytes": 740360192,
         "label": "alloc_postprocess",
         "pool_total_bytes": 24576,
         "pool_used_bytes": 16384
       },
       {
-        "device_free_bytes": 7314210816,
+        "device_free_bytes": 7313555456,
         "device_total_bytes": 8053915648,
-        "device_used_bytes": 739704832,
+        "device_used_bytes": 740360192,
         "label": "malloc_postprocess",
         "pool_total_bytes": 24576,
         "pool_used_bytes": 24576
       },
       {
-        "device_free_bytes": 7314210816,
+        "device_free_bytes": 7313555456,
         "device_total_bytes": 8053915648,
-        "device_used_bytes": 739704832,
+        "device_used_bytes": 740360192,
         "label": "free_postprocess",
         "pool_total_bytes": 24576,
         "pool_used_bytes": 16384
       },
       {
-        "device_free_bytes": 7314210816,
+        "device_free_bytes": 7313555456,
         "device_total_bytes": 8053915648,
-        "device_used_bytes": 739704832,
+        "device_used_bytes": 740360192,
         "label": "free_postprocess",
         "pool_total_bytes": 24576,
         "pool_used_bytes": 8192
       },
       {
-        "device_free_bytes": 7314210816,
+        "device_free_bytes": 7313555456,
         "device_total_bytes": 8053915648,
-        "device_used_bytes": 739704832,
+        "device_used_bytes": 740360192,
         "label": "free_postprocess",
         "pool_total_bytes": 24576,
         "pool_used_bytes": 0
       },
       {
-        "device_free_bytes": 7314210816,
+        "device_free_bytes": 7313555456,
         "device_total_bytes": 8053915648,
-        "device_used_bytes": 739704832,
+        "device_used_bytes": 740360192,
         "label": "after",
         "pool_total_bytes": 24576,
         "pool_used_bytes": 0
       }
     ],
-    "device_used_high_water_bytes": 739704832,
+    "device_used_high_water_bytes": 740360192,
     "pool_free_count": 3,
     "pool_request_count": 3,
     "pool_requested_bytes": 24576,
@@ -105,7 +105,7 @@
   "mode": "device-memory",
   "numerical_sha256": "34d46acc7352c3bf9a9a44e36573061209f2e0fa9f2398d0f847fd90d87c4a19",
   "output_nbytes": 8192,
-  "pid": 291608,
+  "pid": 316349,
   "schema_version": 2,
   "semantic_ranges": null,
   "status": "P0P2V2_ZERO_STEP_CAPABILITY_PROBE_PASS",

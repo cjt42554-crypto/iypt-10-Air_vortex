@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import os
@@ -519,6 +520,66 @@ def _claim_inputs(lock_identity: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+@contextmanager
+def _synthetic_campaign(
+    root: Path,
+    launches: list[dict[str, Any]],
+) -> Iterator[Path]:
+    artifacts = root / "artifacts"
+    artifacts.mkdir()
+    raw = artifacts / "performance_raw"
+    lock_path = root / "campaign.lock"
+    inputs = _claim_inputs({"synthetic": True})
+    preflight = {
+        "gate_pass": True,
+        "post_probe_environment": inputs["environment"],
+        "observed_capability_identity": inputs["machine_identity"],
+    }
+
+    def execute_sample(
+        sample_id: str,
+        *,
+        sequence_index: int,
+        launch_token: str,
+        **_kwargs: Any,
+    ) -> dict[str, Any]:
+        manifest = {
+            "sample_id": sample_id,
+            "sequence_index": sequence_index,
+            "launch_token": launch_token,
+        }
+        launches.append(manifest)
+        _write_json(raw / sample_id / "sample_manifest.json", manifest)
+        return manifest
+
+    with (
+        _runtime_paths(artifacts),
+        patch.object(campaign, "RAW_ROOT", raw),
+        patch.object(campaign, "CAMPAIGN_LOCK_PATH", lock_path),
+        patch.object(
+            campaign,
+            "load_authorization",
+            return_value=inputs["authorization"],
+        ),
+        patch.object(campaign, "load_contract", return_value={}),
+        patch.object(campaign, "evidence_identity", return_value={}),
+        patch.object(campaign, "assert_no_sample_output_root", return_value={}),
+        patch.object(campaign, "zero_step_preflight", return_value=preflight),
+        patch.object(
+            campaign,
+            "execution_binding",
+            return_value=inputs["execution_binding"],
+        ),
+        patch.object(
+            campaign,
+            "full_environment_gate",
+            return_value={"gate_pass": True},
+        ),
+        patch.object(campaign, "execute_one_sample", side_effect=execute_sample),
+    ):
+        yield raw
+
+
 class ConsumptionTests(unittest.TestCase):
     def test_preclaim_failure_is_retained_while_authorized_tree_stays_clean(
         self,
@@ -872,6 +933,296 @@ class ConsumptionTests(unittest.TestCase):
                     )
                 self.assertTrue(token)
 
+    def test_running_transition_recovers_one_transient_strict_reload(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "artifacts").mkdir()
+            lock_path = root / "campaign.lock"
+            original_strict_json = consumption.strict_json
+            injected = False
+
+            def transient_candidate_reload(path: Path) -> dict[str, Any]:
+                nonlocal injected
+                observed = original_strict_json(path)
+                entries = observed.get("entries")
+                if (
+                    path == consumption.LEDGER_PATH
+                    and isinstance(entries, list)
+                    and entries[0].get("state") == "RUNNING"
+                    and not injected
+                ):
+                    injected = True
+                    raise OSError("synthetic first strict reload fault")
+                return observed
+
+            with (
+                _runtime_paths(root / "artifacts"),
+                ExclusiveCampaignLock(lock_path) as lock,
+            ):
+                consumption.create_claim_and_ledger(**_claim_inputs(lock.identity))
+                with patch.object(
+                    consumption,
+                    "strict_json",
+                    side_effect=transient_candidate_reload,
+                ):
+                    token = consumption.mark_sample_running(
+                        0, EXPANDED_EXECUTION_SCHEDULE[0]
+                    )
+                ledger = consumption.load_ledger()
+                self.assertTrue(injected)
+                self.assertEqual(ledger["entries"][0]["start_count"], 1)
+                self.assertEqual(
+                    ledger["entries"][0]["launch_token_sha256"],
+                    hashlib.sha256(token.encode("utf-8")).hexdigest(),
+                )
+                failure = {
+                    "schema_version": 2,
+                    "status": "HF3D_P0P2_V2_TRANSIENT_RELOAD_TEST_FAILED_STOPPED",
+                    "gate_pass": False,
+                }
+                consumption.mark_schedule_failed(
+                    sequence_index=0,
+                    sample_id=EXPANDED_EXECUTION_SCHEDULE[0],
+                    failure=failure,
+                )
+                consumption.publish_execution_failure(failure)
+                self.assertEqual(
+                    consumption.validate_terminal_execution_state()["terminal_kind"],
+                    "FAILED_STOPPED",
+                )
+
+    def test_full_orchestrator_ledger_transition_fault_matrix(self) -> None:
+        transition_modes = ("RUNNING", "ORDINARY_PASS", "FINAL_PENDING")
+        fault_modes = ("PRECOMMIT_ONCE", "POSTCOMMIT", "PRECOMMIT_PERSISTENT")
+
+        def matches_target(ledger: Mapping[str, Any], mode: str) -> bool:
+            entries = ledger.get("entries")
+            if not isinstance(entries, list):
+                return False
+            if mode == "RUNNING":
+                return entries[0].get("state") == "RUNNING" and all(
+                    entry.get("state") == "NOT_STARTED" for entry in entries[1:]
+                )
+            if mode == "ORDINARY_PASS":
+                return (
+                    ledger.get("status") == "IN_PROGRESS"
+                    and entries[0].get("state") == "PASS"
+                    and entries[1].get("state") == "NOT_STARTED"
+                )
+            return ledger.get("status") == "ALL_SAMPLES_PASS_PENDING_TERMINAL"
+
+        for transition_mode in transition_modes:
+            for fault_mode in fault_modes:
+                with (
+                    self.subTest(
+                        transition=transition_mode,
+                        fault=fault_mode,
+                    ),
+                    tempfile.TemporaryDirectory() as temporary,
+                ):
+                    root = Path(temporary)
+                    launches: list[dict[str, Any]] = []
+                    attempted_candidates: list[dict[str, Any]] = []
+                    with _synthetic_campaign(root, launches):
+                        original_publish = consumption._publish_ledger
+
+                        def inject_transition_fault(
+                            ledger: Mapping[str, Any],
+                            target_mode: str = transition_mode,
+                            fault_kind: str = fault_mode,
+                            candidates: list[dict[str, Any]] = attempted_candidates,
+                            publish: Any = original_publish,
+                        ) -> None:
+                            if matches_target(ledger, target_mode):
+                                candidates.append(
+                                    copy.deepcopy(dict(ledger))
+                                )
+                                attempt = len(candidates)
+                                if fault_kind == "POSTCOMMIT" and attempt == 1:
+                                    publish(ledger)
+                                    raise OSError(
+                                        "synthetic post-commit ledger fault"
+                                    )
+                                if fault_kind == "PRECOMMIT_ONCE" and attempt == 1:
+                                    raise OSError(
+                                        "synthetic one-shot pre-commit ledger fault"
+                                    )
+                                if (
+                                    fault_kind == "PRECOMMIT_PERSISTENT"
+                                    and attempt <= 2
+                                ):
+                                    raise OSError(
+                                        "synthetic persistent pre-commit ledger fault"
+                                    )
+                            publish(ledger)
+
+                        with patch.object(
+                            consumption,
+                            "_publish_ledger",
+                            side_effect=inject_transition_fault,
+                        ):
+                            if fault_mode == "PRECOMMIT_PERSISTENT":
+                                with self.assertRaises(
+                                    consumption.LedgerTransitionNotCommitted
+                                ):
+                                    campaign.execute_campaign()
+                            else:
+                                result = campaign.execute_campaign()
+                                self.assertTrue(result["gate_pass"])
+
+                        terminal = consumption.validate_terminal_execution_state()
+                        expected_terminal = (
+                            "FAILED_STOPPED"
+                            if fault_mode == "PRECOMMIT_PERSISTENT"
+                            else "COMPLETE"
+                        )
+                        self.assertEqual(
+                            terminal["terminal_kind"], expected_terminal
+                        )
+                        expected_attempts = {
+                            "PRECOMMIT_ONCE": 2,
+                            "POSTCOMMIT": 1,
+                            "PRECOMMIT_PERSISTENT": 2,
+                        }[fault_mode]
+                        self.assertEqual(
+                            len(attempted_candidates), expected_attempts
+                        )
+                        self.assertTrue(
+                            all(
+                                candidate == attempted_candidates[0]
+                                for candidate in attempted_candidates
+                            )
+                        )
+                        launched_sample_ids = [
+                            item["sample_id"] for item in launches
+                        ]
+                        expected_launch_count = (
+                            {
+                                "RUNNING": 0,
+                                "ORDINARY_PASS": 1,
+                                "FINAL_PENDING": len(
+                                    EXPANDED_EXECUTION_SCHEDULE
+                                ),
+                            }[transition_mode]
+                            if fault_mode == "PRECOMMIT_PERSISTENT"
+                            else len(EXPANDED_EXECUTION_SCHEDULE)
+                        )
+                        self.assertEqual(
+                            launched_sample_ids,
+                            list(EXPANDED_EXECUTION_SCHEDULE[:expected_launch_count]),
+                        )
+                        self.assertEqual(
+                            len(set(launched_sample_ids)),
+                            len(launched_sample_ids),
+                        )
+                        self.assertEqual(
+                            len({item["launch_token"] for item in launches}),
+                            len(launches),
+                        )
+                        self.assertTrue(
+                            all(
+                                entry["start_count"] == 1
+                                for entry in terminal["ledger"]["entries"]
+                                if entry["state"] != "NOT_STARTED"
+                            )
+                        )
+                        self.assertFalse(
+                            consumption.COMPLETE_PATH.exists()
+                            and consumption.FAILURE_PATH.exists()
+                        )
+
+    def test_outer_handler_uses_durable_ledger_not_stale_loop_locals(self) -> None:
+        for mode in ("RUNNING", "ORDINARY_PASS", "FINAL_PENDING"):
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                launches: list[dict[str, Any]] = []
+                with _synthetic_campaign(root, launches):
+                    original_running = campaign.mark_sample_running
+                    original_pass = campaign.mark_sample_pass
+
+                    def committed_running_then_raise(
+                        sequence_index: int,
+                        sample_id: str,
+                        selected_mode: str = mode,
+                        mark_running: Any = original_running,
+                    ) -> str:
+                        token = mark_running(sequence_index, sample_id)
+                        if selected_mode == "RUNNING" and sequence_index == 0:
+                            raise OSError("synthetic error after RUNNING return")
+                        return token
+
+                    def committed_pass_then_raise(
+                        sequence_index: int,
+                        sample_id: str,
+                        *,
+                        launch_token: str,
+                        manifest_sha256: str,
+                        selected_mode: str = mode,
+                        mark_pass: Any = original_pass,
+                    ) -> dict[str, Any]:
+                        ledger = mark_pass(
+                            sequence_index,
+                            sample_id,
+                            launch_token=launch_token,
+                            manifest_sha256=manifest_sha256,
+                        )
+                        if selected_mode == "ORDINARY_PASS" and sequence_index == 0:
+                            raise OSError("synthetic error after ordinary PASS return")
+                        if (
+                            selected_mode == "FINAL_PENDING"
+                            and sequence_index + 1
+                            == len(EXPANDED_EXECUTION_SCHEDULE)
+                        ):
+                            raise OSError("synthetic error after final PASS return")
+                        return ledger
+
+                    with (
+                        patch.object(
+                            campaign,
+                            "mark_sample_running",
+                            side_effect=committed_running_then_raise,
+                        ),
+                        patch.object(
+                            campaign,
+                            "mark_sample_pass",
+                            side_effect=committed_pass_then_raise,
+                        ),
+                        self.assertRaises(OSError),
+                    ):
+                        campaign.execute_campaign()
+
+                    terminal = consumption.validate_terminal_execution_state()
+                    self.assertEqual(terminal["terminal_kind"], "FAILED_STOPPED")
+                    failure = terminal["failure"]
+                    self.assertIsInstance(failure, Mapping)
+                    expected_completed = {
+                        "RUNNING": 0,
+                        "ORDINARY_PASS": 1,
+                        "FINAL_PENDING": len(EXPANDED_EXECUTION_SCHEDULE),
+                    }[mode]
+                    self.assertEqual(
+                        len(failure["completed_samples"]), expected_completed
+                    )
+                    expected_status = (
+                        "ALL_SAMPLES_PASS_PENDING_TERMINAL"
+                        if mode == "FINAL_PENDING"
+                        else "IN_PROGRESS"
+                    )
+                    self.assertEqual(
+                        failure["observed_ledger_status"], expected_status
+                    )
+                    if mode == "RUNNING":
+                        self.assertEqual(failure["active_sequence_index"], 0)
+                        self.assertEqual(
+                            failure["active_sample"],
+                            EXPANDED_EXECUTION_SCHEDULE[0],
+                        )
+                        self.assertEqual(launches, [])
+                    else:
+                        self.assertIsNone(failure["active_sequence_index"])
+                        self.assertIsNone(failure["active_sample"])
+                    self.assertFalse(consumption.COMPLETE_PATH.exists())
+
     def test_valid_worker_token_and_direct_or_pid_reuse_rejection(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -1136,13 +1487,10 @@ class ConsumptionTests(unittest.TestCase):
                         raise OSError("synthetic final ledger write failure")
                     original_publish(ledger)
 
-                with (
-                    patch.object(
-                        consumption,
-                        "_publish_ledger",
-                        side_effect=fail_last_pass_once,
-                    ),
-                    self.assertRaises(OSError),
+                with patch.object(
+                    consumption,
+                    "_publish_ledger",
+                    side_effect=fail_last_pass_once,
                 ):
                     consumption.mark_sample_pass(
                         len(EXPANDED_EXECUTION_SCHEDULE) - 1,
@@ -1150,20 +1498,22 @@ class ConsumptionTests(unittest.TestCase):
                         launch_token=last_token,
                         manifest_sha256="a" * 64,
                     )
-                failure = {
+                self.assertTrue(failed_once)
+                child = inputs["authorization"]["observed_parent_ticket_binding"][
+                    "authorization_child_commit"
+                ]
+                completion = {
                     "schema_version": 2,
-                    "status": "HF3D_P0P2_V2_FINAL_LEDGER_WRITE_FAILED_STOPPED",
-                    "gate_pass": False,
+                    "status": "HF3D_P0P2_V2_FROZEN_SCHEDULE_EXECUTED_PENDING_ANALYSIS",
+                    "gate_pass": True,
+                    "authorization_child_commit": child,
+                    "completed_samples": list(EXPANDED_EXECUTION_SCHEDULE),
+                    "completed_monotonic_ns": time.monotonic_ns(),
                 }
-                consumption.mark_schedule_failed(
-                    sequence_index=len(EXPANDED_EXECUTION_SCHEDULE) - 1,
-                    sample_id=EXPANDED_EXECUTION_SCHEDULE[-1],
-                    failure=failure,
-                )
-                consumption.publish_execution_failure(failure)
+                consumption.publish_execution_complete(completion)
                 terminal = consumption.validate_terminal_execution_state()
-                self.assertEqual(terminal["terminal_kind"], "FAILED_STOPPED")
-                self.assertFalse(consumption.COMPLETE_PATH.exists())
+                self.assertEqual(terminal["terminal_kind"], "COMPLETE")
+                self.assertFalse(consumption.FAILURE_PATH.exists())
 
         for mode in ("before_create", "partial_create"):
             with self.subTest(mode=mode), tempfile.TemporaryDirectory() as temporary:

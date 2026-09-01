@@ -39,6 +39,6 @@ test_telemetry_coverage_truncation_and_gap (__main__.TelemetryAndMemoryTests.tes
 test_ticket_machine_identity_rejects_each_governed_drift (__main__.TelemetryAndMemoryTests.test_ticket_machine_identity_rejects_each_governed_drift) ... ok
 
 ----------------------------------------------------------------------
-Ran 33 tests in 1.013s
+Ran 33 tests in 1.020s
 
 OK
