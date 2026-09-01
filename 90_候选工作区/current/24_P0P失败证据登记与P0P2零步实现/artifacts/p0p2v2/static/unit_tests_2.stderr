@@ -1,0 +1,17 @@
+test_contract_and_grant_namespace_drift_is_rejected (__main__.CompleteGitTopologyTests.test_contract_and_grant_namespace_drift_is_rejected) ... ok
+test_extra_review_and_child_paths_are_rejected (__main__.CompleteGitTopologyTests.test_extra_review_and_child_paths_are_rejected) ... ok
+test_fetch_exposes_stale_local_main (__main__.CompleteGitTopologyTests.test_fetch_exposes_stale_local_main) ... ok
+test_intermediate_parent_is_rejected (__main__.CompleteGitTopologyTests.test_intermediate_parent_is_rejected) ... ok
+test_merge_c2_is_rejected (__main__.CompleteGitTopologyTests.test_merge_c2_is_rejected) ... ok
+test_merge_p2_is_rejected (__main__.CompleteGitTopologyTests.test_merge_p2_is_rejected) ... ok
+test_missing_and_drifted_reviewed_files_are_rejected (__main__.CompleteGitTopologyTests.test_missing_and_drifted_reviewed_files_are_rejected) ... ok
+test_nul_in_ticket_path_is_rejected_before_git_interpretation (__main__.CompleteGitTopologyTests.test_nul_in_ticket_path_is_rejected_before_git_interpretation) ... ok
+test_positive_i2_p2_c2_fetch_symbolic_main_and_nul_safe_paths (__main__.CompleteGitTopologyTests.test_positive_i2_p2_c2_fetch_symbolic_main_and_nul_safe_paths) ... ok
+test_rename_copy_mode_symlink_and_submodule_are_rejected (__main__.CompleteGitTopologyTests.test_rename_copy_mode_symlink_and_submodule_are_rejected) ... ok
+test_wrong_denied_and_authorized_blobs_are_rejected (__main__.CompleteGitTopologyTests.test_wrong_denied_and_authorized_blobs_are_rejected) ... ok
+test_wrong_symbolic_branch_is_rejected (__main__.CompleteGitTopologyTests.test_wrong_symbolic_branch_is_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.902s
+
+OK

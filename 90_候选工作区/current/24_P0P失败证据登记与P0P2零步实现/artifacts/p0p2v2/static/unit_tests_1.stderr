@@ -1,0 +1,29 @@
+test_frozen_schedule_and_modes_have_no_selective_cli (__main__.ContractAndLaunchTests.test_frozen_schedule_and_modes_have_no_selective_cli) ... usage: test_p0p2v2_harness.py [-h] (--zero-step-preflight | --execute)
+                              [--output OUTPUT]
+test_p0p2v2_harness.py: error: unrecognized arguments: --resume
+usage: test_p0p2v2_harness.py [-h] (--zero-step-preflight | --execute)
+                              [--output OUTPUT]
+test_p0p2v2_harness.py: error: unrecognized arguments: --only B1
+ok
+test_launch_modes_are_strictly_separated (__main__.ContractAndLaunchTests.test_launch_modes_are_strictly_separated) ... ok
+test_nsys_launcher_contains_only_qualified_options (__main__.ContractAndLaunchTests.test_nsys_launcher_contains_only_qualified_options) ... ok
+test_three_benchmarks_change_only_duration (__main__.ContractAndLaunchTests.test_three_benchmarks_change_only_duration) ... ok
+test_v1_0002_duration_and_hash_drift_are_exact_negative_cases (__main__.ContractAndLaunchTests.test_v1_0002_duration_and_hash_drift_are_exact_negative_cases) ... ok
+test_cprofile_parser_reads_real_call_graph (__main__.InstrumentationTests.test_cprofile_parser_reads_real_call_graph) ... ok
+test_nested_exclusive_coverage_thresholds (__main__.InstrumentationTests.test_nested_exclusive_coverage_thresholds) ... ok
+test_serialized_host_ranges_are_strictly_reparsed_and_recomputed (__main__.InstrumentationTests.test_serialized_host_ranges_are_strictly_reparsed_and_recomputed) ... ok
+test_transparent_wrapper_preserves_arguments_result_and_exception (__main__.InstrumentationTests.test_transparent_wrapper_preserves_arguments_result_and_exception) ... ok
+test_synthetic_nsys_positive_and_negative_gates (__main__.NsysAuditTests.test_synthetic_nsys_positive_and_negative_gates) ... ok
+test_directory_publication_writes_terminal_last_and_never_replaces (__main__.NumericalAndTransactionTests.test_directory_publication_writes_terminal_last_and_never_replaces) ... ok
+test_monitor_start_and_stop_failures_are_observable (__main__.NumericalAndTransactionTests.test_monitor_start_and_stop_failures_are_observable) ... ok
+test_numerical_hash_is_layout_stable_and_metadata_files_are_excluded (__main__.NumericalAndTransactionTests.test_numerical_hash_is_layout_stable_and_metadata_files_are_excluded) ... ok
+test_sample_publication_failure_retains_staging_and_no_target (__main__.NumericalAndTransactionTests.test_sample_publication_failure_retains_staging_and_no_target) ... ok
+test_sample_transaction_no_replace_and_symlink_rejection (__main__.NumericalAndTransactionTests.test_sample_transaction_no_replace_and_symlink_rejection) ... ok
+test_native_allocator_known_exit_overflow_and_device_crosscheck (__main__.TelemetryAndMemoryTests.test_native_allocator_known_exit_overflow_and_device_crosscheck) ... ok
+test_pid_reuse_identity_and_96c_environment_rejection (__main__.TelemetryAndMemoryTests.test_pid_reuse_identity_and_96c_environment_rejection) ... ok
+test_telemetry_coverage_truncation_and_gap (__main__.TelemetryAndMemoryTests.test_telemetry_coverage_truncation_and_gap) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 1.054s
+
+OK
