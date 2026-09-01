@@ -10,9 +10,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-import numpy as np
-
 import analyse_p0lite
+import numpy as np
 import p0lite_common
 import run_p0lite
 
@@ -45,6 +44,9 @@ class P0LiteTests(unittest.TestCase):
         (attempt / "telemetry").mkdir()
         (attempt / "telemetry" / "runtime.jsonl").write_text("{}\n", encoding="utf-8")
         (attempt / "telemetry" / "pidstat.log").write_text("test\n", encoding="utf-8")
+        p0lite_common.write_json(
+            attempt / "telemetry" / "runtime_environment.json", {"gate_pass": True}
+        )
         (attempt / "stdout.log").write_text("", encoding="utf-8")
         (attempt / "stderr.log").write_text("", encoding="utf-8")
         p0lite_common.write_json(attempt / "worker_timing.json", {"test_s": 1.0})
@@ -179,6 +181,19 @@ class P0LiteTests(unittest.TestCase):
             self.assertEqual(status, "INVALID_ENVIRONMENT")
             self.assertTrue((attempt / "archive").is_dir())
             launcher.assert_not_called()
+
+    def test_runtime_pollution_detects_external_cpu_group_and_gpu_process(self) -> None:
+        processes = [{"cpu_percent": 60.0} for _ in range(4)]
+        reasons = run_p0lite._instant_pollution_reasons(
+            processes, {"compute_processes": []}, 32
+        )
+        self.assertIn(
+            "four_or_more_external_processes_each_use_at_least_half_a_core", reasons
+        )
+        reasons = run_p0lite._instant_pollution_reasons(
+            [], {"compute_processes": [{"is_target_worker": False}]}, 32
+        )
+        self.assertIn("other_gpu_compute_process_detected", reasons)
 
     def test_config_probe_uses_a_fresh_process(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

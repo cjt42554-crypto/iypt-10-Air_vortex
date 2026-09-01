@@ -626,12 +626,16 @@ def validate_success_artifacts(attempt: Path) -> dict[str, Any]:
         or not (telemetry / "runtime.jsonl").is_file()
         or (telemetry / "runtime.jsonl").stat().st_size == 0
         or not (telemetry / "pidstat.log").is_file()
+        or not (telemetry / "runtime_environment.json").is_file()
         or not (attempt / "archive").is_dir()
     ):
         raise P0LiteError(f"attempt artifacts are incomplete: {missing}")
     quality = strict_json(attempt / "quality.json")
+    runtime_environment = strict_json(telemetry / "runtime_environment.json")
     if not isinstance(quality, dict) or quality.get("gate_pass") is not True:
         raise P0LiteError("quality gate did not pass")
+    if not isinstance(runtime_environment, dict) or runtime_environment.get("gate_pass") is not True:
+        raise P0LiteError("runtime environment gate did not pass")
     required_gates = {
         "formal_config_roundtrip_exact",
         "result_completed",

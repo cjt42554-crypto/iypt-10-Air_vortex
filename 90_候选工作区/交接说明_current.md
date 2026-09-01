@@ -18,7 +18,7 @@
 
     P0LITE_STAGE_0_GOVERNANCE_CONVERGENCE = COMPLETE
     P0LITE_STAGE_1_IMPLEMENTATION_AND_ZERO_STEP_GATES = COMPLETE
-    P0LITE_STAGE_2_REFERENCE_BASELINE = NEXT_AND_AUTHORIZED_NOT_STARTED
+    P0LITE_STAGE_2_REFERENCE_BASELINE = FIRST_ATTEMPT_INTERRUPTED__RUNTIME_POLLUTION_FIX_QUALIFIED
 
 ## 唯一活动入口
 
@@ -52,7 +52,7 @@
     analyse_p0lite.py
     tests/test_p0lite.py
 
-实现总量约 2080 个非空非注释行，包含 14 个高价值测试，没有新增第六个模块，也没有 import 旧 P0-P2 V2。
+四个核心实现文件约 1900 个非空非注释行，包含 15 个高价值测试，没有新增第六个模块，也没有 import 旧 P0-P2 V2。
 
 当前实现只包含：
 
@@ -63,6 +63,8 @@
 - Nsight CSV 与 SQLite 中 CUDA kernel、API、allocation、H2D/D2H 次数、精确字节和时间解析；
 - canonical numerical payload；
 - archive strict reload。
+
+首次 Stage 2 warm-up 暴露了运行开始后才出现的外部背景计算。P0-Lite 现已补充轻量运行期污染门：排除 launcher、worker 与子进程后，连续五个采样点出现至少四个各占半个逻辑 CPU 的外部进程、外部 CPU 合计超过 25% 逻辑容量，或其他 GPU compute process 时，安全终止并标为 INVALID_ENVIRONMENT。纯合成监视器验证已在 4.6 秒内识别当前 7 路外部 Node 计算。
 
 不得重新实现：
 
@@ -78,11 +80,12 @@
 
 ## 下一项唯一任务
 
-先把阶段 1 实现按 Pro 指定消息提交并 push：
+Stage 1 主体已经提交并 push：
 
     perf: add lightweight reproducible HF3D baseline harness
+    c18952ae0393fe64f90fa8572faae6b1c16a100f
 
-该提交的完整 40 位对象 ID 是阶段 2 baseline commit。随后在 clean main 上按 p0lite_schedule.json 的既定顺序执行 16 个 slot；不等待 P2、C2 或新的授权票据，不运行旧 P0-P2 V2。
+以包含本文件和运行期污染修正的提交完整对象 ID 作为重新执行阶段 2 的 baseline commit。等当前 7 路外部 Node 计算和其他明显背景负载结束、机器降温且环境门通过后，从 WARMUP_B1 创建第二个全新 attempt，继续 p0lite_schedule.json；不删除或复用第一次中断证据。
 
 ## 固定 benchmark 与日程
 
@@ -125,7 +128,7 @@ p0lite_schedule.json 已冻结为：
 
 已实际完成：
 
-- 14/14 高价值测试通过；
+- 15/15 高价值测试通过；
 - Ruff 通过；
 - 四个核心文件 strict mypy 通过；
 - 五个活动 Python 文件 compile 通过；
@@ -136,6 +139,8 @@ p0lite_schedule.json 已冻结为：
 - 正式理论、正式程序和 AGENTS.md 差异为空。
 
 这些检查没有启动 warm-up、timed、HOST profile、CUDA profile 或任何 HF3D 动态时间步。阶段 2 尚未开始，不能把零步 PASS 写成性能或数值资格结论。
+
+之后首次 WARMUP_B1 在提交 c18952a 上启动；约 400 秒后发现运行开始后另一个项目启动 7 路满核 Node 计算和 pytest，系统负载约 9、Tctl 约 96 摄氏度。该 worker 已安全终止，状态为 INTERRUPTED，保留约 726 KB runtime JSONL 和 448 KB pidstat；没有 SUCCESS、没有可采信 archive、没有性能结论。运行期污染修正已通过 15/15 测试、Ruff、strict mypy、compile、三份 fresh-process CUDA 零步和 Nsight 最小探针；完整假 worker watchdog 也实际返回 INVALID_ENVIRONMENT。
 
 阶段 1 通过后直接提交并进入阶段 2，不等待 P2/C2 或新的授权票据。
 
@@ -174,7 +179,7 @@ p0lite_schedule.json 已冻结为：
     P0-P V1 measured result = NOT AVAILABLE
     P0-P2 V2 governance prototype = ARCHIVED_NOT_ACTIVE
     P0-Lite harness = IMPLEMENTED_AND_ZERO_STEP_QUALIFIED
-    P0-Lite reference baseline = NOT_YET_RUN
+    P0-Lite reference baseline = ONE_INTERRUPTED_INVALID_ATTEMPT__NO_VALID_SAMPLE
     hardware utilization baseline = NOT DEMONSTRATED
     numerical qualification = NOT DEMONSTRATED
     physical validation = NOT PERFORMED

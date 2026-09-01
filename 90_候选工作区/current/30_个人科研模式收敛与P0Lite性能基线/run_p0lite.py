@@ -75,10 +75,58 @@ def _thread_snapshot(pid: int) -> dict[str, Any]:
     return {"process": status, "threads": threads}
 
 
-def _monitor(outer_pid: int, attempt: Path, stop: threading.Event, output: Path) -> None:
+def _process_snapshot() -> dict[int, dict[str, Any]]:
+    rows: dict[int, dict[str, Any]] = {}
+    for stat_path in Path("/proc").glob("[0-9]*/stat"):
+        try:
+            raw = stat_path.read_text(encoding="ascii")
+            closing = raw.rfind(")")
+            fields = raw[closing + 2 :].split()
+            pid = int(stat_path.parent.name)
+            cmdline = (stat_path.parent / "cmdline").read_bytes().replace(b"\0", b" ")
+            rows[pid] = {
+                "pid": pid,
+                "ppid": int(fields[1]),
+                "name": raw[raw.find("(") + 1 : closing],
+                "ticks": int(fields[11]) + int(fields[12]),
+                "command": cmdline[:300].decode("utf-8", errors="replace"),
+            }
+        except (OSError, ValueError, IndexError):
+            continue
+    return rows
+
+
+def _instant_pollution_reasons(
+    other_processes: Sequence[Mapping[str, Any]], gpu: Mapping[str, Any], cpu_count: int
+) -> list[str]:
+    busy = [item for item in other_processes if float(item["cpu_percent"]) >= 50.0]
+    aggregate = sum(float(item["cpu_percent"]) for item in other_processes)
+    gpu_others = [
+        item for item in gpu.get("compute_processes", []) if not item.get("is_target_worker")
+    ]
+    reasons = []
+    if len(busy) >= 4:
+        reasons.append("four_or_more_external_processes_each_use_at_least_half_a_core")
+    if cpu_count > 0 and aggregate / cpu_count > 25.0:
+        reasons.append("external_cpu_usage_exceeds_25_percent_of_logical_capacity")
+    if gpu_others:
+        reasons.append("other_gpu_compute_process_detected")
+    return reasons
+
+
+def _monitor(
+    outer_pid: int,
+    attempt: Path,
+    stop: threading.Event,
+    pollution: threading.Event,
+    pollution_details: list[dict[str, Any]],
+    output: Path,
+) -> None:
     previous: tuple[int, int] | None = None
     previous_threads: dict[int, int] = {}
+    previous_processes: dict[int, int] = {}
     previous_monotonic: float | None = None
+    pollution_streak = 0
     ticks_per_second = float(os.sysconf("SC_CLK_TCK"))
     with output.open("x", encoding="utf-8") as stream:
         while not stop.is_set():
@@ -112,7 +160,6 @@ def _monitor(outer_pid: int, attempt: Path, stop: threading.Event, output: Path)
                     else 100.0 * (ticks - before) / ticks_per_second / elapsed
                 )
             previous_threads = current_threads
-            previous_monotonic = monotonic
             gpu = captured.get("gpu")
             if isinstance(gpu, dict):
                 for item in gpu.get("compute_processes", []):
@@ -120,12 +167,54 @@ def _monitor(outer_pid: int, attempt: Path, stop: threading.Event, output: Path)
                         item["is_target_worker"] = int(item["pid"]) == pid
                     except (KeyError, TypeError, ValueError):
                         item["is_target_worker"] = False
+            process_rows = _process_snapshot()
+            excluded = {os.getpid(), outer_pid, pid}
+            for _ in range(2):
+                excluded.update(
+                    item_pid
+                    for item_pid, item in process_rows.items()
+                    if int(item["ppid"]) in excluded
+                )
+            other_processes = []
+            if elapsed is not None and elapsed > 0.0:
+                for item_pid, item in process_rows.items():
+                    before = previous_processes.get(item_pid)
+                    if before is None or item_pid in excluded:
+                        continue
+                    cpu_percent = (
+                        100.0 * (int(item["ticks"]) - before) / ticks_per_second / elapsed
+                    )
+                    if cpu_percent >= 10.0:
+                        other_processes.append({**item, "cpu_percent": cpu_percent})
+            previous_processes = {
+                item_pid: int(item["ticks"]) for item_pid, item in process_rows.items()
+            }
+            reasons = _instant_pollution_reasons(
+                other_processes,
+                gpu if isinstance(gpu, Mapping) else {},
+                int(os.cpu_count() or 0),
+            )
+            pollution_streak = pollution_streak + 1 if reasons else 0
+            triggered = pollution_streak >= 5
+            if triggered and not pollution.is_set():
+                pollution_details.append(
+                    {
+                        "detected_at_utc": utc_now(),
+                        "reasons": reasons,
+                        "other_processes": other_processes,
+                    }
+                )
+                pollution.set()
+            previous_monotonic = monotonic
             record = {
                 "captured_at_utc": utc_now(),
                 "monotonic_s": monotonic,
                 "outer_pid": outer_pid,
                 "observed_worker_pid": pid,
                 "system_cpu_percent": total_cpu,
+                "other_cpu_processes": other_processes,
+                "runtime_pollution_reasons": reasons,
+                "runtime_pollution_triggered": triggered,
                 **captured,
                 **process,
             }
@@ -301,6 +390,9 @@ def execute_slot(
     started_utc = utc_now()
     started = time.perf_counter()
     interrupted = False
+    runtime_invalid = False
+    pollution = threading.Event()
+    pollution_details: list[dict[str, Any]] = []
     with (attempt / "stdout.log").open("w", encoding="utf-8") as stdout, (
         attempt / "stderr.log"
     ).open("w", encoding="utf-8") as stderr:
@@ -316,7 +408,14 @@ def execute_slot(
         stop = threading.Event()
         monitor = threading.Thread(
             target=_monitor,
-            args=(process.pid, attempt, stop, attempt / "telemetry" / "runtime.jsonl"),
+            args=(
+                process.pid,
+                attempt,
+                stop,
+                pollution,
+                pollution_details,
+                attempt / "telemetry" / "runtime.jsonl",
+            ),
             daemon=True,
         )
         monitor.start()
@@ -325,7 +424,20 @@ def execute_slot(
             worker_pid, attempt / "telemetry" / "pidstat.log"
         )
         try:
-            exit_code = process.wait()
+            while True:
+                try:
+                    exit_code = process.wait(timeout=0.5)
+                    break
+                except subprocess.TimeoutExpired:
+                    if pollution.is_set():
+                        runtime_invalid = True
+                        os.killpg(process.pid, signal.SIGTERM)
+                        try:
+                            exit_code = process.wait(timeout=30.0)
+                        except subprocess.TimeoutExpired:
+                            os.killpg(process.pid, signal.SIGKILL)
+                            exit_code = process.wait(timeout=10.0)
+                        break
         except KeyboardInterrupt:
             interrupted = True
             os.killpg(process.pid, signal.SIGTERM)
@@ -339,6 +451,14 @@ def execute_slot(
             monitor.join(timeout=5.0)
             _stop_pidstat(pidstat, pidstat_stream)
     wall = time.perf_counter() - started
+    write_json(
+        attempt / "telemetry" / "runtime_environment.json",
+        {
+            "gate_pass": not runtime_invalid,
+            "pollution_detected": runtime_invalid,
+            "details": pollution_details,
+        },
+    )
 
     profiler_error: str | None = None
     if exit_code == 0 and slot["kind"] == "PROFILE_CUDA":
@@ -356,7 +476,14 @@ def execute_slot(
 
     status = "FAILED"
     reason: str | None = None
-    if interrupted or exit_code == 130:
+    if runtime_invalid:
+        status = "INVALID_ENVIRONMENT"
+        reason = "runtime background pollution detected"
+        write_json(
+            attempt / "quality.json",
+            {"evaluated": False, "gate_pass": False, "reason": reason},
+        )
+    elif interrupted or exit_code == 130:
         status = "INTERRUPTED"
         reason = "launcher or worker was interrupted"
     elif exit_code != 0:

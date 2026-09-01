@@ -188,6 +188,8 @@ attempt_id 使用 UTC 时间、短 commit 和 PID。目录至少包含：
 
 环境无效、中断或 profiler 失败可以在原因消除后创建新 attempt。配置身份、正式数值质量、CUDA fallback、archive 严格重载或 canonical payload 一致性失败会停止阶段，不自动重试。
 
+运行期监视器还会排除 launcher、worker 及其子进程后审计外部负载。连续五个采样点出现至少四个各占半个逻辑 CPU 的外部进程、外部 CPU 合计超过 25% 逻辑容量，或其他 GPU compute process 时，会安全终止 worker 并把 attempt 标为 INVALID_ENVIRONMENT；输出、pidstat 和逐点遥测全部保留。
+
 ## 数据驱动优化
 
 完成 reference baseline 后只按冻结规则选择一个性能候选：
