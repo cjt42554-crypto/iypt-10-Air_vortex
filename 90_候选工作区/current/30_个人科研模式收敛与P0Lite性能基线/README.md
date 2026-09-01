@@ -172,6 +172,22 @@ attempt_id 使用 UTC 时间、短 commit 和 PID。目录至少包含：
 
 不再测试所有 fsync、rename、control signal 或 Git parent 组合。
 
+## 活动入口
+
+阶段 1 零步资格使用：
+
+    GPU_PYTHON run_p0lite.py --zero-step-all <全新输出目录>
+
+阶段 2 在阶段 1 提交后的 clean main 上使用：
+
+    GPU_PYTHON run_p0lite.py --run-schedule --baseline-commit <完整提交对象 ID>
+
+全部 16 个 slot 成功后生成报告：
+
+    GPU_PYTHON analyse_p0lite.py --write-reports
+
+环境无效、中断或 profiler 失败可以在原因消除后创建新 attempt。配置身份、正式数值质量、CUDA fallback、archive 严格重载或 canonical payload 一致性失败会停止阶段，不自动重试。
+
 ## 数据驱动优化
 
 完成 reference baseline 后只按冻结规则选择一个性能候选：

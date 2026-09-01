@@ -17,8 +17,8 @@
     P0P2_V2_DYNAMIC_EXECUTION = RETIRED_NOT_ACTIVE
 
     P0LITE_STAGE_0_GOVERNANCE_CONVERGENCE = COMPLETE
-    P0LITE_STAGE_1_IMPLEMENTATION = NEXT
-    P0LITE_STAGE_2_REFERENCE_BASELINE = AUTHORIZED_AFTER_STAGE_1_GATES
+    P0LITE_STAGE_1_IMPLEMENTATION_AND_ZERO_STEP_GATES = COMPLETE
+    P0LITE_STAGE_2_REFERENCE_BASELINE = NEXT_AND_AUTHORIZED_NOT_STARTED
 
 ## 唯一活动入口
 
@@ -42,9 +42,9 @@
 - 正式理论与正式模拟程序保持未修改；
 - 没有运行任何动态样本。
 
-## 下一项唯一任务
+## 已完成的 P0-Lite 实现
 
-在唯一活动目录内实现轻量 P0-Lite。活动 Python 文件限定为：
+轻量 P0-Lite 已限制在五个活动 Python 文件内：
 
     p0lite_common.py
     run_p0lite.py
@@ -52,15 +52,15 @@
     analyse_p0lite.py
     tests/test_p0lite.py
 
-除非这五个文件无法完成任务，不得新增模块。活动 Python 代码原则上不超过约 2000 个非空非注释行；测试不超过约 20 个高价值用例。超过上限时先删减实现。
+实现总量约 2080 个非空非注释行，包含 14 个高价值测试，没有新增第六个模块，也没有 import 旧 P0-P2 V2。
 
-新代码可以阅读旧 P0-P2 的测量逻辑，但不得 import 旧模块。只重新实现必要的：
+当前实现只包含：
 
 - 三份有效配置生成与正式 SimulationConfig round-trip；
 - fresh-process worker；
 - cProfile、NVTX 和稳定 Nsight CUDA/NVTX 包装；
 - pidstat、nvidia-smi 和 Tctl 采样；
-- CUDA memcpy 汇总解析；
+- Nsight CSV 与 SQLite 中 CUDA kernel、API、allocation、H2D/D2H 次数、精确字节和时间解析；
 - canonical numerical payload；
 - archive strict reload。
 
@@ -75,6 +75,14 @@
 - Git topology 合成仓库；
 - fsync、rename 或控制信号组合故障矩阵；
 - 高可靠事务恢复框架。
+
+## 下一项唯一任务
+
+先把阶段 1 实现按 Pro 指定消息提交并 push：
+
+    perf: add lightweight reproducible HF3D baseline harness
+
+该提交的完整 40 位对象 ID 是阶段 2 baseline commit。随后在 clean main 上按 p0lite_schedule.json 的既定顺序执行 16 个 slot；不等待 P2、C2 或新的授权票据，不运行旧 P0-P2 V2。
 
 ## 固定 benchmark 与日程
 
@@ -113,20 +121,21 @@ p0lite_schedule.json 已冻结为：
 
 任何失败和中断证据不得删除。允许环境无效、中断或 profiler 失败后创建新 attempt；每个 slot 最多三个 attempt。数值质量、配置身份、CUDA fallback、archive 重载或 canonical payload 一致性失败时停止整个阶段，不直接重试。
 
-## 阶段 1 最小验证
+## 阶段 1 已完成验证
 
-只要求：
+已实际完成：
 
-- 不超过约 20 个高价值测试；
-- Ruff；
-- 核心文件 mypy 或 pyright；
-- Python compile；
-- B1/B2/B3 fresh-process CUDA 零步构造；
-- Nsight 最小能力探针；
-- git diff --check；
-- 正式理论和正式程序差异为空。
+- 14/14 高价值测试通过；
+- Ruff 通过；
+- 四个核心文件 strict mypy 通过；
+- 五个活动 Python 文件 compile 通过；
+- B1/B2/B3 在三个独立 PID 中完成正式 CUDA 零步构造，网格分别为 90 x 90 x 80、136 x 136 x 120、136 x 136 x 120；三者均 CUDA selected、fallback false、time_steps_advanced = 0；
+- CUDA runtime 13020、driver 13000；
+- Nsight Systems 2026.2.1 最小 CUDA/NVTX 探针通过，捕获实际 kernel/API；SQLite 精确重算 H2D 与 D2H 各 1 次、各 32768 字节；
+- git diff --check 通过；
+- 正式理论、正式程序和 AGENTS.md 差异为空。
 
-高价值测试只覆盖配置正式构造、只改变 duration、非法配置拒绝、attempt 不覆盖、环境失败不启动 worker、fresh process、SUCCESS 完整条件、残缺 attempt、canonical payload、Nsight 最小 trace 和损坏文件拒绝。
+这些检查没有启动 warm-up、timed、HOST profile、CUDA profile 或任何 HF3D 动态时间步。阶段 2 尚未开始，不能把零步 PASS 写成性能或数值资格结论。
 
 阶段 1 通过后直接提交并进入阶段 2，不等待 P2/C2 或新的授权票据。
 
@@ -164,7 +173,8 @@ p0lite_schedule.json 已冻结为：
 
     P0-P V1 measured result = NOT AVAILABLE
     P0-P2 V2 governance prototype = ARCHIVED_NOT_ACTIVE
-    P0-Lite reference baseline = NOT_YET_IMPLEMENTED_OR_RUN
+    P0-Lite harness = IMPLEMENTED_AND_ZERO_STEP_QUALIFIED
+    P0-Lite reference baseline = NOT_YET_RUN
     hardware utilization baseline = NOT DEMONSTRATED
     numerical qualification = NOT DEMONSTRATED
     physical validation = NOT PERFORMED
