@@ -1,5 +1,21 @@
 # 个人科研模式收敛与 P0-Lite 性能基线
 
+## 2026-09-02 终止状态
+
+本节取代下文原定的继续执行日程；下文实现与冻结日程仅作为已执行工作的合同说明保留。
+
+    P0LITE_EXECUTION = TERMINATED
+    P0LITE_REFERENCE_BASELINE = INCOMPLETE
+    P0LITE_VALID_SAMPLES = PARTIAL
+    P0LITE_DECISION_NEED = SUPERSEDED_BY_USER_OPERATIONAL_JUDGMENT
+    TIMED_R1_B3 = NO_VALID_SAMPLE
+    ATTEMPT_LIMIT = UNCHANGED
+    FURTHER_PERFORMANCE_EXECUTION = NO_GO
+
+实际保留的有效样本为 `WARMUP_B1/B2/B3` 和 `TIMED_R1_B1/B2`。`TIMED_R1_B3` 的三个 attempt 分别为两次 `INVALID_ENVIRONMENT` 和一次实际中断但持久状态仍为 `RUNNING` 的不可采信 attempt；因此不得把当前材料写成完整 reference baseline 或性能 PASS。
+
+用户已经确认现有性能没有明显妨碍个人短期使用，并要求以科学预测准确性为先。不得修改每 slot 三次 attempt 上限，不再重跑 `TIMED_R1_B3`，不再补齐其余 timed/profile slot，也不据此选择性能重构。全部既有 attempt 证据原样保留。活动路线已经返回 D3R1 数值可信度诊断。
+
 ## 项目模式
 
 本项目是个人短期科研工具，唯一目标是尽可能准确地预测实验现象。

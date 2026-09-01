@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "protocol_id": "D3R1_G9_DT2_PROJECTION_CLOSURE_AUDIT_V1",
+  "status": "PREREGISTERED_RESULT_BLIND__EXECUTION_NOT_STARTED",
+  "purpose": "Read only the frozen G9_DT2 failure-step numerical state needed to distinguish algebraic pressure-residual localization from a discrete projection-operator or boundary mismatch. This audit does not compute or classify physical observables.",
+  "bindings": {
+    "repository": "https://github.com/cjt42554-crypto/iypt-10-Air_vortex.git",
+    "branch": "main",
+    "preregistration_parent_commit": "d6759c6bc7eec27019363966bd7cb1b55a591225",
+    "d3_execution_commit": "be349aec2f1bdcdb232e282a11175921eda7976b",
+    "formal_source_tree_sha256": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8",
+    "config": {
+      "path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/generated_configs/G9_DT2.json",
+      "sha256": "c924a225d4d35b25217318c0bdbe7728bceb637f5474e0eb9e2cbffac6ccdb37"
+    },
+    "frozen_partial": {
+      "path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G9_DT2/partial.npz",
+      "size_bytes": 60848588,
+      "sha256": "8f1e0973eda48c2ecc54f10001f28b988d353e85a728a16ec24f74582527cbcc"
+    },
+    "failure_reference": {
+      "accepted_step": 6695,
+      "simulated_time_s": 0.009196624999999948,
+      "archived_max_projected_divergence_s_inv": 0.00010249185899624536,
+      "source": "artifacts/r1_failure/d3_r1_s2_failure_forensic.json"
+    }
+  },
+  "result_blindness": {
+    "audit_formulation_numeric_members_loaded_before_this_freeze": [],
+    "member_names_enumerated_without_loading_values": true,
+    "preexisting_forensic_read_outside_this_audit": [
+      "frame_time_s"
+    ],
+    "rule": "Commit and push this contract before the audit implementation loads any whitelisted numeric member. Any result-dependent change to equations, thresholds, regions, or adjudication invalidates the audit."
+  },
+  "archive_access": {
+    "policy": "EXACT_WHITELIST_ONLY__ABORT_ON_ANY_UNLISTED_ACCESS",
+    "permitted_numeric_members": [
+      "state_u_x_face",
+      "state_u_y_face",
+      "state_u_z_face",
+      "state_pressure_pa",
+      "state_phase",
+      "grid_active_mask",
+      "grid_bar_mask",
+      "diagnostic_step_time",
+      "diagnostic_step_dt",
+      "diagnostic_step_divergence",
+      "diagnostic_step_pressure_residual",
+      "diagnostic_step_pressure_iterations"
+    ],
+    "forbidden_member_patterns": [
+      "observable_*"
+    ],
+    "all_unlisted_members": "FORBIDDEN",
+    "spatial_snapshot": {
+      "meaning": "The state and grid arrays are the single final failure-step snapshot only.",
+      "accepted_step": 6695,
+      "spatial_frame_count": 1
+    },
+    "scalar_context": {
+      "accepted_steps_inclusive": [
+        6683,
+        6695
+      ],
+      "members": [
+        "diagnostic_step_time",
+        "diagnostic_step_dt",
+        "diagnostic_step_divergence",
+        "diagnostic_step_pressure_residual",
+        "diagnostic_step_pressure_iterations"
+      ]
+    },
+    "integrity": "Verify frozen size and SHA-256 before and after reading; abort on drift. Record the exact accessed-member list in the compact result."
+  },
+  "independent_discrete_reconstruction": {
+    "implementation_rule": "Assemble the diagnostic divergence, face coefficients, pressure matrix, residual, connectivity, and flux closure independently in the candidate audit. Do not call a formal projection implementation as the sole calculation.",
+    "density": "rho = rho_g + (rho_l - rho_g) * clip(phi, 0, 1)",
+    "internal_face_beta": "beta_f = 2 / (rho_L + rho_R)",
+    "top_open_face_beta": "beta_top = 1 / rho_top",
+    "pressure_gradient": {
+      "internal": "G_f p = (p_R - p_L) / delta_f",
+      "top_open_boundary": "G_top p = -p_top / (0.5 * dz)"
+    },
+    "velocity_correction": "u_plus = u_star - dt * beta * G p",
+    "predictor_reconstruction": "u_star_rec = u_plus + dt * beta * G p",
+    "post_projection_divergence": "d_plus = D_h u_plus",
+    "predictor_divergence": "d_star = D_h u_star_rec",
+    "rhs": "b = -(V / dt) * d_star",
+    "matrix": "A = -V * D_h * beta * G; active-cell ordering is C-order and A is assembled as a symmetric positive-definite matrix",
+    "algebraic_residual": "r_A = A p - b",
+    "algebraic_divergence_component": "d_alg = (dt / V) * r_A",
+    "operator_defect": "e_op = d_plus - d_alg",
+    "identity_to_check": "d_plus = d_alg + e_op",
+    "global_flux_closure": "sum_active(d_plus * V) - sum_open_top(u_z_plus * dx * dy)",
+    "formal_boundary_identity": "Internal faces are open only between two active cells; side and bottom exterior faces are closed; the top exterior face is open for an active top cell and uses a half-cell pressure distance."
+  },
+  "spatial_hotspot_audit": {
+    "max_cell": "Lexicographically first C-order active cell attaining max(abs(d_plus)).",
+    "hot_cells": "Active cells satisfying abs(d_plus) >= 0.5 * max_active(abs(d_plus)).",
+    "hot_component": "Six-neighbour connected component of hot_cells containing max_cell.",
+    "expanded_region": "Hot-component index bounding box expanded by two cells in every axis and clipped to the domain.",
+    "boundary_labels": [
+      "top_open_boundary_adjacency",
+      "closed_container_or_domain_boundary_adjacency",
+      "bar_mask_adjacency"
+    ],
+    "interface_band": "1e-4 < phi < 1 - 1e-4",
+    "interface_gradients": "Use grid-spacing-aware finite differences for grad(phi); grad(rho) follows the frozen affine density law. Report compact maxima, overlap counts, distances, indices, and bounding boxes only.",
+    "collocation": "For a proposed explanatory field q, argmax(abs(q)) must lie in the d_plus max-cell hot component."
+  },
+  "hypotheses": {
+    "H_A": "Algebraic residual localization: the pressure solver's L2-relative stopping evidence permits an L-infinity divergence hotspot even though the discrete correction operator is internally consistent.",
+    "H_B": "Discrete operator or boundary mismatch: the saved corrected velocity, pressure, density, masks, and independently reconstructed matrix-gradient-divergence identity leave a localized operator defect.",
+    "H_C": "Saved-state versus diagnostic alignment or archive-semantics mismatch: recomputed max(abs(d_plus)) cannot reproduce the frozen archived final divergence scalar."
+  },
+  "adjudication": {
+    "archived_scalar_reproduction_tolerance": "abs(recomputed - archived) <= max(1e-12 s^-1, 1e-8 * abs(archived))",
+    "signed_max_cell_explained_fraction": "1 - abs(d_plus[max_cell] - q[max_cell]) / abs(d_plus[max_cell])",
+    "global_linf_explained_fraction": "1 - max_active(abs(d_plus - q)) / max_active(abs(d_plus))",
+    "minimum_explained_fraction": 0.9,
+    "operator_rounding_scale": "max_active(abs(e_op)) <= max(1e-12 s^-1, 1e-8 * max_active(abs(d_plus)))",
+    "H_A_support": "Archived scalar reproduces; q=d_alg reaches both 0.90 explained-fraction gates; q collocates; and e_op is at rounding scale.",
+    "H_B_support": "Archived scalar reproduces; q=e_op reaches both 0.90 explained-fraction gates; and q collocates.",
+    "H_C_support": "Archived scalar reproduction fails the frozen tolerance. H_C is reported as a hypothesis flag, but it does not authorize a fix.",
+    "tie_or_ambiguity": "If neither H_A nor H_B exclusively satisfies every required gate, return the unidentified terminal. Do not tune regions or thresholds."
+  },
+  "terminal_statuses": [
+    "ALGEBRAIC_RESIDUAL_LOCALIZATION_HYPOTHESIS_SUPPORTED",
+    "DISCRETE_OPERATOR_OR_BOUNDARY_MISMATCH_HYPOTHESIS_SUPPORTED",
+    "MECHANISM_NOT_IDENTIFIED__NO_FIX_AUTHORIZED"
+  ],
+  "required_pre_execution_tests": [
+    "uniform-density internal-face correction identity",
+    "variable-density harmonic face coefficient identity",
+    "top open-boundary half-cell pressure-gradient identity",
+    "closed-face and bar-mask exclusion",
+    "six-neighbour hotspot-component and two-cell expansion"
+  ],
+  "outputs": {
+    "json": "diagnostics/g9_dt2_projection_closure/artifacts/projection_closure_audit.json",
+    "markdown": "diagnostics/g9_dt2_projection_closure/artifacts/projection_closure_audit.md",
+    "content_rule": "Compact scalar metrics, integer indices, counts, labels, and bounding boxes only; no full fields and no physical-observable values."
+  },
+  "hard_stops": [
+    "No HF3D dynamic step or archive resume.",
+    "No access to observable_* members.",
+    "No D3 physical-observable classification.",
+    "No modification of 01_最终理论, 02_模拟程序, or AGENTS.md.",
+    "No solver fix in the same audit round.",
+    "Stop at one frozen terminal status and obtain independent review before any candidate fix."
+  ],
+  "claim_ceiling": {
+    "numerical_qualification": "NOT_DEMONSTRATED",
+    "physical_validation": "NOT_PERFORMED",
+    "experimental_validation": "NOT_PERFORMED",
+    "apparatus_prediction": "DISALLOWED"
+  }
+}
