@@ -451,6 +451,7 @@ def evaluate_environment(
     snapshot: Mapping[str, Any],
     *,
     background_cpu_percent: Sequence[float] | None,
+    allow_hot_cpu: bool = False,
 ) -> dict[str, Any]:
     governors = snapshot.get("governors")
     governor_values = set(governors.values()) if isinstance(governors, Mapping) else set()
@@ -464,7 +465,7 @@ def evaluate_environment(
         gpu_temperature = math.inf
     cpu_tctl = snapshot.get("cpu_tctl_c")
     background = list(background_cpu_percent) if background_cpu_percent is not None else []
-    gates = {
+    observed_gates = {
         "background_cpu_continuous_le_25_percent": (
             background_cpu_percent is None
             or (bool(background) and max(background) <= 25.0)
@@ -478,9 +479,14 @@ def evaluate_environment(
         "git_clean": snapshot.get("git_clean") is True,
         "git_commit_matches_baseline": snapshot.get("git_head") == snapshot.get("baseline_commit"),
     }
+    effective_gates = dict(observed_gates)
+    if allow_hot_cpu:
+        effective_gates["cpu_tctl_le_90_c"] = True
     return {
-        "gate_pass": all(gates.values()),
-        "gates": gates,
+        "gate_pass": all(effective_gates.values()),
+        "gates": observed_gates,
+        "effective_gates": effective_gates,
+        "overrides": {"allow_hot_cpu": allow_hot_cpu},
         "background_cpu_percent": background,
         "background_cpu_max_percent": max(background) if background else None,
         "gpu_temperature_c": None if not math.isfinite(gpu_temperature) else gpu_temperature,

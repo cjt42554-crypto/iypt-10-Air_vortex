@@ -334,6 +334,7 @@ def execute_slot(
     runs_root: Path = RUNS_ROOT,
     environment_override: Mapping[str, Any] | None = None,
     background_cpu_override: Sequence[float] | None = None,
+    allow_hot_cpu: bool = False,
 ) -> tuple[str, Path]:
     """Execute one immutable attempt; test overrides never bypass gate evaluation."""
 
@@ -356,7 +357,11 @@ def execute_slot(
         if environment_override is not None
         else capture_environment(baseline_commit)
     )
-    audit = evaluate_environment(snapshot, background_cpu_percent=background)
+    audit = evaluate_environment(
+        snapshot,
+        background_cpu_percent=background,
+        allow_hot_cpu=allow_hot_cpu,
+    )
     write_json(attempt / "telemetry" / "preflight.json", audit)
     software = software_environment()
     manifest = strict_json(attempt / "run_manifest.json")
@@ -366,13 +371,14 @@ def execute_slot(
             "software_environment": software,
             "environment_id": environment_id(snapshot, software),
             "preflight_gate_pass": audit["gate_pass"],
+            "allow_hot_cpu": allow_hot_cpu,
         }
     )
     write_json(attempt / "run_manifest.json", manifest)
     if not audit["gate_pass"]:
         (attempt / "archive").mkdir(exist_ok=False)
         invalid_reason = "environment gate failed: " + ", ".join(
-            name for name, passed in audit["gates"].items() if not passed
+            name for name, passed in audit["effective_gates"].items() if not passed
         )
         write_json(
             attempt / "quality.json",
@@ -526,13 +532,21 @@ def execute_slot(
     return status, attempt
 
 
-def run_schedule(*, baseline_commit: str, runs_root: Path = RUNS_ROOT) -> int:
+def run_schedule(
+    *,
+    baseline_commit: str,
+    runs_root: Path = RUNS_ROOT,
+    allow_hot_cpu: bool = False,
+) -> int:
     for slot in load_schedule()["slots"]:
         slot_id = str(slot["slot_id"])
         if _has_success(slot_id, runs_root):
             continue
         status, attempt = execute_slot(
-            slot_id, baseline_commit=baseline_commit, runs_root=runs_root
+            slot_id,
+            baseline_commit=baseline_commit,
+            runs_root=runs_root,
+            allow_hot_cpu=allow_hot_cpu,
         )
         print(f"{slot_id}: {status} ({attempt})", flush=True)
         if status != "SUCCESS":
@@ -626,6 +640,11 @@ def _parser() -> argparse.ArgumentParser:
     group.add_argument("--zero-step-all", type=Path)
     parser.add_argument("--baseline-commit")
     parser.add_argument("--runs-root", type=Path, default=RUNS_ROOT)
+    parser.add_argument(
+        "--allow-hot-cpu",
+        action="store_true",
+        help="record but do not block on the CPU Tctl <= 90 degC preflight gate",
+    )
     return parser
 
 
@@ -641,11 +660,18 @@ def main() -> int:
             raise P0LiteError("baseline commit must be a full 40-character object ID")
         if args.slot is not None:
             status, attempt = execute_slot(
-                args.slot, baseline_commit=baseline, runs_root=args.runs_root.resolve()
+                args.slot,
+                baseline_commit=baseline,
+                runs_root=args.runs_root.resolve(),
+                allow_hot_cpu=args.allow_hot_cpu,
             )
             print(f"{args.slot}: {status} ({attempt})")
             return 0 if status == "SUCCESS" else 2
-        return run_schedule(baseline_commit=baseline, runs_root=args.runs_root.resolve())
+        return run_schedule(
+            baseline_commit=baseline,
+            runs_root=args.runs_root.resolve(),
+            allow_hot_cpu=args.allow_hot_cpu,
+        )
     except P0LiteError as exc:
         print(f"P0-Lite launcher failed: {exc}", file=sys.stderr)
         return 1

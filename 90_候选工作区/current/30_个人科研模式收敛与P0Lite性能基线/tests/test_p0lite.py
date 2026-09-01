@@ -10,8 +10,9 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-import analyse_p0lite
 import numpy as np
+
+import analyse_p0lite
 import p0lite_common
 import run_p0lite
 
@@ -168,6 +169,15 @@ class P0LiteTests(unittest.TestCase):
         )
         invalid = dict(good)
         invalid["cpu_tctl_c"] = 96.0
+        hot_audit = p0lite_common.evaluate_environment(
+            invalid,
+            background_cpu_percent=[10.0] * 30,
+            allow_hot_cpu=True,
+        )
+        self.assertTrue(hot_audit["gate_pass"])
+        self.assertFalse(hot_audit["gates"]["cpu_tctl_le_90_c"])
+        self.assertTrue(hot_audit["effective_gates"]["cpu_tctl_le_90_c"])
+        self.assertEqual(hot_audit["overrides"], {"allow_hot_cpu": True})
         with tempfile.TemporaryDirectory() as temporary, mock.patch.object(
             run_p0lite, "_worker_command", side_effect=AssertionError("worker launched")
         ) as launcher:

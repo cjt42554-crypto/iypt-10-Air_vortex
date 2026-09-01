@@ -85,7 +85,7 @@ Stage 1 主体已经提交并 push：
     perf: add lightweight reproducible HF3D baseline harness
     c18952ae0393fe64f90fa8572faae6b1c16a100f
 
-以包含本文件和运行期污染修正的提交完整对象 ID 作为重新执行阶段 2 的 baseline commit。等当前 7 路外部 Node 计算和其他明显背景负载结束、机器降温且环境门通过后，从 WARMUP_B1 创建第二个全新 attempt，继续 p0lite_schedule.json；不删除或复用第一次中断证据。
+以包含本文件、运行期污染修正和显式热 CPU 覆盖参数的提交完整对象 ID 作为重新执行阶段 2 的 baseline commit。当前 7 路外部 Node 计算已经结束；用户于 2026-09-02 明确要求继续并取消 CPU 温度作为启动阻塞条件。因此后续使用 `--allow-hot-cpu` 从 WARMUP_B1 创建第二个全新 attempt，继续 p0lite_schedule.json；不删除或复用第一次中断证据。实际温度、原始 90 摄氏度判定和显式覆盖必须完整记录，其他环境门、运行期污染监测、数值质量门与一致性门保持不变。
 
 ## 固定 benchmark 与日程
 
@@ -148,7 +148,7 @@ p0lite_schedule.json 已冻结为：
 
 16 个 slot 按冻结顺序执行。端到端墙钟必须覆盖进程启动、imports、配置构造、网格和初态、全部时间步、质量门、登记帧、结果组装、archive 写入与严格重载、canonical payload、最终 CUDA synchronize 和进程退出。
 
-每个 scored timed attempt 前要求连续 30 秒背景 CPU 不超过 25%、无其他 GPU compute process、CPU Tctl 不超过 90 摄氏度、GPU 不超过 75 摄氏度、AC online、32 个逻辑 CPU 在线、governor 一致、工作树清洁且 commit 与 baseline 一致。
+每个 scored timed attempt 前要求连续 30 秒背景 CPU 不超过 25%、无其他 GPU compute process、GPU 不超过 75 摄氏度、AC online、32 个逻辑 CPU 在线、governor 一致、工作树清洁且 commit 与 baseline 一致。原 CPU Tctl 不超过 90 摄氏度的观测门继续记录；按用户 2026-09-02 的直接指令，只有显式 `--allow-hot-cpu` 才可不因这一项阻塞。高温或热降频必须在报告中披露，不得用高温样本夸大性能结论。
 
 必须保留全部有效和无效 attempt，并生成：
 

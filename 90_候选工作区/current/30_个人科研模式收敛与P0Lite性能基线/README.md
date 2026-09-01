@@ -152,6 +152,8 @@ attempt_id 使用 UTC 时间、短 commit 和 PID。目录至少包含：
     clean worktree
     Git commit equals the baseline commit
 
+用户在 2026-09-02 明确要求继续运行并取消 CPU 温度作为启动阻塞条件。只有显式传入 `--allow-hot-cpu` 时，运行器才允许这一项不阻塞；`preflight.json` 仍保存实际温度、原始 `cpu_tctl_le_90_c` 判定、有效判定和显式覆盖标记。其他环境门、运行期污染监测、数值质量门与结果一致性门不受影响。高温与任何热降频仍须进入性能解释，不能据此夸大加速结论。
+
 运行中每 0.5--1.0 s 记录总 CPU、逐线程 CPU、GPU utilization、clocks、memory、temperature、power 和其他进程。明显背景污染只使该 attempt 成为 INVALID_ENVIRONMENT，证据保留后可创建新 attempt。
 
 软件环境记录 Python、NumPy、SciPy、CuPy、CUDA runtime/driver、GPU UUID、kernel 和 thread environment。环境变化使用新的 environment_id 分组，不形成授权失效。
