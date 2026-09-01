@@ -1,235 +1,172 @@
 # 当前交接
 
-当前结论：Codex 在 `bbe5531ee4cdcc393f84d3309e79183bd904c415` 实现的 ledger transition 补丁，已经关闭普通 `OSError` 在原子替换前后造成的提交不确定性；但 Pro 独立复核又发现两个执行边界阻断，因此未签发 P2 父票据，也未生成 C2 授权子提交。
+当前唯一活动路线已经切换为个人短期科研工具模式。Pro 对项目用途重新裁决后，明确停止继续加固旧 P0-P2 V2 治理控制面；29 号控制流补丁裁决不再执行。正式物理理论、HF3D reference backend、数值质量门和正式模块化架构继续保留。
 
-```text
-HF3D_P0P_V1_CLAIM = CONSUMED
-HF3D_P0P_V1_SCHEDULE = TERMINAL_FAILED_STOPPED_NO_RESUME
-HF3D_P0P_V1_MEASURED_PERFORMANCE_RESULT = NOT_AVAILABLE
+    PROJECT_MODE = PERSONAL_SHORT_TERM_RESEARCH_TOOL
+    PRIMARY_OBJECTIVE = ACCURATE_EXPERIMENTAL_PHENOMENON_PREDICTION
 
-HF3D_P0P_V1_E0_FAILURE_EVIDENCE_REGISTRATION = ACCEPTED
-HF3D_P0P2_I2_EFFECTIVE_CONFIG_AND_ZERO_STEP_QUALIFICATION = ACCEPTED
+    PROJECT_OVERENGINEERING = YES
+    OVERENGINEERING_LOCATION = GOVERNANCE_AND_EVIDENCE_CONTROL_PLANE
+    FORMAL_PHYSICS_AND_SOLVER_ARCHITECTURE = RETAIN
+    PROJECT_WIDE_REWRITE = PROHIBITED
 
-HF3D_P0P2_V2_NONCONSUMING_PREFLIGHT_RETRY_PATCH = ACCEPTED
-HF3D_P0P2_V2_ANALYSIS_AUTHORIZATION_AND_TOOLCHAIN_REBINDING = ACCEPTED
-HF3D_P0P2_V2_ANALYSIS_UNIQUE_TERMINAL_TRANSACTION = ACCEPTED
-HF3D_P0P2_V2_ORDINARY_EXCEPTION_LEDGER_TRANSITION_PATCH = ACCEPTED
+    P0P2_V2_GOVERNANCE_HARDENING = STOP
+    RULING_29_CONTROL_FLOW_PATCH = SUPERSEDED
+    P0P2_V2_PARENT_TICKET = NOT_ISSUED_AND_RETIRED
+    P0P2_V2_AUTHORIZATION_CHILD = NOT_ISSUED_AND_RETIRED
+    P0P2_V2_DYNAMIC_EXECUTION = RETIRED_NOT_ACTIVE
 
-HF3D_P0P2_V2_CONTROL_FLOW_INTERRUPT_SEMANTICS = BLOCKING
-HF3D_P0P2_V2_DURABLE_CLAIM_OUTER_GATE = BLOCKING
-HF3D_P0P2_V2_INTERRUPT_AND_CLAIM_BOUNDARY_PATCH = REQUIRED
+    P0LITE_STAGE_0_GOVERNANCE_CONVERGENCE = COMPLETE
+    P0LITE_STAGE_1_IMPLEMENTATION = NEXT
+    P0LITE_STAGE_2_REFERENCE_BASELINE = AUTHORIZED_AFTER_STAGE_1_GATES
 
-HF3D_P0P2_V2_PARENT_TICKET = NOT_ISSUED
-HF3D_P0P2_V2_AUTHORIZATION_CHILD = NOT_ISSUED
-HF3D_P0P2_V2_DYNAMIC_EXECUTION = NOT_AUTHORIZED
-HF3D_P1 = PROHIBITED
+## 唯一活动入口
 
-PROJECT_REFACTOR = TARGETED_CROSS_MODULE_REFACTOR_AFTER_BASELINE
-PROJECT_WIDE_REWRITE = REJECTED
-HF3D_HARDWARE_UTILIZATION = INSUFFICIENT
-TRUSTWORTHY_P0P2_BASELINE = NOT_AVAILABLE
-```
+    90_候选工作区/current/30_个人科研模式收敛与P0Lite性能基线/
 
-## 当前裁决入口
+旧治理原型：
 
-```text
-90_候选工作区/current/29_P0P2V2账本补丁复核与控制流中断门裁决.md
-```
+    90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/
 
-该裁决绑定：
+旧目录已经由 ARCHIVED.md 标记为 ARCHIVED_NOT_ACTIVE。其代码、测试、裁决和证据保留在原位，不删除、不移动、不改写；新 P0-Lite 不得 import 其中任何 Python 模块。
 
-```text
-reviewed implementation commit = bbe5531ee4cdcc393f84d3309e79183bd904c415
-reviewed tree = 24e65718982fc2652a61efd0c5c1cca42012aaf0
-previous ruling commit = a18aa007c6be7bf2a7a9216bcd3d45939403a7bc
-formal source SHA-256 = dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
-submitted static audit SHA-256 = 23b801e0a330472490af4287323427cd5f600fa4dc5d01d90f56417fa6577a07
-submitted contract SHA-256 = f0b172a1eaed05ce365b56ab7862ab9f7472f94c0647f5066c41404aafb88561
-```
+## 已完成的治理收敛
 
-## 已接受并保留的实现
+阶段 0 已完成以下仓库状态变更：
 
-`_commit_ledger_transition()` 对普通 `Exception`/存储故障的主体设计可以保留：
-
-```text
-candidate 在写前只构造一次
-写前要求 durable ledger == expected_before
-每次发布后严格重载
-observed candidate -> 按已提交恢复
-observed exact old -> 同一候选最多重试一次
-observed third state -> 失败闭锁
-RUNNING token/timestamp/start_count 不重复生成
-ordinary PASS 与 final pending-terminal 共用提交判定
-outer handler 可从 durable ledger 重建 PASS 前缀和 RUNNING identity
-```
-
-现有普通 OSError 矩阵、同一候选、唯一 token、`start_count = 1`、无重复 worker、completion XOR failure 等测试继续作为回归门。
-
-## 剩余阻断一：不得吞掉控制流中断
-
-当前 transition helper 使用：
-
-```python
-except BaseException:
-```
-
-这会把 `KeyboardInterrupt`、`SystemExit`、`GeneratorExit` 等控制流信号当成可重试存储故障。
-
-后果包括：
-
-```text
-RUNNING pre-commit interrupt -> helper 可能重试并在中断后启动 worker
-RUNNING post-commit interrupt -> 中断被转成成功返回并启动 worker
-ordinary PASS post-commit interrupt -> 继续下一样本
-final pending post-commit interrupt -> 继续发布 completion
-```
-
-必须把可重试异常收窄为普通 `Exception` 或更窄的存储 allowlist。非 `Exception` 的控制流 `BaseException` 必须立即向 outer handler 传播；outer handler 再读取 durable ledger 并形成 FAILED_STOPPED，不得启动 worker、下一样本或 completion。
-
-## 剩余阻断二：durable claim 不能由本地 `claimed` 布尔值决定
-
-当前顺序为：
-
-```python
-claimed = False
-create_claim_and_ledger(...)
-claimed = True
-```
-
-若真实 claim 和 ledger 已持久化，但异常发生在函数返回边界或 `claimed = True` 之前，outer handler 会因为本地 `claimed == False` 跳过终态化，留下：
-
-```text
-valid claim
-valid CLAIMED_NOT_STARTED ledger
-no execution_complete
-no execution_failure
-```
-
-必须以持久对象为权威：异常边界只要能严格加载合法绑定的 claim+ledger，且没有既有合法 terminal，就必须调用 consumed-claim terminalization；本地 `claimed` 最多只能作为诊断字段。
+- 建立新的唯一活动目录；
+- 冻结 16-slot P0-Lite 日程；
+- 明确个人科研工具的测量、验证和停止边界；
+- 归档旧 P0-P2 V2，不执行 29 号补丁；
+- 停止 P2/C2、一次性 claim、全局 ledger、analysis 唯一终态、Git topology 合成测试和穷举故障注入；
+- 正式理论与正式模拟程序保持未修改；
+- 没有运行任何动态样本。
 
 ## 下一项唯一任务
 
-只在现有 P0-P2 V2 身份内完成一次最小控制流补丁，不复制 V3，不改变协议 ID、固定 18 项日程、配置、质量门、profiler、authorization/claim namespace 或 raw root。
+在唯一活动目录内实现轻量 P0-Lite。活动 Python 文件限定为：
 
-允许修改：
+    p0lite_common.py
+    run_p0lite.py
+    p0lite_worker.py
+    analyse_p0lite.py
+    tests/test_p0lite.py
 
-```text
-90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/p0p2v2_consumption.py
-90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/run_p0p2v2_campaign.py
-90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/p0p2v2_contract.py
-90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/p0p2v2_contract.json
-90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/tests/test_p0p2v2_authorization_and_consumption.py
-90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/audit_p0p2v2_harness.py
-90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/artifacts/p0p2v2/static/**
-90_候选工作区/交接说明_current.md
-90_候选工作区/交接说明_history.md
-```
+除非这五个文件无法完成任务，不得新增模块。活动 Python 代码原则上不超过约 2000 个非空非注释行；测试不超过约 20 个高价值用例。超过上限时先删减实现。
 
-必须新增 orchestrator 级故障注入：
+新代码可以阅读旧 P0-P2 的测量逻辑，但不得 import 旧模块。只重新实现必要的：
 
-```text
-KeyboardInterrupt + SystemExit
-x RUNNING pre/post commit
-x ordinary PASS pre/post commit
-x final pending-terminal pre/post commit
-```
+- 三份有效配置生成与正式 SimulationConfig round-trip；
+- fresh-process worker；
+- cProfile、NVTX 和稳定 Nsight CUDA/NVTX 包装；
+- pidstat、nvidia-smi 和 Tctl 采样；
+- CUDA memcpy 汇总解析；
+- canonical numerical payload；
+- archive strict reload。
 
-硬门：
+不得重新实现：
 
-```text
-control-flow exception publication attempt count = 1
-RUNNING interrupt -> zero worker launch
-ordinary PASS interrupt -> no next sample
-final pending interrupt -> no completion
-control exception not converted to success return
-unique coherent FAILED_STOPPED + execution_failure
-```
+- 父票据或授权子提交；
+- grant nonce 或 reviewed blob 表；
+- 一次性 claim；
+- 全局 mutable ledger；
+- no-resume/no-retry 权限系统；
+- analysis lock 或唯一 terminal；
+- Git topology 合成仓库；
+- fsync、rename 或控制信号组合故障矩阵；
+- 高可靠事务恢复框架。
 
-还必须覆盖：
+## 固定 benchmark 与日程
 
-```text
-real create_claim_and_ledger succeeds, then wrapper raises OSError before caller flag assignment
-real create_claim_and_ledger succeeds, then wrapper raises KeyboardInterrupt before caller flag assignment
-no durable claim/ledger -> 不伪造 consumed-claim failure
-existing initialization failure -> 不覆盖
-```
+    B1 = G6_DT0, 0.000--0.005 s
+    B2 = G9_DT0, 0.000--0.005 s
+    B3 = G9_DT2, 0.000--0.005 s
 
-前两个案例必须形成有效 claim、FAILED_STOPPED ledger、唯一 execution failure，且样本启动数为 0。
+派生配置只能把 run.duration_s 从 0.010 改为 0.005。drive.ramp_duration_s、output_interval_s、登记时刻、物理输入、网格、时间步和质量门必须保持不变。
 
-## 返回 Pro 前必须重跑
+p0lite_schedule.json 已冻结为：
 
-从空 V2 static 根执行：
+    WARMUP_B1
+    WARMUP_B2
+    WARMUP_B3
+    TIMED_R1_B1
+    TIMED_R1_B2
+    TIMED_R1_B3
+    TIMED_R2_B2
+    TIMED_R2_B3
+    TIMED_R2_B1
+    TIMED_R3_B3
+    TIMED_R3_B1
+    TIMED_R3_B2
+    PROFILE_HOST_B2
+    PROFILE_CUDA_B2
+    PROFILE_HOST_B3
+    PROFILE_CUDA_B3
 
-```text
-完整 authorization/consumption tests
-完整 harness tests
-完整 Git topology tests
-Ruff
-strict mypy
-Python compile
-contract deterministic regeneration
-allocator probes
-qualified Nsight probe/export/parser
-B1/B2/B3 fresh-process real CUDA zero-step probes
-post-probe 30 s environment gate
-最终 static audit rebuild
-```
+## attempt 模型
 
-随后立即停止交 Pro。
+每次尝试使用新的不可覆盖目录：
 
-## 必须保持的零执行状态
+    runs/<slot_id>/<attempt_id>/
 
-```text
-HF3D time_steps_advanced = 0
-claims consumed = 0
-warmup started = 0
-scored/timed started = 0
-profile started = 0
-V2 performance raw = absent
-campaign lock = absent
-compact evidence = absent
-analysis failure = absent
-P2 ticket = absent
-C2 grant = absent
-P1 implementation = absent
-formal source = unchanged
-```
+状态只允许 RUNNING、SUCCESS、FAILED、INTERRUPTED 和 INVALID_ENVIRONMENT。异常终止遗留的 RUNNING 由 analyser 解释为 INTERRUPTED，不做复杂恢复。
 
-## 禁止事项
+任何失败和中断证据不得删除。允许环境无效、中断或 profiler 失败后创建新 attempt；每个 slot 最多三个 attempt。数值质量、配置身份、CUDA fallback、archive 重载或 canonical payload 一致性失败时停止整个阶段，不直接重试。
 
-```text
-签发或伪造 P2 ticket
-签发或伪造 C2 grant
-authorization=true
---execute
-任何 warm-up / timed / profile
-动态 analyser
-P1
-修改 01_最终理论/**
-修改 02_模拟程序/**
-修改 D3、V1 raw 或 E0 snapshot
-放宽环境、质量、数值同一、覆盖率或事务门
-```
+## 阶段 1 最小验证
 
-## 技术债与硬件利用结论
+只要求：
 
-项目继续采用定向跨模块重构，不整体推倒重写。当前缺口位于候选性能 harness 控制流，不证明正式 HF3D 架构需要大范围重构。
+- 不超过约 20 个高价值测试；
+- Ruff；
+- 核心文件 mypy 或 pyright；
+- Python compile；
+- B1/B2/B3 fresh-process CUDA 零步构造；
+- Nsight 最小能力探针；
+- git diff --check；
+- 正式理论和正式程序差异为空。
 
-既有真实瓶颈结论不变：CPU 长期约一个逻辑核，GPU 多数采样约 `16%-22%`，压力求解存在逐步 host-device transfer。当前零步证据不构成可信性能 baseline。P0-P2 合法完成后，优先规划保留 reference backend 的 GPU-resident E1 候选；验收必须同时依赖数值等价、同机端到端墙钟、CPU/GPU 利用率、传输时间线和实际加速比，不能把线程环境变量或瞬时峰值当作性能证明。
+高价值测试只覆盖配置正式构造、只改变 duration、非法配置拒绝、attempt 不覆盖、环境失败不启动 worker、fresh process、SUCCESS 完整条件、残缺 attempt、canonical payload、Nsight 最小 trace 和损坏文件拒绝。
+
+阶段 1 通过后直接提交并进入阶段 2，不等待 P2/C2 或新的授权票据。
+
+## 阶段 2 执行边界
+
+16 个 slot 按冻结顺序执行。端到端墙钟必须覆盖进程启动、imports、配置构造、网格和初态、全部时间步、质量门、登记帧、结果组装、archive 写入与严格重载、canonical payload、最终 CUDA synchronize 和进程退出。
+
+每个 scored timed attempt 前要求连续 30 秒背景 CPU 不超过 25%、无其他 GPU compute process、CPU Tctl 不超过 90 摄氏度、GPU 不超过 75 摄氏度、AC online、32 个逻辑 CPU 在线、governor 一致、工作树清洁且 commit 与 baseline 一致。
+
+必须保留全部有效和无效 attempt，并生成：
+
+    reports/p0lite_baseline.json
+    reports/p0lite_baseline.md
+    reports/p0lite_profile.json
+    reports/p0lite_profile.md
+
+## 之后的固定方向
+
+阶段 2 报告完成后，只按 Pro 冻结的实测规则选择一个性能候选；候选最多一次修正。预计合理加速低于 1.30 倍时停止性能重构。性能候选无论通过或拒绝，随后必须返回 D3R1 投影散度、空间/时间资格、参数不确定性和实验验证。
+
+## 当前禁止
+
+阶段 0–2 期间禁止：
+
+- 修改 01_最终理论；
+- 修改 02_模拟程序；
+- 修改 AGENTS.md；
+- 删除或改写旧 P0-P、P0-P2、D3、V1 或 E0 证据；
+- 执行旧 P0-P2 V2；
+- 签发旧授权；
+- 扩张治理文档或事务状态机；
+- 在基线数据出现前选择优化技术路线。
 
 ## 当前结论上限
 
-```text
-P0-P V1 measured result = NOT AVAILABLE
-E0 failure evidence = ACCEPTED
-P0-P2 zero-step qualification = ACCEPTED
-P0-P2 ordinary storage-fault ledger patch = ACCEPTED
-P0-P2 control-flow/claim boundary = BLOCKING
-P0-P2 dynamic execution = NOT AUTHORIZED
-P1 = PROHIBITED
-hardware utilization baseline = NOT DEMONSTRATED
-numerical qualification = NOT DEMONSTRATED
-physical validation = NOT PERFORMED
-experimental validation = NOT PERFORMED
-apparatus prediction = DISALLOWED
-```
+    P0-P V1 measured result = NOT AVAILABLE
+    P0-P2 V2 governance prototype = ARCHIVED_NOT_ACTIVE
+    P0-Lite reference baseline = NOT_YET_IMPLEMENTED_OR_RUN
+    hardware utilization baseline = NOT DEMONSTRATED
+    numerical qualification = NOT DEMONSTRATED
+    physical validation = NOT PERFORMED
+    experimental validation = NOT PERFORMED
+    apparatus prediction = DISALLOWED
