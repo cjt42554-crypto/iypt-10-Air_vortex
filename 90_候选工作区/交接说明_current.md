@@ -3,176 +3,183 @@
 当前状态：
 
 ```text
+HF3D_P0P_V1_AUTHORIZATION = HISTORICAL_CONSUMED_AND_NO_LONGER_CURRENT_HEAD
+HF3D_P0P_V1_CLAIM = CONSUMED
+HF3D_P0P_V1_SCHEDULE = TERMINAL_FAILED_STOPPED_NO_RESUME
+HF3D_P0P_V1_WARMUP_B1 = FAILED_STOPPED__SEQUENCE_0__START_COUNT_1
+HF3D_P0P_V1_REMAINING_17 = PERMANENTLY_NOT_STARTED
+HF3D_P0P_V1_HF3D_TIME_STEPS = 0
+HF3D_P0P_V1_FAILURE_CLASS = PRE_NUMERICAL_PROTOCOL_CONFIGURATION_INVALID
+HF3D_P0P_V1_MEASURED_PERFORMANCE_RESULT = NOT_AVAILABLE
+
+HF3D_P0P2_EVIDENCE_REGISTRATION_AND_ZERO_STEP_IMPLEMENTATION = AUTHORIZED
+HF3D_P0P2_DYNAMIC_EXECUTION = NOT_AUTHORIZED
+HF3D_P1 = PROHIBITED
+
 D3R1_S2 = FAILED_STOPPED
-D3R1_DIRECT_TRIGGER = PROJECTED_DIVERGENCE
-D3R1_FAILURE_MECHANISM = NOT_YET_ESTABLISHED
-D3R1_S3 = NOT_EXECUTED
 D3R1_SCIENTIFIC_CLASSIFICATION = NOT_FORMED
-
-HF3D_P0_D = COMPLETED
-HF3D_P0_P_ZERO_STEP_IMPLEMENTATION = STATIC_REVIEW_ACCEPTED
-HF3D_P0_P_REVIEW_BINDING_MATERIAL = ACCEPTED
-HF3D_P0_P_EXACT_AUTHORIZATION = ISSUED
-HF3D_P0_P_DYNAMIC_SCHEDULE = AUTHORIZED_ONCE_NOT_STARTED
-HF3D_P0_P_EXECUTION_CLAIM = NOT_CREATED
-HF3D_P0_P_DYNAMIC_OUTPUT = ABSENT
-HF3D_P1_IMPLEMENTATION = PROHIBITED
-
-PROJECT_REFACTOR = TARGETED_CROSS_MODULE_REFACTOR
-PROJECT_WIDE_REWRITE = REJECTED
-HF3D_HARDWARE_UTILIZATION = INSUFFICIENT
-PRIMARY_ACCELERATION_ROUTE = EXPLICIT_GPU_RESIDENT_E1_BACKEND
-REFERENCE_BACKEND = RETAINED
 ```
 
 ## 最新 Pro 裁决
 
 ```text
-90_候选工作区/current/22_P0P绑定材料复核与动态执行裁决.md
+90_候选工作区/current/23_P0P一次性执行失败独立复核与P0P2协议裁决.md
 ```
 
-绑定实现快照：
+## V1 已消费终态
+
+执行身份：
 
 ```text
-I commit: e3b2a1b794b1bd46113d496550e0ce2970ba0a5d
-I tree: 2e24c41acf7ce71ee3c8979aaad888bbfe126d53
-review material blob: c91c95e7229a98c48ad2d5511772515321110101
-review material SHA-256: 1977454018e11010f0afd6d50d91b688cf71b8c93b06c340527b450e8ec64133
-runtime reference: 8a0c2fa564d9d6abfd84e5620379af11e5f858d3
-formal source SHA-256: dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8
+execution HEAD = origin/main at execution time
+               = 18cd1984fea41b0b1983136e28c4d5a453795e32
+preflight = ALL GATES PASS
 ```
 
-## 签名事务
-
-当前远端 `main` 必须保持为父票据 `P` 的唯一授权子提交 `C`：
+证据锚点：
 
 ```text
-I -> P -> C
+claim SHA-256
+= ecd7cf0e9dfa4e3d609f22e205c95261cc1505a255776dc56a29b3532ad94d80
+
+schedule ledger SHA-256
+= 089d91578f89d083f3552f4dfdfaac464bc32842a4f7945f13e9e00903817948
+
+execution failure SHA-256
+= 749ecd452c3958e6320de4e39fe9ea04d2cf4aadd8e4488f105a1cbdc5ab5262
+
+sample failure SHA-256
+= 81145152ab792a763596cbdc4859040fee47c31cc0546f033d7805cdfa2cee1b
+
+worker stderr SHA-256
+= 944c1cdd60c47f9315d20453e27a541c07f6cf98c5f8419d2b6d79d28d21e894
 ```
 
-父票据：
+Ledger：
 
 ```text
-ticket_id: HF3D_P0P_PRO_TICKET_E3B2A1B7_20260901_V1
-ticket_path: 90_候选工作区/current/17_HF3D性能优化/p0p_authorization_ticket.json
-fixed schedule: HF3D_P0P_FIXED_18_V1
-fixed schedule SHA-256: 2138aea65041ff322a0cc2ce22945544d51d1e39db1929079f9f6265e494dceb
+WARMUP_B1:
+  sequence_index = 0
+  start_count = 1
+  state = FAILED_STOPPED
+
+other 17 entries = NOT_STARTED
+completed_samples = []
 ```
 
-授权子 blob：
+失败：
 
 ```text
-Git blob: 703c38e1d40883028e94e23bd5f90c7f0b083a69
-SHA-256: a8ad3f747171245772d57ebf245c98eabb72d76ec2c9aabb9ee5390998336965
-byte length: 860
-grant_nonce: 0aaf03ac79d9004f9b659c9f0e56883eb59aaafbbd7c3613befb0b0963ce872c
+ConfigError: drive ramp duration cannot exceed run duration
+run.duration_s = 0.002
+drive.ramp_duration_s = 0.005
+partial_evidence = null
+worker stdout = empty
+HF3D accepted steps = 0
 ```
 
-`P..C` 只能修改：
+这是一项三 benchmark 共有的、claim 前本可静态判定的候选协议配置错误，不是 HF3D 数值、物理、CUDA、压力、环境或性能结果。正式配置校验正确，禁止放宽。
+
+## V1 永久禁止
 
 ```text
-90_候选工作区/current/17_HF3D性能优化/p0p_execution_authorization.json
+不得恢复、重跑、补样、替换、重排或复制 completed prefix
+不得修改或删除原 performance_raw
+不得改写 claim、ledger、execution_failure 或 WARMUP_B1 失败目录
+不得把 WARMUP_B1 重解释为 NOT_STARTED
+不得运行剩余 17 项
+不得把 V1 raw/state/trajectory/archive 用作 P0-P2 输入
 ```
 
-不得在执行前再提交任何文件。任何后续提交都会使授权拓扑审计失败。
+本裁决提交后，当前 `HEAD` 不再是旧授权唯一子提交，V1 授权同时失去 current-HEAD 拓扑资格；旧 claim 仍作为历史消费事实永久成立。
 
-## 已完成复核
+## 下一项唯一任务
 
-Pro 已独立确认：
-
-- Codex 提交只涉及 review-binding 生成器、材料、专项测试和交接；
-- 24 个 runtime 文件在当前实现快照与 `8a0c2fa...` 上 mode/blob 完全一致；
-- static audit、P0 contract、三份 P0-D、capability、denied authorization 和 formal source 均已精确绑定；
-- 固定 18 项 schedule 的 canonical SHA-256 可独立重算；
-- ticket/grant/claim/raw 在材料生成阶段不存在；
-- HF3D 时间步、warm-up、scored、profile 计数均为 0；
-- review material 无当前提交、当前树或未来 `P/C` 自引用；
-- 现有 P0-P runtime 无需再次修改。
-
-本次签名事务没有启动动态样本，也没有修改正式理论、正式程序、D3、P0 合同、P0-D 或既有 raw。
-
-## 下一项唯一任务：本机非消费 preflight，然后一次性执行
-
-先同步且不得产生本地修改：
-
-```bash
-git pull --ff-only
-git status --short
-git rev-parse HEAD
-git rev-parse origin/main
-```
-
-必须确认：
+在本地先 `git pull --ff-only`，不得触碰旧 raw。只允许新建：
 
 ```text
-HEAD == origin/main
-worktree/index clean
-main remains exact authorization child C
-no P0-P claim/raw/ledger/complete/failure output exists
+90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/
 ```
 
-运行非消费 preflight：
+按两个提交阶段执行。
 
-```bash
-python3 90_候选工作区/current/17_HF3D性能优化/run_p0_performance_campaign.py --zero-step-preflight
-```
+### E0：跟踪登记 V1 失败证据
 
-若 preflight 失败：
+- 对旧 ignored `performance_raw/` 做复制前、复制后只读 canonical 快照；
+- 把完整常规文件树逐字节复制到新目录的跟踪 evidence snapshot；
+- 记录 path/mode/size/SHA-256/canonical tree SHA-256；
+- 核对本交接列出的五个 hash、ledger 终态、ConfigError、空 stdout、null partial 和 completion 缺失；
+- 原 raw 任何字节发生变化或任一核验不一致，立即失败停止。
+
+禁止移动或强制跟踪原运行目录。
+
+### I2：实现 P0-P2 零步协议
+
+新的 P0-P2 必须与 V1 使用不同的：
 
 ```text
-原样停止
-不得修改授权文件
-不得提交新 commit
-不得创建 claim
-不得启动任何样本
-将完整失败输出交 Pro
+contract ID
+schedule ID/hash
+authorization ID
+ticket/grant/nonce
+raw root
+claim/ledger
+sample IDs
+effective-config hashes
 ```
 
-若 preflight 通过，且用户明确要求执行，则只允许一次：
-
-```bash
-python3 90_候选工作区/current/17_HF3D性能优化/run_p0_performance_campaign.py --execute
-```
-
-执行器会在首次样本环境门通过后原子创建唯一 claim。Claim 后任何失败均为永久 `FAILED_STOPPED_NO_RESUME`，禁止重试、恢复、补样、替换或删除失败证据。
-
-## 环境硬门
-
-必须继续满足：
+冻结有效短窗：
 
 ```text
-AC power online
-32 logical CPUs online
-governor records complete and equal
-no competing GPU compute process
-background CPU load within frozen threshold
-CPU Tctl <= 90 C
-GPU temperature <= 75 C
-toolchain and GPU identity exact
+run.duration_s = 0.005
+drive.ramp_duration_s = 0.005  # 不修改
+output_interval_s = 0.001
+registered times = [0, 0.001, 0.002, 0.003, 0.004, 0.005]
+only allowed source-config change = run.duration_s
 ```
 
-此前约 `96.875 C` 的 Tctl 必须继续被拒绝。线程环境变量不能替代这些门。
-
-## 当前禁止
+Claim 前必须对 B1/B2/B3 全部执行正式：
 
 ```text
-执行前任何新 commit
-任何 P1 实现
-任何 02_模拟程序/** 修改
-任何 D3R1 重跑或 S3
-任何 schedule 改动
-任何阈值或科学门放宽
-任何旧 raw 复用
-任何未通过 preflight 的动态执行
+SimulationConfig.from_dict()
+exact to_dict round-trip
+canonical effective-config hash binding
+exact-case fresh-process zero-step runtime construction
+actual CUDA/no fallback
+grid + pressure + initial state + zero-step diagnostics
+hf3d_time_steps_advanced = 0
+```
+
+新 preflight 的顶层 `gate_pass` 必须合并配置、zero-step、raw、授权、来源和环境全部门；任一失败都必须在 lock/raw/claim/ledger/sample 产生前停止。
+
+完成 E0、I2、测试、静态证据和 handoff 后提交、推送并停止交 Pro。**当前不授权 P0-P2 动态执行或父票据签发。**
+
+## 允许修改
+
+```text
+90_候选工作区/current/24_P0P失败证据登记与P0P2零步实现/**
+90_候选工作区/交接说明_current.md
+90_候选工作区/交接说明_history.md
+```
+
+其余路径只读，尤其：
+
+```text
+90_候选工作区/current/17_HF3D性能优化/**
+01_最终理论/**
+02_模拟程序/**
+90_候选工作区/current/07_D3跨网格时间步响应诊断/**
+AGENTS.md
 ```
 
 ## 结论上限
 
 ```text
-HF3D_P0_P_DYNAMIC_SCHEDULE = AUTHORIZED_ONCE_NOT_STARTED
-HF3D_P0_P_RESULT = NOT_AVAILABLE
-NUMERICAL_QUALIFICATION = NOT_DEMONSTRATED
-PHYSICAL_VALIDATION = NOT_PERFORMED
-EXPERIMENTAL_VALIDATION = NOT_PERFORMED
-APPARATUS_PREDICTION = DISALLOWED
+P0-P V1 measured result = NOT AVAILABLE
+P0-P2 dynamic execution = NOT AUTHORIZED
+P1 = PROHIBITED
+numerical qualification = NOT DEMONSTRATED
+physical validation = NOT PERFORMED
+experimental validation = NOT PERFORMED
+apparatus prediction = DISALLOWED
 ```
