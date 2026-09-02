@@ -1,6 +1,6 @@
 # 当前交接
 
-当前没有已授权的待续任务。E0-R1A 已关闭实验前文档接口的已知数学与适定性缺口，项目达到“真正搭建、校准或执行实验之前可以安全暂停”的阶段。未经用户明确授权，不得进入实验阶段。
+当前没有已授权的待续任务。E0-R1A 已关闭实验前文档接口的已知数学与适定性缺口；全项目复核及候选区去过度工程化清理也已完成。项目达到“真正搭建、校准或执行实验之前可以安全暂停”的阶段。未经用户明确授权，不得进入实验阶段。
 
     PROJECT_MODE = PERSONAL_SHORT_TERM_RESEARCH_TOOL
     PRIMARY_OBJECTIVE = ACCURATE_EXPERIMENTAL_PHENOMENON_PREDICTION
@@ -9,6 +9,26 @@
     READY_FOR_QUANTITATIVE_APPARATUS_PREDICTION = false
     DYNAMIC_STEPS_EXECUTED_THIS_STAGE = 0
     experiment_started = false
+
+## 全项目复核与候选区清理
+
+ChatGPT Pro 在提交 `43b32a6b5028ae78ca2475afb2c6013b15c9c8f1` 上完成全项目只读复核，Codex 随后独立核对文件集合、保留引用、测试入口和正式源码身份。结论为：
+
+    FORMAL_THEORY_PROMOTION_NOW = NO_GO
+    FORMAL_PROGRAM_SOURCE_PROMOTION_NOW = NO_GO
+    FORMAL_PROGRAM_README_STATUS_SECTION = PARTIAL_GO__NOT_IMPLEMENTED
+    TRACKED_CANDIDATE_CLEANUP = PASS_EXACT_184
+
+本次候选清理只删除已经终止、且不再服务于科学结论的性能控制面：
+
+- `17_HF3D性能优化` 中删除 56 个 P0/P0P 性能文件，只保留 7 个 D3R1 散度审计文件；
+- 删除 `24_P0P失败证据登记与P0P2零步实现` 的 108 个 tracked 文件；
+- 删除 `30_个人科研模式收敛与P0Lite性能基线` 的 8 个 tracked 文件；
+- 删除 12 份已由后续终态取代的性能裁决文档。
+
+候选区 tracked 文件总数由 484 降为 300，其中 `current/**` 为 298，另 2 个为本交接文件。两个已归档性能目录中的 233 个本地 ignored 文件共 `436637874` 字节，已移入桌面回收站而非永久擦除。保留的联合预注册仍绑定 `17_HF3D性能优化/artifacts/p0/performance_raw`，因此该 52509 字节原始根没有删除。
+
+正式理论、正式程序源码、测试、配置及冻结科学证据均未改动。Pro 建议的正式 `02_模拟程序/README.md` 证据状态段尚未写入，因为该文件仍需要新的文件级授权；这不影响安全暂停状态。
 
 ## 科学状态
 
@@ -76,7 +96,7 @@ Pro 对 E0-V1 要求结果盲、纯文档 E0-R1 修订；随后对提交 `16fca3
     01_最终理论/**
     02_模拟程序/**
     AGENTS.md
-    既有 Q1R3、D3、投影审计和 P0-Lite 冻结证据
+    既有 Q1R3、D3、投影审计和 E0 冻结证据
 
 当前结论上限：
 
