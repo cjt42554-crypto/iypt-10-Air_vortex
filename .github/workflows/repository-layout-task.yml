@@ -1,0 +1,32 @@
+name: Repository layout task
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/repository-layout-task.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Export tracked files for migration review
+        run: |
+          git archive HEAD > /tmp/repository.tar
+          python - <<'PY'
+          import collections, subprocess
+          paths = subprocess.check_output(['git','ls-files','-z']).decode().split('\0')[:-1]
+          counts = collections.Counter('/'.join(p.split('/')[:3]) for p in paths)
+          for p,n in sorted(counts.items()):
+              print(f'{n:5} {p}')
+          print('HEAD', subprocess.check_output(['git','rev-parse','HEAD']).decode().strip())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: repository-layout-snapshot
+          path: /tmp/repository.tar
+          retention-days: 3
