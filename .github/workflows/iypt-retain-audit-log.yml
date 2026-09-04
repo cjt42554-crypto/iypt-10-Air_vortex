@@ -1,0 +1,44 @@
+name: Retain original audit validation log
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/iypt-retain-audit-log.yml]
+permissions:
+  contents: write
+  actions: read
+jobs:
+  retain-log:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: audit-validation
+          run-id: 33924890990
+          github-token: ${{ github.token }}
+          path: /tmp/iypt-audit-original-log
+      - name: Verify and retain original successful test log
+        run: |
+          python - <<'PY'
+          import hashlib, pathlib
+          raw = pathlib.Path('/tmp/iypt-audit-original-log/iypt-audit-validation.log').read_bytes()
+          assert hashlib.sha256(raw).hexdigest() == '65f7b3b10e976baea04b747032f56f19a07a55419e1a7c1691294acc33952058'
+          assert b'Ran 200 tests in 36.888s' in raw and raw.rstrip().endswith(b'OK (skipped=4)')
+          target = pathlib.Path('90_候选工作区/current/2026-09-05_数值审查修复/validation.log')
+          target.parent.mkdir(parents=True, exist_ok=True)
+          assert not target.exists()
+          target.write_bytes(raw)
+          assert pathlib.Path('90_候选工作区/交接说明_history.md').stat().st_size == 0
+          pathlib.Path('.github/workflows/iypt-retain-audit-log.yml').unlink()
+          PY
+          git diff --check
+          git fetch origin main
+          test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -f '90_候选工作区/current/2026-09-05_数值审查修复/validation.log'
+          git add -u .github/workflows/iypt-retain-audit-log.yml
+          git commit -m 'docs: retain original successful audit validation log and remove temporary workflow'
+          git push origin HEAD:main
+          git rev-parse HEAD
