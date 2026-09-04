@@ -1,0 +1,19 @@
+name: Temporary audit workspace
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/iypt-audit-workspace.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Export tracked working tree
+        run: git archive --format=tar.gz HEAD > /tmp/audit-workspace.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: audit-workspace
+          path: /tmp/audit-workspace.tar.gz
+          retention-days: 1
