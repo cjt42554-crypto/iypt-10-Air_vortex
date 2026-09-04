@@ -75,6 +75,7 @@ class TheoryChecks(unittest.TestCase):
         self.assertEqual(sum(line.strip()=='$$' for line in s.splitlines())%2,0)
         self.assertIn('整个界面的定量预测统一终止',s)
         self.assertIn('局部连续性',s)
+        self.assertIn('开放头空间与受限气道须区分',s)
         self.assertNotIn('仍有强且可重复历史差异',s)
         self.assertNotIn('接触、合并、夹断和再连通均由同一水平集广义解继续',s)
 if __name__=='__main__': unittest.main(verbosity=2)
