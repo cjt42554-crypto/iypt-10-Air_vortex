@@ -245,6 +245,11 @@ class StepDiagnosticsBuffer:
         self.step_divergence: list[float] = []
         self.step_pressure_residual: list[float] = []
         self.step_pressure_iterations: list[float] = []
+        self.step_cls_limited_volume_m3: list[float] = []
+        self.step_cls_kinetic_energy_change_j: list[float] = []
+        self.step_pressure_effective_relative_tolerance: list[float] = []
+        self.step_pressure_residual_predicted_divergence_s_inv: list[float] = []
+        self.step_divergence_residual_identity_error_s_inv: list[float] = []
         self.cumulative_clip = 0.0
         self.cumulative_repair = 0.0
         self.maximum_single_clip = 0.0
@@ -309,6 +314,11 @@ class StepDiagnosticsBuffer:
         self.step_divergence.append(diagnostics.divergence_after_s_inv)
         self.step_pressure_residual.append(diagnostics.pressure_relative_residual)
         self.step_pressure_iterations.append(float(diagnostics.pressure_iterations))
+        self.step_cls_limited_volume_m3.append(diagnostics.cls_limited_volume_m3)
+        self.step_cls_kinetic_energy_change_j.append(diagnostics.cls_kinetic_energy_change_j)
+        self.step_pressure_effective_relative_tolerance.append(diagnostics.pressure_effective_relative_tolerance)
+        self.step_pressure_residual_predicted_divergence_s_inv.append(diagnostics.pressure_residual_predicted_divergence_s_inv)
+        self.step_divergence_residual_identity_error_s_inv.append(diagnostics.divergence_residual_identity_error_s_inv)
         self.cumulative_clip += diagnostics.phase_clip_absolute_volume_m3
         self.cumulative_repair += diagnostics.phase_repair_absolute_volume_m3
         single_clip = diagnostics.phase_clip_absolute_volume_m3 / initial_volume
@@ -559,6 +569,11 @@ def assemble_result(
         "diagnostic_pressure_relative_residual": np.asarray(
             step_pressure_residual, dtype=np.float64
         ),
+        "diagnostic_cls_limited_volume_m3": np.asarray(diagnostics_buffer.step_cls_limited_volume_m3, dtype=np.float64),
+        "diagnostic_cls_kinetic_energy_change_j": np.asarray(diagnostics_buffer.step_cls_kinetic_energy_change_j, dtype=np.float64),
+        "diagnostic_pressure_effective_relative_tolerance": np.asarray(diagnostics_buffer.step_pressure_effective_relative_tolerance, dtype=np.float64),
+        "diagnostic_pressure_residual_predicted_divergence_s_inv": np.asarray(diagnostics_buffer.step_pressure_residual_predicted_divergence_s_inv, dtype=np.float64),
+        "diagnostic_divergence_residual_identity_error_s_inv": np.asarray(diagnostics_buffer.step_divergence_residual_identity_error_s_inv, dtype=np.float64),
         "diagnostic_pressure_iterations": np.asarray(
             step_pressure_iterations, dtype=np.float64
         ),
@@ -634,6 +649,13 @@ def assemble_result(
         )
         for name in fields
     }
+    field_units.update({
+        "diagnostic_cls_limited_volume_m3": "m^3",
+        "diagnostic_cls_kinetic_energy_change_j": "J",
+        "diagnostic_pressure_effective_relative_tolerance": "1",
+        "diagnostic_pressure_residual_predicted_divergence_s_inv": "s^-1",
+        "diagnostic_divergence_residual_identity_error_s_inv": "s^-1",
+    })
     interface_width = (
         config.high_fidelity.interface_thickness_cells
         * grid.minimum_spacing_m
@@ -698,11 +720,15 @@ def assemble_result(
             "nominal_central_depression_m": "initial nominal liquid height minus central minimum; includes raster-volume offset",
             "surface_depth_m": "outer annulus azimuthal-mean height minus central minimum height",
             "axisymmetry_error": "within-annulus surface-height residual norm divided by resolved mean-deformation norm",
-            "connection_candidate": "top-connected gas path whose minimum equivalent cross-section radius passes the interface/grid gate",
+            "connection_candidate": "top-to-bar bulk gas corridor above the voxel bar with conservative 3D clearance exceeding the interface/grid gate; contact-line resolution is not certified",
         },
         "capabilities": dict(capabilities),
         "limitations": list(limitations),
         "diagnostics": {
+            "numerical_revision": "HF3D-20260905-consistent-CLS-clearance-divergence",
+            "maximum_projected_divergence_target_s_inv": hf.maximum_projected_divergence_s_inv,
+            "phase_repair_policy": "physical clip/repair limited to roundoff + 2*dt*integral(abs(div u)); this residual-sized defect is not an exact momentum transfer; CLS uses bounded paired face transfers",
+            "resolved_channel_scope": "bulk 3D clearance above the voxel bar; not contact-line or wall-film qualification",
             "active_cells": grid.active_cell_count,
             "numerical_thread_policy": dict(numerical_thread_policy),
             "configured_cells_x_y_z": [grid.nx, grid.ny, grid.nz],

@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
-from typing import Mapping
+from typing import Callable, Mapping
 
 import numpy as np
 from numpy.typing import NDArray
-from scipy.ndimage import binary_propagation, gaussian_filter
+from scipy.ndimage import binary_dilation, binary_propagation, distance_transform_edt, gaussian_filter
 
 from .cartesian3d import (
     BAR_WALL,
@@ -19,6 +19,8 @@ from .cartesian3d import (
     bounded_mass_correction_masked,
 )
 
+from .phase_transfer3d import FaceTransfers, limit_phase_transfers, transfer_divergence
+
 
 @dataclass(frozen=True, slots=True)
 class CLS3DDiagnostics:
@@ -28,6 +30,7 @@ class CLS3DDiagnostics:
     repair_absolute_volume_m3: float
     raw_minimum: float
     raw_maximum: float
+    limited_absolute_volume_m3: float = 0.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -338,8 +341,13 @@ def conservative_cls_3d(
     *,
     pseudo_cfl: float,
     iterations: int = 1,
+    transfer_callback: Callable[[FaceTransfers], None] | None = None,
 ) -> tuple[FloatArray, CLS3DDiagnostics]:
-    """Conservative level-set compression/diffusion on closed solid faces."""
+    """Bounded conservative CLS with optional paired momentum transport.
+
+    The callback receives each limited, time-integrated face transfer before
+    the phase update and must not mutate these transfers.
+    """
 
     grid.require_cell_field(phase, "phase")
     if not math.isfinite(interface_thickness_m) or interface_thickness_m <= 0.0:
@@ -354,6 +362,9 @@ def conservative_cls_3d(
     repair_absolute = 0.0
     raw_minimum = float(np.min(c[grid.active_mask]))
     raw_maximum = float(np.max(c[grid.active_mask]))
+    if not np.isfinite(c).all() or raw_minimum < 0.0 or raw_maximum > 1.0:
+        raise ValueError("CLS requires a finite phase in [0, 1]")
+    limited_absolute = 0.0
     for _ in range(iterations):
         gx, gy, gz = masked_gradient_3d(c, grid, top_dirichlet=0.0)
         magnitude = np.sqrt(gx * gx + gy * gy + gz * gz)
@@ -402,19 +413,16 @@ def conservative_cls_3d(
             c - pseudo_cfl * grid.minimum_spacing_m * divergence,
             0.0,
         )
-        clipped = np.where(grid.active_mask, np.clip(raw, 0.0, 1.0), 0.0)
-        repaired = bounded_mass_correction_masked(clipped, grid, target)
-        clip_absolute += float(
-            np.sum(np.abs(clipped - raw)[grid.active_mask])
-            * grid.cell_volume_m3
+        pseudo_step = pseudo_cfl * grid.minimum_spacing_m
+        transfers, limited_volume = limit_phase_transfers(
+            c, (pseudo_step * fx, pseudo_step * fy, pseudo_step * fz), grid
         )
-        repair_absolute += float(
-            np.sum(np.abs(repaired - clipped)[grid.active_mask])
-            * grid.cell_volume_m3
-        )
+        limited_absolute += limited_volume
+        if transfer_callback is not None:
+            transfer_callback(transfers)
         raw_minimum = min(raw_minimum, float(np.min(raw[grid.active_mask])))
         raw_maximum = max(raw_maximum, float(np.max(raw[grid.active_mask])))
-        c = repaired
+        c = np.where(grid.active_mask, c - transfer_divergence(transfers, grid), 0.0)
     return c, CLS3DDiagnostics(
         target_volume_m3=target,
         final_volume_m3=grid.integrate(c),
@@ -422,6 +430,7 @@ def conservative_cls_3d(
         repair_absolute_volume_m3=repair_absolute,
         raw_minimum=raw_minimum,
         raw_maximum=raw_maximum,
+        limited_absolute_volume_m3=limited_absolute,
     )
 
 
@@ -450,9 +459,18 @@ def topology_diagnostics_3d(
     minimum_resolved_throat_cells: int,
     gas_threshold: float = 0.5,
 ) -> Topology3DDiagnostics:
-    """Classify a true 3D top-connected gas path and its equivalent throat."""
+    """Classify connectivity, equivalent area and a resolved gas corridor.
+
+    Equivalent radii are descriptive only. Resolution requires a connected
+    eroded bulk gas path from atmosphere to gas cells above the bar. For clearance
+    only, the bar is not liquid; touching solid is not an automatic zero-radius
+    failure. A thin film next to liquid still fails. This is not a qualification
+    of contact-line, wall-film or apparatus physics.
+    """
 
     grid.require_cell_field(phase, "phase")
+    if not math.isfinite(interface_thickness_m) or interface_thickness_m <= 0.0:
+        raise ValueError("interface_thickness_m must be finite and positive")
     if not 0.0 < gas_threshold < 1.0:
         raise ValueError("gas_threshold must lie in (0, 1)")
     if (
@@ -480,7 +498,30 @@ def topology_diagnostics_3d(
         2.0 * interface_thickness_m,
         2.0 * grid.maximum_spacing_m,
     )
-    resolved = finite and minimum_throat >= required
+    resolved = False
+    # Most pre-contact steps cannot be resolved; avoid an unnecessary full-grid
+    # Euclidean distance transform until a physical contact candidate exists.
+    if finite and int(np.max(np.where(grid.bar_mask)[2])) + 1 < grid.nz:
+        # EDT measures between voxel centres. Subtracting half the cell diagonal
+        # bounds clearance to liquid/side-wall voxel volumes from below. The open
+        # atmosphere and vessel floor are not artificial liquid endpoints.
+        clearance_mask = (gas | grid.bar_mask) & grid.vessel_mask
+        # Qualification concerns the bulk throat ABOVE the voxel bar, as did the
+        # old area-based measure. Continue the terminal slice down for clearance
+        # only; a capped tube need not contain a full sphere below its endpoint.
+        # The connectivity search itself cannot enter that artificial continuation.
+        bulk_start = int(np.max(np.where(grid.bar_mask)[2])) + 1
+        clearance_mask[:, :, :bulk_start] = clearance_mask[:, :, bulk_start, None]
+        padded = np.pad(clearance_mask, ((1, 1), (1, 1), (0, 0)), constant_values=False)
+        clearance = distance_transform_edt(padded, sampling=(grid.dx, grid.dy, grid.dz))[1:-1, 1:-1, :]
+        clearance = np.maximum(0.0, clearance - 0.5 * math.sqrt(grid.dx**2 + grid.dy**2 + grid.dz**2))
+        corridor = connected & (clearance >= required)
+        corridor[:, :, :bulk_start] = False
+        corridor_seed = np.zeros(grid.shape, dtype=bool)
+        corridor_seed[:, :, -1] = corridor[:, :, -1]
+        reachable = binary_propagation(corridor_seed, mask=corridor)
+        bar_neighbours = binary_dilation(grid.bar_mask) & grid.active_mask
+        resolved = finite and bool(np.any(reachable & bar_neighbours))
     if np.any(connected):
         gap = max(
             0.0,

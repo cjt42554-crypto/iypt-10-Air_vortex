@@ -29,6 +29,9 @@ class Projection3DDiagnostics:
     active_unknowns: int
     matrix_nonzeros: int
     converged: bool
+    effective_relative_tolerance: float = 0.0
+    residual_predicted_divergence_s_inv: float = 0.0
+    divergence_residual_identity_error_s_inv: float = 0.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -206,6 +209,7 @@ class VariableDensityProjection3D:
         *,
         relative_tolerance: float,
         maximum_iterations: int,
+        maximum_divergence_s_inv: float | None = None,
     ) -> None:
         if not math.isfinite(relative_tolerance) or relative_tolerance <= 0.0:
             raise ValueError("relative_tolerance must be finite and positive")
@@ -215,6 +219,11 @@ class VariableDensityProjection3D:
             or maximum_iterations < 1
         ):
             raise ValueError("maximum_iterations must be an integer >= 1")
+        if maximum_divergence_s_inv is not None and (
+            not math.isfinite(maximum_divergence_s_inv) or maximum_divergence_s_inv <= 0.0
+        ):
+            raise ValueError("maximum_divergence_s_inv must be finite and positive")
+        self.maximum_divergence_s_inv = maximum_divergence_s_inv
         self.grid = grid
         self.relative_tolerance = float(relative_tolerance)
         self.maximum_iterations = maximum_iterations
@@ -557,6 +566,13 @@ class VariableDensityProjection3D:
             nonlocal iterations
             iterations += 1
 
+        # div(u_new) = dt / cell_volume * (A p - b). A bound on the
+        # residual 2-norm also bounds its infinity norm; retain half the target
+        # as margin, without weakening the caller's relative residual request.
+        effective_rtol = self.relative_tolerance
+        if self.maximum_divergence_s_inv is not None:
+            effective_rtol = min(effective_rtol, 0.5 * self.maximum_divergence_s_inv
+                                 * g.cell_volume_m3 / (dt_s * rhs_norm))
         cg_arguments = {
             "x0": initial,
             "maxiter": self.maximum_iterations,
@@ -568,14 +584,14 @@ class VariableDensityProjection3D:
             solution, info = cg(
                 matrix,
                 rhs,
-                rtol=self.relative_tolerance,
+                rtol=effective_rtol,
                 **cg_arguments,
             )
         else:
             solution, info = cg(
                 matrix,
                 rhs,
-                tol=self.relative_tolerance,
+                tol=effective_rtol,
                 **cg_arguments,
             )
         self.solve_count += 1
@@ -587,9 +603,6 @@ class VariableDensityProjection3D:
                 f"info={info}, iterations={iterations}, "
                 f"relative_residual={relative_residual:.3e}"
             )
-        self._remember_pressure_solution(
-            solution, contiguous_history=contiguous_history
-        )
         pressure[g.active_mask] = solution
 
         internal = g.open_x[1:-1]
@@ -615,7 +628,20 @@ class VariableDensityProjection3D:
         uz *= g.open_z
         after_field = g.divergence(ux, uy, uz)
         after = float(np.max(np.abs(after_field[g.active_mask])))
+        predicted = dt_s / g.cell_volume_m3 * residual
+        identity_error = float(np.max(np.abs(after_field[g.active_mask] - predicted)))
+        if not math.isfinite(after) or (
+            self.maximum_divergence_s_inv is not None and after > self.maximum_divergence_s_inv
+        ):
+            raise FloatingPointError(
+                f"pressure projection exceeds divergence target: actual={after:.6e}, "
+                f"residual_identity_error={identity_error:.6e}"
+            )
+        self._remember_pressure_solution(solution, contiguous_history=contiguous_history)
         diagnostics = Projection3DDiagnostics(
+            effective_relative_tolerance=effective_rtol,
+            residual_predicted_divergence_s_inv=float(np.max(np.abs(predicted))),
+            divergence_residual_identity_error_s_inv=identity_error,
             divergence_before_s_inv=before,
             divergence_after_s_inv=after,
             pressure_relative_residual=relative_residual,

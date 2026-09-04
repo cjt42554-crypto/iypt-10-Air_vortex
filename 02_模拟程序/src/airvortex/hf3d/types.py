@@ -76,6 +76,11 @@ class HF3DStepDiagnostics:
     maximum_pressure_projection_acceleration_m_s2: float
     boundary_rotating_energy_change_j: float
     topology: Topology3DDiagnostics
+    cls_limited_volume_m3: float = 0.0
+    cls_kinetic_energy_change_j: float = 0.0
+    pressure_effective_relative_tolerance: float = 0.0
+    pressure_residual_predicted_divergence_s_inv: float = 0.0
+    divergence_residual_identity_error_s_inv: float = 0.0
 
 
 @dataclass(frozen=True, slots=True)

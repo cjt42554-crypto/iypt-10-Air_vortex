@@ -78,13 +78,16 @@ class CuPyProjectionParityTests(unittest.TestCase):
         phase = np.where(self.grid.z_cell < 0.060, 1.0, 0.0)
         density = mixture_property_3d(phase, 998.2, 1.204)
         cpu = VariableDensityProjection3D(
-            self.grid, relative_tolerance=1.0e-9, maximum_iterations=1600
+            self.grid, relative_tolerance=1.0e-9, maximum_iterations=1600, maximum_divergence_s_inv=1.0e-8
         )
         gpu = CuPyVariableDensityProjection3D(
-            self.grid, relative_tolerance=1.0e-9, maximum_iterations=1600
+            self.grid, relative_tolerance=1.0e-9, maximum_iterations=1600, maximum_divergence_s_inv=1.0e-8
         )
         cpu_result = cpu.project(ux, uy, uz, density, 1.0e-4)
         gpu_result = gpu.project(ux, uy, uz, density, 1.0e-4)
+        for result in (cpu_result, gpu_result):
+            self.assertLessEqual(result[4].divergence_after_s_inv, 1.0e-8)
+            self.assertLess(result[4].divergence_residual_identity_error_s_inv, 1.0e-10)
         self.assertLess(cpu_result[4].pressure_relative_residual, 1.1e-9)
         self.assertLess(gpu_result[4].pressure_relative_residual, 1.1e-9)
         self.assertLess(
@@ -101,7 +104,7 @@ class CuPyProjectionParityTests(unittest.TestCase):
         uz = rng.normal(scale=0.02, size=self.grid.face_shape_z) * self.grid.open_z
         density = np.where(self.grid.z_cell < 0.060, 998.2, 1.204)
         gpu = CuPyVariableDensityProjection3D(
-            self.grid, relative_tolerance=1.0e-9, maximum_iterations=1600
+            self.grid, relative_tolerance=1.0e-9, maximum_iterations=1600, maximum_divergence_s_inv=1.0e-8
         )
         *_, pressure, _ = gpu.project(ux, uy, uz, density, 1.0e-4)
         checkpoint = gpu.checkpoint_history()

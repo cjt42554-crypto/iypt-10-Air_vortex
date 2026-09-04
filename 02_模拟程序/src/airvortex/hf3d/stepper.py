@@ -44,6 +44,8 @@ from airvortex.numerics.momentum3d import (
     rotating_to_laboratory_velocity_3d,
 )
 
+from airvortex.numerics.phase_transfer3d import FaceTransfers, transport_momentum_with_phase_transfers
+
 
 def _maximum_vector_magnitude(
     grid: ImmersedCartesianGrid,
@@ -113,32 +115,23 @@ def advance_one_step(
     )
     clip_absolute = phase_transport.clip_absolute_integral
     repair_absolute = phase_transport.repair_absolute_integral
-    next_step = state.step + 1
-    if (
-        hf.interface_compression_interval > 0
-        and next_step % hf.interface_compression_interval == 0
-        and hf.interface_compression_pseudo_cfl > 0.0
-    ):
-        interface_width = hf.interface_thickness_cells * grid.minimum_spacing_m
-        updated_phase, cls_diagnostics = conservative_cls_3d(
-            updated_phase,
-            grid,
-            interface_width,
-            pseudo_cfl=hf.interface_compression_pseudo_cfl,
-            iterations=1,
+    repair_roundoff = 128.0 * np.finfo(float).eps * grid.active_cell_count * grid.cell_volume_m3
+    # A projected velocity is divergence-free only to its measured residual.
+    # For monotone donor advection, phase overshoot is bounded by dt*|div u|;
+    # clipping plus volume restoration can each contribute that amount. Accept
+    # this explicit residual-sized defect, not an arbitrary phase-repair budget.
+    divergence_allowance = 2.0 * dt_s * grid.integrate(np.abs(grid.divergence(
+        state.u_x_face, state.u_y_face, state.u_z_face
+    )))
+    if clip_absolute + repair_absolute > repair_roundoff + divergence_allowance:
+        raise FloatingPointError(
+            "HF3D phase advection exceeds its roundoff/divergence clip-repair budget without matching "
+            "momentum flux; reduce the time step or repair the transport operator"
         )
-        clip_absolute += cls_diagnostics.clip_absolute_volume_m3
-        repair_absolute += cls_diagnostics.repair_absolute_volume_m3
-
-    new_density = mixture_property_3d(
+    advected_density = mixture_property_3d(
         updated_phase,
         fluid.liquid_density_kg_m3,
         fluid.gas_density_kg_m3,
-    )
-    new_viscosity = mixture_property_3d(
-        updated_phase,
-        fluid.liquid_dynamic_viscosity_pa_s,
-        fluid.gas_dynamic_viscosity_pa_s,
     )
     midpoint = state.time_s + 0.5 * dt_s
     rpm_mid, rpm_slope = _drive_rpm_and_slope(config, midpoint)
@@ -154,13 +147,52 @@ def advance_one_step(
         state.u_x_face,
         state.u_y_face,
         state.u_z_face,
-        new_density,
+        advected_density,
         grid,
         dt_s,
         top_inflow_density_kg_m3=fluid.gas_density_kg_m3,
         top_inflow_u_x_m_s=top_x,
         top_inflow_u_y_m_s=top_y,
         top_inflow_u_z_m_s=0.0,
+    )
+    new_density = advected_density
+
+    def pair_cls_momentum(transfers: FaceTransfers) -> None:
+        nonlocal new_density, ux, uy, uz
+        new_density, (ux, uy, uz) = transport_momentum_with_phase_transfers(
+            new_density, (ux, uy, uz), transfers,
+            fluid.liquid_density_kg_m3 - fluid.gas_density_kg_m3, grid,
+        )
+
+    cls_limited_volume_m3 = 0.0
+    cls_kinetic_energy_change_j = 0.0
+    next_step = state.step + 1
+    if (
+        hf.interface_compression_interval > 0
+        and next_step % hf.interface_compression_interval == 0
+        and hf.interface_compression_pseudo_cfl > 0.0
+    ):
+        cls_energy_before = 0.5 * grid.integrate(new_density * (ux*ux + uy*uy + uz*uz))
+        interface_width = hf.interface_thickness_cells * grid.minimum_spacing_m
+        updated_phase, cls_diagnostics = conservative_cls_3d(
+            updated_phase,
+            grid,
+            interface_width,
+            pseudo_cfl=hf.interface_compression_pseudo_cfl,
+            iterations=1,
+            transfer_callback=pair_cls_momentum,
+        )
+        clip_absolute += cls_diagnostics.clip_absolute_volume_m3
+        repair_absolute += cls_diagnostics.repair_absolute_volume_m3
+        cls_limited_volume_m3 = cls_diagnostics.limited_absolute_volume_m3
+        cls_kinetic_energy_change_j = (
+            0.5 * grid.integrate(new_density * (ux*ux + uy*uy + uz*uz)) - cls_energy_before
+        )
+
+    new_viscosity = mixture_property_3d(
+        updated_phase,
+        fluid.liquid_dynamic_viscosity_pa_s,
+        fluid.gas_dynamic_viscosity_pa_s,
     )
     maximum_momentum_advection_acceleration = _maximum_vector_magnitude(
         grid,
@@ -422,6 +454,11 @@ def advance_one_step(
             boundary_diagnostics.rotating_frame_kinetic_energy_change_j
         ),
         topology=topology,
+        cls_limited_volume_m3=cls_limited_volume_m3,
+        cls_kinetic_energy_change_j=cls_kinetic_energy_change_j,
+        pressure_effective_relative_tolerance=projection_diagnostics.effective_relative_tolerance,
+        pressure_residual_predicted_divergence_s_inv=projection_diagnostics.residual_predicted_divergence_s_inv,
+        divergence_residual_identity_error_s_inv=projection_diagnostics.divergence_residual_identity_error_s_inv,
     )
 
 

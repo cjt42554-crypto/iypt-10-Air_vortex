@@ -30,6 +30,7 @@ def make_pressure_projection(
     common = {
         "relative_tolerance": config.high_fidelity.pressure_relative_tolerance,
         "maximum_iterations": config.high_fidelity.pressure_max_iterations,
+        "maximum_divergence_s_inv": config.high_fidelity.maximum_projected_divergence_s_inv,
     }
     if requested == "cpu":
         return VariableDensityProjection3D(grid, **common), {

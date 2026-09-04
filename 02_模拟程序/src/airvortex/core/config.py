@@ -456,6 +456,7 @@ class HighFidelityConfig:
     pressure_solver_device: str = "auto"
     pressure_relative_tolerance: float = 1.0e-7
     pressure_max_iterations: int = 400
+    maximum_projected_divergence_s_inv: float = 1.0e-4
     interface_compression_interval: int = 1
     interface_compression_pseudo_cfl: float = 0.04
     surface_tension_smoothing_cells: float = 0.75
@@ -521,6 +522,12 @@ class HighFidelityConfig:
         _require_real(
             "high_fidelity.pressure_relative_tolerance",
             self.pressure_relative_tolerance,
+            minimum=0.0,
+            strict=True,
+        )
+        _require_real(
+            "high_fidelity.maximum_projected_divergence_s_inv",
+            self.maximum_projected_divergence_s_inv,
             minimum=0.0,
             strict=True,
         )
@@ -597,6 +604,7 @@ class HighFidelityConfig:
                 "cfl_controller_target_fraction",
                 "interface_thickness_cells",
                 "pressure_relative_tolerance",
+                "maximum_projected_divergence_s_inv",
                 "interface_compression_pseudo_cfl",
                 "surface_tension_smoothing_cells",
                 "boundary_relaxation_time_s",

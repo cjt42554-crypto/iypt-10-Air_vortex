@@ -288,7 +288,9 @@ class CartesianGeometryAndInterfaceTests(unittest.TestCase):
         )
         self.assertFalse(one_column.resolved_channel)
 
-        wide = (grid.x_cell**2 + grid.y_cell**2) < (0.020**2)
+        # Positive case needs clearance beyond the threshold PLUS voxel extent;
+        # the former 20 mm area-only fixture is marginal on this coarse grid.
+        wide = (grid.x_cell**2 + grid.y_cell**2) < (0.030**2)
         phase[wide & (grid.z_cell >= grid.bar_centre_z_m)] = 0.0
         resolved = topology_diagnostics_3d(
             phase,

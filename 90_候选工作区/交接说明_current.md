@@ -1,106 +1,63 @@
-# 当前交接
+# 当前交接：2026-09-05 数值审查修复
 
-当前没有已授权的待续任务。E0-R1A 已关闭实验前文档接口的已知数学与适定性缺口；全项目复核及候选区去过度工程化清理也已完成。项目达到“真正搭建、校准或执行实验之前可以安全暂停”的阶段。未经用户明确授权，不得进入实验阶段。
+## 当前状态
 
-    PROJECT_MODE = PERSONAL_SHORT_TERM_RESEARCH_TOOL
-    PRIMARY_OBJECTIVE = ACCURATE_EXPERIMENTAL_PHENOMENON_PREDICTION
+在 `main` 上以 `0a4d41b05ed91af2ec566f515250d942bc97042a` 的科学代码为基线继续。本轮是用户明确授权的正式源码修复，不再受旧交接中“未授权修改正式程序”的限制。未开展真实实验，没有把软件回归测试写成装置验证或空间/时间收敛资格。
 
-    PROJECT_STATE = READY_TO_PAUSE_BEFORE_EXPERIMENT
-    READY_FOR_QUANTITATIVE_APPARATUS_PREDICTION = false
-    DYNAMIC_STEPS_EXECUTED_THIS_STAGE = 0
-    experiment_started = false
+本轮数值身份为 `HF3D-20260905-consistent-CLS-clearance-divergence`。旧冻结结果不能不经重算直接继承到新算法。项目继续按短期个人科研工具处理，没有新增工作流框架或扩大物理自由度。
 
-## 全项目复核与候选区清理
+`交接说明_history.md` 按要求清空为零字节；Git 历史、Q1R3/D3R1 原始结果、失败审计及 E0 测量接口材料保持保留。临时源码获取/提交工作流在最终发布提交中移除。
 
-ChatGPT Pro 在提交 `43b32a6b5028ae78ca2475afb2c6013b15c9c8f1` 上完成全项目只读复核，Codex 随后独立核对文件集合、保留引用、测试入口和正式源码身份。结论为：
+## 实际修改
 
-    FORMAL_THEORY_PROMOTION_NOW = NO_GO
-    FORMAL_PROGRAM_SOURCE_PROMOTION_NOW = NO_GO
-    FORMAL_PROGRAM_README_STATUS_SECTION = PARTIAL_GO__NOT_IMPLEMENTED
-    TRACKED_CANDIDATE_CLEANUP = PASS_EXACT_184
+文件位于 `02_模拟程序/`。
 
-本次候选清理只删除已经终止、且不再服务于科学结论的性能控制面：
+1. `numerics/phase_transfer3d.py` 与 `numerics/interface3d.py`：CLS 压缩/扩散改成逐面有界通量限制，不再先裁剪再全局补质量；同时将同一质量交换应用于三个动量分量。限流量另行记录，不伪装成裁剪量。测试覆盖密度比直到 $10^6$、密度跳变反号、多次交换、均匀速度保持、总质量和动量守恒及混合动能不增。
+2. `hf3d/stepper.py`：物理动量对流先使用压缩前的密度，之后才配对执行 CLS。增加整步接线测试和开启压缩的零驱动、正反转短轨迹，不再只在关闭压缩的辅助配置上证明组合正确。
+3. 物理对流仍存在有限压力残差引起的微小相分数裁剪/修复。新增上界为舍入量加 $2\Delta t\int|D\mathbf u|\,\mathrm dV$；超出即在提交状态前拒绝。**该残差级修复不是严格的配对动量通量**，不能宣称整个有限精度分裂步精确保持全部能量或自由流；已有逐步裁剪/修复数组继续记录它。初版只允许舍入量的门会误拒正常短轨迹，已按实测离散散度预算修正，不靠随意放宽原有质量预算通过。
+4. `topology_diagnostics_3d`：等面积半径保留为描述量，但不再决定解析资格。采用考虑三维体素体积的保守净空和侵蚀后连通路径，要求从顶部达到体素磁子上方。终端截面的向下延拓只用于净空计算，连通路径不能走该虚拟区域。检验范围是磁子上方的主体气道，不是接触线、薄膜、侧面润湿或装置有效性。未接触时跳过距离变换，避免给每个正常前期步骤增加无用开销。
+5. `projection3d.py` / `projection3d_gpu.py`：加入最大投影散度目标。根据离散恒等式 $D\mathbf u^{n+1}=\Delta t(Ap-b)/V$ 收紧 PCG 相对容差，并独立检查实际最大散度；另记录残差预报散度和恒等式缺口。未放宽原相对残差门。新配置 `high_fidelity.maximum_projected_divergence_s_inv` 默认 $10^{-4}\,\mathrm{s}^{-1}$，是可调整的数值控制，不是装置精度阈值。
+6. `hf3d/types.py` / `recording.py`：保存逐接受步的 CLS 限流体积、CLS 动能变化、实际 PCG 容差、残差预报散度和投影恒等式缺口，并明确新的数值身份与解析门作用域。
+7. 更新根 README、程序 README，新增 `04_20260905_数值一致性修订.md`。原高保真冻结文档只加当前版本提示，既有冻结数值数据不改写。
 
-- `17_HF3D性能优化` 中删除 56 个 P0/P0P 性能文件，只保留 7 个 D3R1 散度审计文件；
-- 删除 `24_P0P失败证据登记与P0P2零步实现` 的 108 个 tracked 文件；
-- 删除 `30_个人科研模式收敛与P0Lite性能基线` 的 8 个 tracked 文件；
-- 删除 12 份已由后续终态取代的性能裁决文档。
+## 验证入口与证据
 
-候选区 tracked 文件总数由 484 降为 300，其中 `current/**` 为 298，另 2 个为本交接文件。两个已归档性能目录中的 233 个本地 ignored 文件共 `436637874` 字节，已移入桌面回收站而非永久擦除。保留的联合预注册仍绑定 `17_HF3D性能优化/artifacts/p0/performance_raw`，因此该 52509 字节原始根没有删除。
+在 `02_模拟程序` 执行：
 
-正式理论、正式程序源码、测试、配置及冻结科学证据均未改动。Pro 建议的正式 `02_模拟程序/README.md` 证据状态段尚未写入，因为该文件仍需要新的文件级授权；这不影响安全暂停状态。
+```bash
+PYTHONPATH=src:tests OPENBLAS_NUM_THREADS=1 xvfb-run -a python -m unittest discover -s tests
+```
 
-## 科学状态
+新增回归覆盖薄缝（含各向异性网格）、大侧腔、薄水平桥、宽气道正例、压力右端尺度变化、伪造 CG 成功状态的拒绝、配置回读和整步数据记录。开启 CLS 的整步烟雾测试使用 $16\times16\times20$ 网格，零驱动及正反转各计算 0.02 秒；这是短数值检查，不是完整物理时长的收敛研究。
 
-- Q1R3 六个必需平滑观测量全部未通过空间收敛，保持 `Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED`。
-- D3R1 的 `G9_DT2` 在接受步 `6695`、模拟时刻 `0.009196624999999948 s` 因投影后最大散度门失败。
-- 结果盲、只读失败步审计独立重算的最大投影散度为 `1.0249185899624536e-4 s^-1`，与归档逐位相同。压力代数残差携带几乎全部失败散度，但冻结 H-A/H-B/H-C 门没有识别唯一因果机制。
-- 冻结终态保持：
+CUDA 路径使用同一停止准则，并增加了可在具备 CUDA 环境运行的对照断言；本次环境没有 CuPy/CUDA，设备测试跳过。不能将代码同步或 CPU PASS 表述为 GPU 硬件验证。
 
-      MECHANISM_NOT_IDENTIFIED__NO_FIX_AUTHORIZED
+完整日志由实际验证工作流写入 `current/2026-09-05_数值审查修复/validation.log`；提交后工作流记录附在本文末尾。
 
-- Pro 接受投影审计为合同忠实并关闭当前取证；不得事后追认 H-A，不开展第二轮审计、求解器修复、动态重跑、D3 S3 或更细网格 campaign。
-- P0-Lite 已按用户“短期个人使用性能足够、科学准确性优先”的判断终止；reference baseline 保持 `INCOMPLETE/PARTIAL`，不得重跑、补齐或转入性能重构。
+## 未被本轮改变的科学状态
 
-## 实验前准备包
+Q1R3 六个必需平滑观测量未通过原空间收敛门。D3R1 的 `G9_DT2` 在接受步 6695、模拟时刻约 0.009196625 秒因最大投影散度失败；旧结果盲审计重算为 $1.0249185899624536\times10^{-4}\,\mathrm{s}^{-1}$，没有识别唯一根因。本轮没有重跑这些 campaign，也没有把压力停止条件修复追认为历史失败的唯一解释。
 
-活动 E0 交付为：
+没有新增动态接触角滞后、惯性界面 ROM、三维湍流闭合或实验标定。前向与 HF3D 的湿润闭合仍不同；对照应先限制在共同适用工况。真实高密度比流动仍需检查界面厚度、网格、步长、壁面和 CSF 平衡误差。
 
-    90_候选工作区/current/31_实验前可证伪预测与测量接口.md
+E0-R1A 测量准备继续参考 `current/31_实验前可证伪预测与测量接口.md`。共同二维观测、容器坐标/快门算子、实测初态映射及本装置单相机 FS-SS 路线仍待实现或校准。物理验证、实验验证和装置定量预测资格均未获得。
 
-Pro 对 E0-V1 要求结果盲、纯文档 E0-R1 修订；随后对提交 `16fca39` 的闭环审查确认 M3/M4/M6/M7/M9/M10/M11/M12 已关闭，但发现部分径向箱、共转坐标和快门算子仍有窄数学缺口。E0-R1A 按其最终最小裁决及正式代码独立核对后关闭：
+## 接续优先级
 
-- 用容器横截面投影面积上的部分箱高度积分和有效面积直接定义 $D_{E0}$；禁止以整箱均值近似部分箱，聚合 profile 无子箱信息时必须箱边界对齐或失败；
-- 冻结采集前比较集合 $\mathcal N_{cmp}$，任一预定时刻失败即使主 run 失败，禁止解封后删时刻；
-- 明确正式 HF3D 共转求解场按实测绝对初相位逐时刻旋回容器坐标，再施加相机/支持算子，并要求非轴对称标记合成测试；
-- 以联合算子表达“曝光光强积分后再做相关与非线性反演”，不再默认空间重建与快门平均可交换；只有独立动态校准通过时才允许时空可分离近似；
-- 补齐正式 $\alpha=0.5$ 列高度的三种 fallback 与空环带插值语义，并要求主域单一合法交叉；
-- 明示正式 HF3D 只有平坦初态，实测 $h_0(x,y)$ 到相场/初态的映射尚未实现，分别减初值不能消除动力学初态差异；
-- 以容器轴和容器坐标重力向量闭合坐标，加入磁子中心、升降、偏心、倾角与跳动的测量/适用域；
-- 把单顶部偏轴 FS-SS 降为本装置尚未证明的条件光学路线，加入有效梯度图连通、法方程满秩、逆问题条件数、独立非平面校准和包含磁子排液的体积约束；
-- 划清触发前基线输入与触发后密封液面，补齐 mask、原因码、有效面积、算子身份、联合协方差/Monte Carlo 载荷和完整 prediction manifest；
-- 把几何、物性、转速、姿态和初态统一放入 $u_{input}$，输出光学误差放入 $u_{meas,out}$，保留共享时基交叉协方差，消除转速双计数；
-- 废止没有本装置误差预算依据的普适固定阈值，改由独立于 holdout 的 $A_{MRD}$、共同时间带宽和预注册决策风险产生资格门。
+先复核新增质量—动量和投影诊断在目标短工况中的尺度，再做独立网格/时间细化。需要 CUDA 时先运行真实设备对照。新模型或更大流场计算只能依据明确的失配证据推进，不应把回归测试通过作为启动无边界大规模扫描的理由。
 
-这些是数学合同和未来失败门，不是实现/校准 PASS。当前仍明确：
+## 本轮提交验证记录
 
-    COMMON_2D_OBSERVATION_OPERATOR = NOT_IMPLEMENTED
-    SOLVER_TO_CONTAINER_FRAME_MAPPING = NOT_IMPLEMENTED
-    JOINT_SHUTTER_OBSERVATION_OPERATOR = NOT_IMPLEMENTED
-    MEASURED_H0_TO_HF3D_INITIAL_STATE_MAPPING = NOT_IMPLEMENTED
-    FS_SS_SINGLE_OFF_AXIS_CAMERA = CONDITIONAL_OPTICAL_ROUTE__FEASIBILITY_NOT_DEMONSTRATED
-    PROFILE_BRIDGE_REQUIRED_BEFORE_PAUSE = false
-    PROFILE_BRIDGE_REQUIRED_BEFORE_SEALED_VALIDATION = true
+实际远端验证：在 `02_模拟程序` 执行 `PYTHONPATH=src:tests OPENBLAS_NUM_THREADS=1 xvfb-run -a python -m unittest discover -s tests -v`，退出码 `0`。NumPy 2.3.5、SciPy 1.17.0、Matplotlib 3.10.8。
 
-正式分析接口只支持一维标量，不能自动承载时间—半径轮廓；暂停前不要求实现桥接，但任何磁力驱动 sealed validation 解封前，候选二维共同观测、初态路径和 profile 分析桥必须合成验证并冻结。
+工作流运行编号：`33924890990`；测试对象是基于 `a313fb0b5e7ce0a0e71a450878ee00967abb7572` 应用本轮补丁后的工作树。
 
-## 恢复条件
-
-只有用户明确授权进入实验阶段后才继续。恢复后的第一项动作是按 E0-R1A 做静态测量系统/输入校准，并在候选区结果盲实现共同二维观测与初态桥；不得直接采集、查看或解封磁力驱动 holdout。
-
-形成装置定量预测之前还必须满足：
-
-- 同一模型身份、参数区间、观测量和运行时长的数值资格；
-- 本装置单相机 FS-SS 光路、磁子完整运动、共同触发和时空传递的静态资格；
-- 实测初态到 HF3D 的合法映射，或结果盲零驱动平衡兼容门；
-- 共同二维投影面积/支持、共转到容器坐标变换、联合空间—快门算子、固定比较时刻及联合不确定度载荷；
-- 在触发后液面仍密封时提交不可追溯修改的完整 prediction manifest；
-- 明确且有限的模型适用域和结构差异处理。
-
-若用户只授权搭建或校准，不得扩大到磁力驱动实验。若用户授权动态实验，也不得把未资格预测、失效测量或已解封数据写成盲验证。
-
-## 保护范围与当前结论上限
-
-未获新的文件级授权时，继续保持只读：
-
-    01_最终理论/**
-    02_模拟程序/**
-    AGENTS.md
-    既有 Q1R3、D3、投影审计和 E0 冻结证据
-
-当前结论上限：
-
-    numerical qualification = NOT DEMONSTRATED
-    physical validation = NOT PERFORMED
-    experimental validation = NOT PERFORMED
-    apparatus prediction = DISALLOWED
+```text
+Python 3.13.15
+test_device_matrix_and_face_coefficients_match_cpu_operator (test_gpu_projection.CuPyProjectionParityTests.test_device_matrix_and_face_coefficients_match_cpu_operator) ... skipped 'GPUProjectionUnavailable: CuPy CUDA runtime is unavailable; install the optional gpu dependencies in an isolated environment'
+test_device_pressure_history_checkpoint_restores_rejected_trial (test_gpu_projection.CuPyProjectionParityTests.test_device_pressure_history_checkpoint_restores_rejected_trial) ... skipped 'GPUProjectionUnavailable: CuPy CUDA runtime is unavailable; install the optional gpu dependencies in an isolated environment'
+test_fp64_projection_reaches_same_discrete_residual_and_divergence_gate (test_gpu_projection.CuPyProjectionParityTests.test_fp64_projection_reaches_same_discrete_residual_and_divergence_gate) ... skipped 'GPUProjectionUnavailable: CuPy CUDA runtime is unavailable; install the optional gpu dependencies in an isolated environment'
+test_one_complete_hf3d_step_matches_explicit_cpu_path (test_gpu_projection.CuPyProjectionParityTests.test_one_complete_hf3d_step_matches_explicit_cpu_path) ... skipped 'GPUProjectionUnavailable: CuPy CUDA runtime is unavailable; install the optional gpu dependencies in an isolated environment'
+Ran 200 tests in 36.888s
+OK (skipped=4)
+```
