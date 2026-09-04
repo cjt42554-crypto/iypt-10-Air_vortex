@@ -1,0 +1,17 @@
+Python 3.12.3
+test_bubble_multiplier_feedback (__main__.TheoryChecks.test_bubble_multiplier_feedback) ... ok
+test_document_invariants (__main__.TheoryChecks.test_document_invariants) ... ok
+test_interface_ramp_memory (__main__.TheoryChecks.test_interface_ramp_memory) ... ok
+test_local_continuity (__main__.TheoryChecks.test_local_continuity) ... ok
+test_moving_closed_end_flux (__main__.TheoryChecks.test_moving_closed_end_flux) ... ok
+test_poisseuille_counterexample (__main__.TheoryChecks.test_poisseuille_counterexample) ... ok
+test_positive_mobility_volume_and_energy (__main__.TheoryChecks.test_positive_mobility_volume_and_energy) ... ok
+test_pressure_against_atmosphere_not_endpoint_only (__main__.TheoryChecks.test_pressure_against_atmosphere_not_endpoint_only) ... ok
+test_triangle_pressure_bound (__main__.TheoryChecks.test_triangle_pressure_bound) ... ok
+test_zero_net_volume_with_internal_flow (__main__.TheoryChecks.test_zero_net_volume_with_internal_flow) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.007s
+
+OK
+No root Markdown checker; tested display delimiters and unique equation tags in theory regression.
