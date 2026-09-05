@@ -26,3 +26,6 @@ dist/
 runs/
 outputs/
 *.log
+
+# Disposable exploration output; important evidence must be retained explicitly.
+/90_探索工作区/_scratch/

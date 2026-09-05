@@ -1,0 +1,120 @@
+name: Repository layout task
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/repository-layout-task.yml]
+permissions:
+  contents: write
+concurrency:
+  group: repository-layout-task
+  cancel-in-progress: false
+env:
+  GIT_LFS_SKIP_SMUDGE: '1'
+  MPLBACKEND: Agg
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        if: endsWith(github.repository, 'iypt-13-Vortex_pendulum')
+        with:
+          node-version: '24'
+      - name: Apply reviewed migration to exact source contents
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64, gzip, hashlib, json, os, pathlib, urllib.request
+          url = 'https://api.github.com/repos/' + os.environ['GITHUB_REPOSITORY'] + '/git/blobs/bd2a91556cf30e30ae5b0340352e57310fb88f98'
+          request = urllib.request.Request(url, headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'], 'Accept':'application/vnd.github+json'})
+          with urllib.request.urlopen(request, timeout=30) as response:
+              blob = json.load(response)
+          code = gzip.decompress(base64.b64decode(blob['content']))
+          assert hashlib.sha256(code).hexdigest() == '94f162d27d769d2e54e43b89acc89045f5907471a02dada5b40c44d191e086db'
+          pathlib.Path('/tmp/migrate.py').write_bytes(code)
+          PY
+          problem="$(basename "$GITHUB_REPOSITORY" | cut -d- -f2)"
+          python /tmp/migrate.py "$problem" | tee /tmp/layout-apply.txt
+          git add -A
+          git add -f --pathspec-from-file=/tmp/iypt-relocated-paths --pathspec-file-nul
+      - name: Validate relocated entry points and formal software
+        run: |
+          set -euo pipefail
+          task='03_研究记录/维护/2026-09-05_目录重组'
+          cp .github/workflows/repository-layout-task.yml "$task/execution-workflow.yml"
+          {
+            echo "Repository: $GITHUB_REPOSITORY"
+            echo "Source commit: $GITHUB_SHA"
+            echo "Actions run: $GITHUB_RUN_ID"
+            echo 'Scope: directory migration, active references and software regression; no new scientific qualification.'
+            cat /tmp/layout-apply.txt
+            python --version
+            uname -a
+            python -m unittest discover -s tools -p 'test_repository_docs.py' -v
+            python tools/check_repository_docs.py
+            python tools/resolve_legacy_path.py '90_候选工作区/交接说明_current.md'
+            problem="$(basename "$GITHUB_REPOSITORY" | cut -d- -f2)"
+            if [ "$problem" = 5 ]; then
+              python -m py_compile '02_模拟程序/03_结构性理论分析程序/torus_structure_analysis.py'
+              cd '02_模拟程序/01_前向预测数值求解器/y_pendulum_forward_solver'
+              echo '$ python -m pip install -e . && python -m unittest discover -s tests -v'
+              python -m pip install -e .
+              python -m unittest discover -s tests -v
+              cd "$GITHUB_WORKSPACE"
+            elif [ "$problem" = 10 ]; then
+              cd '02_模拟程序'
+              echo '$ python -m pip install -e . && python -m unittest discover -s tests -v'
+              python -m pip install -e .
+              python -m unittest discover -s tests -v
+              cd "$GITHUB_WORKSPACE"
+            else
+              python tools/check_markdown_math.py
+              cd '02_模拟程序'
+              node --version
+              npm --version
+              echo '$ npm ci && npm run validate'
+              npm ci
+              npm run validate
+              cd "$GITHUB_WORKSPACE"
+            fi
+            python -m pip freeze
+            echo 'NOT RUN: historical large convergence cases, GPU hardware qualification, apparatus experiments, hydrated LFS object verification.'
+            echo 'PASS: all invoked validation commands completed successfully.'
+          } 2>&1 | tee "$task/validation.txt"
+          git add -- "$task/validation.txt" "$task/execution-workflow.yml"
+      - name: Verify preserved staged bytes and non-force publish
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, pathlib, subprocess
+          m = json.loads(pathlib.Path('03_研究记录/维护/2026-09-05_目录重组/migration.json').read_text())
+          for item in m['preserved_files']:
+              data = subprocess.check_output(['git','show',':'+item['new']])
+              assert len(data) == item['size'] and hashlib.sha256(data).hexdigest() == item['sha256'], item['new']
+          assert pathlib.Path('00_项目管理/交接说明_history.md').stat().st_size == 0
+          print('STAGED ORIGINAL BYTES VERIFIED', len(m['preserved_files']))
+          PY
+          git diff --exit-code
+          git diff --cached --check
+          git fetch origin main
+          test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'refactor: separate project handoff, research records, data and exploration workspaces'
+          git push origin HEAD:main
+          git rev-parse HEAD
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: layout-migration-validation
+          path: 03_研究记录/维护/2026-09-05_目录重组/validation.txt
+          if-no-files-found: ignore
+          retention-days: 7
