@@ -139,19 +139,33 @@ class ThinFilmTests(unittest.TestCase):
             references.append(ref.y[:,-1])
         normalizer=np.sqrt(h.size)*1e-4+np.linalg.norm(references[-1])
         reference_error=np.linalg.norm(references[-2]-references[-1])/normalizer
+        maximum_steps=[.02,.01,.005,.0025]
         errors=[]
-        for dt in [.01,.005,.0025]:
+        for dt in maximum_steps:
             traj=integrate(op,h,[0.,.2],max_dt=dt,rtol=1e-3)
             self.assertEqual(traj.status,'completed')
             errors.append(float(np.linalg.norm(traj.thickness_m[-1]-references[-1])/normalizer))
-        # Adaptive BDF is order 1--5. Report observed error decrease rather
-        # than labelling this a fixed-order method.
-        self.assertTrue(np.all(np.diff(errors)<0.))
-        self.assertGreater(min(np.log2(np.array(errors[:-1])/errors[1:])),.5)
-        self.assertLess(errors[-1],1e-6)
-        self.assertLess(reference_error,errors[-1]/10.)
-        print('TF_NONLINEAR_TIME',json.dumps({'maximum_steps_s':[.01,.005,.0025],
-            'errors_vs_radau':errors,'radau_refinement_error':float(reference_error)}))
+        tolerances=[1e-3,1e-5,1e-7,1e-9]
+        tolerance_errors=[]
+        for tolerance in tolerances:
+            traj=integrate(op,h,[0.,.2],max_dt=.02,rtol=tolerance)
+            self.assertEqual(traj.status,'completed')
+            tolerance_errors.append(float(np.linalg.norm(traj.thickness_m[-1]-references[-1])/normalizer))
+        print('TF_NONLINEAR_TIME',json.dumps({'maximum_steps_s':maximum_steps,
+            'step_sequence_rtol':1e-3,'errors_vs_radau':errors,
+            'relative_tolerances':tolerances,'tolerance_sequence_max_step_s':.02,
+            'tolerance_errors_vs_radau':tolerance_errors,
+            'radau_refinement_error':float(reference_error)}))
+        # The production BDF is adaptive in both order (1--5) and step size:
+        # max_dt only caps its steps. Tiny changes can select another order
+        # history, so successive cap halvings need not reduce error strictly.
+        # Retain the 1e-6 accuracy target at every level and require substantial
+        # coarse-to-fine improvement in two independent controls. This does not
+        # assign a fixed convergence order to adaptive BDF.
+        self.assertLess(max(errors+tolerance_errors),1e-6)
+        self.assertLess(errors[-1],errors[0]/10.)
+        self.assertLess(tolerance_errors[-1],tolerance_errors[0]/100.)
+        self.assertLess(reference_error,min(errors+tolerance_errors)/10.)
 
     def test_open_pde_drainage_and_thickness_exit(self):
         exact=lambda t:(1e8+4*1000./(.003)*100.*t)**(-.5)

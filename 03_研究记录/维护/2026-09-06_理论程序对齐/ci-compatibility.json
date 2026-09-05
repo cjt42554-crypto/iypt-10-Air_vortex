@@ -1,0 +1,71 @@
+{
+  "implementation_commit": "2d251f6bb21f88b74fa887b5e4a400f3a1479430",
+  "unchanged_production_source_sha256": "b422a7ea905f9dc31efacbfd9d7208632a92b9cf150dcd46c974b3ae1766b4f3",
+  "changed_test": "02_模拟程序/tests/test_thin_film.py",
+  "changed_test_sha256": "577d737eb4675375a784a58a4fd63c67e2faa3b98294eabf2088dbdaf746cfb6",
+  "first_remote_run": "https://github.com/cjt42554-crypto/iypt-10-Air_vortex/actions/runs/33985096105",
+  "first_remote_result": {
+    "total": 250,
+    "passed": 244,
+    "failed": 1,
+    "skipped": 5,
+    "failure": "TF adaptive BDF errors were not strictly monotone across maximum-step caps"
+  },
+  "original_log": "ci-first-failure-33985096105.log.gz",
+  "original_log_sha256": "c88787d0e10addeb34f73a3a8d74435450b50825b47d679eb6d66424bc4208f4",
+  "local_rechecks": [
+    {
+      "numpy": "1.26.4",
+      "scipy": "1.11.4",
+      "display": true,
+      "total": 250,
+      "passed": 246,
+      "skipped_cuda": 4,
+      "seconds": 36.895,
+      "log": "solver-regression-ci-fix.txt"
+    },
+    {
+      "numpy": "2.5.2",
+      "scipy": "1.18.1",
+      "matplotlib": "3.11.1",
+      "display": false,
+      "total": 250,
+      "passed": 245,
+      "skipped_cuda": 4,
+      "skipped_tk": 1,
+      "seconds": 34.886,
+      "log": "solver-regression-ci-env.txt"
+    }
+  ],
+  "local_python": "3.12.3",
+  "scope": "Two local dependency environments; remote hardware was not emulated. Production source unchanged; no physics, mass or energy tolerance relaxed.",
+  "acceptance": {
+    "each_step_and_tolerance_level_error_upper_bound": 1e-06,
+    "step_final_to_coarse_upper_bound": 0.1,
+    "tolerance_final_to_coarse_upper_bound": 0.01,
+    "radau_reference_error_to_smallest_test_error_upper_bound": 0.1,
+    "fixed_bdf_order_claim": false
+  },
+  "extended_step_probe": {
+    "numpy": "1.26.4",
+    "scipy": "1.11.4",
+    "maximum_steps_s": [
+      0.02,
+      0.01,
+      0.005,
+      0.0025,
+      0.00125,
+      0.000625
+    ],
+    "errors_vs_radau": [
+      7.426628191595758e-07,
+      4.8309575276051024e-09,
+      1.6889076116818578e-09,
+      2.265997426787885e-10,
+      2.7858829399656456e-11,
+      2.66155119073051e-09
+    ],
+    "reproduction": "Use operator, initial profile, Radau reference and norm from test_nonlinear_time_refinement_with_independent_radau_reference; evaluate integrate(op,h,[0.,.2],max_dt=dt,rtol=1e-3) for each listed maximum step. Only the cap changes."
+  },
+  "command": "From 02_模拟程序: PYTHONPATH=src:tests OPENBLAS_NUM_THREADS=1 python3 -m unittest discover -s tests -v; use the isolated interpreter and env -u DISPLAY MPLBACKEND=Agg for the second environment."
+}
