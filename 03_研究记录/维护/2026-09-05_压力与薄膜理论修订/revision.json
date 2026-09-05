@@ -1,0 +1,28 @@
+{
+  "base_commit": "2461446290106ae6d49b6922cc152b320e8c3a92",
+  "base_production_tree": "6e6b81e41a3aecae1927c70b902938a1a6b90b74",
+  "source_artifact_sha256": "881dcdeaa7329dc24ffca6537bfccd433c571fe4902a4cbf90d6a843695034f4",
+  "changed_tracked_paths": [
+    "00_项目管理/交接说明_current.md",
+    "01_最终理论/01_前向预测理论.md",
+    "01_最终理论/02_前向预测理论的数值计算理论.md",
+    "01_最终理论/README.md",
+    "README.md"
+  ],
+  "hashes": {
+    "00_项目管理/交接说明_current.md": "9557ec375b69de9da75169525a63bb4a1c69fb394bc08258ce88286e2c6a23f2",
+    "01_最终理论/01_前向预测理论.md": "4698b016a4a27110b8e147fe99d216a2b8589ffd96af26c4b5888a39c15a39b7",
+    "01_最终理论/02_前向预测理论的数值计算理论.md": "4099f4af11d784eff43a08a595f471297908f600fc677e6439f7344530831af0",
+    "01_最终理论/README.md": "25773a2d0f91a1ae56b93a27965ca7938333fb4c1d1577764803327275806841",
+    "README.md": "4bfcb3c2e9bd3c239f7559ce9f0e6b76edc4d104ad63771eaa5ef07d8da9e3f8"
+  },
+  "verification_script_sha256": "ff8a0020822679fdfec7d781b79c24ace34beeadb44b83066ed095625cac4be1",
+  "local_solver": {
+    "run": 200,
+    "passed": 195,
+    "skipped": 5,
+    "exit": 0
+  },
+  "no_production_changes": true,
+  "history_bytes": 0
+}

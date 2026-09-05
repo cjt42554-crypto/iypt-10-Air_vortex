@@ -1,0 +1,12 @@
+pandoc 3.1.11.1
+{
+  "exit_codes": [
+    0,
+    0
+  ],
+  "math_nodes": {
+    "theory": 655,
+    "numerical": 193
+  },
+  "scope": "Pandoc AST parsing only; not formula correctness or typesetting"
+}

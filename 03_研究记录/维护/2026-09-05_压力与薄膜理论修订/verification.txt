@@ -1,0 +1,38 @@
+test_32_no_control_characters_and_unique_tags (__main__.DocumentationTests.test_32_no_control_characters_and_unique_tags) ... ok
+test_33_implementation_boundary_and_history (__main__.DocumentationTests.test_33_implementation_boundary_and_history) ... ok
+test_16_slip_flux_from_velocity (__main__.FilmTests.test_16_slip_flux_from_velocity) ... ok
+test_17_weighted_swirl_against_bvp (__main__.FilmTests.test_17_weighted_swirl_against_bvp) ... ok
+test_18_corotation_reduction (__main__.FilmTests.test_18_corotation_reduction) ... ok
+test_19_wetting_derivatives (__main__.FilmTests.test_19_wetting_derivatives) ... ok
+test_20_contact_angle_first_integral (__main__.FilmTests.test_20_contact_angle_first_integral) ... ok
+test_21_unsteady_spin_thinning (__main__.FilmTests.test_21_unsteady_spin_thinning) ... ok
+test_22_slip_accelerates_positive_drainage (__main__.FilmTests.test_22_slip_accelerates_positive_drainage) ... ok
+test_23_radial_mass_and_energy_identity (__main__.FilmTests.test_23_radial_mass_and_energy_identity) ... ok
+test_24_radial_energy_gradient (__main__.FilmTests.test_24_radial_energy_gradient) ... ok
+test_25_uniform_closed_film_is_stationary (__main__.FilmTests.test_25_uniform_closed_film_is_stationary) ... ok
+test_26_nonlinear_closed_film (__main__.FilmTests.test_26_nonlinear_closed_film) ... ok
+test_27_axisymmetric_mode_spatial_convergence (__main__.FilmTests.test_27_axisymmetric_mode_spatial_convergence) ... ok
+test_28_growth_rate_linearization (__main__.FilmTests.test_28_growth_rate_linearization) ... ok
+test_29_open_boundary_power (__main__.FilmTests.test_29_open_boundary_power) ... ok
+test_30_real_rk4_time_refinement (__main__.FilmTests.test_30_real_rk4_time_refinement) ... ok
+test_31_nonpositive_thickness_rejected (__main__.FilmTests.test_31_nonpositive_thickness_rejected) ... ok
+test_11_independent_stokes_boundary_problem (__main__.MobilityTests.test_11_independent_stokes_boundary_problem) ... ok
+test_12_shallow_limit (__main__.MobilityTests.test_12_shallow_limit) ... ok
+test_13_deep_limit (__main__.MobilityTests.test_13_deep_limit) ... ok
+test_14_zero_mode_and_positivity (__main__.MobilityTests.test_14_zero_mode_and_positivity) ... ok
+test_15_forced_mode_phase (__main__.MobilityTests.test_15_forced_mode_phase) ... ok
+test_01_mean_square (__main__.PressureTests.test_01_mean_square) ... ok
+test_02_isotropic_covariance_divergence (__main__.PressureTests.test_02_isotropic_covariance_divergence) ... ok
+test_03_pressure_compatibility_counterexample (__main__.PressureTests.test_03_pressure_compatibility_counterexample) ... ok
+test_04_rigid_swirl_pressure (__main__.PressureTests.test_04_rigid_swirl_pressure) ... ok
+test_05_manufactured_divergence (__main__.PressureTests.test_05_manufactured_divergence) ... ok
+test_06_manufactured_pressure_and_curl (__main__.PressureTests.test_06_manufactured_pressure_and_curl) ... ok
+test_07_manufactured_no_slip (__main__.PressureTests.test_07_manufactured_no_slip) ... ok
+test_08_manufactured_work_dissipation (__main__.PressureTests.test_08_manufactured_work_dissipation) ... ok
+test_09_isotropic_boundary_traction_cancels (__main__.PressureTests.test_09_isotropic_boundary_traction_cancels) ... ok
+test_10_psd_covariance_not_passivity (__main__.PressureTests.test_10_psd_covariance_not_passivity) ... ok
+
+----------------------------------------------------------------------
+Ran 33 tests in 3.260s
+
+OK
