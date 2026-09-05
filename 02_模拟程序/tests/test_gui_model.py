@@ -25,6 +25,9 @@ from airvortex.gui.model import (
 )
 
 
+from validity_fixtures import normalize_synthetic_signal_result
+
+
 class GuiViewModelTests(unittest.TestCase):
     def test_default_runtime_config_is_core_config_with_exact_defaults(self) -> None:
         model = GuiViewModel()
@@ -229,7 +232,7 @@ class GuiViewModelTests(unittest.TestCase):
         self.assertIn(DEMONSTRATION_WARNING, data.metadata["warning"])
         self.assertIs(data.metadata["calibration_validation_eligible"], False)
 
-        matching = normalize_simulation_result(
+        matching = normalize_synthetic_signal_result(
             {
                 "time_s": data.time_s,
                 "signals": {
@@ -297,7 +300,7 @@ class GuiViewModelTests(unittest.TestCase):
                 -1,
             )
 
-            matching = normalize_simulation_result(
+            matching = normalize_synthetic_signal_result(
                 {
                     "time_s": data.time_s,
                     "signals": {
@@ -631,7 +634,7 @@ class GuiViewModelTests(unittest.TestCase):
         self.assertIn("记录过短", compute_hann_spectrum(tuple(times[:8]), short).reason)
 
     def test_compare_series_calls_analysis_alignment(self) -> None:
-        reference = normalize_simulation_result(
+        reference = normalize_synthetic_signal_result(
             {
                 "time_s": [0.0, 0.5, 1.0],
                 "signals": {
@@ -640,7 +643,7 @@ class GuiViewModelTests(unittest.TestCase):
             },
             BackendMode.FORWARD,
         )
-        candidate = normalize_simulation_result(
+        candidate = normalize_synthetic_signal_result(
             {
                 "time_s": [0.0, 1.0],
                 "signals": {

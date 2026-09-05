@@ -1,0 +1,358 @@
+{
+  "schema_version": 1,
+  "contract_id": "airvortex-e0-measurement-input-v1",
+  "run_id": "SYNTHETIC-E0-SOFTWARE-TRACE-001",
+  "evidence_kind": "SYNTHETIC",
+  "role": "calibration",
+  "calibration_validation_eligible": false,
+  "freeze_status": "NOT_A_FROZEN_REAL_BATCH",
+  "warning": "SYNTHETIC SOFTWARE FIXTURE ONLY. This is not acquired data, not a frozen real batch, and not admissible for fitting or holdout scoring.",
+  "split": {
+    "unit": "complete_run",
+    "calibration_run_ids": [
+      "SYNTHETIC-E0-SOFTWARE-TRACE-001"
+    ],
+    "sealed_validation_run_ids": [],
+    "assignment_frozen_before_acquisition": false
+  },
+  "provenance": {
+    "raw_measurement_files_present": false,
+    "origin": "hand-authored analytic values for coordinate, exposure, profile, and leakage tests",
+    "apparatus_used": false,
+    "experiment_started": false
+  },
+  "units": {
+    "time": "s",
+    "length": "m",
+    "angle": "rad",
+    "angular_speed": "rad/s",
+    "volume": "m^3",
+    "gravity": "m/s^2"
+  },
+  "geometry": {
+    "container_inner_radius_m": 0.045,
+    "liquid_depth_m": 0.06,
+    "headspace_height_m": 0.02,
+    "bar_half_length_m": 0.015,
+    "bar_radius_m": 0.003,
+    "bar_volume_m3": 1.5e-06,
+    "bottom_clearance_m": 0.0015,
+    "liquid_volume_m3": 0.0003802,
+    "liquid_volume_standard_uncertainty_m3": 1e-07,
+    "gravity_container_m_s2": [
+      0.0,
+      0.0,
+      -9.80665
+    ],
+    "scientifically_qualified": false
+  },
+  "coordinate_calibration": {
+    "calibration_id": "SYNTHETIC-AFFINE-Y-DOWN-TO-Y-UP-v1",
+    "status": "SYNTHETIC_TEST_ONLY",
+    "scientifically_qualified": false,
+    "homography_pixel_to_container_m": [
+      [
+        0.001,
+        0.0,
+        -0.002
+      ],
+      [
+        0.0,
+        -0.001,
+        0.002
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "valid_pixel_bounds_uv": [
+      0.0,
+      4.0,
+      0.0,
+      4.0
+    ],
+    "expected_jacobian_sign": -1
+  },
+  "timebase": {
+    "time_zero": "shared_hardware_trigger_edge",
+    "trigger_channel": "SYNTHETIC_TTL_AND_IN_FRAME_LED",
+    "camera_clock": "SYNTHETIC_COMMON_CLOCK",
+    "bar_clock": "SYNTHETIC_COMMON_CLOCK",
+    "synchronized": true,
+    "scientifically_qualified": false
+  },
+  "exposure": {
+    "shutter_type": "global",
+    "frame_time_s": [
+      0.005,
+      0.015
+    ],
+    "start_s": [
+      0.002,
+      0.012
+    ],
+    "end_s": [
+      0.008,
+      0.018
+    ],
+    "response_fraction": [
+      0.0,
+      0.5,
+      1.0
+    ],
+    "response_weight": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "bar_kinematics": {
+    "quantity": "actual_bar",
+    "is_actual_bar_measurement": false,
+    "time_s": [
+      0.0,
+      0.005,
+      0.01,
+      0.015,
+      0.02
+    ],
+    "angular_speed_rad_s": [
+      0.0,
+      10.0,
+      20.0,
+      30.0,
+      40.0
+    ],
+    "phase_rad": [
+      0.0,
+      0.025,
+      0.1,
+      0.225,
+      0.4
+    ],
+    "centre_xyz_m": [
+      [
+        0.0,
+        0.0,
+        0.0045
+      ],
+      [
+        0.0,
+        0.0,
+        0.0045
+      ],
+      [
+        0.0,
+        0.0,
+        0.0045
+      ],
+      [
+        0.0,
+        0.0,
+        0.0045
+      ],
+      [
+        0.0,
+        0.0,
+        0.0045
+      ]
+    ],
+    "tilt_rad": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "source": "analytic software signal; not a sensor recording"
+  },
+  "flow_field": {
+    "quantity": "liquid_velocity_container",
+    "is_actual_flow_measurement": false,
+    "time_s": [
+      0.0,
+      0.01,
+      0.02
+    ],
+    "sample_xyz_m": [
+      [
+        0.001,
+        0.0,
+        0.02
+      ],
+      [
+        0.0,
+        0.001,
+        0.04
+      ]
+    ],
+    "velocity_m_s": [
+      [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.0,
+          0.01,
+          0.0
+        ],
+        [
+          -0.01,
+          0.0,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.0,
+          0.02,
+          0.0
+        ],
+        [
+          -0.02,
+          0.0,
+          0.0
+        ]
+      ]
+    ],
+    "valid_mask": [
+      [
+        true,
+        true
+      ],
+      [
+        true,
+        true
+      ],
+      [
+        true,
+        true
+      ]
+    ],
+    "source": "analytic solid-body marker; not PIV, PTV, or LDV data"
+  },
+  "surface_fixture": {
+    "pixel_uv": [
+      [
+        2.0,
+        2.0
+      ],
+      [
+        3.0,
+        2.0
+      ],
+      [
+        1.0,
+        2.0
+      ],
+      [
+        2.0,
+        1.0
+      ],
+      [
+        2.0,
+        3.0
+      ]
+    ],
+    "pixel_footprint_area_px2": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "source_time_s": [
+      0.0,
+      0.005,
+      0.01,
+      0.015,
+      0.02
+    ],
+    "height_m": [
+      [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06
+      ],
+      [
+        0.0599,
+        0.0598,
+        0.06,
+        0.0599,
+        0.0599
+      ],
+      [
+        0.0598,
+        0.0596,
+        0.06,
+        0.0598,
+        0.0598
+      ],
+      [
+        0.0597,
+        0.0594,
+        0.06,
+        0.0597,
+        0.0597
+      ],
+      [
+        0.0596,
+        0.0592,
+        0.06,
+        0.0596,
+        0.0596
+      ]
+    ],
+    "valid_mask": [
+      [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      [
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    ],
+    "source": "traceable synthetic non-axisymmetric height marker in container coordinates"
+  }
+}

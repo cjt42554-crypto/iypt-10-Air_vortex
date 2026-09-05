@@ -1,0 +1,18 @@
+{
+  "drive": {
+    "target_rpm": 0.0,
+    "ramp_duration_s": 0.0
+  },
+  "run": {
+    "duration_s": 0.05,
+    "output_interval_s": 0.01
+  },
+  "forward": {
+    "model_branch": "AV-FWD-TF-v1"
+  },
+  "film": {
+    "radial_cells": 32,
+    "initial_perturbation_amplitude_m": 2e-05,
+    "swirl_closure": "none"
+  }
+}

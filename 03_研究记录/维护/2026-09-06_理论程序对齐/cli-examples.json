@@ -1,0 +1,265 @@
+[
+  {
+    "config": "02_模拟程序/configs/cp_synthetic_reservoir.json",
+    "returncode": 0,
+    "time_s": [
+      0.0,
+      0.01,
+      0.02,
+      0.03,
+      0.04
+    ],
+    "model_id": "forward-cp2-axisymmetric-variational-fv-v2",
+    "validity": {
+      "apparatus_quantitative_prediction_qualified": false,
+      "calibrated_physical_inputs": false,
+      "claim_scope": "conditional_model_numerics",
+      "diagnostic_continuation": false,
+      "experimental_validation": false,
+      "first_invalid_time_s": null,
+      "implementation_id": "forward-cp2-axisymmetric-variational-fv-v2/PF-FV2D-v1",
+      "model_branch": "AV-FWD-CP-v2",
+      "reason": "DECLARED_CONDITIONAL_MODEL_CHECKS_PASSED",
+      "status": "valid",
+      "termination_interval_s": null,
+      "theory_sha256": "4698b016a4a27110b8e147fe99d216a2b8589ffd96af26c4b5888a39c15a39b7",
+      "valid_until_s": 0.04,
+      "version": 1
+    },
+    "config_sha256": "e6ae7285b3c1a9580bbd945773d64e46c2549d69b10aa74dfe61ed89d2834538",
+    "source_tree": {
+      "disk_content_tree": {
+        "boundary_match": true,
+        "execution_end": {
+          "absolute_root_stored": false,
+          "algorithm": "sha256",
+          "available": true,
+          "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+          "file_count": 72,
+          "reason": null,
+          "sample_point": "archive boundary after backend termination and immediately before archive serialization",
+          "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+          "total_bytes": 1324845,
+          "unit": null,
+          "value": "b422a7ea905f9dc31efacbfd9d7208632a92b9cf150dcd46c974b3ae1766b4f3"
+        },
+        "execution_start": {
+          "absolute_root_stored": false,
+          "algorithm": "sha256",
+          "available": true,
+          "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+          "file_count": 72,
+          "reason": null,
+          "sample_point": "run_once entry before backend discovery and backend construction",
+          "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+          "total_bytes": 1324845,
+          "unit": null,
+          "value": "b422a7ea905f9dc31efacbfd9d7208632a92b9cf150dcd46c974b3ae1766b4f3"
+        }
+      },
+      "execution_source_identity_valid": true,
+      "git_revision": {
+        "boundary_match": null,
+        "execution_end": {
+          "available": false,
+          "object_id_algorithm": null,
+          "reason": "Git metadata unavailable; no revision claimed",
+          "sample_point": "after backend termination and before archive serialization",
+          "unit": null,
+          "value": null,
+          "vcs": "git"
+        },
+        "execution_start": {
+          "available": false,
+          "object_id_algorithm": null,
+          "reason": "Git metadata unavailable; no revision claimed",
+          "sample_point": "run_once entry before backend discovery and backend construction",
+          "unit": null,
+          "value": null,
+          "vcs": "git"
+        }
+      },
+      "interpretation": "disk boundary hashes identify allow-listed files at two sample points. A match does not exclude a transient edit-and-restore or prove that already imported Python module bytes equal either disk snapshot. A mismatch invalidates a single execution-source identity. Git revisions are reported only when metadata resolves HEAD and are never synthesized",
+      "loaded_module_bytes_verified": false,
+      "reproducibility_status": "qualified_source_tree_boundary_match",
+      "source_tree_sha256_end": "b422a7ea905f9dc31efacbfd9d7208632a92b9cf150dcd46c974b3ae1766b4f3",
+      "source_tree_sha256_start": "b422a7ea905f9dc31efacbfd9d7208632a92b9cf150dcd46c974b3ae1766b4f3",
+      "unchanged": true
+    }
+  },
+  {
+    "config": "02_模拟程序/configs/sh_fixed_reference_static.json",
+    "returncode": 0,
+    "time_s": [
+      0.0,
+      0.005,
+      0.01
+    ],
+    "model_id": "AV-FWD-SH-v1",
+    "validity": {
+      "apparatus_quantitative_prediction_qualified": false,
+      "calibrated_physical_inputs": false,
+      "claim_scope": "conditional_model_numerics",
+      "diagnostic_continuation": false,
+      "experimental_validation": false,
+      "first_invalid_time_s": null,
+      "implementation_id": "axisymmetric-mac-linear-free-surface-sh-v1",
+      "model_branch": "AV-FWD-SH-v1",
+      "reason": "completed within the conditional linear-flat-cylinder SH limits",
+      "status": "valid",
+      "termination_interval_s": null,
+      "theory_sha256": "4698b016a4a27110b8e147fe99d216a2b8589ffd96af26c4b5888a39c15a39b7",
+      "valid_until_s": 0.01,
+      "version": 1
+    },
+    "config_sha256": "caae2e66541ba91924c40c8dade1bc8c0137716f69a11012818e0f6786776a49",
+    "source_tree": {
+      "disk_content_tree": {
+        "boundary_match": true,
+        "execution_end": {
+          "absolute_root_stored": false,
+          "algorithm": "sha256",
+          "available": true,
+          "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+          "file_count": 72,
+          "reason": null,
+          "sample_point": "archive boundary after backend termination and immediately before archive serialization",
+          "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+          "total_bytes": 1324845,
+          "unit": null,
+          "value": "b422a7ea905f9dc31efacbfd9d7208632a92b9cf150dcd46c974b3ae1766b4f3"
+        },
+        "execution_start": {
+          "absolute_root_stored": false,
+          "algorithm": "sha256",
+          "available": true,
+          "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+          "file_count": 72,
+          "reason": null,
+          "sample_point": "run_once entry before backend discovery and backend construction",
+          "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+          "total_bytes": 1324845,
+          "unit": null,
+          "value": "b422a7ea905f9dc31efacbfd9d7208632a92b9cf150dcd46c974b3ae1766b4f3"
+        }
+      },
+      "execution_source_identity_valid": true,
+      "git_revision": {
+        "boundary_match": null,
+        "execution_end": {
+          "available": false,
+          "object_id_algorithm": null,
+          "reason": "Git metadata unavailable; no revision claimed",
+          "sample_point": "after backend termination and before archive serialization",
+          "unit": null,
+          "value": null,
+          "vcs": "git"
+        },
+        "execution_start": {
+          "available": false,
+          "object_id_algorithm": null,
+          "reason": "Git metadata unavailable; no revision claimed",
+          "sample_point": "run_once entry before backend discovery and backend construction",
+          "unit": null,
+          "value": null,
+          "vcs": "git"
+        }
+      },
+      "interpretation": "disk boundary hashes identify allow-listed files at two sample points. A match does not exclude a transient edit-and-restore or prove that already imported Python module bytes equal either disk snapshot. A mismatch invalidates a single execution-source identity. Git revisions are reported only when metadata resolves HEAD and are never synthesized",
+      "loaded_module_bytes_verified": false,
+      "reproducibility_status": "qualified_source_tree_boundary_match",
+      "source_tree_sha256_end": "b422a7ea905f9dc31efacbfd9d7208632a92b9cf150dcd46c974b3ae1766b4f3",
+      "source_tree_sha256_start": "b422a7ea905f9dc31efacbfd9d7208632a92b9cf150dcd46c974b3ae1766b4f3",
+      "unchanged": true
+    }
+  },
+  {
+    "config": "02_模拟程序/configs/tf_local_synthetic.json",
+    "returncode": 0,
+    "time_s": [
+      0.0,
+      0.01,
+      0.02,
+      0.03,
+      0.04,
+      0.05
+    ],
+    "model_id": "AV-FWD-TF-v1",
+    "validity": {
+      "apparatus_quantitative_prediction_qualified": false,
+      "calibrated_physical_inputs": false,
+      "claim_scope": "conditional_model_numerics",
+      "diagnostic_continuation": false,
+      "experimental_validation": false,
+      "first_invalid_time_s": null,
+      "implementation_id": "airvortex.forward_film.axisymmetric-fv-bdf.v1",
+      "model_branch": "AV-FWD-TF-v1",
+      "reason": "local positive-thickness thin-film integration completed",
+      "status": "valid",
+      "termination_interval_s": null,
+      "theory_sha256": "4698b016a4a27110b8e147fe99d216a2b8589ffd96af26c4b5888a39c15a39b7",
+      "valid_until_s": 0.05,
+      "version": 1
+    },
+    "config_sha256": "1a25a1b8db873e23b567c9799417c8b8441ac519763ede53b10491755524edd3",
+    "source_tree": {
+      "disk_content_tree": {
+        "boundary_match": true,
+        "execution_end": {
+          "absolute_root_stored": false,
+          "algorithm": "sha256",
+          "available": true,
+          "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+          "file_count": 72,
+          "reason": null,
+          "sample_point": "archive boundary after backend termination and immediately before archive serialization",
+          "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+          "total_bytes": 1324845,
+          "unit": null,
+          "value": "b422a7ea905f9dc31efacbfd9d7208632a92b9cf150dcd46c974b3ae1766b4f3"
+        },
+        "execution_start": {
+          "absolute_root_stored": false,
+          "algorithm": "sha256",
+          "available": true,
+          "canonicalization": "SHA-256 over domain bytes airvortex-source-tree-v1\\0, then each file in lexicographic POSIX-relative-path order as uint64_be(path_byte_length), UTF-8 path bytes, uint64_be(content_byte_length), raw content bytes",
+          "file_count": 72,
+          "reason": null,
+          "sample_point": "run_once entry before backend discovery and backend construction",
+          "scope": "pyproject.toml, top-level run.py/run_gui.sh launchers when present, and regular *.py files below src/airvortex; allow-list excludes outputs, caches, bytecode, tests, documents, and user data",
+          "total_bytes": 1324845,
+          "unit": null,
+          "value": "b422a7ea905f9dc31efacbfd9d7208632a92b9cf150dcd46c974b3ae1766b4f3"
+        }
+      },
+      "execution_source_identity_valid": true,
+      "git_revision": {
+        "boundary_match": null,
+        "execution_end": {
+          "available": false,
+          "object_id_algorithm": null,
+          "reason": "Git metadata unavailable; no revision claimed",
+          "sample_point": "after backend termination and before archive serialization",
+          "unit": null,
+          "value": null,
+          "vcs": "git"
+        },
+        "execution_start": {
+          "available": false,
+          "object_id_algorithm": null,
+          "reason": "Git metadata unavailable; no revision claimed",
+          "sample_point": "run_once entry before backend discovery and backend construction",
+          "unit": null,
+          "value": null,
+          "vcs": "git"
+        }
+      },
+      "interpretation": "disk boundary hashes identify allow-listed files at two sample points. A match does not exclude a transient edit-and-restore or prove that already imported Python module bytes equal either disk snapshot. A mismatch invalidates a single execution-source identity. Git revisions are reported only when metadata resolves HEAD and are never synthesized",
+      "loaded_module_bytes_verified": false,
+      "reproducibility_status": "qualified_source_tree_boundary_match",
+      "source_tree_sha256_end": "b422a7ea905f9dc31efacbfd9d7208632a92b9cf150dcd46c974b3ae1766b4f3",
+      "source_tree_sha256_start": "b422a7ea905f9dc31efacbfd9d7208632a92b9cf150dcd46c974b3ae1766b4f3",
+      "unchanged": true
+    }
+  }
+]

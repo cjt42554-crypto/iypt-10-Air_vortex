@@ -30,6 +30,13 @@ from airvortex.core import (
     RunConfig,
     SimulationConfig,
     StirBarConfig,
+    QUANTITATIVE_VALIDITY_KEY,
+    QUANTITATIVE_VALID_MASK,
+    QuantitativeValidityError,
+    QuantitativeValidityStatus,
+    legacy_unassessed_validity,
+    validate_quantitative_validity_payload,
+    validate_result_quantitative_validity,
 )
 from airvortex.io import load_config_json, save_config_json
 
@@ -69,6 +76,7 @@ class RunState(str, Enum):
 DOMAIN_LIMIT_WARNING = "在模型域边界提前终止（非完整时长/非稳定气道）"
 DEMONSTRATION_WARNING = "演示数据，不得用于校准或验证"
 FORWARD_POST_CONTACT_WARNING = "首次几何接触后的点仅为数学外推，不代表真实气道"
+QUANTITATIVE_UNASSESSED_WARNING = "结果缺少定量有效性合同；全部样本按 legacy/未核定处理"
 
 
 _MISSING = object()
@@ -184,6 +192,16 @@ class ParameterSpec:
 
 
 PARAMETER_SPECS: tuple[ParameterSpec, ...] = (
+    ParameterSpec(
+        "forward_model_branch", "前向模型", "模型分支", "", "AV-FWD-CP-v2", 0., 0.,
+        "forward.model_branch", text=True, scannable=False, modes=(BackendMode.FORWARD,),
+        help_text="CP 基线；AV-FWD-SH-v1 固定参考域 Stokes；AV-FWD-TF-v1 局部薄膜。请先载入对应示例配置。",
+    ),
+    ParameterSpec(
+        "prediction_mode", "前向模型", "运行用途", "", "strict", 0., 0.,
+        "forward.prediction_mode", text=True, scannable=False, modes=(BackendMode.FORWARD,),
+        help_text="strict 在物理首次失效时停止；diagnostic 续跑并排除失效后的定量样本。",
+    ),
     ParameterSpec(
         "vessel_radius_mm", "装置", "容器内半径", "mm", 45.0, 10.0, 250.0,
         "container.radius_m", 1e-3,
@@ -630,6 +648,8 @@ class SimulationView:
     diagnostics: dict[str, Any] = field(default_factory=dict)
     metadata: dict[str, Any] = field(default_factory=dict)
     warnings: tuple[str, ...] = ()
+    quantitative_valid_mask: tuple[bool, ...] = ()
+    quantitative_validity: dict[str, Any] = field(default_factory=dict)
     raw: Any = field(default=None, repr=False, compare=False)
 
     def signal(self, key: str) -> SignalSeries | None:
@@ -642,6 +662,16 @@ class SimulationView:
     @property
     def domain_limited(self) -> bool:
         return DOMAIN_LIMIT_WARNING in self.warnings
+
+    @property
+    def quantitatively_valid_sample_count(self) -> int:
+        return sum(self.quantitative_valid_mask)
+
+    def quantitatively_valid_at(self, time_s: float) -> bool:
+        if not self.time_s or not self.quantitative_valid_mask:
+            return False
+        index = nearest_index(self.time_s, float(time_s))
+        return bool(self.quantitative_valid_mask[index])
 
 
 @dataclass(frozen=True)
@@ -1151,7 +1181,7 @@ class GuiViewModel:
             else:
                 self.progress = 1.0
                 self.progress_message = (
-                    f"计算完成；{normalized.warnings[0]}"
+                    "计算完成；" + "；".join(normalized.warnings)
                     if normalized.warnings
                     else "计算完成"
                 )
@@ -1178,13 +1208,28 @@ class GuiViewModel:
         for index, (input_value, raw_result) in enumerate(zip(input_values, results)):
             view = normalize_simulation_result(raw_result, selected)
             final_values: dict[str, float] = {}
-            for key, signal in view.signals.items():
-                finite = [item for item in signal.values if math.isfinite(item)]
-                if finite:
-                    final_values[key] = float(finite[-1])
             raw_status = _object_mapping(raw_result).get("status", "completed")
             status = getattr(raw_status, "value", str(raw_status))
             annotation = " | ".join(view.warnings)
+            validity_status = str(view.quantitative_validity.get("status", "legacy_unassessed"))
+            quantitatively_eligible = bool(
+                validity_status == QuantitativeValidityStatus.VALID.value
+                and view.quantitative_valid_mask
+                and view.quantitative_valid_mask[-1]
+            )
+            if quantitatively_eligible:
+                for key, signal in view.signals.items():
+                    if key == QUANTITATIVE_VALID_MASK:
+                        continue
+                    finite = [item for item in signal.values if math.isfinite(item)]
+                    if finite:
+                        final_values[key] = float(finite[-1])
+            else:
+                status = f"quantitative_rejected:{validity_status}"
+                diagnostics.append(
+                    f"扫描点 {index + 1} 定量聚合被拒绝：validity={validity_status}；"
+                    "未生成临界值或终值"
+                )
             points.append(
                 ScanPointView(float(input_value), final_values, status, annotation)
             )
@@ -1300,6 +1345,10 @@ class GuiViewModel:
                 for item in result.signals.values()
             ],
             "result_metadata": result.metadata,
+            "quantitative_validity": result.quantitative_validity,
+            "quantitatively_valid_sample_count": (
+                result.quantitatively_valid_sample_count
+            ),
             "diagnostics": result.diagnostics,
             "result_warnings": list(result.warnings),
             "experiment_overlay": (
@@ -1432,6 +1481,7 @@ def normalize_simulation_result(result: Any, mode: BackendMode | str) -> Simulat
 
     signals: dict[str, SignalSeries] = {}
     explicit_signals = payload.get("observables", payload.get("signals"))
+    raw_observables = explicit_signals if isinstance(explicit_signals, Mapping) else {}
     if isinstance(explicit_signals, Mapping):
         for raw_key, raw_value in explicit_signals.items():
             series = _normalize_signal(
@@ -1490,6 +1540,27 @@ def normalize_simulation_result(result: Any, mode: BackendMode | str) -> Simulat
             if item.values
         }
 
+    try:
+        validity = validate_result_quantitative_validity(
+            time_s,
+            raw_observables,
+            metadata,
+        )
+    except QuantitativeValidityError as exc:
+        raise ValueError(f"结果定量有效性合同无效：{exc}") from exc
+    if validity is None:
+        validity = validate_quantitative_validity_payload(
+            legacy_unassessed_validity(
+                "GUI input has no quantitative-validity contract; no sample qualification inferred"
+            )
+        )
+        quantitative_mask = tuple(False for _ in time_s)
+    else:
+        quantitative_mask = tuple(
+            value == 1.0
+            for value in _float_vector(raw_observables[QUANTITATIVE_VALID_MASK])
+        )
+
     surface_frames = _normalize_core_surface_frames(payload, time_s)
     if not surface_frames:
         surface_frames = _normalize_surface_frames(payload, time_s)
@@ -1497,6 +1568,9 @@ def normalize_simulation_result(result: Any, mode: BackendMode | str) -> Simulat
     if not field_frames:
         field_frames = _normalize_field_frames(payload, time_s)
     diagnostics = _mapping_copy(metadata.get("diagnostics"))
+    diagnostics[QUANTITATIVE_VALIDITY_KEY] = validity.to_dict()
+    diagnostics["quantitatively_valid_sample_count"] = sum(quantitative_mask)
+    diagnostics["recorded_sample_count"] = len(time_s)
     for key in (
         "fidelity_label",
         "evidence_level",
@@ -1526,6 +1600,24 @@ def normalize_simulation_result(result: Any, mode: BackendMode | str) -> Simulat
     if isinstance(events, Sequence):
         diagnostics.setdefault("event_count", len(events))
     warnings: list[str] = []
+    if metadata.get("numerical_qualification_notice"):
+        warnings.append(str(metadata["numerical_qualification_notice"]))
+    if validity.status is QuantitativeValidityStatus.LEGACY_UNASSESSED:
+        warnings.append(QUANTITATIVE_UNASSESSED_WARNING)
+    elif any(not value for value in quantitative_mask):
+        boundary = (
+            "未知"
+            if validity.valid_until_s is None
+            else f"{validity.valid_until_s:.9g} s"
+        )
+        warnings.append(
+            "定量有效样本止于 "
+            f"{boundary}；其后仅作诊断显示（{validity.status.value}: {validity.reason}）"
+        )
+    if not validity.apparatus_quantitative_prediction_qualified:
+        warnings.append(
+            "定量 mask 仅约束声明模型内的样本使用，不构成真实装置定量资格"
+        )
     termination_reason = diagnostics.get("termination_reason")
     if termination_reason is not None and "domain_limit" in str(termination_reason).lower():
         diagnostics["domain_limit_early_termination"] = True
@@ -1546,6 +1638,8 @@ def normalize_simulation_result(result: Any, mode: BackendMode | str) -> Simulat
         diagnostics=diagnostics,
         metadata=metadata,
         warnings=tuple(warnings),
+        quantitative_valid_mask=quantitative_mask,
+        quantitative_validity=validity.to_dict(),
         raw=result,
     )
 
@@ -1856,27 +1950,46 @@ def compare_series(
             f"比较单位不一致：{ref_unit!r} ≠ {candidate_unit!r}，拒绝计算伪误差"
         )
 
-    ref_pairs = [
-        (float(t), float(v))
-        for t, v in zip(reference.time_s, ref_signal.values)
-        if math.isfinite(float(t)) and math.isfinite(float(v))
-    ]
-    candidate_pairs = [
-        (float(t), float(v))
-        for t, v in zip(candidate.time_s, candidate_signal.values)
-        if math.isfinite(float(t)) and math.isfinite(float(v))
-    ]
-    if len(ref_pairs) != len(ref_signal.values) or len(candidate_pairs) != len(
-        candidate_signal.values
+    def qualified_pairs(
+        dataset: SimulationView | ExperimentData,
+        signal: SignalSeries,
+    ) -> tuple[list[tuple[float, float]], int, int]:
+        if isinstance(dataset, SimulationView):
+            eligibility = dataset.quantitative_valid_mask
+        else:
+            eligibility = tuple(True for _ in dataset.time_s)
+        finite_pairs: list[tuple[float, float]] = []
+        considered = min(len(dataset.time_s), len(signal.values), len(eligibility))
+        eligible_count = 0
+        for t, value, valid in zip(dataset.time_s, signal.values, eligibility):
+            if valid:
+                eligible_count += 1
+                if math.isfinite(float(t)) and math.isfinite(float(value)):
+                    finite_pairs.append((float(t), float(value)))
+        return finite_pairs, considered, eligible_count
+
+    ref_pairs, ref_considered, ref_eligible = qualified_pairs(reference, ref_signal)
+    candidate_pairs, candidate_considered, candidate_eligible = qualified_pairs(
+        candidate, candidate_signal
+    )
+    if (
+        ref_considered != len(ref_signal.values)
+        or candidate_considered != len(candidate_signal.values)
     ):
         raise ValueError(
-            "比较拒绝含缺测/非有限样本的序列："
-            f"参考 {len(ref_pairs)}/{len(ref_signal.values)} 有限，"
-            f"候选 {len(candidate_pairs)}/{len(candidate_signal.values)} 有限；"
+            "比较序列的时间、观测量与资格 mask 长度不一致，拒绝计算"
+        )
+    if len(ref_pairs) != ref_eligible or len(candidate_pairs) != candidate_eligible:
+        raise ValueError(
+            "比较拒绝定量有效区间内的缺测/非有限样本："
+            f"参考 {len(ref_pairs)}/{ref_eligible}，候选 {len(candidate_pairs)}/{candidate_eligible}；"
             "不填补、不跨缺口插值"
         )
     if len(ref_pairs) < 2 or len(candidate_pairs) < 2:
-        raise ValueError("每个序列至少需要两个有限样本，缺失值不会被伪填")
+        raise ValueError(
+            "每个序列至少需要两个定量有效且有限的样本；"
+            "legacy/失效/诊断样本不会被伪填或用于误差"
+        )
     from airvortex.analysis import ObservableSeries, compare_series as analysis_compare_series
 
     ref_core = ObservableSeries(
@@ -1976,10 +2089,12 @@ def _normalize_core_surface_frames(
     fields = payload.get("fields")
     if not isinstance(observables, Mapping) or not isinstance(fields, Mapping):
         return ()
-    radius = _float_vector(_first_present(fields, "radius_m", "r_m"))
+    radius = _float_vector(_first_present(fields, "radius_m", "r_m", "film_radius_m", "radius_centres_m"))
     profiles = _matrix_or_frames(
         _first_present(observables, "surface_profile_m", "free_surface_profile_m")
     )
+    if not profiles and "film_thickness_m" in fields:
+        profiles = _matrix_or_frames(fields["film_thickness_m"])
     minimum_profiles = _matrix_or_frames(
         observables.get("surface_profile_minimum_m")
     )
@@ -2459,6 +2574,7 @@ def _signal_presentation(key: str) -> tuple[str, str]:
         "pressure_residual": ("压力残差", "1"),
         "kinetic_energy_j": ("动能", "J"),
         "volume_error_percent": ("体积误差", "%"),
+        QUANTITATIVE_VALID_MASK: ("定量有效样本掩码", "1"),
     }
     return table.get(key, (key.replace("_", " "), ""))
 

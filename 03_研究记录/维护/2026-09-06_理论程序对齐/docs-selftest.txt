@@ -1,0 +1,21 @@
+test_code_label_is_checked (test_repository_docs.EntryDocumentTests.test_code_label_is_checked) ... ok
+test_escape (test_repository_docs.EntryDocumentTests.test_escape) ... ok
+test_external_and_anchor_links (test_repository_docs.EntryDocumentTests.test_external_and_anchor_links) ... ok
+test_final_newline (test_repository_docs.EntryDocumentTests.test_final_newline) ... ok
+test_inline_and_fenced_examples_are_ignored (test_repository_docs.EntryDocumentTests.test_inline_and_fenced_examples_are_ignored) ... ok
+test_missing_entry (test_repository_docs.EntryDocumentTests.test_missing_entry) ... ok
+test_missing_target (test_repository_docs.EntryDocumentTests.test_missing_target) ... ok
+test_unclosed_or_wrong_fence (test_repository_docs.EntryDocumentTests.test_unclosed_or_wrong_fence) ... ok
+test_valid_unicode_and_encoded_link (test_repository_docs.EntryDocumentTests.test_valid_unicode_and_encoded_link) ... ok
+test_exact_and_longest_prefix_mapping (test_repository_docs.LayoutAndMigrationTests.test_exact_and_longest_prefix_mapping) ... ok
+test_mapping_boundary_is_not_substring_replacement (test_repository_docs.LayoutAndMigrationTests.test_mapping_boundary_is_not_substring_replacement) ... ok
+test_mapping_rejects_escape (test_repository_docs.LayoutAndMigrationTests.test_mapping_rejects_escape) ... ok
+test_missing_layout_is_reported (test_repository_docs.LayoutAndMigrationTests.test_missing_layout_is_reported) ... ok
+test_nested_program_readmes_are_checked_not_frozen_records (test_repository_docs.LayoutAndMigrationTests.test_nested_program_readmes_are_checked_not_frozen_records) ... ok
+test_old_active_workspace_is_not_recreated (test_repository_docs.LayoutAndMigrationTests.test_old_active_workspace_is_not_recreated) ... ok
+test_required_layout_and_empty_history (test_repository_docs.LayoutAndMigrationTests.test_required_layout_and_empty_history) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.010s
+
+OK

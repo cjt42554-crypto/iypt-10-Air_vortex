@@ -1,0 +1,31 @@
+{
+  "drive": {
+    "initial_rpm": 800.0,
+    "target_rpm": 800.0,
+    "ramp_duration_s": 0.0
+  },
+  "run": {
+    "duration_s": 0.04,
+    "output_interval_s": 0.01
+  },
+  "forward": {
+    "initial_circulation_m2_s": 0.007539822368615503,
+    "stable_channel_radius_m": 0.001,
+    "stable_channel_hold_time_s": 0.2,
+    "radial_cells": 24,
+    "axial_cells": 40,
+    "interface_thickness_cells": 1.25,
+    "minimum_resolved_throat_cells": 3
+  },
+  "gas": {
+    "regime": "open_reservoir",
+    "evidence_kind": "synthetic_assumption",
+    "evidence_source": "synthetic prescribed zero-pressure-error reservoir, not measured apparatus data",
+    "evidence_valid_until_s": 1.0,
+    "pressure_error_budget_pa": 1.0,
+    "reservoir_pressure_error_bound_pa": 0.0,
+    "reservoir_reference_pressure_pa": 100.0,
+    "reservoir_max_funnel_depth_m": 0.01,
+    "reservoir_max_surface_slope": 1.0
+  }
+}

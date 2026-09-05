@@ -46,6 +46,9 @@ from airvortex.numerics.variational_interface import (  # noqa: E402
 from airvortex.runtime import discover_backends  # noqa: E402
 
 
+from validity_fixtures import ideal_test_reservoir
+
+
 def compact_config(
     *,
     rpm: float = 0.0,
@@ -59,6 +62,7 @@ def compact_config(
     return replace(
         base,
         backend=BackendMode.FORWARD,
+        gas=ideal_test_reservoir(until_s=duration_s),
         drive=DriveConfig(
             initial_rpm=rpm if ramp_s == 0.0 else 0.0,
             target_rpm=rpm,
@@ -413,8 +417,11 @@ class ForwardTopologyNumericsTests(unittest.TestCase):
 class ForwardTopologyTransitionTests(unittest.TestCase):
     def test_high_drive_forms_resolved_channel_and_restart_breaks_it(self) -> None:
         base = SimulationConfig()
+        # This regression intentionally follows regularised topology after
+        # first contact; all such samples are explicitly diagnostic.
         forward = replace(
             base.forward,
+            prediction_mode="diagnostic",
             radial_cells=32,
             axial_cells=56,
             integration_time_step_s=0.002,
@@ -435,6 +442,7 @@ class ForwardTopologyTransitionTests(unittest.TestCase):
         self.assertEqual(float(np.max(formed.observables["finite_channel"])), 1.0)
         self.assertEqual(float(np.max(formed.observables["resolved_channel"])), 1.0)
         self.assertIn("finite_channel", {event.kind for event in formed.events})
+        self.assertTrue(np.all(formed.observables["quantitative_valid_mask"] == 0.0))
 
         restart = ForwardState(
             float(formed.observables["burgers_C_m2_s"][-1]),

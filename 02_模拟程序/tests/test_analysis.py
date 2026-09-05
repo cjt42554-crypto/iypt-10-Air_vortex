@@ -193,15 +193,18 @@ class DimensionlessTests(unittest.TestCase):
             )
 
 
+from validity_fixtures import synthetic_signal_result
+
+
 class ComparisonTests(unittest.TestCase):
     def test_different_time_grids_are_explicitly_aligned(self) -> None:
-        left = SimulationResult(
+        left = synthetic_signal_result(
             backend=BackendMode.FORWARD,
             time_s=np.array([0.0, 0.7, 2.0]),
             observables={"surface_depth": np.array([0.0, 1.4, 4.0])},
             metadata={"observable_units": {"surface_depth": "m"}},
         )
-        right = SimulationResult(
+        right = synthetic_signal_result(
             backend=BackendMode.HIGH_FIDELITY,
             time_s=np.array([0.25, 1.0, 1.5, 2.5]),
             observables={"surface_depth": np.array([0.5, 2.0, 3.0, 5.0])},
@@ -257,13 +260,13 @@ class ComparisonTests(unittest.TestCase):
         self.assertEqual(identical.metrics.rmse, 0.0)
 
     def test_missing_result_units_are_rejected_even_on_both_sides(self) -> None:
-        left = SimulationResult(
+        left = synthetic_signal_result(
             backend=BackendMode.FORWARD,
             time_s=np.array([0.0, 1.0]),
             observables={"surface_depth": np.array([0.0, 0.001])},
             metadata={},
         )
-        right = SimulationResult(
+        right = synthetic_signal_result(
             backend=BackendMode.HIGH_FIDELITY,
             time_s=np.array([0.0, 1.0]),
             observables={"surface_depth": np.array([0.0, 0.001])},
@@ -274,7 +277,7 @@ class ComparisonTests(unittest.TestCase):
         ):
             compare_results(left, right, "surface_depth")
 
-        right_with_unit = SimulationResult(
+        right_with_unit = synthetic_signal_result(
             backend=BackendMode.HIGH_FIDELITY,
             time_s=np.array([0.0, 1.0]),
             observables={"surface_depth": np.array([0.0, 0.001])},
@@ -303,7 +306,7 @@ class ComparisonTests(unittest.TestCase):
             "-",
         ):
             with self.subTest(unit=invalid_unit):
-                result = SimulationResult(
+                result = synthetic_signal_result(
                     backend=BackendMode.FORWARD,
                     time_s=np.array([0.0, 1.0]),
                     observables={"surface_depth": np.array([0.0, 0.001])},
@@ -314,7 +317,7 @@ class ComparisonTests(unittest.TestCase):
                 with self.assertRaises(DataValidationError):
                     series_from_result(result, "surface_depth")
 
-        valid = SimulationResult(
+        valid = synthetic_signal_result(
             backend=BackendMode.FORWARD,
             time_s=np.array([0.0, 1.0]),
             observables={"surface_depth": np.array([0.0, 0.001])},
@@ -663,7 +666,7 @@ class SweepAndStateTests(unittest.TestCase):
 
         def result(*, end: float, reason: str, state: str) -> SimulationResult:
             time = np.array([0.0, end])
-            return SimulationResult(
+            return synthetic_signal_result(
                 backend=BackendMode.FORWARD,
                 time_s=time,
                 observables={
@@ -729,7 +732,7 @@ class SweepAndStateTests(unittest.TestCase):
 
         no_state_metadata = dict(full.metadata)
         no_state_metadata.pop("connectivity_state")
-        no_state = SimulationResult(
+        no_state = synthetic_signal_result(
             backend=full.backend,
             time_s=full.time_s,
             observables=full.observables,

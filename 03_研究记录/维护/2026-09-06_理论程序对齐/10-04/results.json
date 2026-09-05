@@ -1,0 +1,171 @@
+{
+  "checks": [
+    {
+      "identity": "dV_f/dt = -2*pi*a*(Q_f-a_dot*h_m)",
+      "name": "moving_ring_relative_flux_mass_identity",
+      "observed_exact_residual_over_pi": "0",
+      "parameters": {
+        "Q_f": 0.009,
+        "a": 0.6,
+        "a_dot": 0.05,
+        "h_match": 0.224
+      },
+      "status": "PASS"
+    },
+    {
+      "final_bulk_volume_exact": "14039/20000",
+      "final_film_volume_exact": "5961/20000",
+      "name": "discrete_shared_flux_global_volume_ledger",
+      "status": "PASS",
+      "step_residuals_exact": [
+        "0",
+        "0",
+        "0"
+      ]
+    },
+    {
+      "expected_exact": "-3/125",
+      "identity": "d(h_m)/dt = w_top + (a_dot-u_top)*h_r",
+      "name": "free_surface_seam_kinematics",
+      "observed_exact": "-3/125",
+      "status": "PASS"
+    },
+    {
+      "absolute_residual": 0.0,
+      "detail": {
+        "bulk_port_power_W": 2.156389197424034e-08,
+        "film_port_power_W": -2.156389197424034e-08,
+        "surface_representation": "same small-slope capillary port on both sides"
+      },
+      "expected": 0.0,
+      "name": "compatible_reduced_pressure_and_capillary_power_cancellation",
+      "observed": 0.0,
+      "status": "PASS",
+      "tolerance": 1e-20
+    },
+    {
+      "expected_exact_m3": "13/30000000",
+      "name": "thin_film_velocity_lifting_normalization",
+      "observed_exact_m3": "13/30000000",
+      "shape": "b*h + h*y - y^2/2",
+      "status": "PASS"
+    },
+    {
+      "augmented_rank": 2,
+      "coefficient_rank": 2,
+      "name": "single_port_equation_count",
+      "solution": {
+        "J_match": "2",
+        "p_match": "6"
+      },
+      "status": "PASS",
+      "unknowns": [
+        "p_match",
+        "J_match"
+      ]
+    },
+    {
+      "bulk_dissipation_exact": "12",
+      "film_dissipation_exact": "8",
+      "input_power_exact": "20",
+      "interface_power_pair_exact": [
+        "-12",
+        "12"
+      ],
+      "name": "two_domain_hydraulic_port_energy_balance",
+      "status": "PASS",
+      "total_dissipation_exact": "20"
+    },
+    {
+      "augmented_rank": 3,
+      "coefficient_rank": 2,
+      "name": "arbitrary_extra_interface_flux_is_detected",
+      "prescribed_incompatible_J": "1",
+      "required_J": "2",
+      "status": "PASS"
+    },
+    {
+      "fluxes_exact": [
+        "2",
+        "2",
+        "2",
+        "2"
+      ],
+      "locations": [
+        "1/5",
+        "2/5",
+        "3/5",
+        "4/5"
+      ],
+      "name": "manufactured_matching_location_invariance",
+      "spread_exact": "0",
+      "status": "PASS"
+    }
+  ],
+  "claim": "PASS_SYNTHETIC_CONSERVATION_CONTRACT__NO_GO_DEVICE_COUPLING",
+  "counterexamples": [
+    {
+      "mass_residual_m3_per_s_for_unit_consistent_inputs": 0.04222300526424682,
+      "missing_term": "2*pi*a*a_dot*h_m",
+      "name": "lab_flux_at_moving_ring_is_not_conservative",
+      "status": "EXPECTED_FAIL_REPRODUCED"
+    },
+    {
+      "kinematic_residual_m_per_s_for_unit_consistent_inputs": -0.0084,
+      "missing_term": "(a_dot-u_top)*h_r",
+      "name": "vertical_velocity_alone_is_not_seam_speed",
+      "status": "EXPECTED_FAIL_REPRODUCED"
+    },
+    {
+      "name": "omitting_outer_capillary_line_work",
+      "power_residual_W": -2.7143360527015813e-09,
+      "status": "EXPECTED_FAIL_REPRODUCED"
+    },
+    {
+      "name": "using_same_pressure_work_sign_on_both_sides",
+      "power_residual_W": -3.769911184307752e-08,
+      "status": "EXPECTED_FAIL_REPRODUCED"
+    },
+    {
+      "name": "exact_SH_and_small_slope_TF_capillary_ports_do_not_exactly_cancel",
+      "power_residual_W": -3.3865715654205355e-12,
+      "reason": "SH uses exact area while T2/T9 use the small-slope surface energy",
+      "status": "EXPECTED_FAIL_REPRODUCED"
+    },
+    {
+      "augmented_rank": 3,
+      "coefficient_rank": 2,
+      "name": "pressure_and_incompatible_flow_on_same_internal_port",
+      "status": "EXPECTED_FAIL_REPRODUCED"
+    },
+    {
+      "absolute_spread": 0.07342575187969924,
+      "fluxes": [
+        1.8796992481203008,
+        1.893939393939394,
+        1.918158567774936,
+        1.953125
+      ],
+      "name": "constitutive_mismatch_causes_match_location_drift",
+      "relative_spread_to_mean": 0.038418050499058005,
+      "status": "EXPECTED_FAIL_REPRODUCED"
+    }
+  ],
+  "not_tested": [
+    "existence of a common SH/TF asymptotic overlap in the apparatus",
+    "full pointwise traction and velocity continuity",
+    "azimuthal velocity, shear, torque, and power continuity",
+    "SH or TF production-solver integration",
+    "space/time convergence of the coupled free boundary",
+    "physical parameters, calibration, or holdout experiment"
+  ],
+  "python": "3.12.3",
+  "schema": "air-vortex-sh-tf-match-benchmark-v1",
+  "source_head_at_start": "3d974e554a34cadfa95a3978c69218e107277512",
+  "summary": {
+    "checks_failed": 0,
+    "checks_passed": 9,
+    "checks_total": 9,
+    "expected_counterexamples": 7
+  }
+}

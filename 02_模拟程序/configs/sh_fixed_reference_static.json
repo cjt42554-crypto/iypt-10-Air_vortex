@@ -1,0 +1,29 @@
+{
+  "drive": {
+    "target_rpm": 0.0,
+    "ramp_duration_s": 0.0
+  },
+  "run": {
+    "duration_s": 0.01,
+    "output_interval_s": 0.005
+  },
+  "forward": {
+    "model_branch": "AV-FWD-SH-v1"
+  },
+  "gas": {
+    "regime": "open_reservoir",
+    "evidence_kind": "synthetic_assumption",
+    "evidence_source": "synthetic prescribed zero-pressure-error reservoir, not measured apparatus data",
+    "evidence_valid_until_s": 0.02,
+    "pressure_error_budget_pa": 1.0,
+    "reservoir_pressure_error_bound_pa": 0.0,
+    "reservoir_reference_pressure_pa": 100.0,
+    "reservoir_max_funnel_depth_m": 0.01,
+    "reservoir_max_surface_slope": 1.0
+  },
+  "stokes": {
+    "radial_cells": 8,
+    "axial_cells": 8,
+    "time_step_s": 0.001
+  }
+}

@@ -198,6 +198,17 @@ class SimulationResult:
         metadata = json_ready(self.metadata, "result.metadata")
         if not isinstance(metadata, dict):
             raise ResultError("result metadata must be a mapping")
+        # Import locally to avoid a module cycle: validity helpers accept raw
+        # arrays/mappings and do not need to construct SimulationResult here.
+        from .validity import (
+            QuantitativeValidityError,
+            validate_result_quantitative_validity,
+        )
+
+        try:
+            validate_result_quantitative_validity(time_s, observables, metadata)
+        except QuantitativeValidityError as exc:
+            raise ResultError(f"invalid quantitative-validity contract: {exc}") from exc
         object.__setattr__(self, "time_s", time_s)
         object.__setattr__(self, "observables", MappingProxyType(observables))
         object.__setattr__(self, "fields", MappingProxyType(fields))

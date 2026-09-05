@@ -252,8 +252,20 @@ class ForwardModelConfig:
     volume_relative_tolerance: float = 5.0e-8
     energy_relative_tolerance: float = 2.0e-10
     maximum_step_rejections: int = 18
+    model_branch: str = "AV-FWD-CP-v2"
+    prediction_mode: str = "strict"
+    validity_event_tolerance_s: float = 1.0e-5
 
     def __post_init__(self) -> None:
+        if self.model_branch not in {
+            "AV-FWD-CP-v2", "AV-FWD-SH-v1", "AV-FWD-TF-v1"
+        }:
+            raise ConfigError("forward.model_branch is not an implemented forward branch")
+        if self.prediction_mode not in {"strict", "diagnostic"}:
+            raise ConfigError("forward.prediction_mode must be strict or diagnostic")
+        _require_real("forward.validity_event_tolerance_s", self.validity_event_tolerance_s,
+                      minimum=0.0, strict=True)
+        object.__setattr__(self, "validity_event_tolerance_s", float(self.validity_event_tolerance_s))
         _require_real(
             "forward.circulation_coupling_m2",
             self.circulation_coupling_m2,
@@ -651,6 +663,10 @@ def _decode_dataclass(cls: type[T], raw: object, path: str) -> T:
 
 
 def _decode_value(annotation: Any, value: object, path: str) -> Any:
+    if annotation is type(None):
+        if value is not None:
+            raise ConfigError(f"{path} must be null")
+        return None
     if isinstance(annotation, type) and is_dataclass(annotation):
         return _decode_dataclass(annotation, value, path)
     if isinstance(annotation, type) and issubclass(annotation, Enum):
@@ -717,6 +733,11 @@ def _encode_dataclass(instance: object) -> dict[str, Any]:
     return result
 
 
+from .gas_config import GasModelConfig
+from .stokes_config import StokesModelConfig
+from .film_config import FilmModelConfig
+
+
 @dataclass(frozen=True, slots=True)
 class SimulationConfig:
     """Complete, validated input shared by both solver backends."""
@@ -731,6 +752,9 @@ class SimulationConfig:
     run: RunConfig = RunConfig()
     forward: ForwardModelConfig = ForwardModelConfig()
     high_fidelity: HighFidelityConfig = HighFidelityConfig()
+    gas: GasModelConfig = GasModelConfig()
+    stokes: StokesModelConfig = StokesModelConfig()
+    film: FilmModelConfig = FilmModelConfig()
 
     def __post_init__(self) -> None:
         _require_int("schema_version", self.schema_version, minimum=1)
@@ -751,6 +775,9 @@ class SimulationConfig:
             "run": RunConfig,
             "forward": ForwardModelConfig,
             "high_fidelity": HighFidelityConfig,
+            "gas": GasModelConfig,
+            "stokes": StokesModelConfig,
+            "film": FilmModelConfig,
         }
         for name, cls in nested.items():
             if not isinstance(getattr(self, name), cls):

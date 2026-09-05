@@ -13,6 +13,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from matplotlib.figure import Figure
 from matplotlib.patches import FancyBboxPatch
 
+from airvortex.core import QUANTITATIVE_VALID_MASK
+
 from .model import (
     BACKEND_PRESENTATIONS,
     BackendMode,
@@ -189,6 +191,21 @@ class ProcessPlots(_FigureFrame):
         *,
         live_surface_frame: SurfaceFrame | None = None,
     ) -> None:
+        if config.forward.model_branch == "AV-FWD-TF-v1":
+            if result and result.surface_frames:
+                frame = result.surface_frames[nearest_index(
+                    [item.time_s for item in result.surface_frames], at_time)]
+                radius = np.asarray(frame.radius_m) * 1000.
+                thickness = np.asarray(frame.height_m) * 1e6
+                axis.plot(radius, thickness, color="#075985", label="正厚度液膜")
+                axis.fill_between(radius, 0., thickness, alpha=.25, color="#77bce8")
+            axis.axhline(config.film.minimum_valid_thickness_m * 1e6,
+                         color="#dc2626", linestyle=":", label="适用厚度下限")
+            axis.set_xlabel("局部半径 / mm")
+            axis.set_ylabel("膜厚 / μm")
+            axis.set_title("局部覆膜；未与全容器耦合")
+            axis.legend(fontsize=8)
+            return
         radius = config.container.radius_m
         depth = config.container.liquid_depth_m
         profile_r = np.linspace(0.0, radius, 96)
@@ -277,6 +294,8 @@ class ProcessPlots(_FigureFrame):
             if used_result_profile
             else "初始装置截面"
         )
+        if result is not None and not live_preview and not result.quantitatively_valid_at(at_time):
+            suffix += "（诊断/未核定，不作定量结论）"
         axis.set_title(f"装置截面｜{suffix}\nt = {at_time:.6g} s")
         axis.grid(alpha=0.18)
         axis.legend(loc="upper right", fontsize=8)
@@ -305,12 +324,51 @@ class ProcessPlots(_FigureFrame):
             "actual_bar_rpm",
             "surface_min_z_m",
         )
-        key = next((item for item in priorities if item in result.signals), next(iter(result.signals)))
+        plottable = [
+            item for item in result.signals if item != QUANTITATIVE_VALID_MASK
+        ]
+        if not plottable:
+            axis.text(
+                0.5,
+                0.5,
+                "结果只有资格 mask，没有可绘制的物理标量",
+                ha="center",
+                va="center",
+                transform=axis.transAxes,
+                color="#9a3412",
+            )
+            axis.set_xlabel("时间 t / s")
+            axis.set_title("时间序列")
+            axis.grid(alpha=0.2)
+            return None
+        key = next((item for item in priorities if item in plottable), plottable[0])
         signal = result.signals[key]
         scale, display_unit = _display_scale(signal.unit)
         times = np.asarray(result.time_s[: len(signal.values)], dtype=float)
         values = np.asarray(signal.values[: len(times)], dtype=float) * scale
-        axis.plot(times, values, color="#0369a1", lw=2.0, label=signal.label)
+        mask = np.asarray(
+            result.quantitative_valid_mask[: len(times)], dtype=bool
+        )
+        if len(mask) != len(times):
+            mask = np.zeros(len(times), dtype=bool)
+        if np.any(mask):
+            axis.plot(
+                times[mask],
+                values[mask],
+                color="#0369a1",
+                lw=2.0,
+                label=f"{signal.label}（定量有效）",
+            )
+        if np.any(~mask):
+            axis.plot(
+                times[~mask],
+                values[~mask],
+                color="#94a3b8",
+                lw=1.6,
+                ls="--",
+                marker=".",
+                label=f"{signal.label}（诊断/未核定）",
+            )
         if len(times):
             index = nearest_index(times.tolist(), at_time)
             axis.scatter([times[index]], [values[index]], color="#dc2626", s=42, zorder=4)
@@ -360,7 +418,23 @@ class ProcessPlots(_FigureFrame):
                 fontsize=8,
             )
             return
-        spectrum = compute_hann_spectrum(result.time_s, signal)
+        mask = np.asarray(
+            result.quantitative_valid_mask[: len(signal.values)], dtype=bool
+        )
+        times = np.asarray(result.time_s[: len(signal.values)], dtype=float)
+        values = np.asarray(signal.values[: len(times)], dtype=float)
+        if len(mask) != len(times):
+            mask = np.zeros(len(times), dtype=bool)
+        qualified_signal = SignalSeries(
+            signal.key,
+            signal.label,
+            signal.unit,
+            tuple(float(value) for value in values[mask]),
+            signal.unit_origin,
+        )
+        spectrum = compute_hann_spectrum(
+            tuple(float(value) for value in times[mask]), qualified_signal
+        )
         if not spectrum.available:
             axis.text(
                 0.5,

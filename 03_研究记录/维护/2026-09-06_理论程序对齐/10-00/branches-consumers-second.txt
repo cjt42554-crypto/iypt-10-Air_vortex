@@ -1,0 +1,82 @@
+test_missing_gas_and_large_surface_exit_strictly (test_stokes_branch.StokesBackendTests.test_missing_gas_and_large_surface_exit_strictly) ... ok
+test_stationary_hydrostatic_archive_and_explicit_branch (test_stokes_branch.StokesBackendTests.test_stationary_hydrostatic_archive_and_explicit_branch) ... ok
+test_unsupported_nonlinear_domain_is_not_aliased (test_stokes_branch.StokesBackendTests.test_unsupported_nonlinear_domain_is_not_aliased) ... ok
+test_axisymmetric_strain_includes_hoop_component (test_stokes_branch.StokesOperatorTests.test_axisymmetric_strain_includes_hoop_component) ... ok
+test_manufactured_velocity_pressure_strain_convergence (test_stokes_branch.StokesOperatorTests.test_manufactured_velocity_pressure_strain_convergence) ... ok
+test_planar_mobility_three_independent_routes_and_limits (test_stokes_branch.StokesOperatorTests.test_planar_mobility_three_independent_routes_and_limits) ... ok
+test_pressure_gradient_and_uniform_traction_have_no_flow (test_stokes_branch.StokesOperatorTests.test_pressure_gradient_and_uniform_traction_have_no_flow) ... ok
+test_equal_mean_swirl_has_different_weighted_transport (test_thin_film.ThinFilmTests.test_equal_mean_swirl_has_different_weighted_transport) ... ok
+test_formal_local_film_archive_and_unambiguous_scope (test_thin_film.ThinFilmTests.test_formal_local_film_archive_and_unambiguous_scope) ... ok
+test_mobility_and_wetting_have_independent_references (test_thin_film.ThinFilmTests.test_mobility_and_wetting_have_independent_references) ... ok
+test_nonlinear_evolution_mass_energy_and_spatial_convergence (test_thin_film.ThinFilmTests.test_nonlinear_evolution_mass_energy_and_spatial_convergence) ... ok
+test_nonlinear_semidiscrete_energy_open_and_closed (test_thin_film.ThinFilmTests.test_nonlinear_semidiscrete_energy_open_and_closed) ... ok
+test_nonlinear_time_refinement_with_independent_radau_reference (test_thin_film.ThinFilmTests.test_nonlinear_time_refinement_with_independent_radau_reference) ... ok
+test_open_pde_drainage_and_thickness_exit (test_thin_film.ThinFilmTests.test_open_pde_drainage_and_thickness_exit) ... FAIL
+test_stable_and_unstable_linear_disk_modes (test_thin_film.ThinFilmTests.test_stable_and_unstable_linear_disk_modes) ... ok
+test_uniform_drainage_constant_and_changing_speed (test_thin_film.ThinFilmTests.test_uniform_drainage_constant_and_changing_speed) ... ok
+test_affine_handedness_area_rotation_and_scope (test_observation_preparation.ObservationPreparationTests.test_affine_handedness_area_rotation_and_scope) ... ok
+test_exposure_preserves_source_knots_and_weighted_integral (test_observation_preparation.ObservationPreparationTests.test_exposure_preserves_source_knots_and_weighted_integral) ... ok
+test_exposure_sine_amplitude_matches_sinc (test_observation_preparation.ObservationPreparationTests.test_exposure_sine_amplitude_matches_sinc) ... ok
+test_measured_initial_state_refuses_unqualified_mapping (test_observation_preparation.ObservationPreparationTests.test_measured_initial_state_refuses_unqualified_mapping) ... ok
+test_synthetic_fixture_loads_but_cannot_fit_or_score (test_observation_preparation.ObservationPreparationTests.test_synthetic_fixture_loads_but_cannot_fit_or_score) ... ok
+test_builtin_discovery_constructs_both_backends (test_runtime_cli.BackendRegistryTests.test_builtin_discovery_constructs_both_backends) ... ok
+test_register_alias_create_and_reject_duplicate (test_runtime_cli.BackendRegistryTests.test_register_alias_create_and_reject_duplicate) ... ok
+test_1500rpm_three_second_pair_excludes_forward_post_contact_tail (test_runtime_cli.CLITests.test_1500rpm_three_second_pair_excludes_forward_post_contact_tail) ... ok
+test_compare_rejects_metrics_when_valid_domain_has_no_duration (test_runtime_cli.CLITests.test_compare_rejects_metrics_when_valid_domain_has_no_duration) ... ok
+test_domain_limit_is_not_collapsed_into_full_duration_in_run_or_sweep (test_runtime_cli.CLITests.test_domain_limit_is_not_collapsed_into_full_duration_in_run_or_sweep) ... ok
+test_failed_run_has_terminal_manifest_and_is_not_success (test_runtime_cli.CLITests.test_failed_run_has_terminal_manifest_and_is_not_success) ... ok
+test_hf_domain_limit_is_not_labelled_as_post_domain_output (test_runtime_cli.CLITests.test_hf_domain_limit_is_not_labelled_as_post_domain_output) ... ok
+test_linear_and_log_sweep_values_include_endpoints (test_runtime_cli.CLITests.test_linear_and_log_sweep_values_include_endpoints) ... ok
+test_minimal_forward_run_creates_verified_archive (test_runtime_cli.CLITests.test_minimal_forward_run_creates_verified_archive) ... ok
+test_paired_compare_runs_both_backends_on_common_observables (test_runtime_cli.CLITests.test_paired_compare_runs_both_backends_on_common_observables) ... ok
+test_runtime_source_hash_provider_detects_change_without_touching_tree (test_runtime_cli.CLITests.test_runtime_source_hash_provider_detects_change_without_touching_tree) ... ok
+test_single_run_and_sweep_report_post_contact_scientific_class (test_runtime_cli.CLITests.test_single_run_and_sweep_report_post_contact_scientific_class) ... ok
+test_sweep_resume_skips_verified_completed_cases (test_runtime_cli.CLITests.test_sweep_resume_skips_verified_completed_cases) ... ok
+test_validate_config_backend_override (test_runtime_cli.CLITests.test_validate_config_backend_override) ... ok
+test_failure_writes_terminal_manifest_with_traceback (test_runtime_cli.JobControllerTests.test_failure_writes_terminal_manifest_with_traceback) ... ok
+test_illegal_transitions_are_rejected (test_runtime_cli.JobControllerTests.test_illegal_transitions_are_rejected) ... ok
+test_pause_acknowledges_checkpoint_stops_progress_then_resumes (test_runtime_cli.JobControllerTests.test_pause_acknowledges_checkpoint_stops_progress_then_resumes) ... ok
+test_pause_racing_with_final_step_can_complete (test_runtime_cli.JobControllerTests.test_pause_racing_with_final_step_can_complete) ... ok
+test_soft_cancel_wakes_paused_job_and_never_marks_success (test_runtime_cli.JobControllerTests.test_soft_cancel_wakes_paused_job_and_never_marks_success) ... ok
+test_compare_rejects_missing_invalid_and_placeholder_units (test_gui_model.GuiViewModelTests.test_compare_rejects_missing_invalid_and_placeholder_units) ... ok
+test_compare_rejects_missing_samples_without_cross_gap_filling (test_gui_model.GuiViewModelTests.test_compare_rejects_missing_samples_without_cross_gap_filling) ... ok
+test_compare_rejects_unit_mismatch (test_gui_model.GuiViewModelTests.test_compare_rejects_unit_mismatch) ... ok
+test_compare_series_calls_analysis_alignment (test_gui_model.GuiViewModelTests.test_compare_series_calls_analysis_alignment) ... ok
+test_core_config_round_trip_and_strict_unknown_rejection (test_gui_model.GuiViewModelTests.test_core_config_round_trip_and_strict_unknown_rejection) ... ok
+test_cross_parameter_validation_is_actionable (test_gui_model.GuiViewModelTests.test_cross_parameter_validation_is_actionable) ... ok
+test_default_runtime_config_is_core_config_with_exact_defaults (test_gui_model.GuiViewModelTests.test_default_runtime_config_is_core_config_with_exact_defaults) ... ok
+test_domain_limit_is_prominent_for_single_result_and_scan (test_gui_model.GuiViewModelTests.test_domain_limit_is_prominent_for_single_result_and_scan) ... ok
+test_experiment_csv_quick_import_normalizes_units_and_marks_role (test_gui_model.GuiViewModelTests.test_experiment_csv_quick_import_normalizes_units_and_marks_role) ... ok
+test_experiment_csv_requires_strict_time (test_gui_model.GuiViewModelTests.test_experiment_csv_requires_strict_time) ... ok
+test_export_always_writes_evidence_and_exact_config_metadata (test_gui_model.GuiViewModelTests.test_export_always_writes_evidence_and_exact_config_metadata) ... ok
+test_fixed_burgers_decay_power_is_not_editable_or_changeable (test_gui_model.GuiViewModelTests.test_fixed_burgers_decay_power_is_not_editable_or_changeable) ... ok
+test_formal_bar_speed_restores_signed_direction_or_fails_closed (test_gui_model.GuiViewModelTests.test_formal_bar_speed_restores_signed_direction_or_fails_closed) ... ok
+test_formal_demonstration_flags_block_evidence_claims (test_gui_model.GuiViewModelTests.test_formal_demonstration_flags_block_evidence_claims) ... ok
+test_formal_experiment_rejects_known_canonical_with_wrong_dimension (test_gui_model.GuiViewModelTests.test_formal_experiment_rejects_known_canonical_with_wrong_dimension) ... ok
+test_gui_preserves_signed_piecewise_actual_speed_schedule (test_gui_model.GuiViewModelTests.test_gui_preserves_signed_piecewise_actual_speed_schedule) ... ok
+test_hann_spectrum_finds_known_sine_and_refuses_invalid_sampling (test_gui_model.GuiViewModelTests.test_hann_spectrum_finds_known_sine_and_refuses_invalid_sampling) ... ok
+test_hf_quick_preset_has_bounded_work_and_valid_core_config (test_gui_model.GuiViewModelTests.test_hf_quick_preset_has_bounded_work_and_valid_core_config) ... ok
+test_real_forward_post_contact_is_extrapolation_not_early_termination (test_gui_model.GuiViewModelTests.test_real_forward_post_contact_is_extrapolation_not_early_termination) ... ok
+test_real_forward_simulation_result_normalization (test_gui_model.GuiViewModelTests.test_real_forward_simulation_result_normalization) ... ok
+test_real_hf_simulation_result_normalizes_fields_and_velocity (test_gui_model.GuiViewModelTests.test_real_hf_simulation_result_normalizes_fields_and_velocity) ... ok
+test_run_state_policy_locks_physics_and_enforces_transitions (test_gui_model.GuiViewModelTests.test_run_state_policy_locks_physics_and_enforces_transitions) ... ok
+test_scan_generation_and_integer_uniqueness (test_gui_model.GuiViewModelTests.test_scan_generation_and_integer_uniqueness) ... ok
+test_shipped_formal_experiment_maps_si_canonical_and_display_rpm (test_gui_model.GuiViewModelTests.test_shipped_formal_experiment_maps_si_canonical_and_display_rpm) ... ok
+test_surface_profiles_use_result_times_not_single_final_field_time (test_gui_model.GuiViewModelTests.test_surface_profiles_use_result_times_not_single_final_field_time) ... ok
+
+======================================================================
+FAIL: test_open_pde_drainage_and_thickness_exit (test_thin_film.ThinFilmTests.test_open_pde_drainage_and_thickness_exit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/cjt/Desktop/iypt/10 空气涡流/02_模拟程序/tests/test_thin_film.py", line 165, in test_open_pde_drainage_and_thickness_exit
+    self.assertLess(np.max(abs(traj.thickness_m[-1]-exact(.1)))/exact(.1),1e-6)
+AssertionError: 3.071554060498943e-05 not less than 1e-06
+
+----------------------------------------------------------------------
+Ran 65 tests in 4.314s
+
+FAILED (failures=1)
+SH_MANUFACTURED {"n": [16, 32, 64, 128], "errors_u_w_p_rr_tt_zz_rz": [[0.0030878856746067917, 0.004824222489664084, 0.0227327113076206, 0.0061372418101080005, 0.0037089778655907016, 0.005932430995365047, 0.009385168653468699], [0.0007910353066636948, 0.0012214901364933552, 0.005783405609480577, 0.0015874640714432803, 0.0009412214364784909, 0.0015211161210088183, 0.001893059156520369], [0.00019940979456809158, 0.00030601176081205086, 0.0014541158234371028, 0.00040116424862295395, 0.00023588618269027676, 0.0003829931072806279, 0.00038839436676073357], [5.0018407748194876e-05, 7.65261104373501e-05, 0.0003643468970634336, 0.00010063491669837293, 5.8986811723973825e-05, 9.594833991719419e-05, 8.319120336723502e-05]], "orders": [[1.9648053457232066, 1.9816542309070786, 1.9747785714184567, 1.9508664872256969, 1.9784155744881062, 1.963493122767826, 2.30966317606131], [1.9880058151786162, 1.9969832083765082, 1.991777099092012, 1.98445899502898, 1.9964432650628194, 1.9897399583189148, 2.2851253134694525], [1.9952052358715537, 1.99956312108988, 1.9967575783399003, 1.995062084748167, 1.9996265757295288, 1.9969886777590098, 2.2230193851229436]]}
+SH_PLANAR [{"k": 1.0, "reference": 0.3274408882489201, "bvp": 0.3274408882496106, "fd_errors": [8.979061753224923e-07, 4.935898382772618e-08, 2.9649475854834814e-09]}, {"k": 10.0, "reference": 12.029084059132849, "bvp": 12.029084059133439, "fd_errors": [0.00030689973918062596, 6.837947338545234e-05, 1.0657394715709497e-05]}]
+TF_NONLINEAR_SPACE {"ledger": [{"n": 16, "volume_relative_error": 1.4626425368114211e-16, "energy_relative_error": -1.342321645220876e-09}, {"n": 32, "volume_relative_error": 1.4627430619128094e-16, "energy_relative_error": -1.6759688588304378e-09}, {"n": 64, "volume_relative_error": 0.0, "energy_relative_error": -1.5253767363544144e-09}, {"n": 128, "volume_relative_error": 0.0, "energy_relative_error": -1.7807768416801313e-09}, {"n": 256, "volume_relative_error": 2.925551918940176e-16, "energy_relative_error": -2.1698766123968588e-09}], "errors_vs_256": [7.926661250119487e-05, 1.9480477970433228e-05, 4.63207182396078e-06, 9.261009973763177e-07]}
+TF_NONLINEAR_TIME {"maximum_steps_s": [0.01, 0.005, 0.0025], "errors_vs_radau": [4.8309575276051024e-09, 1.6889076116818578e-09, 2.265997426787885e-10], "radau_refinement_error": 5.618323580462341e-17}

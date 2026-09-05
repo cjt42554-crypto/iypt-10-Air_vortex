@@ -22,9 +22,14 @@ import numpy as np
 from airvortex.analysis.comparison import compare_results
 from airvortex.core import (
     BackendMode,
+    QuantitativeClaimScope,
+    QuantitativeValidityStatus,
     RunStatus,
     SimulationConfig,
     SimulationResult,
+    make_quantitative_validity,
+    quantitative_valid_mask,
+    quantitative_validity,
     sha256_file,
 )
 from airvortex.io import (
@@ -154,14 +159,25 @@ def _termination_summary(
         else None
     )
     diagnostics: Mapping[str, object] = {}
+    validity = quantitative_validity(result) if result is not None else None
     if result is not None:
         raw_diagnostics = result.metadata.get("diagnostics")
         if isinstance(raw_diagnostics, Mapping):
             diagnostics = raw_diagnostics
     raw_reason = diagnostics.get("termination_reason")
+    if raw_reason is None and result is not None:
+        raw_reason = result.metadata.get("termination_reason")
     explicit_reason = raw_reason if isinstance(raw_reason, str) and raw_reason else None
+    if validity is not None and validity.status not in {
+        QuantitativeValidityStatus.VALID, QuantitativeValidityStatus.LEGACY_UNASSESSED
+    }:
+        explicit_reason = validity.reason
     domain_limited = bool(
-        explicit_reason is not None and "domain_limit" in explicit_reason.lower()
+        (
+            validity is not None
+            and validity.status is QuantitativeValidityStatus.PHYSICAL_EXIT
+        )
+        or (explicit_reason is not None and "domain_limit" in explicit_reason.lower())
     )
     tolerance = max(1.0e-12, 1.0e-9 * max(1.0, requested_end_s))
     reached_requested_end = bool(
@@ -185,7 +201,9 @@ def _termination_summary(
         termination_reason = "runtime_cancelled_without_completed_result"
     else:
         termination_reason = "completed_before_requested_end_without_domain_reason"
-    if state is JobState.FAILED:
+    if state is JobState.FAILED or (
+        result is not None and result.status is RunStatus.FAILED
+    ):
         completion_class = "failed"
     elif state is JobState.CANCELLED or (
         result is not None and result.status is RunStatus.STOPPED
@@ -275,6 +293,16 @@ def _failed_archive(
             }
             for name in sorted(payload_names)
         }
+        if controller.state is JobState.CANCELLED:
+            validity_status = QuantitativeValidityStatus.USER_STOPPED
+        else:
+            validity_status = QuantitativeValidityStatus.NUMERICAL_FAILURE
+        error = controller.error
+        validity_reason = (
+            f"{type(error).__name__}: {error}"
+            if error is not None
+            else str(termination_summary["termination_reason"])
+        )
         manifest = controller.manifest()
         manifest.update(
             {
@@ -292,6 +320,15 @@ def _failed_archive(
                     "execution_source_identity_valid"
                 ],
                 "termination": termination_summary,
+                "quantitative_validity": make_quantitative_validity(
+                    model_branch=None,
+                    theory_sha256=None,
+                    implementation_id=None,
+                    status=validity_status,
+                    valid_until_s=None,
+                    reason=validity_reason,
+                    claim_scope=QuantitativeClaimScope.NONE,
+                ),
             }
         )
         _write_json(staging / "manifest.json", manifest)
@@ -400,7 +437,12 @@ def run_once(
             on_message(message)
 
     result = job.result
-    termination_summary = _termination_summary(config, result, job.state)
+    outcome_state = (
+        JobState.FAILED
+        if result is not None and result.status is RunStatus.FAILED
+        else job.state
+    )
+    termination_summary = _termination_summary(config, result, outcome_state)
     invocation_summary = {
         "backend": config.backend.value,
         "config_sha256": config_sha256(config),
@@ -422,11 +464,6 @@ def run_once(
         "termination_summary": termination_summary,
     }
     if job.state is JobState.COMPLETED and result is not None:
-        if result.status is not RunStatus.COMPLETED:
-            _failed_archive(output_path, config, job, **terminal_provenance)
-            raise RuntimeError(
-                f"completed job returned non-completed result status {result.status.value}"
-            )
         save_run_archive(
             output_path,
             config,
@@ -466,7 +503,7 @@ def run_once(
         _failed_archive(output_path, config, job, **terminal_provenance)
     return RunOutcome(
         output_path,
-        job.state,
+        outcome_state,
         result,
         job,
         termination_summary["termination_reason"],
@@ -487,6 +524,8 @@ def run_once(
 def _result_domain_summary(result: SimulationResult) -> dict[str, Any]:
     """Describe recorded model-domain validity without equating it to termination."""
 
+    validity = quantitative_validity(result)
+    validity_mask = quantitative_valid_mask(result)
     raw_status = result.metadata.get("domain_status")
     reported_status = (
         raw_status.strip().upper()
@@ -503,7 +542,17 @@ def _result_domain_summary(result: SimulationResult) -> dict[str, Any]:
         for event in result.events
         if event.kind.strip().casefold() in boundary_event_kinds
     ]
-    first_out_of_domain_s = min(boundary_times) if boundary_times else None
+    first_out_of_domain_s = (
+        validity.first_invalid_time_s
+        if validity.status
+        in {
+            QuantitativeValidityStatus.PHYSICAL_EXIT,
+            QuantitativeValidityStatus.DIAGNOSTIC_CONTINUATION,
+        }
+        else min(boundary_times)
+        if boundary_times
+        else None
+    )
 
     diagnostics = result.metadata.get("diagnostics")
     raw_reason = (
@@ -512,11 +561,17 @@ def _result_domain_summary(result: SimulationResult) -> dict[str, Any]:
         else None
     )
     model_domain_limit = bool(
-        isinstance(raw_reason, str) and "domain_limit" in raw_reason.casefold()
+        validity.status is QuantitativeValidityStatus.PHYSICAL_EXIT
+        or (isinstance(raw_reason, str) and "domain_limit" in raw_reason.casefold())
     )
     out_of_model_domain = bool(
         reported_status == "OUT_OF_MODEL_DOMAIN"
         or first_out_of_domain_s is not None
+        or validity.status
+        in {
+            QuantitativeValidityStatus.PHYSICAL_EXIT,
+            QuantitativeValidityStatus.DIAGNOSTIC_CONTINUATION,
+        }
     )
     if out_of_model_domain:
         domain_status = "OUT_OF_MODEL_DOMAIN"
@@ -533,6 +588,14 @@ def _result_domain_summary(result: SimulationResult) -> dict[str, Any]:
         "first_out_of_domain_s": first_out_of_domain_s,
         "out_of_model_domain": out_of_model_domain,
         "model_domain_limit": model_domain_limit,
+        "quantitative_validity_status": validity.status.value,
+        "quantitative_validity_reason": validity.reason,
+        "quantitative_valid_until_s": validity.valid_until_s,
+        "quantitative_valid_sample_count": int(np.count_nonzero(validity_mask)),
+        "quantitative_claim_scope": validity.claim_scope.value,
+        "apparatus_quantitative_prediction_qualified": (
+            validity.apparatus_quantitative_prediction_qualified
+        ),
     }
 
 
@@ -568,19 +631,16 @@ def _comparison_domain_window(
         valid_time_start = max(float(left.time_s[0]), float(right.time_s[0]))
         recorded_common_end = min(float(left.time_s[-1]), float(right.time_s[-1]))
 
-    missing_boundary = any(
-        bool(item["out_of_model_domain"])
-        and item["first_out_of_domain_s"] is None
-        for item in domains.values()
-    )
-    if recorded_common_end is None or missing_boundary:
-        valid_time_end: float | None = None
+    left_valid_time = left.time_s[quantitative_valid_mask(left)]
+    right_valid_time = right.time_s[quantitative_valid_mask(right)]
+    if left_valid_time.size and right_valid_time.size:
+        valid_time_start = max(float(left_valid_time[0]), float(right_valid_time[0]))
+        valid_time_end: float | None = min(
+            float(left_valid_time[-1]), float(right_valid_time[-1])
+        )
     else:
-        valid_time_end = recorded_common_end
-        for item in domains.values():
-            boundary = item["first_out_of_domain_s"]
-            if boundary is not None:
-                valid_time_end = min(valid_time_end, float(boundary))
+        valid_time_start = None
+        valid_time_end = None
 
     tolerance = 1.0e-12
     sufficient = bool(
@@ -593,15 +653,13 @@ def _comparison_domain_window(
         and recorded_common_end is not None
         and valid_time_end < recorded_common_end - tolerance
     )
-    if missing_boundary:
+    if not sufficient:
+        left_validity = quantitative_validity(left)
+        right_validity = quantitative_validity(right)
         insufficient_reason = (
-            "OUT_OF_MODEL_DOMAIN was reported without a CONNECTED_PROXY/"
-            "out-of-domain event time; a safe comparison window cannot be reconstructed"
-        )
-    elif not sufficient:
-        insufficient_reason = (
-            "common model-valid interval has no positive duration or fewer than "
-            "two distinct aligned times"
+            "common quantitatively valid interval has no positive duration; "
+            f"left={left_validity.status.value} ({left_validity.reason}), "
+            f"right={right_validity.status.value} ({right_validity.reason})"
         )
     else:
         insufficient_reason = None
@@ -626,31 +684,6 @@ def _comparison_domain_window(
     }
 
 
-def _observable_comparison_view(
-    result: SimulationResult,
-    observable: str,
-    valid_time_end: float,
-) -> SimulationResult:
-    """Return one observable clipped at an interpolated closed domain boundary."""
-
-    source_time = result.time_s
-    clipped_time = np.unique(
-        np.concatenate((source_time[source_time < valid_time_end], [valid_time_end]))
-    )
-    clipped_values = np.interp(
-        clipped_time,
-        source_time,
-        result.observables[observable],
-    )
-    return SimulationResult(
-        backend=result.backend,
-        time_s=clipped_time,
-        observables={observable: clipped_values},
-        metadata=result.metadata,
-        status=result.status,
-    )
-
-
 def compare_archives(
     left_path: str | Path,
     right_path: str | Path,
@@ -667,6 +700,7 @@ def compare_archives(
     scalar_common = [
         name
         for name in common
+        if name != "quantitative_valid_mask"
         if left.result.observables[name].ndim == 1
         and right.result.observables[name].ndim == 1
     ]
@@ -684,16 +718,9 @@ def compare_archives(
             for name in scalar_common
         )
     else:
-        assert isinstance(valid_time_end, float)
         for name in scalar_common:
             try:
-                left_view = _observable_comparison_view(
-                    left.result, name, valid_time_end
-                )
-                right_view = _observable_comparison_view(
-                    right.result, name, valid_time_end
-                )
-                comparison = compare_results(left_view, right_view, name)
+                comparison = compare_results(left.result, right.result, name)
             except Exception as exc:
                 rejected[name] = f"{type(exc).__name__}: {exc}"
                 continue
@@ -900,7 +927,9 @@ def run_paired_compare(
     any_domain_limit = forward.domain_limited or high_fidelity.domain_limited
     any_out_of_model_domain = bool(domain_window["out_of_model_domain"])
     paired_status = (
-        "completed_with_out_of_model_domain"
+        "rejected_insufficient_common_valid_domain"
+        if not domain_window["common_valid_domain_sufficient"]
+        else "completed_with_out_of_model_domain"
         if any_out_of_model_domain
         else "completed_with_domain_limit"
         if any_domain_limit

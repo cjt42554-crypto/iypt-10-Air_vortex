@@ -1,0 +1,315 @@
+{
+  "schema_version": 1,
+  "review_id": "AIRVORTEX_10_05_TARGETED_HF3D_REVIEW_V1",
+  "source": {
+    "head": "3d974e554a34cadfa95a3978c69218e107277512",
+    "runtime_paths_verified_against_head": [
+      "02_模拟程序/src/airvortex/hf3d",
+      "02_模拟程序/src/airvortex/numerics/cartesian3d.py",
+      "02_模拟程序/src/airvortex/numerics/interface3d.py",
+      "02_模拟程序/src/airvortex/numerics/phase_transfer3d.py",
+      "02_模拟程序/src/airvortex/numerics/projection3d.py"
+    ],
+    "runtime_paths_match_head": true,
+    "head_formal_source_tree": {
+      "algorithm": "airvortex-source-tree-v1/sha256",
+      "sha256": "89a8e93826101875dd13aba9c945ef9a8b3a8186e7d984458878ae2fca1de2be",
+      "file_count": 59,
+      "total_bytes": 1020597
+    },
+    "input_artifacts": {
+      "03_研究记录/专题/07_D3跨网格时间步响应诊断/diagnostics/g9_dt2_projection_closure/artifacts/projection_closure_audit.json": "0a2b51f3eba3356bf75d880501bd1cdfe04ff75f0f120f3a990c65d2ebcec524",
+      "03_研究记录/专题/17_HF3D性能优化/artifacts/p0/divergence_diagnostics.json": "d83f3bd42b819cdfadea51dd2153f183eee7f7d29fbde6111722fb6abc0cffa5",
+      "03_研究记录/专题/07_D3跨网格时间步响应诊断/generated_configs/G9_DT2.json": "c924a225d4d35b25217318c0bdbe7728bceb637f5474e0eb9e2cbffac6ccdb37",
+      "03_研究记录/专题/01_HF3D数值资格/reports/q1r3_freeze/freeze_manifest.json": "76df3985b63badd43f8517548c17f195e7388b2fcc6e197ec551ba60413829ef",
+      "03_研究记录/专题/01_HF3D数值资格/reports/q1r3_spatial_stage/qualification_report.json": "c975dc332018553037c2e6c81b8c6fbbacc1a9347bafe01b656184760d859c3c",
+      "03_研究记录/专题/01_HF3D数值资格/reports/q1r3_spatial_stage/spatial_stage_decision.json": "cf61250b5222a71a5add4daa97777b5209ef96e1a9ca8d141a12b317234dca05",
+      "03_研究记录/维护/2026-09-05_目录重组/migration.json": "112c064bdc8d979f55ba743e8351284052836ba989f662af10923781006a8c4a",
+      "03_研究记录/维护/2026-09-06_理论程序对齐/10-05/cls_pairing.json": "72c08e25c6d0b15310ae51febd0fc6f3b41dcc1017e23613ab49690fe888d9fe",
+      "03_研究记录/维护/2026-09-06_理论程序对齐/10-05/quantify_cls_pairing.py": "e53b9c226ff92b0506f9ca967648b64ee2dac2951e73bca814b6c66941034a42"
+    }
+  },
+  "hardware_runtime": {
+    "nvidia_smi_exit_code": 0,
+    "nvidia_smi": "NVIDIA GeForce RTX 5060 Laptop GPU, 8151 MiB, 580.173.02",
+    "cupy_importable_in_system_python": false,
+    "gpu_execution_this_review": "NOT_RUN"
+  },
+  "d3r1_g9_dt2": {
+    "historical_binding": {
+      "execution_commit": "be349aec2f1bdcdb232e282a11175921eda7976b",
+      "formal_source_tree_sha256": "dcd27cbf4353ab8b0d53802c4810f4423d3a34a45ea2944bdd8346e4eab54bb8",
+      "config_sha256_recorded": "c924a225d4d35b25217318c0bdbe7728bceb637f5474e0eb9e2cbffac6ccdb37",
+      "config_sha256_current_file": "c924a225d4d35b25217318c0bdbe7728bceb637f5474e0eb9e2cbffac6ccdb37",
+      "partial_sha256_recorded": "8f1e0973eda48c2ecc54f10001f28b988d353e85a728a16ec24f74582527cbcc",
+      "partial_size_bytes_recorded": 60848588,
+      "partial_present_in_current_checkout": false
+    },
+    "partial_recovery_audit": {
+      "historical_path": "90_候选工作区/current/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G9_DT2/partial.npz",
+      "mapped_current_path": "03_研究记录/专题/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G9_DT2/partial.npz",
+      "mapped_target_present": false,
+      "mapped_target_tracked_by_git": false,
+      "partial_paths_in_all_git_object_history": [],
+      "git_lfs_query_exit_code": 0,
+      "git_lfs_entry_count": 0,
+      "recorded_size_search_roots": [
+        "/home/cjt/Desktop/iypt/10 空气涡流/03_研究记录/专题/07_D3跨网格时间步响应诊断/artifacts/r1/runs/cases/G9_DT2"
+      ],
+      "recorded_size_candidates": [],
+      "recovery_status": "NOT_RECOVERABLE_FROM_GIT_OR_PROJECT_INDEXED_LOCAL_STORAGE",
+      "remaining_possibilities": [
+        "an unrecorded user backup containing the exact hash",
+        "full recomputation from the frozen source/config contract"
+      ]
+    },
+    "failure": {
+      "accepted_step": 6695,
+      "time_s": 0.009196624999999948,
+      "dt_s": 1.375e-06,
+      "measured_divergence_s_inv": 0.00010249185899624536,
+      "maximum_divergence_s_inv": 0.0001,
+      "gate_ratio": 1.0249185899624536,
+      "pressure_relative_residual_l2": 9.830838356012649e-08,
+      "old_relative_residual_gate_satisfied": true,
+      "algebraic_residual_signed_explained_fraction": 0.9999999988175134,
+      "operator_defect_max_s_inv": 1.9441830861506717e-11,
+      "operator_defect_at_failure_cell_s_inv": 1.2119524947420274e-13,
+      "archive_alignment_reproduced": true
+    },
+    "source_contrast": {
+      "historical_pressure_blob": "374b35f187f14038e6dcc081c299292e427b3c41",
+      "current_pressure_blob": "9b45b55f0abbf75bd641d2b9a784b1419da9e749",
+      "historical_solver_only_used_configured_relative_tolerance": true,
+      "current_solver_derives_effective_tolerance_from_divergence_target": true,
+      "current_solver_rechecks_actual_divergence": true,
+      "historical_execution_precedes_current_fix": true
+    },
+    "diagnosis": {
+      "direct_numerical_mechanism": "RELATIVE_L2_PRESSURE_STOP_DID_NOT_BOUND_ABSOLUTE_LINF_DIVERGENCE",
+      "mechanism_status": "IDENTIFIED_FROM_FROZEN_DECOMPOSITION_AND_SOURCE",
+      "current_implementation_status": "DIVERGENCE_TARGET_CONTROL_IMPLEMENTED_AND_BOUNDED_REGRESSION_PASS",
+      "exact_failure_state_replay": "NOT_RUN_RAW_PARTIAL_AND_CUPY_RUNTIME_ABSENT",
+      "full_d3r1_replay": "NOT_RUN",
+      "claim_limit": "The current solver closes the stopping-criterion defect, but no current-source CUDA trajectory has shown that G9_DT2 reaches the registered end or that D3 converges."
+    },
+    "deterministic_pressure_contract_counterexample": {
+      "scope": "Fixed-seed 12x12x16 CPU projection; identical current operator, density, velocity and dt; only the absolute divergence control is disabled in the legacy comparator.",
+      "seed": 1005,
+      "configured_relative_tolerance": 1e-07,
+      "maximum_divergence_s_inv": 0.0001,
+      "legacy_relative_only": {
+        "pressure_relative_residual": 9.884763758827009e-08,
+        "divergence_after_s_inv": 0.00018849520478170234,
+        "relative_gate_pass": true,
+        "absolute_divergence_gate_pass": false
+      },
+      "current_absolute_control": {
+        "effective_relative_tolerance": 3.170439893348502e-09,
+        "pressure_relative_residual": 2.3048006537232544e-09,
+        "divergence_after_s_inv": 4.154516972221245e-06,
+        "divergence_residual_identity_error_s_inv": 5.115907697472721e-13,
+        "absolute_divergence_gate_pass": true
+      },
+      "regression": "02_模拟程序/tests/test_hf3d_10_05.py",
+      "claim_limit": "This isolates the stopping-contract defect on a synthetic CPU state; it is not the archived G9_DT2 state and does not qualify a dynamic trajectory."
+    }
+  },
+  "q1r3": {
+    "historical_binding": {
+      "expected_formal_source_tree_sha256": "03ebc4dcd194d0ffadc7f24228720d775dc7d888ceb5a9737816368626482010",
+      "last_formal_program_commit_before_raw_freeze": "462da97293d86747100c29b6194d8313fdbb7bde",
+      "historical_source_precedes_current_fix": true,
+      "current_formal_source_tree_sha256": "89a8e93826101875dd13aba9c945ef9a8b3a8186e7d984458878ae2fca1de2be"
+    },
+    "historical_decision": "Q1R3_SPATIAL_STAGE_FAIL_CLOSED__TEMPORAL_NOT_AUTHORIZED",
+    "all_six_smooth_observables_failed": true,
+    "smooth_observables": {
+      "angular_momentum_z_kg_m2_s": {
+        "pass": false,
+        "fine_vs_medium_relative_l2": 0.32942442436164726,
+        "fine_vs_medium_relative_linf": 0.27669830428284314,
+        "observed_order": null,
+        "fine_grid_gci_l2": null,
+        "asymptotic_trend": false,
+        "reason": "No positive observed order could be established from the three-level L2 differences."
+      },
+      "axisymmetry_error": {
+        "pass": false,
+        "fine_vs_medium_relative_l2": 0.4014727960302999,
+        "fine_vs_medium_relative_linf": 0.4995162053416115,
+        "observed_order": 0.21581240145105518,
+        "fine_grid_gci_l2": 5.4877758300550425,
+        "asymptotic_trend": true,
+        "reason": "Three-level differences support a positive convergence trend."
+      },
+      "funnel_depth_m": {
+        "pass": false,
+        "fine_vs_medium_relative_l2": 1.4839731620028025,
+        "fine_vs_medium_relative_linf": 1.0748349036037923,
+        "observed_order": 0.7129276796704513,
+        "fine_grid_gci_l2": 5.534213557257202,
+        "asymptotic_trend": true,
+        "reason": "Three-level differences support a positive convergence trend."
+      },
+      "kinetic_energy_lab_j": {
+        "pass": false,
+        "fine_vs_medium_relative_l2": 0.44606261518529927,
+        "fine_vs_medium_relative_linf": 0.40036050963478903,
+        "observed_order": 0.19059245965263388,
+        "fine_grid_gci_l2": 6.939972391778307,
+        "asymptotic_trend": true,
+        "reason": "Three-level differences support a positive convergence trend."
+      },
+      "liquid_mass_error_relative": {
+        "pass": false,
+        "fine_vs_medium_relative_l2": 0.6543776018320083,
+        "fine_vs_medium_relative_linf": 0.6857430344424252,
+        "observed_order": null,
+        "fine_grid_gci_l2": null,
+        "asymptotic_trend": false,
+        "reason": "No positive observed order could be established from the three-level L2 differences."
+      },
+      "min_gap_to_bar_m": {
+        "pass": false,
+        "fine_vs_medium_relative_l2": 0.004195475460315919,
+        "fine_vs_medium_relative_linf": 0.00904891303010583,
+        "observed_order": null,
+        "fine_grid_gci_l2": null,
+        "asymptotic_trend": false,
+        "reason": "No positive observed order could be established from the three-level L2 differences."
+      }
+    },
+    "historical_numerical_quality": {
+      "space_L0_4cells": {
+        "pass": true,
+        "projected_divergence_s_inv": 6.866666352710327e-07,
+        "pressure_relative_residual": 9.999744923845984e-08,
+        "liquid_volume_balance_error_relative": 1.045031423001252e-12
+      },
+      "space_L1_6cells": {
+        "pass": true,
+        "projected_divergence_s_inv": 6.567799847712052e-05,
+        "pressure_relative_residual": 9.99995423909517e-08,
+        "liquid_volume_balance_error_relative": 6.4012622055254415e-12
+      },
+      "space_L2_9cells": {
+        "pass": true,
+        "projected_divergence_s_inv": 3.663630011629948e-05,
+        "pressure_relative_residual": 9.999897504895926e-08,
+        "liquid_volume_balance_error_relative": 9.668568675532624e-12
+      }
+    },
+    "source_contrast": {
+      "historical_cls_used_global_clip_mass_correction": false,
+      "historical_cls_had_no_paired_momentum_callback": true,
+      "current_cls_pairs_density_and_momentum": true,
+      "current_physical_phase_advection_retains_residual_sized_unpaired_budget": true
+    },
+    "diagnosis": {
+      "historical_result_for_current_solver": "NON_TRANSFERABLE_AFTER_MASS_MOMENTUM_AND_PRESSURE_CONTRACT_CHANGE",
+      "pressure_stop_defect_as_primary_explanation": "NOT_SUPPORTED_BY_OLD_RUN_QUALITY; ALL_THREE_SPATIAL_CASES_PASSED_THE_DIVERGENCE_GATE",
+      "bulk_channel_clearance_fix_as_explanation": "NOT_SUPPORTED; RESOLVED_CHANNEL_IS_NOT_ONE_OF_THE_SIX_SMOOTH_OBSERVABLES",
+      "remaining_mechanism_status": "NOT_UNIQUE",
+      "remaining_supported_contributors": [
+        "historical unpaired CLS density/momentum update can contaminate a trajectory; the magnitude in Q1R3 is unestablished",
+        "G0 immersed-bar and diffuse-interface resolution can change forcing and observables",
+        "open-top liquid inventory response is grid dependent despite flux-corrected conservation",
+        "the current physical phase-advection clip/repair remains only residual-bounded, not exactly paired"
+      ],
+      "claim_limit": "The old six-observable failure remains historical evidence and is not closed. Changed source and small tests establish neither current failure nor current convergence."
+    },
+    "small_domain_cls_pairing_counterexample": {
+      "schema_version": 1,
+      "experiment_id": "HF3D_10_05_SMALL_DOMAIN_CLS_PAIRING_V1",
+      "scope": "One deterministic synthetic CLS substep comparison; no physical time advance and no Q1R3 convergence claim.",
+      "grid_shape": [
+        12,
+        12,
+        16
+      ],
+      "density_kg_m3": {
+        "liquid": 998.2,
+        "gas": 1.204
+      },
+      "cls": {
+        "interface_thickness_cells": 2.5,
+        "pseudo_cfl": 0.2,
+        "iterations": 12,
+        "maximum_phase_change": 0.3403945463950026,
+        "limited_absolute_volume_m3": 9.371271398406838e-08
+      },
+      "initial_momentum_kg_m_s": [
+        0.7120337723983208,
+        -0.2859282487931361,
+        0.046655366841079265
+      ],
+      "paired": {
+        "momentum_kg_m_s": [
+          0.7120337723983208,
+          -0.2859282487931361,
+          0.04665536684107927
+        ],
+        "momentum_relative_error": 9.026606564473563e-18,
+        "kinetic_energy_j": 0.9048863694068396,
+        "kinetic_energy_relative_change": -0.0004274326489350777
+      },
+      "unpaired_density_with_pre_cls_velocity_comparator": {
+        "momentum_kg_m_s": [
+          0.7141694619362937,
+          -0.2859665833897627,
+          0.04755822291379473
+        ],
+        "momentum_relative_error": 0.0030167277813521,
+        "kinetic_energy_j": 0.9091358354003453,
+        "kinetic_energy_relative_change": 0.004266692245203707
+      },
+      "initial_kinetic_energy_j": 0.9052733127769301,
+      "interpretation": "Paired CLS conserves total momentum to roundoff and dissipates a small amount of kinetic energy.  Applying the same density change without its momentum flux changes momentum and creates energy in this counterexample.",
+      "claim_limit": "This establishes that the historical missing pairing can contaminate momentum/energy observables.  It does not quantify the old Q1R3 error or prove that pairing alone restores three-grid convergence."
+    }
+  },
+  "verification_boundary": {
+    "completed": [
+      "13 bounded CPU regressions in tests/test_audit_numerics_3d.py",
+      "one targeted pressure stopping-contract regression in tests/test_hf3d_10_05.py",
+      "one deterministic small-domain paired/unpaired CLS counterexample",
+      "tracked frozen JSON and source/config binding checks",
+      "historical/current source contract comparison",
+      "mapped-path, Git object/LFS, and recorded-size local partial recovery audit"
+    ],
+    "not_run": [
+      "CUDA projection parity because CuPy is absent from system Python",
+      "exact G9_DT2 failure-state projection replay because partial.npz is absent",
+      "D3R1 dynamic rerun",
+      "Q1R3 current-source three-grid rerun",
+      "physical or experimental validation"
+    ]
+  },
+  "recommended_next_experiments": [
+    {
+      "priority": 1,
+      "experiment": "EXACT_G9_DT2_FAILURE_STATE_PROJECTION_REPLAY",
+      "requirements": [
+        "restore the 60,848,588-byte partial.npz read-only",
+        "verify SHA-256 8f1e0973eda48c2ecc54f10001f28b988d353e85a728a16ec24f74582527cbcc",
+        "restore an isolated CuPy runtime and require explicit CUDA/no fallback"
+      ],
+      "scope": "Reconstruct the pre-projection velocity from the frozen corrected state and pressure, then apply one current projection solve; do not advance dynamics.",
+      "acceptance": "actual projected divergence <= 1e-4 s^-1, residual identity closes, physics/config/threshold unchanged"
+    },
+    {
+      "priority": 2,
+      "experiment": "CURRENT_SOURCE_Q1R3_THREE_GRID_PROSPECTIVE_CAMPAIGN",
+      "requirements": [
+        "new protocol and evidence root because the algorithm identity changed",
+        "all three 4/6/9-cells-per-radius cases from zero",
+        "same physical inputs and frozen convergence thresholds",
+        "explicit CUDA/no fallback and new CLS/divergence diagnostics"
+      ],
+      "scope": "Run only if numerical qualification is resumed. A single finer case cannot separate CLS correction from geometry, interface, or open-boundary effects.",
+      "acceptance": "all six smooth observables plus quality and binary-event gates; no result may be used as physical or apparatus validation"
+    }
+  ],
+  "overall_status": "IMPLEMENTATION_LEVEL_D3_STOPPING_DEFECT_CLOSED__Q1R3_CURRENT_CONVERGENCE_UNKNOWN__GPU_AND_DYNAMIC_REPLAYS_NOT_RUN__READY_TO_PAUSE_BEFORE_EXPERIMENT"
+}

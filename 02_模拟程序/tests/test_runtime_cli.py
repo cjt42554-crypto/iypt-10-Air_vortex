@@ -66,6 +66,9 @@ class _FakeBackend:
         return _result()
 
 
+from validity_fixtures import ideal_test_reservoir, synthetic_signal_result
+
+
 class BackendRegistryTests(unittest.TestCase):
     def test_register_alias_create_and_reject_duplicate(self) -> None:
         registry = BackendRegistry()
@@ -281,6 +284,7 @@ class CLITests(unittest.TestCase):
             root = Path(directory)
             config = SimulationConfig(
                 backend=BackendMode.FORWARD,
+                gas=ideal_test_reservoir(until_s=0.01),
                 drive=DriveConfig(
                     initial_rpm=0.0,
                     target_rpm=0.0,
@@ -321,7 +325,7 @@ class CLITests(unittest.TestCase):
             self.assertEqual(
                 payload["scientific_completion_class"], "completed_full"
             )
-            self.assertEqual(payload["termination_reason"], "configured_duration_reached")
+            self.assertEqual(payload["termination_reason"], "requested_duration_reached")
             self.assertFalse(payload["domain_limited"])
             self.assertTrue(payload["full_duration"])
             self.assertEqual(payload["requested_end_s"], config.run.duration_s)
@@ -723,8 +727,9 @@ class CLITests(unittest.TestCase):
 
             def run(self, config, control=None, progress=None):
                 del config, control, progress
-                return SimulationResult(
+                return synthetic_signal_result(
                     backend=BackendMode.FORWARD,
+                    first_invalid_time_s=2.0,
                     time_s=time_s,
                     # The deliberately divergent t=3 proxy value must never
                     # enter the model-to-model RMSE after contact at t=2.
@@ -752,7 +757,7 @@ class CLITests(unittest.TestCase):
 
             def run(self, config, control=None, progress=None):
                 del config, control, progress
-                return SimulationResult(
+                return synthetic_signal_result(
                     backend=BackendMode.HIGH_FIDELITY,
                     time_s=time_s,
                     observables={"funnel_depth_m": np.zeros(4)},
@@ -786,7 +791,7 @@ class CLITests(unittest.TestCase):
             self.assertEqual(
                 comparison["status"], "completed_with_out_of_model_domain"
             )
-            self.assertEqual(comparison["valid_time_end"], 2.0)
+            self.assertEqual(comparison["valid_time_end"], 1.0)
             self.assertTrue(comparison["truncated_to_common_valid_domain"])
             self.assertEqual(
                 comparison["domains"]["left"]["domain_status"],
@@ -797,7 +802,7 @@ class CLITests(unittest.TestCase):
             )
             self.assertEqual(
                 comparison["metrics"]["funnel_depth_m"]["common_interval_s"],
-                [0.0, 2.0],
+                [0.0, 1.0],
             )
             self.assertEqual(
                 comparison["metrics"]["funnel_depth_m"]["rmse"], 0.0
@@ -809,7 +814,7 @@ class CLITests(unittest.TestCase):
                 comparison_manifest["status"],
                 "completed_with_out_of_model_domain",
             )
-            self.assertEqual(comparison_manifest["valid_time_end"], 2.0)
+            self.assertEqual(comparison_manifest["valid_time_end"], 1.0)
             self.assertTrue(
                 comparison_manifest["truncated_to_common_valid_domain"]
             )
@@ -822,7 +827,7 @@ class CLITests(unittest.TestCase):
             )
             self.assertFalse(paired["domain_limited"])
             self.assertTrue(paired["out_of_model_domain"])
-            self.assertEqual(paired["valid_time_end"], 2.0)
+            self.assertEqual(paired["valid_time_end"], 1.0)
             self.assertTrue(paired["truncated_to_common_valid_domain"])
             self.assertEqual(
                 paired["backend_terminations"]["forward"]["completion_class"],
@@ -853,7 +858,7 @@ class CLITests(unittest.TestCase):
                 cli_payload["status"],
                 "completed_with_out_of_model_domain",
             )
-            self.assertEqual(cli_payload["valid_time_end"], 2.0)
+            self.assertEqual(cli_payload["valid_time_end"], 1.0)
             self.assertTrue(
                 cli_payload["truncated_to_common_valid_domain"]
             )
@@ -914,7 +919,7 @@ class CLITests(unittest.TestCase):
                 comparison["completion_class"],
                 "completed_with_out_of_model_domain",
             )
-            self.assertEqual(comparison["valid_time_end"], 0.0)
+            self.assertIsNone(comparison["valid_time_end"])
             self.assertFalse(comparison["common_valid_domain_sufficient"])
             self.assertEqual(comparison["metrics"], {})
             self.assertIn(
@@ -927,7 +932,7 @@ class CLITests(unittest.TestCase):
             SimulationConfig(),
             run=RunConfig(duration_s=3.0, output_interval_s=1.0),
         )
-        forward_result = SimulationResult(
+        forward_result = synthetic_signal_result(
             backend=BackendMode.FORWARD,
             time_s=np.array([0.0, 1.0, 2.0, 3.0]),
             observables={"funnel_depth_m": np.zeros(4)},
@@ -936,7 +941,7 @@ class CLITests(unittest.TestCase):
                 "observable_units": {"funnel_depth_m": "m"},
             },
         )
-        high_fidelity_result = SimulationResult(
+        high_fidelity_result = synthetic_signal_result(
             backend=BackendMode.HIGH_FIDELITY,
             time_s=np.array([0.0, 1.0, 2.0]),
             observables={"funnel_depth_m": np.zeros(3)},
@@ -987,6 +992,7 @@ class CLITests(unittest.TestCase):
         default = SimulationConfig()
         config = replace(
             default,
+            gas=ideal_test_reservoir(until_s=0.0002),
             drive=DriveConfig(
                 initial_rpm=0.0,
                 target_rpm=0.0,
@@ -1015,20 +1021,23 @@ class CLITests(unittest.TestCase):
                 (comparison_path / "comparison.json").read_text(encoding="utf-8")
             )
             self.assertEqual(payload["comparison_format_version"], 2)
-            self.assertEqual(payload["status"], "completed")
-            self.assertEqual(payload["valid_time_end"], config.run.duration_s)
+            self.assertEqual(payload["status"], "rejected_insufficient_common_valid_domain")
+            self.assertIsNone(payload["valid_time_end"])
             self.assertFalse(payload["truncated_to_common_valid_domain"])
-            self.assertIn("funnel_depth_m", payload["metrics"])
-            self.assertIn("min_gap_to_bar_m", payload["metrics"])
-            self.assertEqual(payload["metrics"]["funnel_depth_m"]["unit"], "m")
+            # Both real backends run and archive; HF3D has no declared
+            # quantitative qualification, so no cross-model metrics are made.
+            self.assertEqual(payload["metrics"], {})
+            self.assertEqual(payload["domains"]["right"]["quantitative_validity_status"], "legacy_unassessed")
+            self.assertGreater(load_run_archive(root / "forward").result.time_s.size, 1)
+            self.assertGreater(load_run_archive(root / "high_fidelity").result.time_s.size, 1)
             paired = json.loads(
                 (root / "paired_manifest.json").read_text(encoding="utf-8")
             )
-            self.assertEqual(paired["status"], "completed")
+            self.assertEqual(paired["status"], "rejected_insufficient_common_valid_domain")
             self.assertEqual(paired["paired_run_format_version"], 2)
             self.assertFalse(paired["domain_limited"])
             self.assertFalse(paired["out_of_model_domain"])
-            self.assertEqual(paired["valid_time_end"], config.run.duration_s)
+            self.assertIsNone(paired["valid_time_end"])
             self.assertFalse(paired["truncated_to_common_valid_domain"])
             self.assertEqual(paired["requested_end_s"], config.run.duration_s)
             self.assertEqual(

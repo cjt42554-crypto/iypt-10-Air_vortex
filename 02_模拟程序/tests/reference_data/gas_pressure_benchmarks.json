@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "theory_contract": "AV-FWD F86-F88",
+  "quadrature_segments": [64, 128, 256, 512],
+  "B1": {
+    "length_m": 0.1,
+    "radius_m": 0.001,
+    "gas_viscosity_pa_s": 0.000018,
+    "area_rate_amplitude_m2_s": 0.0001,
+    "volume_rate_m3_s": 0.0,
+    "midpoint_flow_m3_s": -0.000003183098861837907,
+    "max_abs_pressure_pa": 7.29512522224832
+  },
+  "B2": {
+    "length_m": 0.1,
+    "radius_m": 0.001,
+    "gas_viscosity_pa_s": 0.000018,
+    "flow_amplitude_m3_s": 0.000001,
+    "endpoint_pressure_difference_pa": 0.0,
+    "max_abs_pressure_pa": 1.4590250444496635
+  },
+  "fixed_space_area_rate": {
+    "evaluation_time_s": 0.2,
+    "half_intervals_s": [0.04, 0.02, 0.01, 0.005],
+    "area_offset_m2": 0.000003,
+    "area_axial_gradient_m": 0.000001,
+    "area_time_amplitude_m2": 0.0000002,
+    "exponential_rate_s_inv": 3.0,
+    "grid_velocity_m_s": 0.01
+  }
+}

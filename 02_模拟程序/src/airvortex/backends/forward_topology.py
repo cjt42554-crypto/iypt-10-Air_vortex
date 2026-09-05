@@ -1,9 +1,9 @@
-"""Topology-capable numerical implementation of frozen forward theory F1.0.
+"""CP pressure-potential interface with accepted-step quantitative validity.
 
-The legacy single-valued Young--Laplace graph solver remains in
-``airvortex.backends.forward`` as an independent pre-contact regression oracle.
-This module is the normative forward runtime: one variational interface state
-continues through target contact, finite-channel formation and disconnection.
+The independent graph solver remains in ``airvortex.backends.forward``.
+Strict CP prediction stops at its first unsupported event; explicit diagnostic
+continuation preserves the same regularised equations and an irreversible
+invalid-sample mask.  SH and TF dispatch to their own equations and states.
 """
 
 from __future__ import annotations
@@ -29,6 +29,8 @@ from airvortex.core import (
     SimulationConfig,
     SimulationResult,
 )
+from airvortex.core.validity import make_quantitative_validity
+from airvortex.backends.forward_gas import assess_forward_gas
 from airvortex.numerics.axisymmetric import AxisymmetricGrid, FloatArray
 from airvortex.numerics.interface import surface_profile
 from airvortex.numerics.variational_interface import (
@@ -50,8 +52,8 @@ from airvortex.numerics.variational_interface import (
 )
 
 
-MODEL_ID = "forward-f1.0-axisymmetric-variational-fv-v1"
-THEORY_ID = "F1.0-frozen-2026-08-21"
+MODEL_ID = "forward-cp2-axisymmetric-variational-fv-v2"
+THEORY_ID = "AV-FWD-CP-v2"
 NUMERICAL_METHOD_ID = "PF-FV2D-v1"
 FORWARD_STATE_FORMAT = "airvortex-forward-state-v1"
 
@@ -532,6 +534,18 @@ class ForwardTopologyBackend:
             raise ValueError(
                 "ForwardTopologyBackend requires config.backend=BackendMode.FORWARD"
             )
+        if config.forward.model_branch == "AV-FWD-SH-v1":
+            if initial_state is not None:
+                raise ValueError("SH requires its own initial surface/flow state, not a CP phase state")
+            from .forward_stokes import ForwardStokesBackend
+            return ForwardStokesBackend().run(config, control, progress)
+        if config.forward.model_branch == "AV-FWD-TF-v1":
+            if initial_state is not None:
+                raise ValueError("TF requires its own local film state, not a CP phase state")
+            from .forward_film import ForwardFilmBackend
+            return ForwardFilmBackend().run(config, control, progress)
+        if config.forward.model_branch != THEORY_ID:
+            raise ValueError("unknown forward model branch; implicit fallback is forbidden")
         geometry, thickness = _build_geometry(config)
         grid = geometry.grid
         laws = _contact_laws(config)
@@ -593,6 +607,59 @@ class ForwardTopologyBackend:
         minimum_accepted_dt = math.inf
         maximum_abs_volume_error = 0.0
         maximum_energy_increase = 0.0
+        physical_refinements = 0
+        first_invalid_time: float | None = None
+        last_valid_time: float | None = None
+        validity_interval: tuple[float, float] | None = None
+        validity_reason = "DECLARED_CONDITIONAL_MODEL_CHECKS_PASSED"
+        validity_transition_phase: FloatArray | None = None
+        validity_previous_phase: FloatArray | None = None
+        numerical_failure_interval: tuple[float, float] | None = None
+        numerical_failure_reason: str | None = None
+        validity_mask_values: list[float] = []
+        gas_summary_values: list[dict] = []
+        gas_pressure_evaluated_values: list[float] = []
+        gas_pressure_max_values: list[float] = []
+        gas_section_z_values: list[FloatArray] = []
+        gas_area_profile_values: list[FloatArray] = []
+        gas_area_rate_profile_values: list[FloatArray] = []
+        gas_flow_profile_values: list[FloatArray] = []
+        gas_pressure_profile_values: list[FloatArray] = []
+        gas_section_evaluated_values: list[float] = []
+
+        def inspect_state(phase, state_circulation, time_s, previous_sections):
+            topology = topology_diagnostics(
+                phase, geometry, interface_thickness_m=thickness,
+                minimum_resolved_throat_cells=config.forward.minimum_resolved_throat_cells,
+            )
+            phi = centrifugal_potential_field(config, grid, state_circulation)
+            gas_check = assess_forward_gas(
+                config, phase, geometry, topology, time_s=time_s,
+                previous_sections=previous_sections,
+                surface_profile_m=_surface_profile_m(phase, geometry),
+                centrifugal_potential_range_m2_s2=float(np.max(phi) - np.min(phi)),
+                interface_thickness_m=thickness,
+            )
+            reason = (
+                "ISOLATED_GAS_COMPONENT_WHOLE_INTERFACE_INVALID"
+                if topology.isolated_gas_volume_m3 > 0.0 else
+                "GEOMETRIC_TARGET_TOUCH_CONTINUATION_UNESTABLISHED"
+                if topology.touches_target else
+                gas_check.reason if not gas_check.valid else None
+            )
+            return topology, gas_check, reason
+
+        current_topology, current_gas, initial_invalid_reason = inspect_state(q, circulation, 0.0, None)
+        if initial_invalid_reason is None:
+            last_valid_time = 0.0
+        else:
+            first_invalid_time = 0.0
+            validity_interval = (0.0, 0.0)
+            validity_reason = initial_invalid_reason
+            validity_transition_phase = q.copy()
+            events.append(Event(0.0, "quantitative_validity_exit", validity_reason,
+                                {"bracket_start_s": 0.0, "bracket_end_s": 0.0,
+                                 "whole_interface_invalid": True}))
 
         times: list[float] = []
         omega_values: list[float] = []
@@ -647,14 +714,7 @@ class ForwardTopologyBackend:
                 contact_laws=laws,
                 apply_hysteresis=False,
             )
-            topology = topology_diagnostics(
-                q,
-                geometry,
-                interface_thickness_m=thickness,
-                minimum_resolved_throat_cells=(
-                    config.forward.minimum_resolved_throat_cells
-                ),
-            )
+            topology = current_topology
             profile_m = _surface_profile_m(q, geometry)
             depth_static, visible_depth, profile_range, profile_gap = (
                 _surface_functionals(profile_m, config, geometry)
@@ -776,46 +836,31 @@ class ForwardTopologyBackend:
                     Event(
                         time_s,
                         "isolated_gas_component",
-                        "isolated gas appeared; bubble quantities are qualitative only",
+                        "isolated gas appeared; the whole interface is quantitatively invalid",
                     )
                 )
                 isolated_announced = True
 
-            gas_error = 0.0
-            if times and topology.minimum_throat_radius_m > 0.0:
-                dt_output = time_s - times[-1]
-                gas_flux = abs(
-                    topology.top_connected_gas_volume_m3 - connected_gas_values[-1]
-                ) / max(dt_output, np.finfo(float).tiny)
-                length = max(
-                    config.container.liquid_depth_m - geometry.target_top_m,
-                    grid.dz,
-                )
-                pressure_drop = (
-                    8.0
-                    * config.fluid.gas_dynamic_viscosity_pa_s
-                    * length
-                    * gas_flux
-                    / (
-                        math.pi
-                        * max(topology.minimum_throat_radius_m, 0.5 * grid.dr) ** 4
-                    )
-                )
-                phi = centrifugal_potential_field(config, grid, circulation)
-                pressure_scale = max(
-                    config.fluid.surface_tension_n_m
-                    / max(topology.minimum_throat_radius_m, 0.5 * grid.dr),
-                    (
-                        config.fluid.liquid_density_kg_m3
-                        - config.fluid.gas_density_kg_m3
-                    )
-                    * config.fluid.gravity_m_s2
-                    * length,
-                    config.fluid.liquid_density_kg_m3
-                    * float(np.max(phi) - np.min(phi)),
-                    np.finfo(float).tiny,
-                )
-                gas_error = pressure_drop / pressure_scale
+            gas_diagnostic = current_gas.diagnostic
+            gas_error = gas_diagnostic.epsilon_g if gas_diagnostic.epsilon_g is not None else 0.0
+            # Dense numeric arrays use finite placeholders only alongside an
+            # explicit availability mask.  Missing evidence is null in JSON
+            # and invalid in the scientific contract, never a pressure PASS.
+            gas_pressure_evaluated_values.append(float(gas_diagnostic.epsilon_g is not None))
+            gas_pressure_max_values.append(gas_diagnostic.max_abs_pressure_pa or 0.0)
+            gas_summary_values.append(current_gas.summary())
+            validity_mask_values.append(float(first_invalid_time is None))
+            count = config.gas.channel_section_count
+            section_available = gas_diagnostic.z_m.size == count
+            gas_section_evaluated_values.append(float(section_available))
+            for values, source in (
+                (gas_section_z_values, gas_diagnostic.z_m),
+                (gas_area_profile_values, gas_diagnostic.area_m2),
+                (gas_area_rate_profile_values, gas_diagnostic.area_rate_fixed_m2_s),
+                (gas_flow_profile_values, gas_diagnostic.flow_m3_s),
+                (gas_pressure_profile_values, gas_diagnostic.pressure_relative_pa),
+            ):
+                values.append(np.array(source, copy=True) if section_available else np.zeros(count))
 
             omega = actual_bar_omega_rad_s(config, time_s)
             velocity = burgers_tangential_velocity_field(config, grid, circulation)
@@ -873,6 +918,8 @@ class ForwardTopologyBackend:
             )
 
         for output_index, output_time in enumerate(requested_times[1:], start=1):
+            if first_invalid_time is not None and config.forward.prediction_mode == "strict":
+                break
             while current_time < output_time - 1.0e-14:
                 if control is not None and not control.checkpoint():
                     status = RunStatus.STOPPED
@@ -924,14 +971,47 @@ class ForwardTopologyBackend:
                                 {"proposed_dt_s": proposed_dt},
                             )
                         )
-                        raise
+                        status = RunStatus.FAILED
+                        numerical_failure_interval = (current_time, current_time + proposed_dt)
+                        numerical_failure_reason = str(exc)
+                        break
                     accepted_dt = step_diagnostics.accepted_dt_s
                     if accepted_dt < proposed_dt * (1.0 - 1.0e-12):
                         proposed_dt = accepted_dt
                         continue
+                    trial_topology, trial_gas, invalid_reason = inspect_state(
+                        trial_q, trial_circulation, current_time + accepted_dt, current_gas.sections,
+                    )
+                    # Refine a newly detected physical transition using the
+                    # same evolution from the last accepted state.  The final
+                    # bracket is evidence, not an invented root precision.
+                    if (
+                        first_invalid_time is None and invalid_reason is not None
+                        and accepted_dt > config.forward.validity_event_tolerance_s
+                    ):
+                        proposed_dt = 0.5 * accepted_dt
+                        physical_refinements += 1
+                        continue
+                    if first_invalid_time is None:
+                        if invalid_reason is None:
+                            last_valid_time = current_time + accepted_dt
+                        else:
+                            first_invalid_time = current_time + accepted_dt
+                            validity_interval = (current_time, first_invalid_time)
+                            validity_reason = invalid_reason
+                            validity_previous_phase = q.copy()
+                            validity_transition_phase = trial_q.copy()
+                            events.append(Event(
+                                first_invalid_time, "quantitative_validity_exit", validity_reason,
+                                {"bracket_start_s": current_time,
+                                 "bracket_end_s": first_invalid_time,
+                                 "whole_interface_invalid": True},
+                            ))
                     q = trial_q
                     circulation = trial_circulation
                     current_time += accepted_dt
+                    current_topology = trial_topology
+                    current_gas = trial_gas
                     accepted_internal_steps += 1
                     maximum_rejections = max(
                         maximum_rejections, step_diagnostics.rejected_attempts
@@ -955,7 +1035,13 @@ class ForwardTopologyBackend:
                         - step_diagnostics.energy_before_j,
                     )
                     break
-            if status is RunStatus.STOPPED:
+                if status is RunStatus.FAILED:
+                    break
+                if first_invalid_time is not None and config.forward.prediction_mode == "strict":
+                    break
+            if status in {RunStatus.STOPPED, RunStatus.FAILED} or (
+                first_invalid_time is not None and config.forward.prediction_mode == "strict"
+            ):
                 if current_time > times[-1] + 1.0e-14:
                     snapshot(current_time)
                 break
@@ -984,7 +1070,7 @@ class ForwardTopologyBackend:
                     control.stop_reason if control is not None else "stop requested",
                 )
             )
-        elif progress is not None:
+        elif status is RunStatus.COMPLETED and first_invalid_time is None and progress is not None:
             progress(
                 Progress(
                     fraction=1.0,
@@ -1005,13 +1091,10 @@ class ForwardTopologyBackend:
         if last_topology is None:  # pragma: no cover - initial snapshot sets it
             raise RuntimeError("topology diagnostics missing")
         any_isolated = bool(np.any(np.asarray(isolated_gas_values) > 0.0))
-        gas_invalid = bool(
-            np.any(
-                np.asarray(gas_pressure_error_values)
-                > config.forward.gas_pressure_error_max
-            )
-        )
+        gas_invalid = any(not record["valid"] for record in gas_summary_values)
         scientific_status = (
+            "NUMERICAL_FAILURE" if status is RunStatus.FAILED else
+            "QUANTITATIVE_VALIDITY_EXIT" if first_invalid_time is not None else
             "GAS_PRESSURE_CLOSURE_INVALID"
             if gas_invalid
             else "QUALITATIVE_AXISYMMETRIC_ONLY"
@@ -1021,7 +1104,11 @@ class ForwardTopologyBackend:
             else "CLASSICAL_SOLUTION"
         )
         termination_reason = (
-            "soft_stop" if status is RunStatus.STOPPED else "requested_duration_reached"
+            "numerical_failure" if status is RunStatus.FAILED else
+            "soft_stop" if status is RunStatus.STOPPED else
+            "quantitative_validity_exit" if first_invalid_time is not None and config.forward.prediction_mode == "strict" else
+            "requested_duration_reached_diagnostic" if first_invalid_time is not None else
+            "requested_duration_reached"
         )
         envelope_length = min(
             config.container.radius_m, config.container.liquid_depth_m
@@ -1060,9 +1147,41 @@ class ForwardTopologyBackend:
         else:
             wave_error = 0.0
             wave_error_status = "UNBOUNDED_FOR_IDEAL_SPEED_STEP"
+        theory_path = Path(__file__).resolve().parents[4] / "01_最终理论" / "01_前向预测理论.md"
+        theory_sha256 = _sha256_file(theory_path)
+        if status is RunStatus.FAILED:
+            quantitative_status = "numerical_failure"
+            validity_mask_values = [0.0 for _ in times]
+            contract_valid_until = None
+            contract_first_invalid = numerical_failure_interval[1]
+            contract_interval = numerical_failure_interval
+            contract_reason = numerical_failure_reason or "NUMERICAL_STEP_FAILED"
+        else:
+            quantitative_status = (
+                "physical_exit" if first_invalid_time is not None and config.forward.prediction_mode == "strict" else
+                "diagnostic_continuation" if first_invalid_time is not None else
+                "user_stopped" if status is RunStatus.STOPPED else "valid"
+            )
+            contract_valid_until = last_valid_time
+            contract_first_invalid = first_invalid_time
+            contract_interval = validity_interval
+            contract_reason = validity_reason
+        quantitative_contract = make_quantitative_validity(
+            model_branch=THEORY_ID, theory_sha256=theory_sha256,
+            implementation_id=MODEL_ID + "/" + NUMERICAL_METHOD_ID,
+            status=quantitative_status,
+            valid_until_s=contract_valid_until,
+            first_invalid_time_s=contract_first_invalid,
+            termination_interval_s=contract_interval,
+            reason=contract_reason,
+            diagnostic_continuation=quantitative_status == "diagnostic_continuation",
+            claim_scope="none" if status is RunStatus.FAILED else "conditional_model_numerics",
+        )
         metadata = {
             "model_id": MODEL_ID,
             "theory_id": THEORY_ID,
+            "theory_sha256": theory_sha256,
+            "quantitative_validity": quantitative_contract,
             "numerical_method_id": NUMERICAL_METHOD_ID,
             "model_role": "forward_theory_numerical_implementation",
             "initial_state_kind": initial_state_kind,
@@ -1091,7 +1210,7 @@ class ForwardTopologyBackend:
             "termination_reason": termination_reason,
             "topology_change_simulated": True,
             "wetting_and_contact_line_simulated": True,
-            "post_contact_interpretation": "same_equations_continue",
+            "post_contact_interpretation": "regularised continuation is diagnostic only",
             "uses_high_fidelity_equations": False,
             "bubble_quantification": (
                 "QUALITATIVE_AXISYMMETRIC_ONLY" if any_isolated else "not_triggered"
@@ -1121,10 +1240,17 @@ class ForwardTopologyBackend:
                 "CALIBRATED_WETTING/FIXED_REFERENCE"
             ),
             "event_time_localisation": (
-                "topology classified at output snapshots; event is right endpoint "
-                "of a bracket no wider than output_interval_s"
+                "quantitative exit checked at each accepted internal step and refined; "
+                "the termination interval bounds the last confirmed valid and first "
+                "confirmed invalid state; legacy diagnostic topology labels remain snapshots"
             ),
-            "event_time_nominal_resolution_s": config.run.output_interval_s,
+            "event_time_nominal_resolution_s": config.forward.validity_event_tolerance_s,
+            "gas_pressure_diagnostics": gas_summary_values,
+            "dense_gas_array_contract": (
+                "zero placeholders are unavailable when gas_pressure_evaluated_mask or "
+                "gas_section_evaluated_mask is zero; use nullable JSON diagnostics for "
+                "open-reservoir bounds and absent pressure maxima"
+            ),
             "geometry": {
                 "domain_height_m": grid.height_m,
                 "effective_target_bottom_m": geometry.target_bottom_m,
@@ -1158,6 +1284,8 @@ class ForwardTopologyBackend:
                     config.forward.minimum_resolved_throat_cells
                 ),
                 "accepted_internal_steps": accepted_internal_steps,
+                "physical_transition_refinement_attempts": physical_refinements,
+                "validity_checked_at_each_accepted_step": True,
                 "minimum_accepted_dt_s": (
                     minimum_accepted_dt if math.isfinite(minimum_accepted_dt) else 0.0
                 ),
@@ -1193,6 +1321,15 @@ class ForwardTopologyBackend:
                 "final_resolved": last_topology.resolved_channel,
             },
             "observable_units": {
+                "quantitative_valid_mask": "1",
+                "gas_pressure_evaluated_mask": "1",
+                "gas_section_evaluated_mask": "1",
+                "gas_pressure_max_abs_pa": "Pa",
+                "gas_section_z_m": "m",
+                "gas_section_area_m2": "m^2",
+                "gas_section_area_rate_m2_s": "m^2 s^-1",
+                "gas_section_flow_m3_s": "m^3 s^-1",
+                "gas_section_pressure_relative_pa": "Pa",
                 "actual_bar_rpm": "rpm",
                 "actual_angular_velocity_rad_s": "rad s^-1",
                 "burgers_C_m2_s": "m^2 s^-1",
@@ -1252,10 +1389,21 @@ class ForwardTopologyBackend:
                 "diffuse-interface result requires epsilon/grid/time convergence",
                 "effective central target replaces the horizontal bar geometry",
                 "gas pressure is uniform only while the reported closure check passes",
-                "isolated bubble pressure/dissolution is not a quantitative state",
+                "an isolated gas component invalidates the entire interface prediction",
+                "gas derivative and tube-resistance error budgets require independent evidence",
+                "conditional numerical validity does not establish calibration or apparatus accuracy",
             ],
         }
         observable_arrays = {
+            "quantitative_valid_mask": np.asarray(validity_mask_values, dtype=float),
+            "gas_pressure_evaluated_mask": np.asarray(gas_pressure_evaluated_values),
+            "gas_section_evaluated_mask": np.asarray(gas_section_evaluated_values),
+            "gas_pressure_max_abs_pa": np.asarray(gas_pressure_max_values),
+            "gas_section_z_m": np.stack(gas_section_z_values),
+            "gas_section_area_m2": np.stack(gas_area_profile_values),
+            "gas_section_area_rate_m2_s": np.stack(gas_area_rate_profile_values),
+            "gas_section_flow_m3_s": np.stack(gas_flow_profile_values),
+            "gas_section_pressure_relative_pa": np.stack(gas_pressure_profile_values),
             "actual_bar_rpm": np.asarray(omega_values) * 60.0 / (2.0 * math.pi),
             "actual_angular_velocity_rad_s": np.asarray(omega_values),
             "burgers_C_m2_s": circulation_array,
@@ -1317,6 +1465,12 @@ class ForwardTopologyBackend:
             "u_z_m_s": np.zeros(grid.shape, dtype=np.float64),
             "u_theta_m_s": final_velocity,
         }
+        if validity_previous_phase is not None:
+            fields["validity_last_confirmed_phase"] = validity_previous_phase
+            metadata["field_units"]["validity_last_confirmed_phase"] = "1"
+        if validity_transition_phase is not None:
+            fields["validity_first_invalid_phase"] = validity_transition_phase
+            metadata["field_units"]["validity_first_invalid_phase"] = "1"
         return SimulationResult(
             backend=BackendMode.FORWARD,
             time_s=time_array,

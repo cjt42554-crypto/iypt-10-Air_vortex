@@ -1,0 +1,195 @@
+{
+  "reference_inputs": {
+    "schema_version": 1,
+    "theory_contract": "AV-FWD F86-F88",
+    "quadrature_segments": [
+      64,
+      128,
+      256,
+      512
+    ],
+    "B1": {
+      "length_m": 0.1,
+      "radius_m": 0.001,
+      "gas_viscosity_pa_s": 1.8e-05,
+      "area_rate_amplitude_m2_s": 0.0001,
+      "volume_rate_m3_s": 0.0,
+      "midpoint_flow_m3_s": -3.183098861837907e-06,
+      "max_abs_pressure_pa": 7.29512522224832
+    },
+    "B2": {
+      "length_m": 0.1,
+      "radius_m": 0.001,
+      "gas_viscosity_pa_s": 1.8e-05,
+      "flow_amplitude_m3_s": 1e-06,
+      "endpoint_pressure_difference_pa": 0.0,
+      "max_abs_pressure_pa": 1.4590250444496635
+    },
+    "fixed_space_area_rate": {
+      "evaluation_time_s": 0.2,
+      "half_intervals_s": [
+        0.04,
+        0.02,
+        0.01,
+        0.005
+      ],
+      "area_offset_m2": 3e-06,
+      "area_axial_gradient_m": 1e-06,
+      "area_time_amplitude_m2": 2e-07,
+      "exponential_rate_s_inv": 3.0,
+      "grid_velocity_m_s": 0.01
+    }
+  },
+  "pressure_cases": [
+    {
+      "case": "B1",
+      "segments": 64,
+      "reference_pressure_pa": 7.29512522224832,
+      "measured_pressure_pa": 7.289264905793446,
+      "measured_endpoint_difference_pa": -7.289264905793446,
+      "measured_midpoint_flow_m3_s": -3.1805418164042485e-06,
+      "relative_error": 0.0008033195149277973,
+      "final_target_relative": 0.001,
+      "status": "PASS",
+      "input_sha256": "fea9f13035a8311571769976533cf5f67b17041b343c9323921fe8cee01af551"
+    },
+    {
+      "case": "B1",
+      "segments": 128,
+      "reference_pressure_pa": 7.29512522224832,
+      "measured_pressure_pa": 7.293660319667524,
+      "measured_endpoint_difference_pa": -7.293660319667524,
+      "measured_midpoint_flow_m3_s": -3.182459677506509e-06,
+      "relative_error": 0.0002008056799804677,
+      "final_target_relative": 0.001,
+      "status": "PASS",
+      "input_sha256": "567a404fda6ccba5c0724f0be8f4f6f5bd99fcb72a4ed55f4d252191545ffb12"
+    },
+    {
+      "case": "B1",
+      "segments": 256,
+      "reference_pressure_pa": 7.29512522224832,
+      "measured_pressure_pa": 7.294759007634054,
+      "measured_endpoint_difference_pa": -7.294759007634054,
+      "measured_midpoint_flow_m3_s": -3.18293907056821e-06,
+      "relative_error": 5.019990789859166e-05,
+      "final_target_relative": 0.001,
+      "status": "PASS",
+      "input_sha256": "69d6ab62e94f22c468187689bfa6bc0a77d032e5e12d4a1602578393cc0d2d17"
+    },
+    {
+      "case": "B1",
+      "segments": 512,
+      "reference_pressure_pa": 7.29512522224832,
+      "measured_pressure_pa": 7.2950336692841535,
+      "measured_endpoint_difference_pa": -7.2950336692841535,
+      "measured_midpoint_flow_m3_s": -3.1830589143212884e-06,
+      "relative_error": 1.2549882473173086e-05,
+      "final_target_relative": 0.001,
+      "status": "PASS",
+      "input_sha256": "2cafc21dd675713cc4e12d5ca247ee0487391d2ce3ced50dc843a16ffc7c5469"
+    },
+    {
+      "case": "B2",
+      "segments": 64,
+      "reference_pressure_pa": 1.4590250444496635,
+      "measured_pressure_pa": 1.4566818594090298,
+      "measured_endpoint_difference_pa": -5.88938620094126e-16,
+      "measured_midpoint_flow_m3_s": -1.3234889800848443e-23,
+      "relative_error": 0.0016059937076114588,
+      "final_target_relative": 0.001,
+      "status": "FAIL",
+      "input_sha256": "3ccf5f77717a43503c2bec32f9a460b06d4926520af1f36cdd21661e7c835b9d"
+    },
+    {
+      "case": "B2",
+      "segments": 128,
+      "reference_pressure_pa": 1.4590250444496635,
+      "measured_pressure_pa": 1.4584391422494956,
+      "measured_endpoint_difference_pa": -1.0169816377914032e-16,
+      "measured_midpoint_flow_m3_s": 3.044024654195142e-22,
+      "relative_error": 0.0004015710370406726,
+      "final_target_relative": 0.001,
+      "status": "PASS",
+      "input_sha256": "e8d7ca46db956a8229f1b0bc48713f754108275c6ccc799d3f0d59af4ff09b59"
+    },
+    {
+      "case": "B2",
+      "segments": 256,
+      "reference_pressure_pa": 1.4590250444496635,
+      "measured_pressure_pa": 1.4588785622807443,
+      "measured_endpoint_difference_pa": 9.69466477582226e-16,
+      "measured_midpoint_flow_m3_s": 3.0109374296930207e-22,
+      "relative_error": 0.00010039729576709739,
+      "final_target_relative": 0.001,
+      "status": "PASS",
+      "input_sha256": "5372d1be4ed2226bb7ec30b39bbb69b6ad8349e00f31d5b9cb76d361ad4c2cf9"
+    },
+    {
+      "case": "B2",
+      "segments": 512,
+      "reference_pressure_pa": 1.4590250444496635,
+      "measured_pressure_pa": 1.4589884234937902,
+      "measured_endpoint_difference_pa": 2.3109633781256966e-15,
+      "measured_midpoint_flow_m3_s": 6.683619349428464e-22,
+      "relative_error": 2.5099607448565344e-05,
+      "final_target_relative": 0.001,
+      "status": "PASS",
+      "input_sha256": "7ba723cad16acf622e865b93ecf1b136538284be2d7ff89070355fa75db26eef"
+    }
+  ],
+  "internal_exit_cases": [
+    {
+      "config_sha256": "39bb54ada0e1bb0eadb6b36617964256e763da01df8a69e4829fec7ea385141d",
+      "output_s": 0.01,
+      "maximum_step_s": 0.001,
+      "reference_evidence_expiry_s": 0.0073,
+      "measured_interval_s": [
+        0.007296875,
+        0.0073046875
+      ],
+      "interval_width_target_s": 1e-05,
+      "reason": "GAS_PRESSURE_EVIDENCE_TIME_DOMAIN_EXCEEDED",
+      "accepted_samples": 1
+    },
+    {
+      "config_sha256": "cfc573ca1afceb37f3801c56238826620f9fd630e4fa37a7302954c5df00a407",
+      "output_s": 0.0025,
+      "maximum_step_s": 0.001,
+      "reference_evidence_expiry_s": 0.0073,
+      "measured_interval_s": [
+        0.007294921875,
+        0.00730133056640625
+      ],
+      "interval_width_target_s": 1e-05,
+      "reason": "GAS_PRESSURE_EVIDENCE_TIME_DOMAIN_EXCEEDED",
+      "accepted_samples": 3
+    },
+    {
+      "config_sha256": "e93691ce6e98f275caf847436e0f75dbc41f41ca81641f107a8eb563371906b2",
+      "output_s": 0.01,
+      "maximum_step_s": 0.0005,
+      "reference_evidence_expiry_s": 0.0073,
+      "measured_interval_s": [
+        0.007296875000000003,
+        0.007304687500000003
+      ],
+      "interval_width_target_s": 1e-05,
+      "reason": "GAS_PRESSURE_EVIDENCE_TIME_DOMAIN_EXCEEDED",
+      "accepted_samples": 1
+    },
+    {
+      "config_sha256": "5b3a962568a9260ff0b846d039430fe658ab44880a20f44fd13eb1fe51e69b5d",
+      "output_s": 0.0025,
+      "maximum_step_s": 0.0005,
+      "reference_evidence_expiry_s": 0.0073,
+      "measured_interval_s": [
+        0.007294921875000001,
+        0.007301330566406251
+      ],
+      "interval_width_target_s": 1e-05,
+      "reason": "GAS_PRESSURE_EVIDENCE_TIME_DOMAIN_EXCEEDED",
+      "accepted_samples": 3
+    }
+  ]
+}

@@ -13,6 +13,13 @@ from typing import TYPE_CHECKING, Any, Callable, Mapping, Sequence
 
 import numpy as np
 
+from airvortex.core.validity import (
+    QuantitativeValidityError,
+    QuantitativeValidityStatus,
+    quantitative_valid_mask,
+    quantitative_validity,
+)
+
 from ._common import DataValidationError
 from .comparison import series_from_result
 from .states import ConnectivityState, StateClassification
@@ -223,6 +230,24 @@ def _termination_summary(
     if domain_status.upper() == "OUT_OF_MODEL_DOMAIN":
         eligible = False
         diagnostics.append("post-contact mathematical proxy excluded from phase map")
+    try:
+        validity = quantitative_validity(result)
+        validity_mask = quantitative_valid_mask(result)
+    except QuantitativeValidityError as exc:
+        eligible = False
+        diagnostics.append(f"invalid quantitative-validity contract: {exc}")
+    else:
+        if validity.status is not QuantitativeValidityStatus.VALID:
+            eligible = False
+            diagnostics.append(
+                "phase-map quantitative aggregation requires validity status 'valid'; "
+                f"received {validity.status.value}: {validity.reason}"
+            )
+        if validity_mask.size == 0 or not bool(validity_mask[-1]):
+            eligible = False
+            diagnostics.append(
+                "final recorded sample is not quantitatively valid; no terminal value inferred"
+            )
     if requested_end_s is not None:
         if actual_end_s is None:
             eligible = False
@@ -341,7 +366,11 @@ def aggregate_phase_data(
         final_values: dict[str, float] = {}
         final_units: dict[str, str] = {}
         observables = getattr(result, "observables", None)
-        if not isinstance(observables, Mapping):
+        if not eligible:
+            diagnostics.append(
+                "quantitative observables omitted because this result is phase-map ineligible"
+            )
+        elif not isinstance(observables, Mapping):
             diagnostics.append("result has no observable mapping")
         else:
             for requested_name in observable_names:

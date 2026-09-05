@@ -26,6 +26,7 @@ from airvortex.core import (
     SimulationConfig,
     SimulationResult,
     sha256_file,
+    with_legacy_unassessed_validity,
 )
 from airvortex.core.protocols import json_ready
 from airvortex.version import __version__
@@ -34,7 +35,6 @@ from .config_io import (
     canonical_json_bytes,
     config_sha256,
     dumps_json_strict,
-    load_config_json,
     read_json_strict,
 )
 
@@ -1305,9 +1305,18 @@ def load_run_archive(path: str | Path, *, verify: bool = True) -> ArchivedRun:
     _validate_manifest_schema(manifest)
     if verify:
         _verify_manifest(root, manifest)
-    config = load_config_json(root / "config.json")
-    if manifest.get("config_sha256") != config_sha256(config):
+    # Authenticate the exact stored configuration document before applying any
+    # schema migration/defaults in SimulationConfig.from_dict.  Re-encoding a
+    # loaded legacy config with today's defaults would change its identity and
+    # can both reject authentic archives and silently misstate their source.
+    config_raw = read_json_strict(root / "config.json")
+    stored_config_sha256 = hashlib.sha256(canonical_json_bytes(config_raw)).hexdigest()
+    if manifest.get("config_sha256") != stored_config_sha256:
         raise ArchiveError("manifest configuration hash mismatch")
+    try:
+        config = SimulationConfig.from_dict(config_raw)
+    except (TypeError, ValueError) as exc:
+        raise ArchiveError(f"archived configuration is invalid: {exc}") from exc
     if manifest.get("problem_id") != config.problem_id:
         raise ArchiveError("manifest/config problem_id mismatch")
     result_json = _expect_mapping(read_json_strict(root / "result.json"), "result")
@@ -1351,7 +1360,7 @@ def load_run_archive(path: str | Path, *, verify: bool = True) -> ArchivedRun:
     events_raw = result_json["events"]
     if not isinstance(events_raw, list):
         raise ArchiveError("result events must be a list")
-    result = SimulationResult(
+    stored_result = SimulationResult(
         backend=backend,
         status=status,
         time_s=time_s,
@@ -1360,20 +1369,22 @@ def load_run_archive(path: str | Path, *, verify: bool = True) -> ArchivedRun:
         events=tuple(Event.from_dict(item) for item in events_raw),
         metadata=result_json["metadata"],
     )
-    if result.backend is not config.backend:
+    if stored_result.backend is not config.backend:
         raise ArchiveError("result backend does not match configuration backend")
-    if manifest.get("backend") != result.backend.value:
+    if manifest.get("backend") != stored_result.backend.value:
         raise ArchiveError("manifest/config/result backend mismatch")
-    if manifest.get("status") != result.status.value:
+    if manifest.get("status") != stored_result.status.value:
         raise ArchiveError("manifest/result status mismatch")
     scalar_names = sorted(
-        name for name, value in result.observables.items() if np.asarray(value).ndim == 1
+        name
+        for name, value in stored_result.observables.items()
+        if np.asarray(value).ndim == 1
     )
     if manifest.get("csv_observable_columns") != scalar_names:
         raise ArchiveError("manifest scalar-observable columns mismatch")
-    _verify_timeseries_csv(root / "timeseries.csv", result, scalar_names)
+    _verify_timeseries_csv(root / "timeseries.csv", stored_result, scalar_names)
     provenance = _validate_provenance(read_json_strict(root / "provenance.json"))
-    if provenance.get("config_sha256") != config_sha256(config):
+    if provenance.get("config_sha256") != stored_config_sha256:
         raise ArchiveError("provenance configuration hash mismatch")
     if (
         manifest.get("archive_format_version") == ARCHIVE_FORMAT_VERSION
@@ -1392,4 +1403,11 @@ def load_run_archive(path: str | Path, *, verify: bool = True) -> ArchivedRun:
             "execution_source_identity_valid"
         ):
             raise ArchiveError("manifest/provenance source-quality gate mismatch")
+    result = with_legacy_unassessed_validity(
+        stored_result,
+        reason=(
+            "archived result predates or omitted the quantitative-validity contract; "
+            "stored arrays were preserved and no sample qualification was inferred"
+        ),
+    )
     return ArchivedRun(root, config, result, manifest, provenance)

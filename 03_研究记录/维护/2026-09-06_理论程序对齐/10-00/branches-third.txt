@@ -1,0 +1,21 @@
+test_open_pde_drainage_and_thickness_exit (test_thin_film.ThinFilmTests.test_open_pde_drainage_and_thickness_exit) ... ok
+test_missing_gas_and_large_surface_exit_strictly (test_stokes_branch.StokesBackendTests.test_missing_gas_and_large_surface_exit_strictly) ... ok
+test_stationary_hydrostatic_archive_and_explicit_branch (test_stokes_branch.StokesBackendTests.test_stationary_hydrostatic_archive_and_explicit_branch) ... ok
+test_unsupported_nonlinear_domain_is_not_aliased (test_stokes_branch.StokesBackendTests.test_unsupported_nonlinear_domain_is_not_aliased) ... ok
+test_axisymmetric_strain_includes_hoop_component (test_stokes_branch.StokesOperatorTests.test_axisymmetric_strain_includes_hoop_component) ... ok
+test_manufactured_velocity_pressure_strain_convergence (test_stokes_branch.StokesOperatorTests.test_manufactured_velocity_pressure_strain_convergence) ... ok
+test_planar_mobility_three_independent_routes_and_limits (test_stokes_branch.StokesOperatorTests.test_planar_mobility_three_independent_routes_and_limits) ... ok
+test_pressure_gradient_and_uniform_traction_have_no_flow (test_stokes_branch.StokesOperatorTests.test_pressure_gradient_and_uniform_traction_have_no_flow) ... ok
+test_affine_handedness_area_rotation_and_scope (test_observation_preparation.ObservationPreparationTests.test_affine_handedness_area_rotation_and_scope) ... ok
+test_exposure_preserves_source_knots_and_weighted_integral (test_observation_preparation.ObservationPreparationTests.test_exposure_preserves_source_knots_and_weighted_integral) ... ok
+test_exposure_sine_amplitude_matches_sinc (test_observation_preparation.ObservationPreparationTests.test_exposure_sine_amplitude_matches_sinc) ... ok
+test_measured_initial_state_refuses_unqualified_mapping (test_observation_preparation.ObservationPreparationTests.test_measured_initial_state_refuses_unqualified_mapping) ... ok
+test_synthetic_fixture_loads_but_cannot_fit_or_score (test_observation_preparation.ObservationPreparationTests.test_synthetic_fixture_loads_but_cannot_fit_or_score) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 5.232s
+
+OK
+TF_OPEN_DRAINAGE {"n": [24, 48, 96, 192], "relative_errors": [3.071554060498943e-05, 7.682872878642137e-06, 1.9210949045601372e-06, 4.801583379100208e-07]}
+SH_MANUFACTURED {"n": [16, 32, 64, 128], "errors_u_w_p_rr_tt_zz_rz": [[0.0030878856746067917, 0.004824222489664084, 0.0227327113076206, 0.0061372418101080005, 0.0037089778655907016, 0.005932430995365047, 0.009385168653468699], [0.0007910353066636948, 0.0012214901364933552, 0.005783405609480577, 0.0015874640714432803, 0.0009412214364784909, 0.0015211161210088183, 0.001893059156520369], [0.00019940979456809158, 0.00030601176081205086, 0.0014541158234371028, 0.00040116424862295395, 0.00023588618269027676, 0.0003829931072806279, 0.00038839436676073357], [5.0018407748194876e-05, 7.65261104373501e-05, 0.0003643468970634336, 0.00010063491669837293, 5.8986811723973825e-05, 9.594833991719419e-05, 8.319120336723502e-05]], "orders": [[1.9648053457232066, 1.9816542309070786, 1.9747785714184567, 1.9508664872256969, 1.9784155744881062, 1.963493122767826, 2.30966317606131], [1.9880058151786162, 1.9969832083765082, 1.991777099092012, 1.98445899502898, 1.9964432650628194, 1.9897399583189148, 2.2851253134694525], [1.9952052358715537, 1.99956312108988, 1.9967575783399003, 1.995062084748167, 1.9996265757295288, 1.9969886777590098, 2.2230193851229436]]}
+SH_PLANAR [{"k": 1.0, "reference": 0.3274408882489201, "bvp": 0.3274408882496106, "fd_errors": [8.979061753224923e-07, 4.935898382772618e-08, 2.9649475854834814e-09]}, {"k": 10.0, "reference": 12.029084059132849, "bvp": 12.029084059133439, "fd_errors": [0.00030689973918062596, 6.837947338545234e-05, 1.0657394715709497e-05]}]

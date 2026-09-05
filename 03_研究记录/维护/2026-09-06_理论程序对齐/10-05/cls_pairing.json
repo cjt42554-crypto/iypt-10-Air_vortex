@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "experiment_id": "HF3D_10_05_SMALL_DOMAIN_CLS_PAIRING_V1",
+  "scope": "One deterministic synthetic CLS substep comparison; no physical time advance and no Q1R3 convergence claim.",
+  "grid_shape": [
+    12,
+    12,
+    16
+  ],
+  "density_kg_m3": {
+    "liquid": 998.2,
+    "gas": 1.204
+  },
+  "cls": {
+    "interface_thickness_cells": 2.5,
+    "pseudo_cfl": 0.2,
+    "iterations": 12,
+    "maximum_phase_change": 0.3403945463950026,
+    "limited_absolute_volume_m3": 9.371271398406838e-08
+  },
+  "initial_momentum_kg_m_s": [
+    0.7120337723983208,
+    -0.2859282487931361,
+    0.046655366841079265
+  ],
+  "paired": {
+    "momentum_kg_m_s": [
+      0.7120337723983208,
+      -0.2859282487931361,
+      0.04665536684107927
+    ],
+    "momentum_relative_error": 9.026606564473563e-18,
+    "kinetic_energy_j": 0.9048863694068396,
+    "kinetic_energy_relative_change": -0.0004274326489350777
+  },
+  "unpaired_density_with_pre_cls_velocity_comparator": {
+    "momentum_kg_m_s": [
+      0.7141694619362937,
+      -0.2859665833897627,
+      0.04755822291379473
+    ],
+    "momentum_relative_error": 0.0030167277813521,
+    "kinetic_energy_j": 0.9091358354003453,
+    "kinetic_energy_relative_change": 0.004266692245203707
+  },
+  "initial_kinetic_energy_j": 0.9052733127769301,
+  "interpretation": "Paired CLS conserves total momentum to roundoff and dissipates a small amount of kinetic energy.  Applying the same density change without its momentum flux changes momentum and creates energy in this counterexample.",
+  "claim_limit": "This establishes that the historical missing pairing can contaminate momentum/energy observables.  It does not quantify the old Q1R3 error or prove that pairing alone restores three-grid convergence."
+}

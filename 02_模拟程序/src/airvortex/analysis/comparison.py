@@ -9,6 +9,12 @@ from typing import TYPE_CHECKING, Any, Mapping
 
 import numpy as np
 
+from airvortex.core.validity import (
+    QUANTITATIVE_VALID_MASK,
+    QuantitativeValidityError,
+    quantitative_series,
+)
+
 from ._common import DataValidationError, NoCommonIntervalError
 
 if TYPE_CHECKING:
@@ -214,16 +220,23 @@ def series_from_result(
     observables = result.observables
     if not isinstance(observables, Mapping) or observable not in observables:
         raise DataValidationError(f"result does not contain observable {observable!r}")
-    values = np.asarray(observables[observable], dtype=float)
-    if values.ndim != 1:
+    if observable == QUANTITATIVE_VALID_MASK:
+        raise DataValidationError("the quantitative-validity mask is not a physical observable")
+    try:
+        time, values = quantitative_series(result, observable)
+    except QuantitativeValidityError as exc:
         raise DataValidationError(
-            f"observable {observable!r} is not scalar over time (shape={values.shape})"
+            f"observable {observable!r} has no usable quantitative-validity interval: {exc}"
+        ) from exc
+    if len(time) < 2:
+        raise DataValidationError(
+            f"observable {observable!r} has fewer than two quantitatively valid samples"
         )
     source_name = source
     if source_name is None:
         source_name = str(getattr(result, "backend", "unknown"))
     return ObservableSeries(
-        time=np.asarray(result.time_s, dtype=float),
+        time=time,
         values=values,
         unit=(
             _unit_from_result(result, observable)
