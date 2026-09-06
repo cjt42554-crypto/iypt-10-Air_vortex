@@ -1,0 +1,27 @@
+name: Temporary documentation source snapshot
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/temporary-docs-snapshot.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+          persist-credentials: false
+      - name: Archive tracked source without LFS payloads
+        run: |
+          git rev-parse HEAD > /tmp/source-commit.txt
+          git archive --format=zip -o /tmp/source.zip HEAD
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docs-source-snapshot
+          path: |
+            /tmp/source.zip
+            /tmp/source-commit.txt
+          retention-days: 1
