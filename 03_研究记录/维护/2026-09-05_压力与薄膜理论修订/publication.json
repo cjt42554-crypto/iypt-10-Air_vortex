@@ -1,9 +1,0 @@
-{
-  "source_commit": "2461446290106ae6d49b6922cc152b320e8c3a92",
-  "publishing_parent": "3bc8920744c7f6473d2032f5df8cc8b77880ea81",
-  "run_id": "33945160880",
-  "payload_sha256": "681b9c0109469157d7a278266bcc2c701c0e1be2c2299f55356303130a802d89",
-  "production_tree_sha": "6e6b81e41a3aecae1927c70b902938a1a6b90b74",
-  "theory_sha256": "4698b016a4a27110b8e147fe99d216a2b8589ffd96af26c4b5888a39c15a39b7",
-  "new_modes_in_production": false
-}

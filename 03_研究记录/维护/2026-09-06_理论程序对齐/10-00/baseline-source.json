@@ -1,6 +1,0 @@
-{
-  "source_commit": "3d974e554a34cadfa95a3978c69218e107277512",
-  "baseline_checkout": "/tmp/airvortex-baseline-8_19f9ha",
-  "command": "PYTHONPATH=src:tests OPENBLAS_NUM_THREADS=1 python3 -m unittest discover -s tests -v",
-  "identity": "clean git archive of source_commit, isolated from active edits"
-}

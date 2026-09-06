@@ -11,8 +11,8 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
-REQUIRED_DIRS = ("00_项目管理", "01_最终理论", "02_模拟程序", "03_研究记录", "04_实验与数据", "90_探索工作区")
-ENTRY_DOCS = ("AGENTS.md", "README.md", "00_项目管理/README.md", "00_项目管理/交接说明_current.md", "01_最终理论/README.md", "02_模拟程序/README.md", "03_研究记录/README.md", "04_实验与数据/README.md", "90_探索工作区/README.md")
+REQUIRED_DIRS = ("00_项目管理", "01_最终理论", "02_模拟程序", "03_研究记录", "04_实验与数据")
+ENTRY_DOCS = ("AGENTS.md", "README.md", "00_项目管理/README.md", "00_项目管理/交接说明_current.md", "01_最终理论/README.md", "02_模拟程序/README.md", "03_研究记录/README.md", "04_实验与数据/README.md")
 
 def entry_documents(root: Path) -> tuple[str, ...]:
     docs = set(ENTRY_DOCS)
